@@ -1,0 +1,124 @@
+@page "/trainings/create"
+@page "/trainings/{Id:int}/edit"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Trainer,Admin")]
+@inject ITrainingService TrainingService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>@(_isEdit ? "Edit Training" : "Create Training")</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="my-3">
+        <a href="/trainer-trainings" class="btn btn-sm btn-outline-secondary">← Back</a>
+    </div>
+    <h2>@(_isEdit ? "Edit Training" : "New Training")</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input class="form-control form-control-lg" @bind="_title" placeholder="Training title" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" rows="3" @bind="_description" placeholder="Description"></textarea>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Location</label>
+                    <input class="form-control" @bind="_location" placeholder="Location" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Capacity</label>
+                    <input class="form-control" type="number" @bind="_capacity" min="1" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Date & Time</label>
+                <input class="form-control" type="datetime-local" @bind="_dateTime" />
+            </div>
+            @if (_isEdit)
+            {
+                <div class="mb-3 form-check">
+                    <input class="form-check-input" type="checkbox" @bind="_isActive" id="isActive" />
+                    <label class="form-check-label" for="isActive">Active</label>
+                </div>
+            }
+            @if (_error != null) { <div class="alert alert-danger">@_error</div> }
+            <button class="btn btn-primary btn-lg w-100" @onclick="Save">
+                @(_isEdit ? "Update Training" : "Create Training")
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private bool _isEdit => Id.HasValue;
+    private string _title = "", _description = "", _location = "";
+    private int _capacity = 10;
+    private DateTime _dateTime = DateTime.Now.AddDays(7);
+    private bool _isActive = true;
+    private string? _error;
+    private int _trainerId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _trainerId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+        if (_isEdit && Id.HasValue)
+        {
+            var training = await TrainingService.GetByIdAsync(Id.Value);
+            if (training != null)
+            {
+                _title = training.Title;
+                _description = training.Description;
+                _location = training.Location;
+                _capacity = training.Capacity;
+                _dateTime = training.DateTime;
+                _isActive = training.IsActive;
+            }
+        }
+    }
+
+    private async Task Save()
+    {
+        _error = null;
+        try
+        {
+            if (_isEdit && Id.HasValue)
+            {
+                await TrainingService.UpdateAsync(new UpdateTrainingDto
+                {
+                    Id = Id.Value,
+                    Title = _title,
+                    Description = _description,
+                    Location = _location,
+                    Capacity = _capacity,
+                    DateTime = _dateTime,
+                    IsActive = _isActive
+                });
+            }
+            else
+            {
+                await TrainingService.CreateAsync(new CreateTrainingDto
+                {
+                    Title = _title,
+                    Description = _description,
+                    Location = _location,
+                    Capacity = _capacity,
+                    DateTime = _dateTime,
+                    TrainerId = _trainerId
+                });
+            }
+            NavigationManager.NavigateTo("/trainer-trainings");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<div class="page">
+    <div class="sidebar d-none d-md-block">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 d-flex justify-content-between align-items-center">
+            <button class="btn btn-outline-secondary d-md-none" @onclick="ToggleSidebar">☰</button>
+            <span class="text-muted small">🏋️ Trainings App</span>
+            <a href="/logout" class="btn btn-sm btn-outline-danger">Logout</a>
+        </div>
+
+        @if (_showMobileMenu)
+        {
+            <div class="mobile-nav p-3 bg-dark text-white">
+                <NavMenu />
+            </div>
+        }
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private bool _showMobileMenu = false;
+
+    private void ToggleSidebar()
+    {
+        _showMobileMenu = !_showMobileMenu;
+    }
+}

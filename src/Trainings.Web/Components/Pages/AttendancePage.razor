@@ -1,0 +1,92 @@
+@page "/trainings/{TrainingId:int}/attendance"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Trainer,Admin")]
+@inject ITrainingService TrainingService
+@inject IRegistrationService RegistrationService
+@inject IAttendanceService AttendanceService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Attendance</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="my-3">
+        <a href="/trainings/@TrainingId" class="btn btn-sm btn-outline-secondary">← Back</a>
+    </div>
+
+    @if (_training != null)
+    {
+        <h2>Attendance: @_training.Title</h2>
+        <p class="text-muted">@_training.DateTime.ToString("ddd, MMM d, yyyy HH:mm") · @_training.Location</p>
+    }
+
+    @if (_loading)
+    {
+        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        @if (_message != null)
+        {
+            <div class="alert alert-success">@_message</div>
+        }
+
+        <div class="list-group mt-3">
+            @foreach (var participant in _participants)
+            {
+                var status = _attendanceMap.GetValueOrDefault(participant.UserId, AttendanceStatus.Absent);
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                    <span class="fw-bold">@participant.UserName</span>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-success")"
+                                @onclick="() => SetAttendance(participant.UserId, AttendanceStatus.Present)">
+                            ✓ Present
+                        </button>
+                        <button class="btn btn-sm @(status == AttendanceStatus.Absent ? "btn-danger" : "btn-outline-danger")"
+                                @onclick="() => SetAttendance(participant.UserId, AttendanceStatus.Absent)">
+                            ✗ Absent
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!_participants.Any())
+        {
+            <div class="alert alert-info mt-3">No participants registered.</div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int TrainingId { get; set; }
+
+    private TrainingDto? _training;
+    private List<RegistrationDto> _participants = new();
+    private Dictionary<int, AttendanceStatus> _attendanceMap = new();
+    private bool _loading = true;
+    private int _trainerId;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _trainerId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+        _training = await TrainingService.GetByIdAsync(TrainingId);
+        _participants = (await RegistrationService.GetByTrainingIdAsync(TrainingId))
+            .Where(r => r.Status == RegistrationStatus.Registered)
+            .ToList();
+
+        var existingAttendance = await AttendanceService.GetByTrainingIdAsync(TrainingId);
+        _attendanceMap = existingAttendance.ToDictionary(a => a.UserId, a => a.Status);
+
+        _loading = false;
+    }
+
+    private async Task SetAttendance(int userId, AttendanceStatus status)
+    {
+        await AttendanceService.RecordAttendanceAsync(userId, TrainingId, status, _trainerId);
+        _attendanceMap[userId] = status;
+        _message = "Attendance saved.";
+        StateHasChanged();
+    }
+}
