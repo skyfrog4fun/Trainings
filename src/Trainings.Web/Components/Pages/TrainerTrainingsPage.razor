@@ -1,0 +1,60 @@
+@page "/trainer-trainings"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Trainer,Admin")]
+@inject ITrainingService TrainingService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>My Trainings</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2>My Trainings</h2>
+        <a href="/trainings/create" class="btn btn-success">+ New</a>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="text-center"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var t in _trainings)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">@t.Title</h6>
+                            <small class="text-muted">@t.DateTime.ToString("ddd MMM d, yyyy HH:mm") · @t.Location</small><br/>
+                            <small>👥 @t.RegisteredCount / @t.Capacity</small>
+                        </div>
+                        <div class="btn-group-vertical btn-group-sm">
+                            <a href="/trainings/@t.Id" class="btn btn-outline-primary btn-sm">View</a>
+                            <a href="/trainings/@t.Id/attendance" class="btn btn-outline-success btn-sm">Attendance</a>
+                            <a href="/trainings/@t.Id/edit" class="btn btn-outline-secondary btn-sm">Edit</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!_trainings.Any())
+        {
+            <div class="alert alert-info">No trainings yet. <a href="/trainings/create">Create one!</a></div>
+        }
+    }
+</div>
+
+@code {
+    private List<TrainingDto> _trainings = new();
+    private bool _loading = true;
+    private int _trainerId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _trainerId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        _trainings = (await TrainingService.GetByTrainerIdAsync(_trainerId)).ToList();
+        _loading = false;
+    }
+}

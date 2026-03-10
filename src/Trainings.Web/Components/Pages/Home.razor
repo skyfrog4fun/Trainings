@@ -1,0 +1,78 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ITrainingService TrainingService
+@inject IRegistrationService RegistrationService
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="container-fluid px-2 px-md-4">
+    <h2 class="my-3">Welcome, @_userName!</h2>
+
+    @if (_isAdmin)
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card text-bg-primary">
+                    <div class="card-body text-center">
+                        <h3>@_totalTrainings</h3>
+                        <p class="mb-0">Total Trainings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p><a href="/users" class="btn btn-primary">Manage Users</a></p>
+    }
+
+    @if (_isTrainer)
+    {
+        <h4>Your Upcoming Trainings</h4>
+        <TrainingList Trainings="_trainerTrainings" ShowActions="true" />
+        <a href="/trainer-trainings" class="btn btn-primary mt-2">Manage All Trainings</a>
+    }
+
+    @if (_isParticipant)
+    {
+        <h4>Upcoming Trainings</h4>
+        <TrainingList Trainings="_upcomingTrainings" ShowRegisterButton="true" CurrentUserId="_userId" />
+        <a href="/trainings" class="btn btn-outline-primary mt-2">View All Trainings</a>
+    }
+</div>
+
+@code {
+    private string _userName = "";
+    private int _userId;
+    private bool _isAdmin, _isTrainer, _isParticipant;
+    private int _totalTrainings;
+    private List<TrainingDto> _trainerTrainings = new();
+    private List<TrainingDto> _upcomingTrainings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        _userName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User";
+        _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        _isAdmin = user.IsInRole("Admin");
+        _isTrainer = user.IsInRole("Trainer");
+        _isParticipant = user.IsInRole("Participant");
+
+        if (_isAdmin)
+        {
+            var all = await TrainingService.GetAllAsync();
+            _totalTrainings = all.Count();
+        }
+        if (_isTrainer)
+        {
+            _trainerTrainings = (await TrainingService.GetByTrainerIdAsync(_userId)).Take(5).ToList();
+        }
+        if (_isParticipant)
+        {
+            _upcomingTrainings = (await TrainingService.GetActiveAsync())
+                .Where(t => t.DateTime >= DateTime.Now)
+                .Take(5)
+                .ToList();
+        }
+    }
+}

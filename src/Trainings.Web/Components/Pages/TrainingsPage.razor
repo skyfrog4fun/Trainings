@@ -1,0 +1,61 @@
+@page "/trainings"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject ITrainingService TrainingService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Trainings</PageTitle>
+
+<div class="container-fluid px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2>Trainings</h2>
+        <AuthorizeView Roles="Trainer,Admin">
+            <a href="/trainings/create" class="btn btn-success">+ New Training</a>
+        </AuthorizeView>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var training in _trainings)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@training.Title</h5>
+                            <p class="card-text text-muted small">
+                                📅 @training.DateTime.ToString("ddd, MMM d, yyyy HH:mm")<br/>
+                                📍 @training.Location<br/>
+                                👤 @training.TrainerName<br/>
+                                👥 @training.RegisteredCount / @training.Capacity
+                            </p>
+                            <p class="card-text">@training.Description</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!_trainings.Any())
+        {
+            <div class="alert alert-info mt-3">No trainings available.</div>
+        }
+    }
+</div>
+
+@code {
+    private List<TrainingDto> _trainings = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _trainings = (await TrainingService.GetActiveAsync()).ToList();
+        _loading = false;
+    }
+}

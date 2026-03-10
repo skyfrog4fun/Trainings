@@ -1,0 +1,147 @@
+@page "/trainings/{Id:int}"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject ITrainingService TrainingService
+@inject IRegistrationService RegistrationService
+@inject IAttendanceService AttendanceService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>@(_training?.Title ?? "Training")</PageTitle>
+
+<div class="container px-2 px-md-4">
+    @if (_loading)
+    {
+        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+    }
+    else if (_training == null)
+    {
+        <div class="alert alert-danger">Training not found.</div>
+    }
+    else
+    {
+        <div class="my-3">
+            <a href="/trainings" class="btn btn-sm btn-outline-secondary">← Back</a>
+        </div>
+        <div class="card shadow">
+            <div class="card-body">
+                <h2>@_training.Title</h2>
+                <p class="text-muted">
+                    📅 @_training.DateTime.ToString("dddd, MMMM d, yyyy 'at' HH:mm")<br/>
+                    📍 @_training.Location<br/>
+                    👤 Trainer: @_training.TrainerName<br/>
+                    👥 @_training.RegisteredCount / @_training.Capacity registered
+                </p>
+                <p>@_training.Description</p>
+
+                @if (_isParticipant)
+                {
+                    @if (_isRegistered)
+                    {
+                        <button class="btn btn-danger" @onclick="CancelRegistration">Cancel Registration</button>
+                        <span class="badge bg-success ms-2">✓ Registered</span>
+                    }
+                    else if (_training.RegisteredCount < _training.Capacity)
+                    {
+                        <button class="btn btn-primary" @onclick="Register">Register</button>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Training Full</span>
+                    }
+                }
+
+                @if (_isTrainer && _training.TrainerId == _userId)
+                {
+                    <a href="/trainings/@_training.Id/attendance" class="btn btn-primary ms-2">Record Attendance</a>
+                    <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary ms-2">Edit</a>
+                }
+            </div>
+        </div>
+
+        @if (_message != null)
+        {
+            <div class="alert @(_isError ? "alert-danger" : "alert-success") mt-3">@_message</div>
+        }
+
+        @if (_registrations.Any() && (_isTrainer || _isAdmin))
+        {
+            <h4 class="mt-4">Registered Participants (@_registrations.Count)</h4>
+            <ul class="list-group">
+                @foreach (var reg in _registrations.Where(r => r.Status == RegistrationStatus.Registered))
+                {
+                    <li class="list-group-item">@reg.UserName <span class="badge bg-secondary float-end">@reg.RegisteredAt.ToString("MMM d")</span></li>
+                }
+            </ul>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private TrainingDto? _training;
+    private bool _loading = true;
+    private bool _isRegistered;
+    private bool _isParticipant, _isTrainer, _isAdmin;
+    private int _userId;
+    private List<RegistrationDto> _registrations = new();
+    private string? _message;
+    private bool _isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        _isParticipant = user.IsInRole("Participant");
+        _isTrainer = user.IsInRole("Trainer");
+        _isAdmin = user.IsInRole("Admin");
+
+        _training = await TrainingService.GetByIdAsync(Id);
+
+        if (_training != null)
+        {
+            if (_isParticipant)
+                _isRegistered = await RegistrationService.IsRegisteredAsync(_userId, Id);
+            if (_isTrainer || _isAdmin)
+                _registrations = (await RegistrationService.GetByTrainingIdAsync(Id)).ToList();
+        }
+
+        _loading = false;
+    }
+
+    private async Task Register()
+    {
+        try
+        {
+            await RegistrationService.RegisterAsync(_userId, Id);
+            _isRegistered = true;
+            _training = await TrainingService.GetByIdAsync(Id);
+            _message = "Successfully registered!";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _isError = true;
+        }
+    }
+
+    private async Task CancelRegistration()
+    {
+        try
+        {
+            await RegistrationService.CancelAsync(_userId, Id);
+            _isRegistered = false;
+            _training = await TrainingService.GetByIdAsync(Id);
+            _message = "Registration cancelled.";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _isError = true;
+        }
+    }
+}

@@ -1,0 +1,24 @@
+<div class="list-group">
+    @foreach (var t in Trainings)
+    {
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">@t.Title</h6>
+                    <small class="text-muted">@t.DateTime.ToString("ddd MMM d, HH:mm") · @t.Location</small>
+                    <br/><small>👥 @t.RegisteredCount / @t.Capacity · 👤 @t.TrainerName</small>
+                </div>
+                <div>
+                    <a href="/trainings/@t.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<TrainingDto> Trainings { get; set; } = new();
+    [Parameter] public bool ShowActions { get; set; } = false;
+    [Parameter] public bool ShowRegisterButton { get; set; } = false;
+    [Parameter] public int CurrentUserId { get; set; }
+}

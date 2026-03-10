@@ -1,0 +1,54 @@
+@page "/my-registrations"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Participant")]
+@inject IRegistrationService RegistrationService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>My Registrations</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <h2 class="my-3">My Registrations</h2>
+
+    @if (_loading)
+    {
+        <div class="text-center"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var reg in _registrations)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>@reg.TrainingTitle</strong>
+                        <span class="badge @(reg.Status == RegistrationStatus.Registered ? "bg-success" : "bg-secondary")">
+                            @reg.Status
+                        </span>
+                    </div>
+                    <small class="text-muted">Registered: @reg.RegisteredAt.ToString("MMM d, yyyy")</small>
+                    <div class="mt-2">
+                        <a href="/trainings/@reg.TrainingId" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!_registrations.Any())
+        {
+            <div class="alert alert-info">You have no registrations yet. <a href="/trainings">Browse trainings</a></div>
+        }
+    }
+</div>
+
+@code {
+    private List<RegistrationDto> _registrations = new();
+    private bool _loading = true;
+    private int _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        _registrations = (await RegistrationService.GetByUserIdAsync(_userId)).ToList();
+        _loading = false;
+    }
+}
