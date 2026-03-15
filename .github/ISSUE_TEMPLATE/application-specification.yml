@@ -1,0 +1,167 @@
+name: Application Specification
+description: >
+  Structured specification for the Trainings application.
+  Primary audience: AI agents and automated tooling.
+  Secondary audience: Human developers and stakeholders.
+title: "[SPEC] Trainings Application — Full Specification"
+labels: ["specification", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Language:** English (US)
+        > Refer to [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) for the full machine-readable specification.
+
+  # ── SECTION 1: OVERVIEW ───────────────────────────────────────────────────
+  - type: markdown
+    attributes:
+      value: "## 1. Overview"
+
+  - type: input
+    id: app-name
+    attributes:
+      label: Application Name
+      placeholder: "Trainings"
+    validations:
+      required: true
+
+  - type: textarea
+    id: app-purpose
+    attributes:
+      label: Purpose
+      description: "One-sentence description of what the application does."
+      placeholder: "Plan training sessions, manage registrations, and track participant attendance."
+    validations:
+      required: true
+
+  - type: input
+    id: app-architecture
+    attributes:
+      label: Architecture Pattern
+      placeholder: "Clean Architecture — Domain / Application / Infrastructure / Web (Blazor Server)"
+    validations:
+      required: true
+
+  # ── SECTION 2: DOMAIN MODEL ───────────────────────────────────────────────
+  - type: markdown
+    attributes:
+      value: "## 2. Domain Model"
+
+  - type: markdown
+    attributes:
+      value: >
+        Entity field details are defined in the POCO classes under
+        `src/Trainings.Domain/Entities/`. Core entities: **Training**, **User**,
+        **Registration**, **Attendance**.
+
+  - type: textarea
+    id: domain-enumerations
+    attributes:
+      label: Enumerations
+      value: |
+        UserRole          : Admin, Trainer, Participant
+        RegistrationStatus: Registered, Cancelled
+        AttendanceStatus  : Present, Absent
+    validations:
+      required: true
+
+  # ── SECTION 3: ROLES & PERMISSIONS ───────────────────────────────────────
+  - type: markdown
+    attributes:
+      value: "## 3. Roles & Permissions"
+
+  - type: textarea
+    id: roles-permissions
+    attributes:
+      label: Permission Matrix
+      description: "Format: Action | Admin | Trainer | Participant"
+      value: |
+        Create/edit/delete user         | Admin=Y | Trainer=N | Participant=N
+        Create/edit/delete training     | Admin=Y | Trainer=own | Participant=N
+        View all trainings              | Admin=Y | Trainer=Y   | Participant=Y
+        Register for training           | Admin=N | Trainer=N   | Participant=Y
+        Cancel own registration         | Admin=N | Trainer=N   | Participant=Y
+        Record attendance               | Admin=Y | Trainer=own | Participant=N
+        View attendance report          | Admin=Y | Trainer=own | Participant=N
+    validations:
+      required: true
+
+  # ── SECTION 4: BUSINESS RULES ─────────────────────────────────────────────
+  - type: markdown
+    attributes:
+      value: "## 4. Business Rules"
+
+  - type: textarea
+    id: business-rules
+    attributes:
+      label: Business Rules (YAML)
+      description: >
+        Machine-readable business rules.
+        Format: id, entity, trigger, condition, action.
+      value: |
+        - id: BR-001
+          entity: Registration
+          trigger: RegisterAsync
+          condition: registeredCount >= training.Capacity
+          action: "throw InvalidOperationException: Training is at full capacity."
+
+        - id: BR-002
+          entity: Registration
+          trigger: RegisterAsync
+          condition: existingRegistration.Status == Registered
+          action: "throw InvalidOperationException: User is already registered."
+
+        - id: BR-003
+          entity: Training
+          trigger: CreateAsync
+          condition: dto.DateTime <= DateTime.UtcNow
+          action: "throw ArgumentException: Training date must be strictly in the future (not now or in the past)."
+
+        - id: BR-004
+          entity: Training
+          trigger: CreateAsync or UpdateAsync
+          condition: dto.Capacity < 1
+          action: "throw ArgumentException: Capacity must be at least 1."
+
+        - id: BR-005
+          entity: Attendance
+          trigger: RecordAsync
+          condition: trainer is not Admin AND trainer.Id != training.TrainerId
+          action: "throw UnauthorizedAccessException: Only assigned trainer or Admin may record attendance."
+    validations:
+      required: true
+
+  # ── SECTION 5: NON-FUNCTIONAL REQUIREMENTS ───────────────────────────────
+  - type: markdown
+    attributes:
+      value: "## 5. Non-Functional Requirements"
+
+  - type: textarea
+    id: nfr
+    attributes:
+      label: Non-Functional Requirements
+      value: |
+        NFR-01 | Security       | Passwords stored as one-way hash (bcrypt or equivalent).
+        NFR-02 | Security       | All routes except /Login require an authenticated session.
+        NFR-03 | Availability   | Concurrent registrations must not cause double-booking.
+        NFR-04 | Maintainability| Clean Architecture — no cross-layer dependency violations.
+        NFR-05 | Testability    | Domain and Application layers must be testable without Infrastructure.
+    validations:
+      required: true
+
+  # ── SECTION 6: HUMAN NOTES ───────────────────────────────────────────────
+  - type: markdown
+    attributes:
+      value: "## 6. Notes for Human Developers"
+
+  - type: textarea
+    id: human-notes
+    attributes:
+      label: Additional Context
+      description: >
+        Any clarifications, open questions, or design decisions relevant
+        to human developers working on this application.
+      placeholder: |
+        - Confirm whether Trainer self-registration for training sessions is required.
+        - Decide on pagination strategy for large training lists.
+        - Discuss email notification requirements for registration confirmations.
