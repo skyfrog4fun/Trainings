@@ -47,45 +47,12 @@ body:
     attributes:
       value: "## 2. Domain Model"
 
-  - type: textarea
-    id: domain-entities
+  - type: markdown
     attributes:
-      label: Entities (structured list)
-      description: >
-        List each entity with its fields, types, and constraints.
-        Use the format: `EntityName.fieldName : Type (constraints)`.
-      value: |
-        Training.Id           : int      (PK)
-        Training.Title        : string   (required)
-        Training.Description  : string
-        Training.Location     : string
-        Training.DateTime     : DateTime (UTC, future at creation)
-        Training.Capacity     : int      (≥ 1)
-        Training.IsActive     : bool     (default: true)
-        Training.TrainerId    : int      (FK → User)
-
-        User.Id               : int      (PK)
-        User.Name             : string   (required)
-        User.Email            : string   (required, unique)
-        User.PasswordHash     : string   (bcrypt)
-        User.Role             : UserRole (Admin | Trainer | Participant)
-        User.IsActive         : bool     (default: true)
-        User.CreatedAt        : DateTime (UTC)
-
-        Registration.Id           : int  (PK)
-        Registration.UserId       : int  (FK → User)
-        Registration.TrainingId   : int  (FK → Training)
-        Registration.RegisteredAt : DateTime (UTC)
-        Registration.Status       : RegistrationStatus (Registered | Cancelled)
-
-        Attendance.Id                   : int  (PK)
-        Attendance.UserId               : int  (FK → User)
-        Attendance.TrainingId           : int  (FK → Training)
-        Attendance.Status               : AttendanceStatus (Present | Absent)
-        Attendance.RecordedAt           : DateTime (UTC)
-        Attendance.RecordedByTrainerId  : int  (FK → User)
-    validations:
-      required: true
+      value: >
+        Entity field details are defined in the POCO classes under
+        `src/Trainings.Domain/Entities/`. Core entities: **Training**, **User**,
+        **Registration**, **Attendance**.
 
   - type: textarea
     id: domain-enumerations

@@ -26,51 +26,10 @@ Three roles — `Admin`, `Trainer`, and `Participant` — control what each user
 
 ## 2. Domain Model
 
-### 2.1 Entities
+> Entity field details are defined in the POCO classes under `src/Trainings.Domain/Entities/`.
+> The model consists of four core entities: **Training**, **User**, **Registration**, and **Attendance**.
 
-```
-Training
-  Id             : int          (PK)
-  Title          : string       (required)
-  Description    : string
-  Location       : string
-  DateTime       : DateTime     (UTC)
-  Capacity       : int          (≥ 1)
-  IsActive       : bool         (default: true)
-  TrainerId      : int          (FK → User)
-  Trainer        : User
-  Registrations  : Registration[]
-  Attendances    : Attendance[]
-
-User
-  Id             : int          (PK)
-  Name           : string       (required)
-  Email          : string       (required, unique)
-  PasswordHash   : string
-  Role           : UserRole     (Admin | Trainer | Participant)
-  IsActive       : bool         (default: true)
-  CreatedAt      : DateTime     (UTC)
-  TrainingsAsTrainer : Training[]
-  Registrations      : Registration[]
-  Attendances        : Attendance[]
-
-Registration
-  Id             : int          (PK)
-  UserId         : int          (FK → User)
-  TrainingId     : int          (FK → Training)
-  RegisteredAt   : DateTime     (UTC)
-  Status         : RegistrationStatus (Registered | Cancelled)
-
-Attendance
-  Id                    : int   (PK)
-  UserId                : int   (FK → User)
-  TrainingId            : int   (FK → Training)
-  Status                : AttendanceStatus (Present | Absent)
-  RecordedAt            : DateTime (UTC)
-  RecordedByTrainerId   : int   (FK → User)
-```
-
-### 2.2 Enumerations
+### 2.1 Enumerations
 
 | Enum                | Values                       |
 |---------------------|------------------------------|
@@ -78,7 +37,7 @@ Attendance
 | `RegistrationStatus`| `Registered`, `Cancelled`    |
 | `AttendanceStatus`  | `Present`, `Absent`          |
 
-### 2.3 Relationships (ERD notation)
+### 2.2 Relationships (ERD notation)
 
 ```
 User  ||--o{  Training       : "trains (TrainerId)"
