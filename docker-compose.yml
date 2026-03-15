@@ -1,0 +1,31 @@
+# Trainings application stack for Synology NAS deployment
+# Place this file in /volume1/docker/trainings/ on the NAS
+# Create a .env file in the same directory with the required secrets (see .env.example)
+
+services:
+  trainings-web:
+    image: ghcr.io/${GITHUB_REPOSITORY:-skyfrog4fun/trainings}:latest
+    container_name: trainings-web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/trainings.db
+      - Seed__AdminEmail=${SEED_ADMIN_EMAIL}
+      - Seed__AdminPassword=${SEED_ADMIN_PASSWORD}
+    volumes:
+      - /volume1/docker/trainings/data:/app/data
+    networks:
+      - trainings-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  trainings-net:
+    driver: bridge
