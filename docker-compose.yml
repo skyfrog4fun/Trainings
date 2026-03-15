@@ -1,0 +1,37 @@
+# MariaDB Production Instance – Synology NAS 224+
+# Usage: docker-compose up -d
+#
+# Before first start, replace all CHANGE_ME_* placeholders with strong passwords.
+# Store credentials safely (e.g. in a password manager), never commit them to git.
+
+services:
+  mariadb-prod:
+    image: mariadb:11.4
+    container_name: trainings-mariadb-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: CHANGE_ME_ROOT_PASSWORD
+      MYSQL_DATABASE: trainings_prod
+      MYSQL_USER: trainings_user
+      MYSQL_PASSWORD: CHANGE_ME_STRONG_PASSWORD
+    ports:
+      - "3306:3306"
+    volumes:
+      - trainings_prod_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - trainings_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  trainings_prod_data:
+    driver: local
+
+networks:
+  trainings_net:
+    driver: bridge

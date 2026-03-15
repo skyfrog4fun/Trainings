@@ -10,3 +10,7 @@ obj/
 .DS_Store
 Thumbs.db
 TestResults/
+.env
+.env.local
+.env.production
+.env.development
