@@ -89,35 +89,48 @@ The database file is **not** baked into the Docker image. It lives in a persiste
 
 ## 2. NAS Preparation
 
-### 2.1 Install Container Manager
 
+### 2.1 System Information (as of 24.03.2026)
+
+- **DSM version:** 7.3.2-86009 Update 3
+- **NAS URL:** [https://skynas24:5001](https://skynas24:5001)
+- **Container Manager (Docker Inc) version:** 24.0.2-1606
+- **LAN subnet:** 192.168.1.0/24 (subnet mask 255.255.255.0)
+
+#### Install Container Manager
 1. Open **DSM** → **Package Center**.
 2. Search for **Container Manager** and click **Install**.
 3. After installation, open **Container Manager** from the main menu.
+
+#### During installation
+- When prompted to "Configure bridge network", choose **Custom** and set **Subnet ID** to `172.20.0.1/24`.
 
 ### 2.2 Recommended DSM Configuration
 
 | Setting | Recommended Value |
 |---|---|
-| DSM version | 7.2 or later |
+| DSM version | 7.3.2-86009 Update 3 |
 | Automatic DSM updates | Security patches only |
 | 2-Factor Authentication | Enabled for all admin accounts |
 | Default admin account | Disabled (create a named admin account) |
 | SSH service | Disabled unless required (see 2.5) |
 
-To disable the default `admin` account:
-1. **Control Panel** → **User & Group** → select `admin` → **Edit** → **Disable this account**.
+
+To deactivate the default `admin` account:
+1. **Control Panel** → **User & Group** → select `admin` → **Edit** → **Deactivate this account**.
+
 
 ### 2.3 Firewall Configuration
 
 1. **Control Panel** → **Security** → **Firewall** → **Enable Firewall**.
-2. Create rules in this order (rules are evaluated top to bottom):
+2. Click **Manage firewall profile** and create a new profile named `docker`.
+3. Add rules in this order (rules are evaluated top to bottom):
 
 | Priority | Source | Port | Action |
 |---|---|---|---|
 | 1 | All | 443 | Allow |
 | 2 | All | 80 | Allow |
-| 3 | Your local subnet (e.g. 192.168.1.0/24) | All | Allow |
+| 3 | 192.168.1.0/Subnet 255.255.0.0 | All | Allow |
 | 4 | All | All | Deny |
 
 > **Note:** Port 80 is needed for Let's Encrypt HTTP-01 certificate validation. After the certificate is issued, you may restrict port 80 to only the Let's Encrypt validation service, or redirect it to 443.
