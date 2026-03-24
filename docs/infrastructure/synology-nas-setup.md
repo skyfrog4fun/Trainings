@@ -135,29 +135,38 @@ To deactivate the default `admin` account:
 
 > **Note:** Port 80 is needed for Let's Encrypt HTTP-01 certificate validation. After the certificate is issued, you may restrict port 80 to only the Let's Encrypt validation service, or redirect it to 443.
 
+
 ### 2.4 User Permissions
 
 Create a dedicated non-admin user to own the container data:
 
 1. **Control Panel** → **User & Group** → **Create**.
-2. Name: `docker-svc`
-3. Assign to no additional groups.
+2. Fill in the following fields:
+  - **Name:** `docker-svc`
+  - **Email:** [your private mail] (required field)
+  - **Password:** Set a very long and strong password. *(Note: Remember it!)*
+  - **Untick** "Send a notification mail to the newly created user"
+  - **Tick** "Disallow the user to change account password"
+3. Assign only to the group `users` (required). Do **not** assign to any additional groups.
 4. Grant read/write access only to `/volume1/docker/`.
+5. **Quota:** Set a quota for the user so that the used memory is restricted. For volume `docker`, set the limit to **500MB**.
+6. **Assign application permissions:** Set **Deny** to all applications.
 
 All container data (volumes, config) should be stored under `/volume1/docker/`.
 
 ### 2.5 SSH Configuration (Optional)
 
-SSH is only needed for advanced troubleshooting. If enabled, harden it:
+SSH is currently **disabled**. It is not configured yet, but may be enabled later for advanced troubleshooting.
 
+If you enable SSH in the future, be sure to harden it:
 1. **Control Panel** → **Terminal & SNMP** → **Enable SSH service**.
 2. Change the port from 22 to a non-standard port (e.g. 2222).
 3. In `/etc/ssh/sshd_config` set:
-   ```
-   PermitRootLogin no
-   PasswordAuthentication no
-   PubkeyAuthentication yes
-   ```
+  ```
+  PermitRootLogin no
+  PasswordAuthentication no
+  PubkeyAuthentication yes
+  ```
 4. Add your SSH public key via **Control Panel** → **User & Group** → **Advanced** → **User Home** and place it in `~/.ssh/authorized_keys`.
 5. Disable SSH again when not needed.
 
