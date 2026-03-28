@@ -20,15 +20,12 @@ RUN dotnet publish "src/Trainings.Web/Trainings.Web.csproj" \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-RUN addgroup --system --gid 1000 appgroup && \
-    adduser --system --uid 1000 --ingroup appgroup appuser
-
 COPY --from=build /app/publish .
 
 RUN mkdir -p /app/data && \
-    chown -R appuser:appgroup /app
+    chown -R app:app /app
 
-USER appuser
+USER app
 
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
