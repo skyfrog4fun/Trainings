@@ -422,18 +422,22 @@ docker run --rm \
 
 ### 5.5 Updating the Container on the NAS
 
+> **Prerequisite:** The `ghcr.io/skyfrog4fun/trainings` package must be set to **Public** on GitHub before the NAS can pull it without authentication. Go to **github.com/skyfron4fun** → **Packages** → **trainings** → **Package settings** → **Change visibility** → **Public**.
+
+> **Note:** On Synology DSM, Docker commands require `sudo` because the `docker` group is not available to non-root users.
+
 ```bash
 # SSH into the NAS (or use DSM Task Scheduler)
 cd /volume1/docker/trainings
 
 # Pull the latest image
-docker compose pull
+sudo docker compose pull
 
 # Recreate the container with the new image (zero-downtime for SQLite apps)
-docker compose up -d --remove-orphans
+sudo docker compose up -d --remove-orphans
 
 # Remove old images
-docker image prune -f
+sudo docker image prune -f
 ```
 
 ---
@@ -776,9 +780,9 @@ After a new image is pushed to ghcr.io, update the NAS manually or automatically
 **Option A: Manual update (SSH)**
 ```bash
 cd /volume1/docker/trainings
-docker compose pull
-docker compose up -d --remove-orphans
-docker image prune -f
+sudo docker compose pull
+sudo docker compose up -d --remove-orphans
+sudo docker image prune -f
 ```
 
 **Option B: Automated update with Watchtower**
@@ -922,3 +926,5 @@ Use this checklist when setting up the environment on a new NAS:
 | 502 Bad Gateway | Container not running or wrong port | Check container is running: `docker ps` |
 | Blazor SignalR disconnects | WebSocket not enabled on proxy | Enable WebSocket support in DSM Reverse Proxy |
 | DDNS not updating | Invalid API token or network issue | Test manually, check `cloudflare-ddns` container logs |
+| `docker compose pull` — permission denied | Docker socket not accessible without root | Use `sudo docker compose pull` on Synology DSM |
+| `docker compose pull` — manifest unknown | Image tagged `:latest` not yet published | Ensure the GitHub Actions workflow has run and pushed the `latest` tag |
