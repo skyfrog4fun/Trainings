@@ -250,7 +250,7 @@ Place this file in `/volume1/docker/trainings/` on the NAS:
 # /volume1/docker/trainings/docker-compose.yml
 services:
   trainings-web:
-    image: ghcr.io/<github-username>/trainings:latest
+    image: ghcr.io/skyfrog4fun/trainings:latest
     container_name: trainings-web
     restart: unless-stopped
     ports:
@@ -276,6 +276,11 @@ networks:
   trainings-net:
     driver: bridge
 ```
+
+**Note:**  
+- When running this on your Synology NAS, always use the `/volume1/...` Linux path for volumes.  
+- If you want to edit files from Windows, map the NAS share (e.g. `\\skynas24\docker\trainings`) as a network drive.  
+- Do **not** change the `/volume1/...` path in the YAML; Docker on the NAS only understands Linux paths, not Windows UNC paths.
 
 Create a `.env` file in the same directory (never commit this file):
 
@@ -310,20 +315,46 @@ EF Core Migrations are applied automatically on startup by `DbSeeder`.
 
 The `/app/data` directory inside the container is a bind mount to the NAS.
 
-### 4.3 File Permissions and Security
+### 4.3 How to Start a Bash Session on the NAS
+
+You need a bash session on the NAS to run host-level commands (e.g. setting file permissions, managing Docker volumes). There are two ways to do this:
+
+1. Enable SSH in DSM: **Control Panel** → **Terminal & SNMP** → tick **Enable SSH service** → **Apply**.
+2. From any terminal on your local machine, connect:
+
+   ```bash
+   ssh your-admin-user@skynas24
+   # or use the NAS IP address directly
+   ssh your-admin-user@192.168.1.x
+   ```
+
+3. You will land in a bash shell as your DSM user. To run commands as root, prefix them with `sudo`. The exact commands to run are listed in [Section 4.4](#44-file-permissions-and-security).
+
+4. **Disable SSH again** when you are done (re-open **Control Panel** → **Terminal & SNMP** → untick **Enable SSH service** → **Apply**).
+
+> **Security note:** Follow the hardening steps in [Section 2.5](#25-ssh-configuration-optional) before enabling SSH on a production NAS. Never leave SSH enabled when not in use.
+
+
+### 4.4 File Permissions and Security
 
 ```bash
-# On the NAS, set ownership and permissions before starting the container
-chown -R 1000:1000 /volume1/docker/trainings/data
-chmod 700 /volume1/docker/trainings/data
-chmod 600 /volume1/docker/trainings/data/trainings.db  # after first run
+# Lock down the data directory
+sudo chown -R 1654:1654 /volume1/docker/trainings/data
+sudo chmod 700 /volume1/docker/trainings/data
+
+# Create a blank placeholder file and set its permissions now
+sudo touch /volume1/docker/trainings/data/trainings.db
+sudo chown 1654:1654 /volume1/docker/trainings/data/trainings.db
+sudo chmod 600 /volume1/docker/trainings/data/trainings.db
 ```
 
-The container runs as a non-root user (UID 1000). The data directory should only be accessible to that user.
+The container runs as a non-root user (UID 1654, the built-in `app` user from the .NET aspnet base image — this is a fixed value set by Microsoft and does not change between builds). The data directory and database file should only be accessible to that user.
+
+> **Note:** Creating the blank placeholder file upfront lets you set permissions correctly before the container ever starts. EF Core Migrations will initialize the SQLite database inside the existing empty file on first startup — no data is lost.
 
 > **Important:** The `.db` file is the entire database. Do not expose it via file sharing (SMB/NFS). Only the container process should access it.
 
-### 4.4 Backup Strategy
+### 4.5 Backup Strategy
 
 | Method | Description |
 |---|---|
@@ -331,18 +362,75 @@ The container runs as a non-root user (UID 1000). The data directory should only
 | Online backup | Use SQLite's `.backup` command or the `VACUUM INTO` SQL statement to create a consistent copy while the app is running |
 | Synology Hyper Backup | Schedule daily backups of `/volume1/docker/trainings/data/` to an external destination |
 
-**Recommended daily backup script** (run via DSM Task Scheduler):
+**Recommended daily backup script via DSM Task Scheduler:**
+
+**Step 1 — Create the `backups` shared folder in DSM**
+
+The script writes backups to `/volume1/backups/trainings/`. The top-level `backups` directory **must** be registered as a DSM Shared Folder before the script runs. If the script creates it first as a raw directory, DSM will refuse to register it later with the error _"A folder with the same name already exists on this volume"_.
+
+1. **Control Panel** → **Shared Folder** → **Create** → **Create Shared Folder**.
+2. Fill in:
+   - **Name:** `backups`
+   - **Location:** `Volume 1`
+3. On the permissions step, grant your named admin user **Read/Write**. `docker-svc` does not need access here.
+4. Click **Apply**.
+
+The `trainings` subdirectory inside it will be created automatically by the script on first run.
+
+**Step 2 — Create the scheduled task**
+
+1. **Control Panel** → **Task Scheduler** → **Create** → **Scheduled Task** → **User-defined script**.
+2. On the **General** tab:
+   - **Task name:** `Trainings DB Backup`
+   - **User:** `root`
+   - **Enabled:** ticked
+
+   > **Why `root`?** The database file is owned by UID 1654 (the container's `app` user) with permissions `600` — only its owner and root can read it. The `sqlite3` binary is also only reliably available to root on DSM. Running as your admin account or `docker-svc` will fail because DSM task accounts do not have a full shell environment and `docker-svc` has no application permissions by design (see [Section 2.4](#24-user-permissions)).
+
+3. On the **Schedule** tab:
+   - **Run on the following days:** Daily
+   - **Time:** `02:00` (or any quiet off-peak time)
+
+4. On the **Task Settings** tab, paste the script below into the **User-defined script** box.
+
+5. Optionally tick **Send run details by email** and enter your email address to receive a report (including errors) after each run.
+
+6. Click **OK**.
+
+**Step 3 — The script**
 
 ```bash
 #!/bin/bash
+set -euo pipefail
+
+DB=/volume1/docker/trainings/data/trainings.db
 BACKUP_DIR=/volume1/backups/trainings
+KEEP_DAYS=30
+
 mkdir -p "$BACKUP_DIR"
-sqlite3 /volume1/docker/trainings/data/trainings.db \
-  "VACUUM INTO '$BACKUP_DIR/trainings-$(date +%Y%m%d).db'"
-find "$BACKUP_DIR" -name "trainings-*.db" -mtime +30 -delete
+
+# VACUUM INTO creates a consistent, defragmented copy — safe while the app is running
+sqlite3 "$DB" "VACUUM INTO '$BACKUP_DIR/trainings-$(date +%Y%m%d-%H%M%S).db'"
+
+# Remove backups older than KEEP_DAYS days
+find "$BACKUP_DIR" -name "trainings-*.db" -mtime +"$KEEP_DAYS" -delete
+
+echo "Backup completed: $(date)"
 ```
 
-### 4.5 Limitations
+**Step 4 — Run the task manually to verify**
+
+1. In **Task Scheduler**, select the `Trainings DB Backup` task and click **Run**.
+2. Wait a few seconds, then check the result:
+   - Select the task → **Action** → **View Result**
+   - The output should end with `Backup completed: <timestamp>` and show exit code `0`.
+   - If you see an error, the most common cause is that `trainings.db` does not yet exist (the container has never started) — start the container first and let EF Core create the database, then re-run the task.
+3. Verify the backup file is visible in three ways:
+   - **File Station** → `backups` → `trainings` → you should see `trainings-YYYYMMDD-HHMMSS.db`
+   - **Windows Explorer** → `\\skynas24\backups\trainings` → same file
+   - **SSH:** `ls /volume1/backups/trainings/`
+
+### 4.6 Limitations
 
 | Limitation | Detail |
 |---|---|
@@ -357,7 +445,7 @@ find "$BACKUP_DIR" -name "trainings-*.db" -mtime +30 -delete
 
 ### 5.1 Dockerfile
 
-Place this `Dockerfile` at the root of the repository:
+Save the content below as a file named exactly `Dockerfile` (no extension) in the repository root — i.e. `Trainings/Dockerfile`, the same level as `Trainings.slnx`:
 
 ```dockerfile
 # syntax=docker/dockerfile:1
@@ -376,21 +464,20 @@ RUN dotnet publish "src/Trainings.Web/Trainings.Web.csproj" \
     --output /app/publish \
     --no-restore
 
+# Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
-
-RUN addgroup --system --gid 1000 appgroup && \
-    adduser --system --uid 1000 --ingroup appgroup appuser
 
 COPY --from=build /app/publish .
 
 RUN mkdir -p /app/data && \
-    chown -R appuser:appgroup /app
+    chown -R app:app /app
 
-USER appuser
+USER app
 
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
+
 ENTRYPOINT ["dotnet", "Trainings.Web.dll"]
 ```
 
@@ -408,11 +495,19 @@ Place `.dockerignore` at the root of the repository to keep build contexts small
 **/node_modules
 docs
 *.md
+.env
+**/.env
+*.env
 ```
 
 ### 5.3 Environment Variables
 
-| Variable | Description | Example |
+These variables are already wired into the `docker-compose.yml` from [Section 3.6](#36-docker-composeyml). You do **not** set them manually — they are read automatically when the container starts.
+
+- The non-secret variables (`ASPNETCORE_ENVIRONMENT`, `ASPNETCORE_URLS`, `ConnectionStrings__DefaultConnection`) are hardcoded directly in `docker-compose.yml`.
+- The secret variables (`Seed__AdminEmail`, `Seed__AdminPassword`) are referenced as `${SEED_ADMIN_EMAIL}` / `${SEED_ADMIN_PASSWORD}` in `docker-compose.yml` and must be defined in the `.env` file on the NAS (see [Section 3.6](#36-docker-composeyml)).
+
+| Variable | Description | Where set |
 |---|---|---|
 | `ASPNETCORE_ENVIRONMENT` | Runtime environment | `Production` |
 | `ASPNETCORE_URLS` | Listening URL | `http://+:8080` |
@@ -420,23 +515,33 @@ docs
 | `Seed__AdminEmail` | Initial admin user email | `admin@example.com` |
 | `Seed__AdminPassword` | Initial admin user password | `ChangeMe!2025` |
 
-### 5.4 Building the Image Locally
+| `ASPNETCORE_ENVIRONMENT` | Runtime environment (`Production`) | `docker-compose.yml` |
+| `ASPNETCORE_URLS` | Listening URL (`http://+:8080`) | `docker-compose.yml` |
+| `ConnectionStrings__DefaultConnection` | SQLite connection string | `docker-compose.yml` |
+| `Seed__AdminEmail` | Initial admin user email | `.env` file on NAS |
+| `Seed__AdminPassword` | Initial admin user password | `.env` file on NAS |
 
-```bash
-# From the repository root
-docker build -t trainings:local .
+> **Important:** Replace the placeholder values in `.env` with strong, unique credentials before starting the container for the first time. The seed admin account is created on first startup — if the password is weak it cannot easily be changed afterwards without direct database access.
 
-# Run locally with a local data directory
-mkdir -p ./local-data
-docker run --rm \
-  -p 8080:8080 \
-  -e ASPNETCORE_ENVIRONMENT=Development \
-  -e ConnectionStrings__DefaultConnection="Data Source=/app/data/trainings.db" \
-  -v "$(pwd)/local-data:/app/data" \
-  trainings:local
-```
+### 5.4 Prerequisites: Docker Desktop on Your Development Machine
 
-### 5.5 Updating the Container on the NAS
+Before you can build or test the image locally, you need Docker installed on your Windows machine.
+
+1. Download and install **Docker Desktop for Windows** from [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop).
+2. The installer does not prompt for a backend selection. When the installer finishes, **restart Windows** when prompted.
+3. After the reboot, Docker Desktop starts automatically and may trigger WSL 2 setup. If prompted, open **Windows Terminal** and run `wsl` — Windows will install or update WSL 2 automatically. Once that completes, run `wsl --update` to confirm WSL is at the latest version. Wait until the Docker Desktop system tray icon shows **"Docker Desktop is running"**.
+4. Verify the installation in a terminal:
+   ```powershell
+   docker --version
+   docker compose version
+   ```
+   Both commands should print a version number without errors.
+
+> **Note:** Docker Desktop only needs to be installed on your **development machine**. The NAS runs Docker through Container Manager — not Docker Desktop.
+
+### 5.5 Building the Image Locally
+
+Run these commands in a **Windows terminal (PowerShell or cmd) on your development machine**, from the repository root (`Trainings/` — the folder containing `Dockerfile` and `Trainings.slnx`). Docker Desktop must be running.
 
 > **Prerequisite:** The `ghcr.io/skyfrog4fun/trainings` package must be set to **Public** on GitHub before the NAS can pull it without authentication. Go to **github.com/skyfron4fun** → **Packages** → **trainings** → **Package settings** → **Change visibility** → **Public**.
 
@@ -626,14 +731,14 @@ The NAS firewall must block all ports except 80 and 443 from the public internet
 
 ### 10.2 Container Isolation
 
-- The container runs as a **non-root user** (UID 1000).
+- The container runs as a **non-root user** (UID 1654, the built-in `app` user from the .NET aspnet base image).
 - Only port 8080 is published to the host. The container cannot reach other services on the host network unless explicitly configured.
 - The Docker network `trainings-net` is isolated from other Docker networks.
 
 ### 10.3 Database Access Control
 
 - The SQLite file is only accessible from inside the container via the bind mount.
-- File permissions on the NAS restrict access to the `docker-svc` user (UID 1000).
+- File permissions on the NAS restrict access to the container's `app` user (UID 1654).
 - The database is never exposed to the internet; it is accessed only through the ASP.NET application layer.
 
 ### 10.4 Secure Credential Storage
@@ -653,7 +758,7 @@ chmod 600 /volume1/docker/trainings/.env
 
 | Component | Privilege Level |
 |---|---|
-| Container process | Non-root (UID 1000) |
+| Container process | Non-root (UID 1654, built-in `app` user) |
 | Volume access | Only the container user |
 | NAS Docker user | No admin rights |
 | DSM admin account | Named account, 2FA enabled, not `admin` |
