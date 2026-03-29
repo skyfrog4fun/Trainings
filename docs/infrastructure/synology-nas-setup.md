@@ -135,6 +135,22 @@ To deactivate the default `admin` account:
 
 > **Note:** Port 80 is needed for Let's Encrypt HTTP-01 certificate validation. After the certificate is issued, you may restrict port 80 to only the Let's Encrypt validation service, or redirect it to 443.
 
+### 2.3.1 Verifying Port Reachability
+
+The NAS firewall alone is not sufficient — the **home router** must also forward ports 80 and 443 to the NAS. See [Section 9.1](#91-port-forwarding-rules) for router port forwarding setup.
+
+After configuring both the NAS firewall and the router, verify that the ports are reachable from the internet:
+
+1. Go to **[portchecker.co](https://portchecker.co)** from any device (or use your phone on mobile data — not the home Wi-Fi).
+2. Enter your public IP address (find it at [whatismyip.com](https://www.whatismyip.com)) and test port **80**, then port **443**.
+3. Both should report **Open**.
+
+If a port shows as **closed** or **timed out**:
+- Check that the port forwarding rule exists on the router (see below).
+- Check that the NAS firewall rule allows that port (rules 1 and 2 in the table above).
+- Some ISPs (including Sunrise on certain residential plans) block inbound port 80. If port forwarding is correctly configured but port 80 remains blocked, contact your ISP.
+
+> **Sunrise Internet Box:** The router admin UI is typically at `http://192.168.1.1` or `http://internetbox.home`. Port forwarding is under **Network** → **Port Forwarding** ("NAT / Portweiterleitung"). Add TCP rules for external ports 80 and 443 pointing to the NAS LAN IP.
 
 ### 2.4 User Permissions
 
