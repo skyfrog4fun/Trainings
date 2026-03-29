@@ -14,9 +14,9 @@ This guide provides step-by-step instructions to deploy the Trainings web applic
 4. [Database Setup (SQLite)](#4-database-setup-sqlite)
 5. [Web Application Container](#5-web-application-container)
 6. [Reverse Proxy Configuration](#6-reverse-proxy-configuration)
-7. [HTTPS and Certificates](#7-https-and-certificates)
-8. [Dynamic DNS Setup](#8-dynamic-dns-setup)
-9. [Router Configuration](#9-router-configuration)
+7. [Dynamic DNS Setup](#7-dynamic-dns-setup)
+8. [Router Configuration](#8-router-configuration)
+9. [HTTPS and Certificates](#9-https-and-certificates)
 10. [Security Considerations](#10-security-considerations)
 11. [Deployment Workflow](#11-deployment-workflow)
 12. [Backup Strategy](#12-backup-strategy)
@@ -508,62 +508,34 @@ Each entry maps a different domain/subdomain to a specific backend container por
 
 Each entry in the Reverse Proxy list maps a domain to a backend port.
 
-## 7. HTTPS and Certificates
-
-> **Prerequisite:**  
-> Before requesting a Let's Encrypt certificate, your public domain (e.g. `trainings.planetfrey.ch`) must resolve to your NAS's public IP.  
-> - If you do **not** have a static public IP, set up Synology DDNS first:  
->   1. Go to **Control Panel** → **External Access** → **DDNS** → **Add**.
->   2. Register a Synology DDNS hostname (e.g. `skyfrog.myds.me`).
-> - In your domain registrar or DNS provider, create a **CNAME** record:  
->   - **Name:** `trainings`  
->   - **Type:** `CNAME`  
->   - **Value:** `skyfrog.myds.me`  
->   This ensures `trainings.planetfrey.ch` always points to your NAS, even if your public IP changes.
-
-### 7.1 Requesting a Let's Encrypt Certificate
-
-1. **Control Panel** → **Security** → **Certificate** → **Add** → **Add a new certificate**.
-2. Select **Get a certificate from Let's Encrypt**.
-  - **Important:** When prompted, **do not tick "Set as default certificate"**. This ensures the new certificate is only used for the specified domain and does not override the default certificate for DSM or other services.
-3. Fill in:
-  - **Domain name:** `trainings.planetfrey.ch`
-  - **Email:** your email address
-  - **Subject Alternative Name:** leave blank (or add additional subdomains)
-4. Click **Done**.
-
-DSM will request and automatically store the certificate.
-
-> **Prerequisite:** Port 80 must be reachable from the internet for the HTTP-01 ACME challenge. Ensure your router forwards port 80 to the NAS before requesting the certificate. You can restrict port 80 again after the certificate is issued (DSM will use a TLS-ALPN challenge for renewals if port 80 is later blocked, or continue using HTTP-01 on renewal if port 80 stays open).
-
-### 7.2 Binding the Certificate to the Reverse Proxy
-
-1. **Control Panel** → **Security** → **Certificate** → select the certificate → **Edit** → **Services**.
-2. Find the reverse proxy entry for `trainings.example.com` and assign the certificate to it.
-3. Click **OK**.
-
-### 7.3 Automatic Renewal
-
-DSM renews Let's Encrypt certificates automatically 30 days before expiry. No manual action is required. Ensure:
-- Port 80 remains forwarded (for HTTP-01 renewal).
-- The NAS has internet connectivity.
-
----
-
-## 8. Dynamic DNS Setup
+## 7. Dynamic DNS Setup
 
 Because most home internet connections use a dynamic public IP, a Dynamic DNS (DDNS) service updates the DNS record automatically when the IP changes.
 
 Synology provides a built-in DDNS service at `*.myds.me`, which is the simplest option and requires no external accounts.
 
-### 8.1 Steps
+### 7.1 Registering the Synology DDNS Hostname
 
 1. **Control Panel** → **External Access** → **DDNS** → **Add**.
 2. Service provider: **Synology**.
 3. Hostname: `skyfrog.myds.me`.
 4. Click **Test Connection** → **OK**.
 
-### 8.2 Security Implications
+### 7.2 Pointing Your Custom Domain to the NAS
+
+After registering the Synology DDNS hostname, create a **CNAME** record at your domain registrar (wherever `planetfrey.ch` is managed):
+
+| Field | Value |
+|---|---|
+| Name | `trainings` |
+| Type | `CNAME` |
+| Value | `skyfrog.myds.me` |
+
+This ensures `trainings.planetfrey.ch` always resolves to your NAS's current public IP, even when the IP changes.
+
+> **Note:** DNS propagation can take a few minutes to a few hours. Verify the CNAME resolves correctly before requesting the Let's Encrypt certificate: run `nslookup trainings.planetfrey.ch` and confirm it returns your public IP.
+
+### 7.3 Security Implications
 
 | Risk | Mitigation |
 |---|---|
@@ -572,9 +544,9 @@ Synology provides a built-in DDNS service at `*.myds.me`, which is the simplest 
 
 ---
 
-## 9. Router Configuration
+## 8. Router Configuration
 
-### 9.1 Port Forwarding Rules
+### 8.1 Port Forwarding Rules
 
 Add the following NAT rules on the home router:
 
@@ -587,13 +559,13 @@ Replace `NAS IP` with the NAS's local IP address (e.g. `192.168.1.100`).
 
 > **Tip:** Assign the NAS a static local IP (DHCP reservation on the router) to prevent the NAS IP from changing after a router reboot.
 
-### 9.2 Finding the NAS IP
+### 8.2 Finding the NAS IP
 
 ```
 DSM → Control Panel → Network → Network Interface → LAN 1 → IP address
 ```
 
-### 9.3 Router-Specific Instructions
+### 8.3 Router-Specific Instructions
 
 Port forwarding UIs differ between router brands. Common paths:
 
@@ -604,12 +576,45 @@ Port forwarding UIs differ between router brands. Common paths:
 | TP-Link | Advanced → NAT Forwarding → Virtual Servers |
 | Netgear | Dynamic DNS / Port Forwarding |
 
-### 9.4 Security Best Practices
+### 8.4 Security Best Practices
 
 - **Only expose ports 80 and 443.** Never forward SSH (22), DSM (5000/5001), or database ports.
 - **Disable UPnP** on the router to prevent containers from auto-opening ports.
 - **Block inbound access to DSM** from the internet (restrict port 5000/5001 to the local subnet in the NAS firewall).
 - Consider placing the NAS in a DMZ only if you fully trust the firewall rules on the NAS itself.
+
+---
+
+## 9. HTTPS and Certificates
+
+> **Prerequisites — complete these before requesting a certificate:**
+> 1. Synology DDNS registered and `trainings.planetfrey.ch` CNAME resolves to your NAS's public IP — see [Section 7](#7-dynamic-dns-setup).
+> 2. Router port forwarding for ports 80 and 443 configured and verified open — see [Section 8](#8-router-configuration) and [Section 2.3.1](#231-verifying-port-reachability).
+
+### 9.1 Requesting a Let's Encrypt Certificate
+
+1. **Control Panel** → **Security** → **Certificate** → **Add** → **Add a new certificate**.
+2. Select **Get a certificate from Let's Encrypt**.
+  - **Important:** When prompted, **do not tick "Set as default certificate"**. This ensures the new certificate is only used for the specified domain and does not override the default certificate for DSM or other services.
+3. Fill in:
+  - **Domain name:** `trainings.planetfrey.ch`
+  - **Email:** your email address
+  - **Subject Alternative Name:** leave blank
+4. Click **Done**.
+
+DSM will request and automatically store the certificate.
+
+### 9.2 Binding the Certificate to the Reverse Proxy
+
+1. **Control Panel** → **Security** → **Certificate** → select the certificate → **Edit** → **Services**.
+2. Find the reverse proxy entry for `trainings.planetfrey.ch` and assign the certificate to it.
+3. Click **OK**.
+
+### 9.3 Automatic Renewal
+
+DSM renews Let's Encrypt certificates automatically 30 days before expiry. No manual action is required. Ensure:
+- Port 80 remains forwarded (for HTTP-01 renewal).
+- The NAS has internet connectivity.
 
 ---
 
@@ -863,10 +868,11 @@ Use this checklist when setting up the environment on a new NAS:
 - [ ] Create `/volume1/docker/trainings/docker-compose.yml` (from Section 3.6)
 - [ ] Create `/volume1/docker/trainings/.env` with secrets (from Section 3.5)
 - [ ] Set permissions: `chmod 600 /volume1/docker/trainings/.env`
-- [ ] Set up Dynamic DNS (Section 8)
-- [ ] Configure router port forwarding: 80 and 443 → NAS (Section 9)
-- [ ] Request Let's Encrypt certificate in DSM (Section 7)
+- [ ] Set up Dynamic DNS and CNAME record (Section 7)
+- [ ] Configure router port forwarding: 80 and 443 → NAS (Section 8)
+- [ ] Verify ports 80 and 443 are open from the internet (Section 2.3.1)
 - [ ] Configure DSM Reverse Proxy entry (Section 6)
+- [ ] Request Let's Encrypt certificate in DSM (Section 9)
 - [ ] Start the container: `docker compose up -d`
 - [ ] Verify the application is accessible at `https://trainings.planetfrey.ch`
 - [ ] Set up automated backup task in DSM Task Scheduler (Section 12.1)
