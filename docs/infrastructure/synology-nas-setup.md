@@ -31,10 +31,10 @@ This guide provides step-by-step instructions to deploy the Trainings web applic
 Internet
     │
     ▼
-Public Domain (e.g. trainings.example.com)
+Public Domain (trainings.planetfrey.ch)
     │
     ▼
-Dynamic DNS Provider (Cloudflare / Synology DDNS)
+Dynamic DNS Provider (Synology DDNS: skyfrog.myds.me)
     │  (maps domain to current public IP)
     ▼
 Home Router
@@ -46,7 +46,7 @@ Synology DS224+ (DSM)
     ▼
 DSM Reverse Proxy (built-in, port 443)
     │  SSL termination with Let's Encrypt certificate
-    │  Routes trainings.example.com → localhost:8080
+    │  Routes trainings.planetfrey.ch → localhost:8080
     ▼
 Docker Container: trainings-web (port 8080)
     │
@@ -61,7 +61,7 @@ Docker Container: trainings-web (port 8080)
 | Layer | Technology | Role |
 |---|---|---|
 | Public Domain | DNS A/CNAME record | Resolves the domain to the current public IP |
-| Dynamic DNS | Cloudflare / Synology DDNS | Updates the DNS record when the ISP changes the public IP |
+| Dynamic DNS | Synology DDNS | Updates the DNS record when the ISP changes the public IP |
 | Router Port Forwarding | Home Router NAT | Forwards TCP 80 and 443 from the internet to the NAS |
 | NAS Reverse Proxy | DSM built-in (nginx) | Terminates TLS, routes requests to the correct container port |
 | Docker Container | Synology Container Manager | Runs the ASP.NET Core application in isolation |
@@ -69,7 +69,7 @@ Docker Container: trainings-web (port 8080)
 
 ### Domain Resolution Flow
 
-1. User browser resolves `trainings.example.com` via DNS.
+1. User browser resolves `trainings.planetfrey.ch` via DNS.
 2. The Dynamic DNS provider has updated the A record to point to the current home router public IP.
 3. The router forwards port 443 traffic to the NAS.
 4. The DSM Reverse Proxy terminates TLS using the Let's Encrypt certificate and forwards HTTP traffic to the container on port 8080.
@@ -489,11 +489,8 @@ For example, if you have a second web application (such as a static site or anot
 
 Each entry maps a different domain/subdomain to a specific backend container port.  
 **Note:** Do not use the DSM management interface (ports 5000/5001) as a reverse proxy target; DSM manages its own reverse proxy and should not be exposed via custom entries. 
-```
 
 Each entry in the Reverse Proxy list maps a domain to a backend port.
-
----
 
 ## 7. HTTPS and Certificates
 
@@ -501,48 +498,22 @@ Each entry in the Reverse Proxy list maps a domain to a backend port.
 > Before requesting a Let's Encrypt certificate, your public domain (e.g. `trainings.planetfrey.ch`) must resolve to your NAS's public IP.  
 > - If you do **not** have a static public IP, set up Synology DDNS first:  
 >   1. Go to **Control Panel** → **External Access** → **DDNS** → **Add**.
->   2. Register a Synology DDNS hostname (e.g. `planetfrey.myds.me`).
+>   2. Register a Synology DDNS hostname (e.g. `skyfrog.myds.me`).
 > - In your domain registrar or DNS provider, create a **CNAME** record:  
 >   - **Name:** `trainings`  
 >   - **Type:** `CNAME`  
->   - **Value:** `planetfrey.myds.me`  
+>   - **Value:** `skyfrog.myds.me`  
 >   This ensures `trainings.planetfrey.ch` always points to your NAS, even if your public IP changes.
 
 ### 7.1 Requesting a Let's Encrypt Certificate
 
 1. **Control Panel** → **Security** → **Certificate** → **Add** → **Add a new certificate**.
 2. Select **Get a certificate from Let's Encrypt**.
+  - **Important:** When prompted, **do not tick "Set as default certificate"**. This ensures the new certificate is only used for the specified domain and does not override the default certificate for DSM or other services.
 3. Fill in:
   - **Domain name:** `trainings.planetfrey.ch`
   - **Email:** your email address
   - **Subject Alternative Name:** leave blank (or add additional subdomains)
-4. Click **Done**.
-
-DSM will request and automatically store the certificate.
-
-> **Prerequisite:** Port 80 must be reachable from the internet for the HTTP-01 ACME challenge. Ensure your router forwards port 80 to the NAS before requesting the certificate. You can restrict port 80 again after the certificate is issued (DSM will use a TLS-ALPN challenge for renewals if port 80 is later blocked, or continue using HTTP-01 on renewal if port 80 stays open).
-
-### 7.2 Binding the Certificate to the Reverse Proxy
-
-1. **Control Panel** → **Security** → **Certificate** → select the certificate → **Edit** → **Services**.
-2. Find the reverse proxy entry for `trainings.planetfrey.ch` and assign the certificate to it.
-3. Click **OK**.
-
-### 7.3 Automatic Renewal
-
-DSM renews Let's Encrypt certificates automatically 30 days before expiry. No manual action is required. Ensure:
-- Port 80 remains forwarded (for HTTP-01 renewal).
-- The NAS has internet connectivity.
-
-
-### 7.1 Requesting a Let's Encrypt Certificate
-
-1. **Control Panel** → **Security** → **Certificate** → **Add** → **Add a new certificate**.
-2. Select **Get a certificate from Let's Encrypt**.
-3. Fill in:
-   - **Domain name:** `trainings.example.com`
-   - **Email:** your email address
-   - **Subject Alternative Name:** leave blank (or add additional subdomains)
 4. Click **Done**.
 
 DSM will request and automatically store the certificate.
@@ -567,71 +538,21 @@ DSM renews Let's Encrypt certificates automatically 30 days before expiry. No ma
 
 Because most home internet connections use a dynamic public IP, a Dynamic DNS (DDNS) service updates the DNS record automatically when the IP changes.
 
-### 8.1 Option A: Synology DDNS (Simplest)
+Synology provides a built-in DDNS service at `*.myds.me`, which is the simplest option and requires no external accounts.
 
-Synology provides its own DDNS service at `*.synology.me`.
+### 8.1 Steps
 
 1. **Control Panel** → **External Access** → **DDNS** → **Add**.
 2. Service provider: **Synology**.
-3. Hostname: `yourname.synology.me`.
+3. Hostname: `skyfrog.myds.me`.
 4. Click **Test Connection** → **OK**.
 
-**Limitation:** You get a `*.synology.me` subdomain, not a custom domain.
-
-### 8.2 Option B: Cloudflare DDNS (Recommended)
-
-Cloudflare is the recommended option because it also provides a CDN and DDoS protection layer.
-
-#### Prerequisites
-
-- A domain registered with any registrar, with nameservers pointed to Cloudflare.
-- A Cloudflare account (free tier is sufficient).
-
-#### Steps
-
-1. In Cloudflare, create an A record:
-   - **Name:** `trainings` (or `@` for the root)
-   - **IPv4 address:** your current public IP
-   - **Proxy status:** Proxied (orange cloud) — hides your real IP and enables Cloudflare WAF
-
-2. Create a Cloudflare API token:
-   - Cloudflare Dashboard → **Profile** → **API Tokens** → **Create Token**.
-   - Use the **Edit zone DNS** template.
-   - Scope to your specific zone.
-
-3. Deploy a DDNS updater on the NAS. Use the `oznu/cloudflare-ddns` Docker image:
-
-```yaml
-# Add to docker-compose.yml or create a separate compose file
-services:
-  cloudflare-ddns:
-    image: oznu/cloudflare-ddns:latest
-    restart: unless-stopped
-    environment:
-      - API_KEY=${CLOUDFLARE_API_TOKEN}
-      - ZONE=example.com
-      - SUBDOMAIN=trainings
-      - PROXIED=true
-```
-
-Add to `.env`:
-```
-CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here
-```
-
-### 8.3 Option C: No-IP
-
-1. Register at [noip.com](https://www.noip.com) and create a hostname.
-2. In DSM → **Control Panel** → **External Access** → **DDNS** → **Add** → select **No-IP**.
-3. Enter your No-IP credentials and hostname.
-
-### 8.4 Security Implications
+### 8.2 Security Implications
 
 | Risk | Mitigation |
 |---|---|
-| IP exposure | Use Cloudflare proxy (orange cloud) to hide the home IP |
-| DDNS credentials compromise | Use scoped API tokens, not account-level credentials |
-| DNS hijacking | Enable DNSSEC in Cloudflare |
+| Public IP exposure | Your real IP is directly exposed — keep router firewall rules tight (ports 80 and 443 only) |
+| DNS hijacking | Use HTTPS with a valid certificate (Let's Encrypt via DSM) |
 
 ---
 
@@ -700,7 +621,6 @@ The NAS firewall must block all ports except 80 and 443 from the public internet
 |---|---|
 | Admin seed password | `.env` file on NAS, not in image or source control |
 | Database (SQLite) | No password needed; secured by file permissions |
-| DDNS API token | `.env` file on NAS, not in source control |
 | Let's Encrypt | Managed by DSM, stored in DSM keystore |
 
 The `.env` file must have restrictive permissions:
@@ -715,17 +635,9 @@ chmod 600 /volume1/docker/trainings/.env
 | Container process | Non-root (UID 1000) |
 | Volume access | Only the container user |
 | NAS Docker user | No admin rights |
-| Cloudflare API token | Scoped to DNS edit on one zone only |
 | DSM admin account | Named account, 2FA enabled, not `admin` |
 
 ### 10.6 Optional Security Enhancements
-
-#### Cloudflare Proxy (Recommended)
-
-Enable the Cloudflare proxy (orange cloud icon) on the DNS record. This:
-- Hides the home IP address from DNS lookups.
-- Adds a CDN layer.
-- Enables the Cloudflare WAF (free tier provides basic protection).
 
 #### VPN Access
 
@@ -734,25 +646,6 @@ For administrative access to DSM, consider using **Synology VPN Server** instead
 1. Install **VPN Server** from Package Center.
 2. Configure OpenVPN or L2TP/IPSec.
 3. Connect to VPN before accessing DSM remotely.
-
-#### Zero Trust Networking (Advanced)
-
-Use **Cloudflare Tunnel** (`cloudflared`) to expose the application without opening any inbound ports on the router:
-
-```yaml
-services:
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-```
-
-With Cloudflare Tunnel:
-- No port forwarding on the router is needed.
-- The NAS initiates an outbound connection to Cloudflare.
-- Cloudflare proxies traffic to the application.
 
 ---
 
@@ -959,7 +852,7 @@ Use this checklist when setting up the environment on a new NAS:
 - [ ] Request Let's Encrypt certificate in DSM (Section 7)
 - [ ] Configure DSM Reverse Proxy entry (Section 6)
 - [ ] Start the container: `docker compose up -d`
-- [ ] Verify the application is accessible at `https://trainings.example.com`
+- [ ] Verify the application is accessible at `https://trainings.planetfrey.ch`
 - [ ] Set up automated backup task in DSM Task Scheduler (Section 12.1)
 - [ ] Configure Synology Hyper Backup for offsite backups (Section 12.5)
 
@@ -972,6 +865,5 @@ Use this checklist when setting up the environment on a new NAS:
 | Database file not found | Volume not mounted correctly | Verify bind mount path in docker-compose.yml |
 | 502 Bad Gateway | Container not running or wrong port | Check container is running: `docker ps` |
 | Blazor SignalR disconnects | WebSocket not enabled on proxy | Enable WebSocket support in DSM Reverse Proxy |
-| DDNS not updating | Invalid API token or network issue | Test manually, check `cloudflare-ddns` container logs |
 | `docker compose pull` — permission denied | Docker socket not accessible without root | Use `sudo docker compose pull` on Synology DSM |
 | `docker compose pull` — manifest unknown | Image tagged `:latest` not yet published | Ensure the GitHub Actions workflow has run and pushed the `latest` tag |
