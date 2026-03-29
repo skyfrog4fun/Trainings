@@ -1,5 +1,4 @@
 # Trainings
-# Trainings
 
 ## Overview
 
