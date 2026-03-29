@@ -455,7 +455,7 @@ The DSM built-in Reverse Proxy uses nginx internally and provides a UI for confi
 |---|---|
 | Description | `Trainings Web App` |
 | Source Protocol | `HTTPS` |
-| Source Hostname | `trainings.example.com` |
+| Source Hostname | `trainings.planetfrey.ch` |
 | Source Port | `443` |
 | Enable HSTS | Yes |
 | Destination Protocol | `HTTP` |
@@ -477,9 +477,18 @@ The DSM built-in Reverse Proxy uses nginx internally and provides a UI for confi
 
 ### 6.2 Multiple Applications Example
 
-```
-trainings.example.com  → localhost:8080  (Trainings app)
-nas.example.com        → localhost:5000  (DSM UI, if desired)
+trainings.planetfrey.ch  → localhost:8080  (Trainings app)  
+blog.planetfrey.ch       → localhost:8090  (e.g. a static blog container)
+
+For example, if you have a second web application (such as a static site or another containerized app), create a new reverse proxy entry:
+
+| Source Hostname         | Source Port | Destination Hostname | Destination Port | Description         |
+|------------------------|-------------|---------------------|------------------|---------------------|
+| trainings.planetfrey.ch | 443         | localhost           | 8080             | Trainings app       |
+| blog.planetfrey.ch      | 443         | localhost           | 8090             | Blog/static website |
+
+Each entry maps a different domain/subdomain to a specific backend container port.  
+**Note:** Do not use the DSM management interface (ports 5000/5001) as a reverse proxy target; DSM manages its own reverse proxy and should not be exposed via custom entries. 
 ```
 
 Each entry in the Reverse Proxy list maps a domain to a backend port.
@@ -487,6 +496,44 @@ Each entry in the Reverse Proxy list maps a domain to a backend port.
 ---
 
 ## 7. HTTPS and Certificates
+
+> **Prerequisite:**  
+> Before requesting a Let's Encrypt certificate, your public domain (e.g. `trainings.planetfrey.ch`) must resolve to your NAS's public IP.  
+> - If you do **not** have a static public IP, set up Synology DDNS first:  
+>   1. Go to **Control Panel** → **External Access** → **DDNS** → **Add**.
+>   2. Register a Synology DDNS hostname (e.g. `planetfrey.myds.me`).
+> - In your domain registrar or DNS provider, create a **CNAME** record:  
+>   - **Name:** `trainings`  
+>   - **Type:** `CNAME`  
+>   - **Value:** `planetfrey.myds.me`  
+>   This ensures `trainings.planetfrey.ch` always points to your NAS, even if your public IP changes.
+
+### 7.1 Requesting a Let's Encrypt Certificate
+
+1. **Control Panel** → **Security** → **Certificate** → **Add** → **Add a new certificate**.
+2. Select **Get a certificate from Let's Encrypt**.
+3. Fill in:
+  - **Domain name:** `trainings.planetfrey.ch`
+  - **Email:** your email address
+  - **Subject Alternative Name:** leave blank (or add additional subdomains)
+4. Click **Done**.
+
+DSM will request and automatically store the certificate.
+
+> **Prerequisite:** Port 80 must be reachable from the internet for the HTTP-01 ACME challenge. Ensure your router forwards port 80 to the NAS before requesting the certificate. You can restrict port 80 again after the certificate is issued (DSM will use a TLS-ALPN challenge for renewals if port 80 is later blocked, or continue using HTTP-01 on renewal if port 80 stays open).
+
+### 7.2 Binding the Certificate to the Reverse Proxy
+
+1. **Control Panel** → **Security** → **Certificate** → select the certificate → **Edit** → **Services**.
+2. Find the reverse proxy entry for `trainings.planetfrey.ch` and assign the certificate to it.
+3. Click **OK**.
+
+### 7.3 Automatic Renewal
+
+DSM renews Let's Encrypt certificates automatically 30 days before expiry. No manual action is required. Ensure:
+- Port 80 remains forwarded (for HTTP-01 renewal).
+- The NAS has internet connectivity.
+
 
 ### 7.1 Requesting a Let's Encrypt Certificate
 
