@@ -763,7 +763,18 @@ chmod 600 /volume1/docker/trainings/.env
 | NAS Docker user | No admin rights |
 | DSM admin account | Named account, 2FA enabled, not `admin` |
 
-### 10.6 Optional Security Enhancements
+### 10.6 Deployment Strategy: NAS Pulls, GitHub Never Pushes
+
+A common alternative for automated deployment is for GitHub Actions to SSH into the NAS after a Docker image is pushed and run `docker compose pull && up -d`. **This approach is intentionally not used here** because it requires the NAS to have SSH (port 22) permanently reachable from the internet — which contradicts the firewall rule in [Section 10.1](#101-firewall-configuration-summary) that allows only ports 80 and 443 from external sources.
+
+Instead, deployment is **pull-based**: the NAS reaches out to the registry, not the other way around. Watchtower runs inside Docker on the NAS, polls the GitHub Container Registry (ghcr.io) every few minutes, and automatically pulls and restarts the container when a new image is available. No inbound firewall rule changes are required.
+
+| Approach | NAS port 22 open to internet? | Preferred |
+|---|---|---|
+| GitHub Actions SSHes into NAS | Yes | ✗ |
+| NAS polls ghcr.io (Watchtower) | No | ✓ |
+
+### 10.7 Optional Security Enhancements
 
 #### VPN Access
 
@@ -782,8 +793,12 @@ For administrative access to DSM, consider using **Synology VPN Server** instead
 ```
 Developer → git push → GitHub Actions → Build Docker image
                                       → Push to GitHub Container Registry (ghcr.io)
-                                      → SSH/webhook trigger on NAS → docker compose pull && up -d
+
+NAS (Watchtower) → polls ghcr.io every 5 minutes
+                 → detects new image → docker pull → container restart
 ```
+
+> The NAS initiates all outbound connections. No inbound SSH or webhook port is required.
 
 ### 11.2 GitHub Actions: Build and Publish Docker Image
 
@@ -841,19 +856,11 @@ jobs:
 
 ### 11.3 Updating the Container on the NAS
 
-After a new image is pushed to ghcr.io, update the NAS manually or automatically.
+After a new image is pushed to ghcr.io, the NAS can pick it up automatically or manually.
 
-**Option A: Manual update (SSH)**
-```bash
-cd /volume1/docker/trainings
-sudo docker compose pull
-sudo docker compose up -d --remove-orphans
-sudo docker image prune -f
-```
+**Primary: Automated update with Watchtower (recommended)**
 
-**Option B: Automated update with Watchtower**
-
-Add Watchtower to the compose file to automatically pull and restart updated containers:
+Watchtower runs on the NAS and polls ghcr.io for new images. When it detects an update it pulls the new image and restarts the container automatically — no inbound SSH required. Add Watchtower as an additional service in the compose file:
 
 ```yaml
 services:
@@ -869,7 +876,18 @@ services:
     command: trainings-web
 ```
 
-> **Security note:** Watchtower requires access to the Docker socket, which grants root-level access. Only add trusted images and keep Watchtower updated.
+> **Security note:** Watchtower requires access to the Docker socket, which grants root-level access to the host. Only configure it to watch known, trusted images and keep Watchtower itself updated.
+
+**Fallback: Manual update via SSH from within the local network**
+
+If Watchtower is not running or an immediate update is needed, SSH into the NAS from the local network (not from the internet) and run:
+
+```bash
+cd /volume1/docker/trainings
+sudo docker compose pull
+sudo docker compose up -d --remove-orphans
+sudo docker image prune -f
+```
 
 ### 11.4 GitHub Packages: Making the Image Accessible
 

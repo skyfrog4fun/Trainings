@@ -69,14 +69,7 @@ All checks must pass before the PR can be merged.
 
 - Merging to `main` triggers the **Build and Publish Docker Image** workflow.
 - A new Docker image is built and pushed to the GitHub Container Registry (GHCR).
-- Once the image is published successfully, the **Deploy to Production** workflow is triggered automatically.
-- It connects to the Synology NAS via SSH and runs `docker compose pull && docker compose up -d` to pull the new image and restart the application.
-
-> **Prerequisites:** The following GitHub repository secrets must be configured:
-> - `NAS_HOST` — hostname or IP address of the NAS
-> - `NAS_USER` — SSH username on the NAS
-> - `NAS_SSH_KEY` — SSH private key for authentication
-> - `NAS_DEPLOY_PATH` — path to the Docker Compose project directory on the NAS (e.g. `/volume1/docker/trainings`)
+- The production environment pulls the new image and restarts the application.
 
 ---
 
