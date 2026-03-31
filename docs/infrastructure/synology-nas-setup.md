@@ -853,23 +853,125 @@ sudo docker image prune -f
 
 **Option B: Automated update with Watchtower**
 
-Add Watchtower to the compose file to automatically pull and restart updated containers:
+Watchtower polls the container registry at a configurable interval, pulls new image versions, and restarts the affected containers automatically. Follow the steps below to install and configure it on the NAS.
+
+#### Step 1 – Authenticate with the GitHub Container Registry
+
+Watchtower needs registry credentials so it can pull private images.  
+SSH into the NAS and run:
+
+```bash
+echo "<YOUR_GITHUB_TOKEN>" | sudo docker login ghcr.io \
+  -u <your-github-username> --password-stdin
+```
+
+The credentials are saved to `/root/.docker/config.json` and will be used by Watchtower automatically.
+
+> Create a fine-grained Personal Access Token (PAT) with **`read:packages`** scope at
+> **GitHub → Settings → Developer settings → Personal access tokens**.
+
+#### Step 2 – Add Watchtower to the compose file
+
+Open `/volume1/docker/trainings/docker-compose.yml` and add the `watchtower` service:
 
 ```yaml
 services:
+  trainings-web:
+    image: ghcr.io/<your-github-username>/trainings:main
+    container_name: trainings-web
+    restart: unless-stopped
+    # … rest of the existing service definition …
+
   watchtower:
     image: containrrr/watchtower
+    container_name: watchtower
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json:ro   # Watchtower reads registry credentials from /config.json by default
     environment:
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=300   # check every 5 minutes
-      - WATCHTOWER_INCLUDE_STOPPED=false
-    command: trainings-web
+      - WATCHTOWER_CLEANUP=true            # remove old images after update
+      - WATCHTOWER_POLL_INTERVAL=300       # check for updates every 5 minutes
+      - WATCHTOWER_INCLUDE_STOPPED=false   # only watch running containers
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr  # optional – see Step 5 for notifications
+    command: trainings-web                 # only watch this container
 ```
 
-> **Security note:** Watchtower requires access to the Docker socket, which grants root-level access. Only add trusted images and keep Watchtower updated.
+> **Tip:** Omit the `command:` line entirely if you want Watchtower to monitor *all* containers on the host.
+
+#### Step 3 – Start Watchtower
+
+```bash
+cd /volume1/docker/trainings
+sudo docker compose pull watchtower   # pull the latest Watchtower image
+sudo docker compose up -d watchtower  # start only the new service
+```
+
+Verify the container is running:
+
+```bash
+sudo docker ps | grep watchtower
+```
+
+#### Step 4 – Verify it is working
+
+Check Watchtower logs to confirm it started correctly and can reach the registry:
+
+```bash
+sudo docker logs watchtower --tail 50
+```
+
+Expected output on first run (no update available yet):
+
+```
+time="…" level=info msg="Watchtower 1.x.x"
+time="…" level=info msg="Starting Watchtower and scheduling first run: …"
+time="…" level=info msg="Checking all containers (except explicitly disabled with label)"
+time="…" level=info msg="Session done" Failed=0 Scanned=1 Updated=0 Fresh=1
+```
+
+When a new image is published and Watchtower detects it, you will see:
+
+```
+time="…" level=info msg="Found new ghcr.io/…/trainings:main image (sha256:…)"
+time="…" level=info msg="Stopping /trainings-web (…) with SIGTERM"
+time="…" level=info msg="Creating /trainings-web"
+time="…" level=info msg="Session done" Failed=0 Scanned=1 Updated=1 Fresh=0
+```
+
+#### Step 5 – (Optional) Enable update notifications
+
+Watchtower can send notifications via e-mail, Slack, Telegram, or any URL supported by [shoutrrr](https://containrrr.dev/shoutrrr). Example for a generic webhook:
+
+```yaml
+environment:
+  - WATCHTOWER_NOTIFICATION_URL=generic://your-webhook-host/path
+```
+
+See the [Watchtower notification docs](https://containrrr.dev/watchtower/notifications/) for all supported providers.
+
+#### Step 6 – (Optional) Use a scheduled time instead of polling
+
+Replace the poll interval with a cron expression to update only at a specific time (e.g. 03:00 every day):
+
+```yaml
+environment:
+  - WATCHTOWER_CLEANUP=true
+  - WATCHTOWER_SCHEDULE=0 0 3 * * *   # Watchtower extended cron: sec min hour day month weekday
+```
+
+Remove `WATCHTOWER_POLL_INTERVAL` when using `WATCHTOWER_SCHEDULE`.
+
+#### Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `unauthorized` in logs | Missing or expired registry credentials | Re-run `docker login` (Step 1) |
+| Container not restarted after push | Wrong container name in `command:` | Check `docker ps --format '{{.Names}}'` and match exactly |
+| Old image not removed | `WATCHTOWER_CLEANUP` not set | Add `WATCHTOWER_CLEANUP=true` to environment |
+| Watchtower restarts itself | No fixed tag pinned for Watchtower image | Pin a specific version, e.g. `containrrr/watchtower:1.7.1` |
+
+> **Security note:** Watchtower requires access to the Docker socket, which grants root-level access to the host. Mount the Docker socket **read-only** where possible, limit the containers Watchtower monitors using the `command:` argument or container labels (`com.centurylinklabs.watchtower.enable=false`), and keep the Watchtower image itself up to date.
 
 ### 11.4 GitHub Packages: Making the Image Accessible
 
