@@ -12,6 +12,27 @@ This document describes how a code change travels from idea to production.
 - Add relevant labels (e.g. `bug`, `enhancement`, `documentation`).
 - The issue serves as the single source of truth for *why* the change is needed.
 
+**What a good issue contains:**
+
+| Field | Guidance |
+|---|---|
+| **Title** | Short, imperative sentence (e.g. "Add capacity validation to TrainingService"). |
+| **Description** | One paragraph explaining the *problem* or *desired behaviour*. Include screenshots or error messages when relevant. |
+| **Steps to reproduce** | (Bug reports only) Numbered list of exact steps that trigger the problem. |
+| **Expected vs actual behaviour** | (Bug reports only) What should happen and what currently happens. |
+| **Acceptance criteria** | Bullet list of conditions that must be true for the issue to be considered done (e.g. "Unit test covers the new validation rule"). |
+| **Related resources** | Links to the relevant section in [SPECIFICATION.md](SPECIFICATION.md), related issues, or external references. |
+
+**Practical checklist before submitting:**
+
+- [ ] The title clearly identifies *what* is being changed.
+- [ ] The description explains *why* the change is needed.
+- [ ] Acceptance criteria are written so a reviewer can objectively verify them.
+- [ ] At least one label has been applied.
+- [ ] No implementation details are prescribed — the issue describes the *what*, not the *how*.
+
+> **Note:** Keep issues scoped to a single change. If you spot multiple problems, open separate issues so each can be tracked, reviewed, and closed independently.
+
 ### 2. Implementation
 
 - Create a feature branch from `main` (e.g. `feature/my-change` or `fix/my-bug`).
