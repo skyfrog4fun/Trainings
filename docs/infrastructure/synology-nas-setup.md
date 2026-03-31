@@ -751,7 +751,7 @@ The NAS firewall must block all ports except 80 and 443 from the public internet
 
 The `.env` file must have restrictive permissions:
 ```bash
-chmod 600 /volume1/docker/trainings/.env
+sudo chmod 600 /volume1/docker/trainings/.env
 ```
 
 ### 10.5 Least Privilege Principle
