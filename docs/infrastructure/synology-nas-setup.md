@@ -266,7 +266,7 @@ services:
     networks:
       - trainings-net
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      test: ["CMD-SHELL", "wget --method=HEAD -q -O /dev/null http://localhost:8080/login || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -870,22 +870,85 @@ sudo docker image prune -f
 **Option B: Automated update with Watchtower**
 Watchtower polls the container registry at a configurable interval, pulls new image versions, and restarts the affected containers automatically. Follow the steps below to install and configure it on the NAS.
 
-#### Step 1 – Authenticate with the GitHub Container Registry
+**Automated Docker Image Updates on Synology NAS with Watchtower**
 
-Watchtower needs registry credentials so it can pull private images.  
-SSH into the NAS and run:
+This guide explains how to create a GitHub Personal Access Token (classic) to allow Watchtower on a Synology NAS to pull private Docker images from GitHub Container Registry (ghcr.io), and how to verify the credentials.
+
+#### Step 1 – Create a GitHub Personal Access Token (classic)
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click “Generate new token (classic)”.
+3. Fill in the details:
+ - Note: synology-watchtower-ghcr
+ - Expiration: choose 90 days or 180 days (recommended) - DON'T forget to create a new token after expiration!
+ - Optionally No expiration for convenience (less secure)
+
+Select scopes: only check
+
+```text
+read:packages
+```
+This allows pulling Docker images from GitHub Container Registry.
+
+5. Click “Generate token” and copy it immediately — it will not be shown again.
+
+#### Step 2 – Login to GitHub Container Registry from the NAS
+SSH into your Synology NAS. (Don't forget to active SSH first Control Panel -> Terminal & SNMP -> Terminal -> Enable SSH service)
+
+Run the following command:
 
 ```bash
-echo "<YOUR_GITHUB_TOKEN>" | sudo docker login ghcr.io \
-  -u <your-github-username> --password-stdin
+sudo docker login ghcr.io -u <your-github-username>
+When prompted for password: paste your GitHub token (not your GitHub password).
+```
+The sudo prompt asks for your NAS password (for root access), not GitHub.
+
+You should see:
+```text
+Login Succeeded
 ```
 
-The credentials are saved to `/root/.docker/config.json` and will be used by Watchtower automatically.
+**Notes:**
+Credentials are stored in /root/.docker/config.json.
+Watchtower uses this automatically to pull images.
 
-> Create a fine-grained Personal Access Token (PAT) with **`read:packages`** scope at
-> **GitHub → Settings → Developer settings → Personal access tokens**.
+#### Step 3 – Verify the Docker config file
 
-#### Step 2 – Add Watchtower to the compose file
+To check that the credentials are stored correctly:
+
+```bash
+sudo cat /root/.docker/config.json
+```
+
+You should see an entry like:
+
+```json
+{
+  "auths": {
+    "ghcr.io": {
+      "auth": "xxxxxxxxxxxxxxxxxxxx"
+    }
+  }
+}
+```
+"ghcr.io" must be present
+"auth" is a base64-encoded token (do not share this file)
+
+#### Step 4 – Test pulling a private image
+
+Before enabling Watchtower, verify that the NAS can pull your image:
+
+```bash
+sudo docker pull ghcr.io/<your-github-username>/<your-image>:latest
+```
+Replace <your-username> and <your-image> with your GitHub username and image name.
+If the pull succeeds, Watchtower will be able to update the container automatically.
+
+**Notes**
+Watchtower does not automatically renew tokens.
+When the token expires, re-run the docker login command with a new token.
+Using sudo on Synology is normal — Synology does not provide usermod to modify Docker group permissions.
+
+#### Step 5 – Add Watchtower to the compose file
 
 Open `/volume1/docker/trainings/docker-compose.yml` and add the `watchtower` service:
 
@@ -910,10 +973,16 @@ services:
       - WATCHTOWER_INCLUDE_STOPPED=false   # only watch running containers
       - WATCHTOWER_NOTIFICATIONS=shoutrrr  # optional – see Step 5 for notifications
     command: trainings-web                 # only watch this container
+
+# … rest of the existing file …
+networks:
+  trainings-net:
+    driver: bridge
+
 ```
 > **Tip:** Omit the `command:` line entirely if you want Watchtower to monitor *all* containers on the host.
 
-#### Step 3 – Start Watchtower
+#### Step 6 – Start Watchtower
 
 ```bash
 cd /volume1/docker/trainings
@@ -927,7 +996,7 @@ Verify the container is running:
 sudo docker ps | grep watchtower
 ```
 
-#### Step 4 – Verify it is working
+#### Step 7 – Verify it is working
 
 Check Watchtower logs to confirm it started correctly and can reach the registry:
 
@@ -938,10 +1007,11 @@ sudo docker logs watchtower --tail 50
 Expected output on first run (no update available yet):
 
 ```
-time="…" level=info msg="Watchtower 1.x.x"
-time="…" level=info msg="Starting Watchtower and scheduling first run: …"
-time="…" level=info msg="Checking all containers (except explicitly disabled with label)"
-time="…" level=info msg="Session done" Failed=0 Scanned=1 Updated=0 Fresh=1
+time="…" level=info msg="Watchtower 1.7.1"
+time="…" level=info msg="Using no notifications"
+time="…" level=info msg="Only checking containers which name matches \"trainings-web\""
+time="…" level=info msg="Scheduling first run: … UTC"
+time="…" level=info msg="Note that the first check will be performed in 4 minutes, 59 seconds"
 ```
 
 When a new image is published and Watchtower detects it, you will see:
@@ -953,7 +1023,7 @@ time="…" level=info msg="Creating /trainings-web"
 time="…" level=info msg="Session done" Failed=0 Scanned=1 Updated=1 Fresh=0
 ```
 
-#### Step 5 – (Optional) Enable update notifications
+#### Step 8 – (Optional) Enable update notifications
 
 Watchtower can send notifications via e-mail, Slack, Telegram, or any URL supported by [shoutrrr](https://containrrr.dev/shoutrrr). Example for a generic webhook:
 
@@ -964,14 +1034,14 @@ environment:
 
 See the [Watchtower notification docs](https://containrrr.dev/watchtower/notifications/) for all supported providers.
 
-#### Step 6 – (Optional) Use a scheduled time instead of polling
+#### Step 9 – (Optional) Use a scheduled time instead of polling
 
 Replace the poll interval with a cron expression to update only at a specific time (e.g. 03:00 every day):
 
 ```yaml
 environment:
   - WATCHTOWER_CLEANUP=true
-  - WATCHTOWER_SCHEDULE=0 0 3 * * *   # Watchtower extended cron: sec min hour day month weekday
+  - WATCHTOWER_SCHEDULE=0 0 3 * * *   # Watchtower extended cron: sec min hour day month weekday (every day at 03:00 AM UTC)
 ```
 
 Remove `WATCHTOWER_POLL_INTERVAL` when using `WATCHTOWER_SCHEDULE`.
@@ -987,52 +1057,13 @@ Remove `WATCHTOWER_POLL_INTERVAL` when using `WATCHTOWER_SCHEDULE`.
 
 > **Security note:** Watchtower requires access to the Docker socket, which grants root-level access to the host. Mount the Docker socket **read-only** where possible, limit the containers Watchtower monitors using the `command:` argument or container labels (`com.centurylinklabs.watchtower.enable=false`), and keep the Watchtower image itself up to date.
 
-
-### 11.4 GitHub Packages: Making the Image Accessible
-
-The GitHub Container Registry package is private by default. Either:
-
-- Make it public: GitHub → **Packages** → select image → **Package settings** → **Change visibility** → **Public**.
-- Or authenticate on the NAS:
-  ```bash
-  echo $GITHUB_TOKEN | docker login ghcr.io -u <github-username> --password-stdin
-  ```
-  Create a fine-grained Personal Access Token with `read:packages` scope.
-
 ---
 
 ## 12. Backup Strategy
 
 ### 12.1 SQLite Database
 
-The database file is the most critical asset. Back it up daily.
-
-| Method | Command / Tool | Notes |
-|---|---|---|
-| Online hot backup | `sqlite3 trainings.db "VACUUM INTO 'backup.db'"` | Safe while app is running |
-| File copy (cold) | `cp trainings.db trainings.db.bak` | Stop app first |
-| Synology Hyper Backup | Schedule task targeting `/volume1/docker/trainings/data/` | Encrypts and stores off-site |
-
-**Automated daily backup** (add to DSM Task Scheduler → User-Defined Script):
-
-```bash
-#!/bin/bash
-set -e
-DB=/volume1/docker/trainings/data/trainings.db
-BACKUP_DIR=/volume1/backups/trainings
-KEEP_DAYS=30
-
-mkdir -p "$BACKUP_DIR"
-sqlite3 "$DB" "VACUUM INTO '$BACKUP_DIR/trainings-$(date +%Y%m%d-%H%M%S).db'"
-find "$BACKUP_DIR" -name "trainings-*.db" -mtime +"$KEEP_DAYS" -delete
-echo "Backup completed: $(date)"
-```
-
-To add this to DSM Task Scheduler:
-1. **Control Panel** → **Task Scheduler** → **Create** → **Scheduled Task** → **User-Defined Script**.
-2. Set the schedule (e.g. daily at 02:00).
-3. Paste the script.
-4. Set **User** to `root` (required for sqlite3).
+See section 4.5 for backup procedure and script.
 
 ### 12.2 Container Configuration
 
