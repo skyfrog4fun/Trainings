@@ -1,0 +1,61 @@
+<Project>
+
+  <!--
+    Directory.Build.props – solution-wide MSBuild defaults.
+    Applied automatically to every project in or below this directory.
+    Override individual settings in each .csproj as needed.
+  -->
+
+  <PropertyGroup Label="Language and framework">
+    <LangVersion>latest</LangVersion>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Nullable reference types are enabled globally; do not disable per-project. -->
+    <Nullable>enable</Nullable>
+    <!-- Global implicit usings reduce boilerplate; disable per-project if conflicts arise. -->
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Build quality">
+    <!--
+      TreatWarningsAsErrors is set to false to keep the baseline non-breaking.
+      Gradually adopt stricter settings: set to true once all existing warnings are resolved.
+    -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- Warn on all nullable violations so they are visible without failing the build. -->
+    <WarningLevel>5</WarningLevel>
+    <!-- Produce deterministic output for reproducible builds. -->
+    <Deterministic>true</Deterministic>
+    <!-- Embed source into the PDB for better debugging and Source Link support. -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analyzers">
+    <!--
+      Enable .NET platform analyzers (included in the SDK; no extra package needed).
+      These surface naming, API-usage, and performance hints.
+    -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <!--
+      Analysis level 'latest-recommended' gives a good balance between
+      catching real issues and avoiding noisy false positives.
+    -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!--
+      StyleCop.Analyzers is not yet referenced in this project.
+      To enable it, add the NuGet package to a shared props file or individual project,
+      then configure rules in stylecop.json at the solution root.
+      Example:
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.*">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    -->
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging (non-publishable defaults)">
+    <!-- Prevent accidental NuGet publishing of internal projects. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>
