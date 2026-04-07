@@ -1,0 +1,7 @@
+# Ensure consistent line endings for C# and related project files (CRLF)
+*.cs      text eol=crlf
+*.cshtml  text eol=crlf
+*.razor   text eol=crlf
+*.csproj  text eol=crlf
+*.sln     text eol=crlf
+*.slnx    text eol=crlf
