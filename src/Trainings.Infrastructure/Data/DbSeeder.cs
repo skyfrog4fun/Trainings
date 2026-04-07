@@ -1,6 +1,6 @@
+using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
-using Trainings.Application.Interfaces;
 
 namespace Trainings.Infrastructure.Data;
 
