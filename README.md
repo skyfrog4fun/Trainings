@@ -39,7 +39,12 @@ Trainings is an application for planning and conducting training sessions, as we
 
 ## Contributing
 
-Pull requests are welcome. Please see [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for architecture and requirements, and [docs/DEVELOPMENT_WORKFLOW.md](docs/DEVELOPMENT_WORKFLOW.md) for the step-by-step process a code change follows from issue to production.
+Pull requests are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the contribution workflow, language policy, and coding conventions.
+
+For deeper context:
+- [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) — architecture and functional requirements.
+- [`docs/DEVELOPMENT_WORKFLOW.md`](docs/DEVELOPMENT_WORKFLOW.md) — step-by-step process from issue to production.
+- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) — conventions for AI-assisted contributions.
 
 ## License
 

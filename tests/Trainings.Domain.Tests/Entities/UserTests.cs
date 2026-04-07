@@ -8,28 +8,28 @@ namespace Trainings.Domain.Tests.Entities;
 public class UserTests
 {
     [Fact]
-    public void User_DefaultRole_IsParticipant()
+    public void UserDefaultRoleIsParticipant()
     {
         var user = new User();
         user.Role.Should().Be(UserRole.Participant);
     }
 
     [Fact]
-    public void User_DefaultIsActive_IsTrue()
+    public void UserDefaultIsActiveIsTrue()
     {
         var user = new User();
         user.IsActive.Should().BeTrue();
     }
 
     [Fact]
-    public void User_CanSetName()
+    public void UserCanSetName()
     {
         var user = new User { Name = "John Doe" };
         user.Name.Should().Be("John Doe");
     }
 
     [Fact]
-    public void User_CanSetRole()
+    public void UserCanSetRole()
     {
         var user = new User { Role = UserRole.Trainer };
         user.Role.Should().Be(UserRole.Trainer);
