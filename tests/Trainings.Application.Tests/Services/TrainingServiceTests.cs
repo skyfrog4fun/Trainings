@@ -19,7 +19,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
+    public async Task GetByIdAsyncReturnsNullWhenNotFound()
     {
         _trainingRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Training?)null);
         var result = await _service.GetByIdAsync(99);
@@ -27,7 +27,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsDto_WhenFound()
+    public async Task GetByIdAsyncReturnsDtoWhenFound()
     {
         var training = new Training { Id = 1, Title = "Yoga", Location = "Studio", DateTime = DateTime.Now, Capacity = 10 };
         _trainingRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(training);
@@ -37,7 +37,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_AddsTraining()
+    public async Task CreateAsyncAddsTraining()
     {
         _trainingRepoMock.Setup(r => r.AddAsync(It.IsAny<Training>())).Returns(Task.CompletedTask);
         var dto = new CreateTrainingDto { Title = "Pilates", Location = "Gym", DateTime = DateTime.Now.AddDays(1), Capacity = 15, TrainerId = 1 };

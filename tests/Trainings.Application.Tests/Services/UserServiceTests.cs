@@ -22,7 +22,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenUserNotFound()
+    public async Task GetByIdAsyncReturnsNullWhenUserNotFound()
     {
         _userRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((User?)null);
         var result = await _service.GetByIdAsync(1);
@@ -30,7 +30,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsDto_WhenUserExists()
+    public async Task GetByIdAsyncReturnsDtoWhenUserExists()
     {
         var user = new User { Id = 1, Name = "Alice", Email = "alice@example.com", Role = UserRole.Participant };
         _userRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(user);
@@ -41,7 +41,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_CallsRepository_AndReturnsDto()
+    public async Task CreateAsyncCallsRepositoryAndReturnsDto()
     {
         _hasherMock.Setup(h => h.Hash("password")).Returns("hashed");
         _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
@@ -55,7 +55,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task ValidatePasswordAsync_ReturnsFalse_WhenUserNotFound()
+    public async Task ValidatePasswordAsyncReturnsFalseWhenUserNotFound()
     {
         _userRepoMock.Setup(r => r.GetByEmailAsync("noone@example.com")).ReturnsAsync((User?)null);
         var result = await _service.ValidatePasswordAsync("noone@example.com", "pass");
@@ -63,7 +63,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task ValidatePasswordAsync_ReturnsTrue_WhenPasswordCorrect()
+    public async Task ValidatePasswordAsyncReturnsTrueWhenPasswordCorrect()
     {
         var user = new User { Email = "user@example.com", PasswordHash = "hash", IsActive = true };
         _userRepoMock.Setup(r => r.GetByEmailAsync("user@example.com")).ReturnsAsync(user);
@@ -73,7 +73,7 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task ValidatePasswordAsync_ReturnsFalse_WhenUserInactive()
+    public async Task ValidatePasswordAsyncReturnsFalseWhenUserInactive()
     {
         var user = new User { Email = "user@example.com", PasswordHash = "hash", IsActive = false };
         _userRepoMock.Setup(r => r.GetByEmailAsync("user@example.com")).ReturnsAsync(user);

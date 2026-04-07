@@ -7,21 +7,21 @@ namespace Trainings.Domain.Tests.Entities;
 public class TrainingTests
 {
     [Fact]
-    public void Training_DefaultIsActive_IsTrue()
+    public void TrainingDefaultIsActiveIsTrue()
     {
         var training = new Training();
         training.IsActive.Should().BeTrue();
     }
 
     [Fact]
-    public void Training_CanSetCapacity()
+    public void TrainingCanSetCapacity()
     {
         var training = new Training { Capacity = 20 };
         training.Capacity.Should().Be(20);
     }
 
     [Fact]
-    public void Training_HasEmptyRegistrationsCollection()
+    public void TrainingHasEmptyRegistrationsCollection()
     {
         var training = new Training();
         training.Registrations.Should().NotBeNull();
