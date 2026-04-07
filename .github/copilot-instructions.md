@@ -51,6 +51,7 @@ These instructions apply to all AI-assisted contributions (GitHub Copilot, Copil
 - Use expression-bodied members for single-line implementations.
 - Keep methods short and focused (single responsibility).
 - Use `ArgumentNullException.ThrowIfNull` for parameter guards.
+- Always open and close curly braces `{ }` even for single statements after `if`, `switch`, etc.
 
 ---
 
@@ -83,6 +84,11 @@ Trainings.Web             ← Blazor Server UI, DI composition root
 - Run `dotnet format` before committing to ensure consistent style.
 
 ---
+
+## Third-Party Libraries
+
+- Prefer using pure .NET / Blazor / built-in functionality whenever possible instead of adding third-party libraries or NuGet packages.
+- If a third-party library is suggested, explicitly name it and explain the advantages over a built-in or custom solution.
 
 ## What to Avoid
 
