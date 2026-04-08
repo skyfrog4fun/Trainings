@@ -39,7 +39,7 @@ public class DbSeeder
             var admin = new User
             {
                 FirstName = "Administrator",
-                LastName = string.Empty,
+                LastName = "User",
                 Email = "admin@trainings.local",
                 PasswordHash = _passwordHasher.Hash("Admin123!"),
                 Role = UserRole.Admin,

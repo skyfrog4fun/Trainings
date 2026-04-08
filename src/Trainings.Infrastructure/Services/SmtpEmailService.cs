@@ -58,7 +58,7 @@ public class SmtpEmailService : IEmailService
 
         if (string.IsNullOrWhiteSpace(host))
         {
-            _logger.LogWarning("SMTP not configured. Would send email to {To}: {Subject}", toEmail, subject);
+            _logger.LogWarning("SMTP not configured. Email notification skipped for subject: {Subject}", subject);
             return;
         }
 
