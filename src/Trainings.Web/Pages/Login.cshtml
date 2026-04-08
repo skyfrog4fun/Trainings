@@ -31,6 +31,14 @@
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
                     </form>
+                    <div class="mt-3 text-center">
+                        <a href="/forgot-password" class="text-decoration-none small">Forgot password?</a>
+                        &nbsp;·&nbsp;
+                        <a href="/register" class="text-decoration-none small">Register</a>
+                    </div>
+                    <div class="text-end mt-2">
+                        <small class="text-muted">v@Model.AppVersion</small>
+                    </div>
                 </div>
             </div>
         </div>

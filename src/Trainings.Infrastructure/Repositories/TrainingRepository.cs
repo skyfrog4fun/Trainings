@@ -18,6 +18,10 @@ public class TrainingRepository : ITrainingRepository
         await _context.Trainings
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
+            .Include(t => t.Group)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.TrainingBlockTags)
+                    .ThenInclude(bt => bt.Tag)
             .FirstOrDefaultAsync(t => t.Id == id);
 
     public async Task<IEnumerable<Training>> GetAllAsync() =>

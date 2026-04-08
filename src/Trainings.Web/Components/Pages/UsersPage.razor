@@ -1,7 +1,8 @@
 @page "/users"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
 @inject IUserService UserService
+@inject IUserRegistrationService UserRegistrationService
 @inject NavigationManager NavigationManager
 
 <PageTitle>User Management</PageTitle>
@@ -19,7 +20,10 @@
                 <h5>@(_editUserId == 0 ? "Create User" : "Edit User")</h5>
                 <div class="row g-2">
                     <div class="col-12 col-md-6">
-                        <input class="form-control" placeholder="Name" @bind="_formName" />
+                        <input class="form-control" placeholder="First Name" @bind="_formFirstName" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <input class="form-control" placeholder="Last Name" @bind="_formLastName" />
                     </div>
                     <div class="col-12 col-md-6">
                         <input class="form-control" type="email" placeholder="Email" @bind="_formEmail" />
@@ -35,6 +39,14 @@
                             <option value="Participant">Participant</option>
                             <option value="Trainer">Trainer</option>
                             <option value="Admin">Admin</option>
+                            <option value="SuperAdmin">Super Admin</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <select class="form-select" @bind="_formGender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                 </div>
@@ -53,6 +65,36 @@
     }
     else
     {
+        @if (_pendingUsers.Any())
+        {
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    ⏳ Pending Approvals (@_pendingUsers.Count)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Registered</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in _pendingUsers)
+                            {
+                                <tr>
+                                    <td>@user.DisplayName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.CreationDate.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)">Approve</button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)">Reject</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -62,7 +104,7 @@
                     @foreach (var user in _users)
                     {
                         <tr>
-                            <td>@user.Name</td>
+                            <td>@user.DisplayName</td>
                             <td>@user.Email</td>
                             <td><span class="badge @RoleBadge(user.Role)">@user.Role</span></td>
                             <td>@(user.IsActive ? "✓" : "✗")</td>
@@ -82,10 +124,12 @@
 
 @code {
     private List<UserDto> _users = new();
+    private List<UserDto> _pendingUsers = new();
     private bool _loading = true;
     private bool _showForm = false;
     private int _editUserId = 0;
-    private string _formName = "", _formEmail = "", _formPassword = "", _formRole = "Participant";
+    private string _formFirstName = "", _formLastName = "", _formEmail = "", _formPassword = "";
+    private string _formRole = "Participant", _formGender = "Other";
     private string? _formError;
 
     protected override async Task OnInitializedAsync()
@@ -96,15 +140,17 @@
     private async Task LoadUsers()
     {
         _loading = true;
-        _users = (await UserService.GetAllAsync()).ToList();
+        _users = (await UserService.GetAllAsync()).Where(u => u.IsActive).ToList();
+        _pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
         _loading = false;
     }
 
     private void ShowCreateForm()
     {
         _editUserId = 0;
-        _formName = _formEmail = _formPassword = "";
+        _formFirstName = _formLastName = _formEmail = _formPassword = "";
         _formRole = "Participant";
+        _formGender = "Other";
         _formError = null;
         _showForm = true;
     }
@@ -112,9 +158,11 @@
     private void EditUser(UserDto user)
     {
         _editUserId = user.Id;
-        _formName = user.Name;
+        _formFirstName = user.FirstName;
+        _formLastName = user.LastName;
         _formEmail = user.Email;
         _formRole = user.Role.ToString();
+        _formGender = user.Gender.ToString();
         _formError = null;
         _showForm = true;
     }
@@ -128,10 +176,12 @@
             {
                 await UserService.CreateAsync(new CreateUserDto
                 {
-                    Name = _formName,
+                    FirstName = _formFirstName,
+                    LastName = _formLastName,
                     Email = _formEmail,
                     Password = _formPassword,
-                    Role = Enum.Parse<UserRole>(_formRole)
+                    Role = Enum.Parse<UserRole>(_formRole),
+                    Gender = Enum.Parse<Gender>(_formGender)
                 });
             }
             else
@@ -140,9 +190,11 @@
                 await UserService.UpdateAsync(new UpdateUserDto
                 {
                     Id = _editUserId,
-                    Name = _formName,
+                    FirstName = _formFirstName,
+                    LastName = _formLastName,
                     Email = _formEmail,
                     Role = Enum.Parse<UserRole>(_formRole),
+                    Gender = Enum.Parse<Gender>(_formGender),
                     IsActive = user.IsActive
                 });
             }
@@ -160,11 +212,25 @@
         await UserService.UpdateAsync(new UpdateUserDto
         {
             Id = user.Id,
-            Name = user.Name,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
             Email = user.Email,
             Role = user.Role,
+            Gender = user.Gender,
             IsActive = !user.IsActive
         });
+        await LoadUsers();
+    }
+
+    private async Task ApproveUser(UserDto user)
+    {
+        await UserRegistrationService.ApproveUserAsync(user.Id, 0);
+        await LoadUsers();
+    }
+
+    private async Task RejectUser(UserDto user)
+    {
+        await UserRegistrationService.RejectUserAsync(user.Id, 0);
         await LoadUsers();
     }
 
@@ -172,6 +238,7 @@
 
     private string RoleBadge(UserRole role) => role switch
     {
+        UserRole.SuperAdmin => "bg-dark",
         UserRole.Admin => "bg-danger",
         UserRole.Trainer => "bg-warning text-dark",
         _ => "bg-secondary"

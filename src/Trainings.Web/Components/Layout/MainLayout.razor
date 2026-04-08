@@ -1,30 +1,57 @@
-﻿@inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar d-none d-md-block">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4 d-flex justify-content-between align-items-center">
-            <button class="btn btn-outline-secondary d-md-none" @onclick="ToggleSidebar">☰</button>
-            <span class="text-muted small">🏋️ Trainings App</span>
-            <a href="/logout" class="btn btn-sm btn-outline-danger">Logout</a>
+<nav class="navbar sticky-top navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">🏋️ Trainings</a>
+        <div class="dropdown">
+            <button class="btn btn-outline-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu">
+                ☰
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+                <li>
+                    <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All">🏠 Dashboard</NavLink>
+                </li>
+                <li>
+                    <NavLink class="dropdown-item" href="trainings">📅 Trainings</NavLink>
+                </li>
+                <AuthorizeView Roles="Participant">
+                    <li>
+                        <NavLink class="dropdown-item" href="my-registrations">📋 My Registrations</NavLink>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Trainer">
+                    <li>
+                        <NavLink class="dropdown-item" href="trainer-trainings">🎯 My Trainings</NavLink>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin,SuperAdmin">
+                    <li>
+                        <NavLink class="dropdown-item" href="users">👥 Users</NavLink>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Roles="SuperAdmin">
+                    <li>
+                        <NavLink class="dropdown-item" href="groups">🏢 Groups</NavLink>
+                    </li>
+                </AuthorizeView>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <a class="dropdown-item text-danger" href="/logout">🚪 Logout</a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <span class="dropdown-item-text text-muted small">v@_version</span>
+                </li>
+            </ul>
         </div>
+    </div>
+</nav>
 
-        @if (_showMobileMenu)
-        {
-            <div class="mobile-nav p-3 bg-dark text-white">
-                <NavMenu />
-            </div>
-        }
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<main>
+    <article class="content container-fluid px-2 px-md-4 py-3">
+        @Body
+    </article>
+</main>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -33,10 +60,6 @@
 </div>
 
 @code {
-    private bool _showMobileMenu = false;
-
-    private void ToggleSidebar()
-    {
-        _showMobileMenu = !_showMobileMenu;
-    }
+    private string _version = System.Reflection.Assembly
+        .GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 }

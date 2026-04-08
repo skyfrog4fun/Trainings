@@ -32,11 +32,11 @@ public class UserServiceTests
     [Fact]
     public async Task GetByIdAsyncReturnsDtoWhenUserExists()
     {
-        var user = new User { Id = 1, Name = "Alice", Email = "alice@example.com", Role = UserRole.Participant };
+        var user = new User { Id = 1, FirstName = "Alice", LastName = "Smith", Email = "alice@example.com", Role = UserRole.Participant };
         _userRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(user);
         var result = await _service.GetByIdAsync(1);
         result.Should().NotBeNull();
-        result!.Name.Should().Be("Alice");
+        result!.DisplayName.Should().Be("Alice Smith");
         result.Email.Should().Be("alice@example.com");
     }
 
@@ -46,11 +46,11 @@ public class UserServiceTests
         _hasherMock.Setup(h => h.Hash("password")).Returns("hashed");
         _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
-        var dto = new CreateUserDto { Name = "Bob", Email = "bob@example.com", Password = "password", Role = UserRole.Trainer };
+        var dto = new CreateUserDto { FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", Password = "password", Role = UserRole.Trainer };
         var result = await _service.CreateAsync(dto);
 
         result.Should().NotBeNull();
-        result.Name.Should().Be("Bob");
+        result.DisplayName.Should().Be("Bob Jones");
         _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
     }
 

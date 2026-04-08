@@ -1,0 +1,187 @@
+@page "/trainings/{Id:int}/run"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Trainer,Admin,SuperAdmin")]
+@inject ITrainingService TrainingService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Run Training</PageTitle>
+
+<div class="container px-2 px-md-3">
+    @if (_loading)
+    {
+        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+    }
+    else if (_training == null)
+    {
+        <div class="alert alert-danger">Training not found.</div>
+    }
+    else if (!_blocks.Any())
+    {
+        <div class="my-3">
+            <a href="/trainings/@Id" class="btn btn-sm btn-outline-secondary">← Back</a>
+        </div>
+        <div class="alert alert-warning mt-3">This training has no blocks. <a href="/trainings/@Id/edit">Add blocks first.</a></div>
+    }
+    else if (_phase == "complete")
+    {
+        <div class="my-3">
+            <a href="/trainings/@Id" class="btn btn-sm btn-outline-secondary">← Back</a>
+        </div>
+        <div class="alert alert-success mt-3 text-center">
+            <h4>🎉 Training Complete!</h4>
+            <p>All @_blocks.Count blocks finished.</p>
+        </div>
+
+        <h5>Enter actual durations and comments</h5>
+        @foreach (var block in _blocks)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>@(_blocks.IndexOf(block) + 1). @block.Title</h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">Actual Duration (min)</label>
+                            <input class="form-control form-control-sm" type="number" min="0"
+                                   value="@block.EffectiveDurationMinutes"
+                                   @onchange="e => SetEffectiveDuration(block, e.Value)" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">Trainer Comment</label>
+                            <textarea class="form-control form-control-sm" rows="2"
+                                      value="@block.TrainerComment"
+                                      @onchange="e => SetTrainerComment(block, e.Value?.ToString())"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <button class="btn btn-primary w-100" @onclick="SaveFeedback" disabled="@_saving">
+            @if (_saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Save Feedback
+        </button>
+        @if (_saved) { <div class="alert alert-success mt-2">Saved!</div> }
+    }
+    else
+    {
+        var currentBlock = _blocks[_currentIndex];
+        <div class="d-flex align-items-center justify-content-between mt-3 mb-2">
+            <a href="/trainings/@Id" class="btn btn-sm btn-outline-secondary">← Back</a>
+            <small class="text-muted">Block @(_currentIndex + 1) of @_blocks.Count</small>
+        </div>
+
+        <div class="progress mb-3" style="height: 6px;">
+            <div class="progress-bar" style="width: @((_currentIndex * 100) / _blocks.Count)%"></div>
+        </div>
+
+        <div class="card shadow-lg text-center">
+            <div class="card-body py-5">
+                <div class="text-muted small mb-2">BLOCK @(_currentIndex + 1)</div>
+                <h2 class="card-title mb-3">@currentBlock.Title</h2>
+                @if (!string.IsNullOrEmpty(currentBlock.Description))
+                {
+                    <p class="text-muted">@currentBlock.Description</p>
+                }
+                <div class="badge bg-light text-dark border fs-6 mb-4">
+                    ⏱ @currentBlock.PlannedDurationMinutes min
+                </div>
+                @if (currentBlock.Tags.Any())
+                {
+                    <div class="mb-3">
+                        @foreach (var tag in currentBlock.Tags)
+                        {
+                            <span class="badge bg-info text-dark me-1">@tag.Name</span>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="card-footer">
+                @if (_currentIndex < _blocks.Count - 1)
+                {
+                    <button class="btn btn-success btn-lg w-100" @onclick="NextBlock">
+                        Next Block →
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary btn-lg w-100" @onclick="FinishTraining">
+                        ✓ Finish Training
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private TrainingDto? _training;
+    private List<TrainingBlockDto> _blocks = new();
+    private int _currentIndex;
+    private string _phase = "running";
+    private bool _loading = true, _saving, _saved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _training = await TrainingService.GetByIdAsync(Id);
+        if (_training != null)
+        {
+            _blocks = _training.Blocks.OrderBy(b => b.OrderIndex).ToList();
+        }
+        _loading = false;
+    }
+
+    private void NextBlock()
+    {
+        if (_currentIndex < _blocks.Count - 1)
+        {
+            _currentIndex++;
+        }
+    }
+
+    private void FinishTraining()
+    {
+        _phase = "complete";
+    }
+
+    private void SetEffectiveDuration(TrainingBlockDto block, object? value)
+    {
+        if (value != null && int.TryParse(value.ToString(), out var mins))
+        {
+            block.EffectiveDurationMinutes = mins;
+        }
+    }
+
+    private void SetTrainerComment(TrainingBlockDto block, string? comment)
+    {
+        block.TrainerComment = comment;
+    }
+
+    private async Task SaveFeedback()
+    {
+        _saving = true;
+        try
+        {
+            foreach (var block in _blocks)
+            {
+                await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
+                {
+                    Id = block.Id,
+                    OrderIndex = block.OrderIndex,
+                    Title = block.Title,
+                    Description = block.Description,
+                    PlannedDurationMinutes = block.PlannedDurationMinutes,
+                    EffectiveDurationMinutes = block.EffectiveDurationMinutes,
+                    TrainerComment = block.TrainerComment,
+                    TagIds = block.Tags.Select(t => t.Id).ToList()
+                });
+            }
+            _saved = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

@@ -9,6 +9,7 @@
   <PropertyGroup Label="Language and framework">
     <LangVersion>latest</LangVersion>
     <TargetFramework>net10.0</TargetFramework>
+    <Version>1.0.0</Version>
     <!-- Nullable reference types are enabled globally; do not disable per-project. -->
     <Nullable>enable</Nullable>
     <!-- Global implicit usings reduce boilerplate; disable per-project if conflicts arise. -->

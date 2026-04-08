@@ -23,7 +23,7 @@
         <div class="my-3">
             <a href="/trainings" class="btn btn-sm btn-outline-secondary">← Back</a>
         </div>
-        <div class="card shadow">
+        <div class="card shadow mb-4">
             <div class="card-body">
                 <h2>@_training.Title</h2>
                 <p class="text-muted">
@@ -31,6 +31,10 @@
                     📍 @_training.Location<br/>
                     👤 Trainer: @_training.TrainerName<br/>
                     👥 @_training.RegisteredCount / @_training.Capacity registered
+                    @if (_training.GroupName != null)
+                    {
+                        <><br/>🏢 @_training.GroupName</>
+                    }
                 </p>
                 <p>@_training.Description</p>
 
@@ -53,6 +57,7 @@
 
                 @if (_isTrainer && _training.TrainerId == _userId)
                 {
+                    <a href="/trainings/@_training.Id/run" class="btn btn-success ms-2">▶ Run Training</a>
                     <a href="/trainings/@_training.Id/attendance" class="btn btn-primary ms-2">Record Attendance</a>
                     <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary ms-2">Edit</a>
                 }
@@ -62,6 +67,45 @@
         @if (_message != null)
         {
             <div class="alert @(_isError ? "alert-danger" : "alert-success") mt-3">@_message</div>
+        }
+
+        @if (_training.Blocks.Any())
+        {
+            <h4>Training Blocks (@_training.Blocks.Count)</h4>
+            <div class="row g-3 mb-4">
+                @for (var i = 0; i < _training.Blocks.Count; i++)
+                {
+                    var block = _training.Blocks[i];
+                    var num = i + 1;
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">@num. @block.Title</h6>
+                                @if (!string.IsNullOrEmpty(block.Description))
+                                {
+                                    <p class="card-text text-muted small">@block.Description</p>
+                                }
+                                <div class="small text-muted">
+                                    ⏱ Planned: @block.PlannedDurationMinutes min
+                                    @if (block.EffectiveDurationMinutes.HasValue)
+                                    {
+                                        <> · Actual: @block.EffectiveDurationMinutes min</>
+                                    }
+                                </div>
+                                @if (block.Tags.Any())
+                                {
+                                    <div class="mt-2">
+                                        @foreach (var tag in block.Tags)
+                                        {
+                                            <span class="badge bg-info text-dark me-1">@tag.Name</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
         }
 
         @if (_registrations.Any() && (_isTrainer || _isAdmin))
@@ -96,7 +140,7 @@
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         _isParticipant = user.IsInRole("Participant");
         _isTrainer = user.IsInRole("Trainer");
-        _isAdmin = user.IsInRole("Admin");
+        _isAdmin = user.IsInRole("Admin") || user.IsInRole("SuperAdmin");
 
         _training = await TrainingService.GetByIdAsync(Id);
 

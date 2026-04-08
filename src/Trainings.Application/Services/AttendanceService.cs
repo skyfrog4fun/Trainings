@@ -55,7 +55,7 @@ public class AttendanceService : IAttendanceService
     {
         Id = a.Id,
         UserId = a.UserId,
-        UserName = a.User?.Name ?? string.Empty,
+        UserName = a.User?.DisplayName ?? string.Empty,
         TrainingId = a.TrainingId,
         Status = a.Status,
         RecordedAt = a.RecordedAt
