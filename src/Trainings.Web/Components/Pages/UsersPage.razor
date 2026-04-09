@@ -3,7 +3,9 @@
 @attribute [Authorize(Roles = "Admin,SuperAdmin")]
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
+@inject IEmailService EmailService
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>User Management</PageTitle>
 
@@ -12,6 +14,26 @@
         <h2>Users</h2>
         <button class="btn btn-success" @onclick="ShowCreateForm">+ New User</button>
     </div>
+
+    <AuthorizeView Roles="SuperAdmin">
+        <div class="card mb-4 border-info">
+            <div class="card-header bg-info text-white fw-bold">🔧 SMTP Configuration Test</div>
+            <div class="card-body">
+                <p class="mb-2 text-muted">Send a test email to your account to verify that the SMTP configuration is working correctly.</p>
+                <button class="btn btn-info" @onclick="SendTestEmail" disabled="@_testEmailSending">
+                    @if (_testEmailSending)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    }
+                    📧 Send Test Email to Me
+                </button>
+                @if (_testEmailResult != null)
+                {
+                    <div class="alert @(_testEmailSuccess ? "alert-success" : "alert-danger") mt-2 mb-0">@_testEmailResult</div>
+                }
+            </div>
+        </div>
+    </AuthorizeView>
 
     @if (_showForm)
     {
@@ -132,6 +154,10 @@
     private string _formRole = "Participant", _formGender = "Other";
     private string? _formError;
 
+    private bool _testEmailSending = false;
+    private bool _testEmailSuccess = false;
+    private string? _testEmailResult;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadUsers();
@@ -235,6 +261,35 @@
     }
 
     private void CancelForm() => _showForm = false;
+
+    private async Task SendTestEmail()
+    {
+        _testEmailSending = true;
+        _testEmailResult = null;
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var email = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                _testEmailSuccess = false;
+                _testEmailResult = "Could not determine your email address from the current session.";
+                return;
+            }
+            await EmailService.SendTestEmailAsync(email);
+            _testEmailSuccess = true;
+            _testEmailResult = $"Test email sent successfully to {email}.";
+        }
+        catch (Exception ex)
+        {
+            _testEmailSuccess = false;
+            _testEmailResult = $"Failed to send test email: {ex.Message}";
+        }
+        finally
+        {
+            _testEmailSending = false;
+        }
+    }
 
     private string RoleBadge(UserRole role) => role switch
     {

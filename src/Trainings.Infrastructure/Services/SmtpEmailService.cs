@@ -50,6 +50,16 @@ public class SmtpEmailService : IEmailService
         await SendAsync(adminEmail, subject, body, ct);
     }
 
+    public async Task SendTestEmailAsync(string toEmail, CancellationToken ct = default)
+    {
+        var subject = "Test Email – SMTP Configuration Check";
+        var body = """
+            <p>This is a test email sent from the Trainings application.</p>
+            <p>If you received this message, your SMTP configuration is working correctly.</p>
+            """;
+        await SendAsync(toEmail, subject, body, ct);
+    }
+
     private async Task SendAsync(string toEmail, string subject, string htmlBody, CancellationToken ct)
     {
         var smtpSection = _configuration.GetSection("Smtp");
