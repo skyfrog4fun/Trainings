@@ -13,4 +13,5 @@ public interface IUserService
     Task UpdateAsync(UpdateUserDto dto);
     Task DeleteAsync(int id);
     Task<bool> ValidatePasswordAsync(string email, string password);
+    Task ChangePasswordAsync(int userId, string newPasswordHash);
 }

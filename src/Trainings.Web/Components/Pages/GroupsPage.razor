@@ -1,0 +1,159 @@
+@page "/groups"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "SuperAdmin")]
+@inject IGroupService GroupService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Groups</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2>Groups</h2>
+        <button class="btn btn-success" @onclick="ShowCreateForm">+ New Group</button>
+    </div>
+
+    @if (_showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>@(_editGroupId == 0 ? "Create Group" : "Edit Group")</h5>
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Name</label>
+                        <input class="form-control" @bind="_formName" placeholder="Group name" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" rows="2" @bind="_formDescription"></textarea>
+                    </div>
+                    @if (_editGroupId != 0)
+                    {
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="grpActive" />
+                                <label class="form-check-label" for="grpActive">Active</label>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary me-2" @onclick="SaveGroup">Save</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm">Cancel</button>
+                </div>
+                @if (_formError != null) { <div class="alert alert-danger mt-2">@_formError</div> }
+            </div>
+        </div>
+    }
+
+    @if (_loading)
+    {
+        <div class="text-center"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>Name</th><th>Description</th><th>Members</th><th>Active</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var group in _groups)
+                    {
+                        <tr>
+                            <td>@group.Name</td>
+                            <td class="text-muted small">@group.Description</td>
+                            <td>@group.MemberCount</td>
+                            <td>@(group.IsActive ? "✓" : "✗")</td>
+                            <td>
+                                <a href="/groups/@group.Id/members" class="btn btn-sm btn-outline-primary me-1">Members</a>
+                                <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => EditGroup(group)">Edit</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteGroup(group)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!_groups.Any())
+        {
+            <div class="alert alert-info">No groups yet.</div>
+        }
+    }
+</div>
+
+@code {
+    private List<GroupDto> _groups = new();
+    private bool _loading = true, _showForm;
+    private int _editGroupId;
+    private string _formName = "", _formDescription = "";
+    private bool _formIsActive = true;
+    private string? _formError;
+
+    protected override async Task OnInitializedAsync() => await LoadGroups();
+
+    private async Task LoadGroups()
+    {
+        _loading = true;
+        _groups = (await GroupService.GetAllAsync()).ToList();
+        _loading = false;
+    }
+
+    private void ShowCreateForm()
+    {
+        _editGroupId = 0;
+        _formName = _formDescription = "";
+        _formIsActive = true;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private void EditGroup(GroupDto group)
+    {
+        _editGroupId = group.Id;
+        _formName = group.Name;
+        _formDescription = group.Description ?? "";
+        _formIsActive = group.IsActive;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private async Task SaveGroup()
+    {
+        _formError = null;
+        try
+        {
+            if (_editGroupId == 0)
+            {
+                await GroupService.CreateAsync(new CreateGroupDto
+                {
+                    Name = _formName,
+                    Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription
+                });
+            }
+            else
+            {
+                await GroupService.UpdateAsync(new UpdateGroupDto
+                {
+                    Id = _editGroupId,
+                    Name = _formName,
+                    Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription,
+                    IsActive = _formIsActive
+                });
+            }
+            _showForm = false;
+            await LoadGroups();
+        }
+        catch (Exception ex)
+        {
+            _formError = ex.Message;
+        }
+    }
+
+    private async Task DeleteGroup(GroupDto group)
+    {
+        await GroupService.DeleteAsync(group.Id);
+        await LoadGroups();
+    }
+
+    private void CancelForm() => _showForm = false;
+}

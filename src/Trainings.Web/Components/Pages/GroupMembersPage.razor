@@ -1,0 +1,149 @@
+@page "/groups/{GroupId:int}/members"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
+@inject IGroupService GroupService
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Group Members</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="my-3">
+        <a href="/groups" class="btn btn-sm btn-outline-secondary">← Back</a>
+    </div>
+
+    @if (_group != null)
+    {
+        <h2>@_group.Name – Members</h2>
+        <p class="text-muted">@_group.Description</p>
+    }
+
+    @if (_showAddForm)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6>Add Member</h6>
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <select class="form-select" @bind="_addUserId">
+                            <option value="0">-- Select User --</option>
+                            @foreach (var user in _allUsers)
+                            {
+                                <option value="@user.Id">@user.DisplayName (@user.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <select class="form-select" @bind="_addRole">
+                            <option value="Participant">Participant</option>
+                            <option value="Trainer">Trainer</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <button class="btn btn-primary btn-sm me-2" @onclick="AddMember">Add</button>
+                    <button class="btn btn-secondary btn-sm" @onclick="() => _showAddForm = false">Cancel</button>
+                </div>
+                @if (_addError != null) { <div class="alert alert-danger mt-2 small">@_addError</div> }
+            </div>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Members (@_members.Count)</h5>
+        <button class="btn btn-success btn-sm" @onclick="() => _showAddForm = true">+ Add Member</button>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="text-center"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th>Joined</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in _members)
+                    {
+                        <tr>
+                            <td>@m.UserDisplayName</td>
+                            <td class="text-muted small">@m.UserEmail</td>
+                            <td><span class="badge bg-secondary">@m.Role</span></td>
+                            <td>@(m.IsActive ? "✓" : "✗")</td>
+                            <td class="small">@m.JoinedAt.ToString("MMM d, yyyy")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(m)">Remove</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!_members.Any())
+        {
+            <div class="alert alert-info">No members yet.</div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int GroupId { get; set; }
+
+    private GroupDto? _group;
+    private List<GroupMembershipDto> _members = new();
+    private List<UserDto> _allUsers = new();
+    private bool _loading = true, _showAddForm;
+    private int _addUserId;
+    private string _addRole = "Participant";
+    private string? _addError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _group = await GroupService.GetByIdAsync(GroupId);
+        _allUsers = (await UserService.GetAllAsync()).Where(u => u.IsActive).ToList();
+        await LoadMembers();
+    }
+
+    private async Task LoadMembers()
+    {
+        _loading = true;
+        _members = (await GroupService.GetMembersAsync(GroupId)).ToList();
+        _loading = false;
+    }
+
+    private async Task AddMember()
+    {
+        _addError = null;
+        if (_addUserId == 0)
+        {
+            _addError = "Please select a user.";
+            return;
+        }
+        try
+        {
+            await GroupService.AddMemberAsync(new AddGroupMemberDto
+            {
+                GroupId = GroupId,
+                UserId = _addUserId,
+                Role = Enum.Parse<GroupMemberRole>(_addRole)
+            });
+            _showAddForm = false;
+            _addUserId = 0;
+            await LoadMembers();
+        }
+        catch (Exception ex)
+        {
+            _addError = ex.Message;
+        }
+    }
+
+    private async Task RemoveMember(GroupMembershipDto m)
+    {
+        await GroupService.RemoveMemberAsync(m.Id);
+        await LoadMembers();
+    }
+}

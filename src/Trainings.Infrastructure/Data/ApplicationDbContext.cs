@@ -11,6 +11,14 @@ public class ApplicationDbContext : DbContext
     public DbSet<Training> Trainings => Set<Training>();
     public DbSet<Registration> Registrations => Set<Registration>();
     public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<EmailConfirmationToken> EmailConfirmationTokens => Set<EmailConfirmationToken>();
+    public DbSet<Group> Groups => Set<Group>();
+    public DbSet<GroupMembership> GroupMemberships => Set<GroupMembership>();
+    public DbSet<PendingGroupRequest> PendingGroupRequests => Set<PendingGroupRequest>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<TrainingBlock> TrainingBlocks => Set<TrainingBlock>();
+    public DbSet<TrainingBlockTag> TrainingBlockTags => Set<TrainingBlockTag>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,8 +29,13 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(u => u.Id);
             entity.HasIndex(u => u.Email).IsUnique();
             entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
-            entity.Property(u => u.Name).IsRequired().HasMaxLength(200);
+            entity.Property(u => u.FirstName).IsRequired().HasMaxLength(100);
+            entity.Property(u => u.LastName).IsRequired().HasMaxLength(100);
             entity.Property(u => u.PasswordHash).IsRequired();
+            entity.Property(u => u.Mobile).HasMaxLength(50);
+            entity.Property(u => u.City).HasMaxLength(100);
+            entity.Property(u => u.WelcomeMessage).HasMaxLength(500);
+            entity.Ignore(u => u.DisplayName);
         });
 
         modelBuilder.Entity<Training>(entity =>
@@ -33,6 +46,10 @@ public class ApplicationDbContext : DbContext
                 .WithMany(u => u.TrainingsAsTrainer)
                 .HasForeignKey(t => t.TrainerId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(t => t.Group)
+                .WithMany(g => g.Trainings)
+                .HasForeignKey(t => t.GroupId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Registration>(entity =>
@@ -60,6 +77,96 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(a => a.Training)
                 .WithMany(t => t.Attendances)
                 .HasForeignKey(a => a.TrainingId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Token).IsRequired().HasMaxLength(256);
+            entity.HasOne(p => p.User)
+                .WithMany(u => u.PasswordResetTokens)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<EmailConfirmationToken>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Token).IsRequired().HasMaxLength(256);
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.EmailConfirmationTokens)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Group>(entity =>
+        {
+            entity.HasKey(g => g.Id);
+            entity.Property(g => g.Name).IsRequired().HasMaxLength(200);
+            entity.Property(g => g.Description).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<GroupMembership>(entity =>
+        {
+            entity.HasKey(gm => gm.Id);
+            entity.HasOne(gm => gm.User)
+                .WithMany()
+                .HasForeignKey(gm => gm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(gm => gm.Group)
+                .WithMany(g => g.Memberships)
+                .HasForeignKey(gm => gm.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PendingGroupRequest>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.Group)
+                .WithMany(g => g.PendingRequests)
+                .HasForeignKey(p => p.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+            entity.HasOne(t => t.Group)
+                .WithMany()
+                .HasForeignKey(t => t.GroupId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<TrainingBlock>(entity =>
+        {
+            entity.HasKey(b => b.Id);
+            entity.Property(b => b.Title).IsRequired().HasMaxLength(200);
+            entity.HasOne(b => b.Training)
+                .WithMany(t => t.Blocks)
+                .HasForeignKey(b => b.TrainingId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(b => b.SourceBlock)
+                .WithMany()
+                .HasForeignKey(b => b.SourceBlockId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<TrainingBlockTag>(entity =>
+        {
+            entity.HasKey(bt => new { bt.TrainingBlockId, bt.TagId });
+            entity.HasOne(bt => bt.TrainingBlock)
+                .WithMany(b => b.TrainingBlockTags)
+                .HasForeignKey(bt => bt.TrainingBlockId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(bt => bt.Tag)
+                .WithMany(t => t.TrainingBlockTags)
+                .HasForeignKey(bt => bt.TagId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

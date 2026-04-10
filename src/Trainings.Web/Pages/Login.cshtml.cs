@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -25,6 +26,9 @@ public class LoginModel : PageModel
 
     public string ErrorMessage { get; set; } = string.Empty;
 
+    public string AppVersion { get; } =
+        Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+
     public IActionResult OnGet()
     {
         if (User.Identity?.IsAuthenticated == true)
@@ -50,7 +54,7 @@ public class LoginModel : PageModel
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(CultureInfo.InvariantCulture)),
-            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Name, user.DisplayName),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };

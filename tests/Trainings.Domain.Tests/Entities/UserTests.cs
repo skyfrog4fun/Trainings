@@ -22,10 +22,10 @@ public class UserTests
     }
 
     [Fact]
-    public void UserCanSetName()
+    public void UserDisplayNameCombinesFirstAndLastName()
     {
-        var user = new User { Name = "John Doe" };
-        user.Name.Should().Be("John Doe");
+        var user = new User { FirstName = "John", LastName = "Doe" };
+        user.DisplayName.Should().Be("John Doe");
     }
 
     [Fact]

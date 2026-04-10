@@ -21,39 +21,79 @@ public class DbSeeder
 
         if (!_context.Users.Any())
         {
+            var superAdmin = new User
+            {
+                FirstName = "Super",
+                LastName = "Admin",
+                Email = "superadmin@trainings.app",
+                PasswordHash = _passwordHasher.Hash("Admin123!"),
+                Role = UserRole.SuperAdmin,
+                Gender = Gender.Other,
+                IsActive = true,
+                EmailConfirmedAt = DateTime.UtcNow,
+                CreationDate = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Users.Add(superAdmin);
+
             var admin = new User
             {
-                Name = "Administrator",
+                FirstName = "Administrator",
+                LastName = "User",
                 Email = "admin@trainings.local",
                 PasswordHash = _passwordHasher.Hash("Admin123!"),
                 Role = UserRole.Admin,
+                Gender = Gender.Other,
                 IsActive = true,
+                EmailConfirmedAt = DateTime.UtcNow,
+                CreationDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };
             _context.Users.Add(admin);
 
             var trainer = new User
             {
-                Name = "Demo Trainer",
+                FirstName = "Demo",
+                LastName = "Trainer",
                 Email = "trainer@trainings.local",
                 PasswordHash = _passwordHasher.Hash("Trainer123!"),
                 Role = UserRole.Trainer,
+                Gender = Gender.Male,
                 IsActive = true,
+                EmailConfirmedAt = DateTime.UtcNow,
+                CreationDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };
             _context.Users.Add(trainer);
 
             var participant = new User
             {
-                Name = "Demo Participant",
+                FirstName = "Demo",
+                LastName = "Participant",
                 Email = "participant@trainings.local",
                 PasswordHash = _passwordHasher.Hash("Part123!"),
                 Role = UserRole.Participant,
+                Gender = Gender.Female,
                 IsActive = true,
+                EmailConfirmedAt = DateTime.UtcNow,
+                CreationDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };
             _context.Users.Add(participant);
 
+            await _context.SaveChangesAsync();
+        }
+
+        if (!_context.Groups.Any())
+        {
+            var group = new Group
+            {
+                Name = "General",
+                Description = "Default training group",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Groups.Add(group);
             await _context.SaveChangesAsync();
         }
     }

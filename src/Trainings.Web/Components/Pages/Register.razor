@@ -1,0 +1,181 @@
+@page "/register"
+@rendermode InteractiveServer
+@inject IUserRegistrationService UserRegistrationService
+@inject IGroupService GroupService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Register</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-center mt-4 mb-5">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-3">Create Account</h4>
+
+                    @if (_registered)
+                    {
+                        <div class="alert alert-success">
+                            <strong>Registration successful!</strong><br/>
+                            Please check your email to confirm your address. Your account will be reviewed and activated by an administrator.
+                        </div>
+                        <a href="/login" class="btn btn-primary w-100">Back to Login</a>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">First Name *</label>
+                                <input class="form-control" @bind="_firstName" placeholder="First name" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Last Name *</label>
+                                <input class="form-control" @bind="_lastName" placeholder="Last name" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" @bind="_email" placeholder="you@example.com" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Password *</label>
+                                <input type="password" class="form-control" @bind="_password" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Gender *</label>
+                                <select class="form-select" @bind="_gender">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other / Prefer not to say</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Birthday</label>
+                                <input type="date" class="form-control" @bind="_birthday" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Mobile</label>
+                                <input class="form-control" @bind="_mobile" placeholder="+1 555 000 0000" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">City</label>
+                                <input class="form-control" @bind="_city" placeholder="Your city" />
+                            </div>
+                            @if (_groups.Any())
+                            {
+                                <div class="col-12">
+                                    <label class="form-label">Request Group Membership</label>
+                                    <div class="border rounded p-2" style="max-height:160px;overflow-y:auto;">
+                                        @foreach (var group in _groups)
+                                        {
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="grp-@group.Id"
+                                                       checked="@_selectedGroupIds.Contains(group.Id)"
+                                                       @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
+                                                <label class="form-check-label" for="grp-@group.Id">@group.Name</label>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-12">
+                                <label class="form-label">Welcome Message / Bio</label>
+                                <textarea class="form-control" rows="3" @bind="_welcomeMessage" placeholder="Tell us a little about yourself..."></textarea>
+                            </div>
+                        </div>
+
+                        @if (_error != null)
+                        {
+                            <div class="alert alert-danger mt-3">@_error</div>
+                        }
+
+                        <button class="btn btn-primary btn-lg w-100 mt-3" @onclick="Submit" disabled="@_loading">
+                            @if (_loading) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                            Register
+                        </button>
+                        <div class="mt-2 text-center">
+                            <a href="/login" class="text-decoration-none small">Already have an account? Login</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _firstName = "", _lastName = "", _email = "", _password = "";
+    private string _gender = "Other", _mobile = "", _city = "", _welcomeMessage = "";
+    private DateTime? _birthday;
+    private List<GroupDto> _groups = new();
+    private HashSet<int> _selectedGroupIds = new();
+    private bool _loading, _registered;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _groups = (await GroupService.GetAllAsync()).Where(g => g.IsActive).ToList();
+    }
+
+    private void ToggleGroup(int groupId, bool selected)
+    {
+        if (selected)
+        {
+            _selectedGroupIds.Add(groupId);
+        }
+        else
+        {
+            _selectedGroupIds.Remove(groupId);
+        }
+    }
+
+    private async Task Submit()
+    {
+        _error = null;
+        if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName))
+        {
+            _error = "First name and last name are required.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_email))
+        {
+            _error = "Email is required.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_password) || _password.Length < 6)
+        {
+            _error = "Password must be at least 6 characters.";
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            DateOnly? birthday = _birthday.HasValue
+                ? DateOnly.FromDateTime(_birthday.Value)
+                : null;
+
+            await UserRegistrationService.RegisterAsync(new RegisterRequestDto
+            {
+                FirstName = _firstName,
+                LastName = _lastName,
+                Email = _email,
+                Password = _password,
+                Gender = Enum.Parse<Gender>(_gender),
+                Birthday = birthday,
+                Mobile = string.IsNullOrWhiteSpace(_mobile) ? null : _mobile,
+                City = string.IsNullOrWhiteSpace(_city) ? null : _city,
+                WelcomeMessage = string.IsNullOrWhiteSpace(_welcomeMessage) ? null : _welcomeMessage,
+                RequestedGroupIds = _selectedGroupIds.ToList()
+            });
+            _registered = true;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

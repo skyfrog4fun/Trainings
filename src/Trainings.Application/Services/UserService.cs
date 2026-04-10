@@ -45,11 +45,17 @@ public class UserService : IUserService
     {
         var user = new User
         {
-            Name = dto.Name,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
             Email = dto.Email,
             PasswordHash = _passwordHasher.Hash(dto.Password),
             Role = dto.Role,
+            Gender = dto.Gender,
+            Birthday = dto.Birthday,
+            Mobile = dto.Mobile,
+            City = dto.City,
             IsActive = true,
+            CreationDate = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow
         };
         await _userRepository.AddAsync(user);
@@ -60,16 +66,31 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetByIdAsync(dto.Id)
             ?? throw new InvalidOperationException($"User {dto.Id} not found.");
-        user.Name = dto.Name;
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
         user.Email = dto.Email;
         user.Role = dto.Role;
         user.IsActive = dto.IsActive;
+        user.Gender = dto.Gender;
+        user.Birthday = dto.Birthday;
+        user.Mobile = dto.Mobile;
+        user.City = dto.City;
+        user.EntryDate = dto.EntryDate;
+        user.WelcomeMessage = dto.WelcomeMessage;
         await _userRepository.UpdateAsync(user);
     }
 
     public async Task DeleteAsync(int id)
     {
         await _userRepository.DeleteAsync(id);
+    }
+
+    public async Task ChangePasswordAsync(int userId, string newPasswordHash)
+    {
+        var user = await _userRepository.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException($"User {userId} not found.");
+        user.PasswordHash = newPasswordHash;
+        await _userRepository.UpdateAsync(user);
     }
 
     public async Task<bool> ValidatePasswordAsync(string email, string password)
@@ -82,10 +103,19 @@ public class UserService : IUserService
     private static UserDto MapToDto(User user) => new()
     {
         Id = user.Id,
-        Name = user.Name,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
         Email = user.Email,
         Role = user.Role,
         IsActive = user.IsActive,
+        Gender = user.Gender,
+        Birthday = user.Birthday,
+        Mobile = user.Mobile,
+        City = user.City,
+        EmailConfirmedAt = user.EmailConfirmedAt,
+        CreationDate = user.CreationDate,
+        EntryDate = user.EntryDate,
+        WelcomeMessage = user.WelcomeMessage,
         CreatedAt = user.CreatedAt
     };
 }

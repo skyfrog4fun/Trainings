@@ -79,7 +79,7 @@ public class RegistrationService : IRegistrationService
     {
         Id = r.Id,
         UserId = r.UserId,
-        UserName = r.User?.Name ?? string.Empty,
+        UserName = r.User?.DisplayName ?? string.Empty,
         TrainingId = r.TrainingId,
         TrainingTitle = r.Training?.Title ?? string.Empty,
         RegisteredAt = r.RegisteredAt,
