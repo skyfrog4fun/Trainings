@@ -15,6 +15,11 @@ services:
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/trainings.db
       - Seed__AdminEmail=${SEED_ADMIN_EMAIL}
       - Seed__AdminPassword=${SEED_ADMIN_PASSWORD}
+      - Smtp__Host=${SMTP_HOST}
+      - Smtp__Port=${SMTP_PORT}
+      - Smtp__User=${SMTP_USER}
+      - Smtp__Password=${SMTP_PASSWORD}
+      - Smtp__From=${SMTP_FROM}
     volumes:
       - /volume1/docker/trainings/data:/app/data
     networks:
