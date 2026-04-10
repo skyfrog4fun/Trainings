@@ -6,7 +6,7 @@ using Trainings.Application.Interfaces;
 
 namespace Trainings.Infrastructure.Services;
 
-public class SmtpEmailService : IEmailService
+public partial class SmtpEmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<SmtpEmailService> _logger;
@@ -68,7 +68,7 @@ public class SmtpEmailService : IEmailService
 
         if (string.IsNullOrWhiteSpace(host))
         {
-            _logger.LogWarning("SMTP not configured. Email notification skipped for subject: {Subject}", subject);
+            LogSmtpNotConfigured(_logger, subject);
             return;
         }
 
@@ -94,4 +94,7 @@ public class SmtpEmailService : IEmailService
 
         await client.SendMailAsync(message, ct);
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SMTP not configured. Email notification skipped for subject: {Subject}")]
+    private static partial void LogSmtpNotConfigured(ILogger logger, string subject);
 }

@@ -8,6 +8,8 @@ namespace Trainings.Infrastructure.Migrations
     /// <inheritdoc />
     public partial class InitialSchema : Migration
     {
+        private static readonly string[] UserIdTrainingIdColumns = ["UserId", "TrainingId"];
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -328,7 +330,7 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_UserId_TrainingId",
                 table: "Attendances",
-                columns: new[] { "UserId", "TrainingId" },
+                columns: UserIdTrainingIdColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -369,7 +371,7 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Registrations_UserId_TrainingId",
                 table: "Registrations",
-                columns: new[] { "UserId", "TrainingId" },
+                columns: UserIdTrainingIdColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
