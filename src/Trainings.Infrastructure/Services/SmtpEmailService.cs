@@ -62,9 +62,9 @@ public class SmtpEmailService : IEmailService
 
     private async Task SendAsync(string toEmail, string subject, string htmlBody, CancellationToken ct)
     {
-        var smtpSection = _configuration.GetSection("Smtp");
-        var host = smtpSection["Host"];
-        var from = smtpSection["From"] ?? smtpSection["User"] ?? "noreply@trainings.app";
+        var smtpSection = _configuration.GetSection("Smtp") ?? throw new InvalidOperationException("SMTP configuration section is missing.");
+        var host = smtpSection["Host"] ?? throw new InvalidOperationException("SMTP Host is not configured.");
+        var from = smtpSection["From"] ?? smtpSection["User"] ?? throw new InvalidOperationException("SMTP From address is not configured.");
 
         if (string.IsNullOrWhiteSpace(host))
         {
@@ -76,17 +76,21 @@ public class SmtpEmailService : IEmailService
         var user = smtpSection["User"];
         var password = smtpSection["Password"];
 
-        using var client = new SmtpClient(host, port);
-        if (!string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(password))
+        using var client = new SmtpClient(host, port)
         {
-            client.Credentials = new NetworkCredential(user, password);
-            client.EnableSsl = true;
-        }
+            EnableSsl = true,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(user, password),
+        };
 
-        using var message = new MailMessage(from, toEmail, subject, htmlBody)
+        var message = new MailMessage
         {
+            From = new MailAddress(from, "Trainings App"),
+            Subject = subject,
+            Body = htmlBody,
             IsBodyHtml = true
         };
+        message.To.Add(toEmail);
 
         await client.SendMailAsync(message, ct);
     }
