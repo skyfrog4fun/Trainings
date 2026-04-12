@@ -827,6 +827,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set lowercase image name
+        run: echo "IMAGE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -854,6 +857,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 ```
+
+> **Note:** Docker image tags must be lowercase. The `Set lowercase image name` step converts `${{ github.repository }}` (which may contain uppercase letters, e.g. `skyfrog4fun/Trainings`) to lowercase before it is used as the image name. Without this step, `docker build` and `docker push` will fail if the repository name contains uppercase characters.
+>
+> **Blazor Server assets:** `dotnet publish` automatically includes all required Blazor framework files (e.g. `wwwroot/_framework/blazor.web.js`) in the publish output, so the Docker image produced by the `Dockerfile` already contains the full Blazor Server runtime bundle. No additional steps are required.
 
 ### 11.3 Updating the Container on the NAS
 
