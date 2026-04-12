@@ -9,10 +9,15 @@ COPY ["src/Trainings.Infrastructure/Trainings.Infrastructure.csproj", "src/Train
 RUN dotnet restore "src/Trainings.Web/Trainings.Web.csproj"
 
 COPY . .
+# Do NOT pass --no-restore here. The earlier restore step ran without .razor files
+# present, so MSBuild set RequiresAspNetWebAssets=false and skipped restoring
+# Microsoft.AspNetCore.App.Internal.Assets (the package that provides
+# wwwroot/_framework/blazor.web.js). Running restore again with the full source
+# tree ensures that package is resolved and the Blazor JS files are included in
+# the publish output.
 RUN dotnet publish "src/Trainings.Web/Trainings.Web.csproj" \
     --configuration Release \
-    --output /app/publish \
-    --no-restore
+    --output /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
