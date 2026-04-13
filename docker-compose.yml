@@ -4,7 +4,7 @@
 
 services:
   trainings-web:
-    image: ghcr.io/${GITHUB_REPOSITORY:-skyfrog4fun/trainings}:latest
+    image: ghcr.io/skyfrog4fun/trainings:latest
     container_name: trainings-web
     restart: unless-stopped
     ports:
@@ -25,11 +25,26 @@ services:
     networks:
       - trainings-net
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/login || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json:ro   # Watchtower reads registry credentials from /config.json by default
+    environment:
+      - WATCHTOWER_CLEANUP=true            # remove old images after update
+#      - WATCHTOWER_POLL_INTERVAL=600       # check for updates every 5 minutes
+      - WATCHTOWER_SCHEDULE=0 0 3 * * *    # Watchtower extended cron: sec min hour day month weekday (every day at 03:00 AM UTC)
+      - WATCHTOWER_INCLUDE_STOPPED=false   # only watch running containers
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr  # optional – see Step 5 for notifications
+    command: trainings-web                 # only watch this container
 
 networks:
   trainings-net:
