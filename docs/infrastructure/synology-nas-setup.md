@@ -294,7 +294,7 @@ networks:
 - If you want to edit files from Windows, map the NAS share (e.g. `\\skynas24\docker\trainings`) as a network drive.  
 - Do **not** change the `/volume1/...` path in the YAML; Docker on the NAS only understands Linux paths, not Windows UNC paths.
 
-Create a `.env` file in the same directory (never commit this file). **All variables listed below are required** — missing or empty values will cause the corresponding feature to silently not work:
+Create a `.env` file in the same directory (never commit this file). The variables below must be set for full functionality — missing or empty values will silently disable the corresponding feature:
 
 ```bash
 # /volume1/docker/trainings/.env
@@ -314,7 +314,7 @@ SMTP_FROM=noreply@yourdomain.com
 APP_BASE_URL=https://trainings.example.com
 ```
 
-> **Important:** If the SMTP variables are missing or empty, email sending is silently skipped — no error is shown to the user, but no email is delivered. Always verify email delivery after deployment using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
+> **Important:** If the SMTP variables are missing or empty, email sending is silently skipped for the end user, but an **Error** is logged to the application log — always check the container logs (`docker logs trainings-web`) if emails are not arriving. Verify email delivery after deployment using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
 
 ---
 
@@ -549,7 +549,7 @@ These variables are already wired into the `docker-compose.yml` from [Section 3.
 
 > **Important:** Replace the placeholder values in `.env` with strong, unique credentials before starting the container for the first time. The seed admin account is created on first startup — if the password is weak it cannot easily be changed afterwards without direct database access.
 >
-> If the SMTP variables are missing or empty, email delivery is silently skipped — no error is shown but no email is sent. Always verify email delivery using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
+> If the SMTP variables are missing or empty, email delivery is silently skipped for the end user, but an **Error** is logged to the application log. Check `docker logs trainings-web` if emails are not arriving, and verify delivery using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
 
 ### 5.4 Prerequisites: Docker Desktop on Your Development Machine
 
