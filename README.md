@@ -50,6 +50,13 @@ sudo docker compose up -d --remove-orphans
 sudo docker image prune -f
 ```
 
+### Restarting the Container
+
+```bash
+cd /volume1/docker/trainings
+sudo docker compose restart trainings-web
+```
+
 ### Checking the Application Log
 
 ```bash
