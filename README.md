@@ -37,6 +37,29 @@ Trainings is an application for planning and conducting training sessions, as we
 
 - Run `dotnet test` in the `tests/` directory
 
+## Deployment
+
+### Manual Publish to NAS
+
+SSH into the NAS and run:
+
+```bash
+cd /volume1/docker/trainings
+sudo docker compose pull
+sudo docker compose up -d --remove-orphans
+sudo docker image prune -f
+```
+
+### Checking the Application Log
+
+```bash
+# Show the last 100 log lines
+sudo docker logs trainings-web --tail 100
+
+# Follow the log in real time (press Ctrl+C to stop)
+sudo docker logs trainings-web --follow
+```
+
 ## Contributing
 
 Pull requests are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the contribution workflow, language policy, and coding conventions.
