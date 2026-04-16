@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
@@ -12,15 +13,18 @@ public class UserRegistrationService : IUserRegistrationService
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly string _baseUrl;
 
     public UserRegistrationService(
         ApplicationDbContext context,
         IEmailService emailService,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        IConfiguration configuration)
     {
         _context = context;
         _emailService = emailService;
         _passwordHasher = passwordHasher;
+        _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
     }
 
     public async Task<UserDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default)
@@ -75,7 +79,7 @@ public class UserRegistrationService : IUserRegistrationService
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
-        var confirmLink = $"/confirm-email?token={confirmToken.Token}";
+        var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
         await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
 
         // Notify admins

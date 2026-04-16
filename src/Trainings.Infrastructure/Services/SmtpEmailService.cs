@@ -76,25 +76,61 @@ public partial class SmtpEmailService : IEmailService
         var user = smtpSection["User"];
         var password = smtpSection["Password"];
 
-        using var client = new SmtpClient(host, port)
-        {
-            EnableSsl = true,
-            UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(user, password),
-        };
+        LogSmtpSending(_logger, host, port, from, toEmail, subject);
 
-        var message = new MailMessage
+        try
         {
-            From = new MailAddress(from, "Trainings App"),
-            Subject = subject,
-            Body = htmlBody,
-            IsBodyHtml = true
-        };
-        message.To.Add(toEmail);
+            using var client = new SmtpClient(host, port)
+            {
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(user, password),
+            };
 
-        await client.SendMailAsync(message, ct);
+            var message = new MailMessage
+            {
+                From = new MailAddress(from, "Trainings App"),
+                Subject = subject,
+                Body = htmlBody,
+                IsBodyHtml = true
+            };
+            message.To.Add(toEmail);
+
+            await client.SendMailAsync(message, ct);
+            LogSmtpSent(_logger, toEmail, subject);
+        }
+        catch (Exception ex)
+        {
+            LogSmtpError(_logger, host, port, toEmail, subject, BuildExceptionMessage(ex), ex);
+            throw new InvalidOperationException(BuildExceptionMessage(ex), ex);
+        }
+    }
+
+    private static string BuildExceptionMessage(Exception ex)
+    {
+        var messages = new System.Text.StringBuilder();
+        var current = ex;
+        while (current != null)
+        {
+            if (messages.Length > 0)
+            {
+                messages.Append(" → ");
+            }
+            messages.Append(current.Message);
+            current = current.InnerException;
+        }
+        return messages.ToString();
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "SMTP not configured. Email notification skipped for subject: {Subject}")]
     private static partial void LogSmtpNotConfigured(ILogger logger, string subject);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Sending email via {Host}:{Port} from {From} to {To}, subject: {Subject}")]
+    private static partial void LogSmtpSending(ILogger logger, string host, int port, string from, string to, string subject);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email sent successfully to {To}, subject: {Subject}")]
+    private static partial void LogSmtpSent(ILogger logger, string to, string subject);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send email via {Host}:{Port} to {To}, subject: {Subject}. Error: {Error}")]
+    private static partial void LogSmtpError(ILogger logger, string host, int port, string to, string subject, string error, Exception ex);
 }

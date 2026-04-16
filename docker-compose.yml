@@ -20,6 +20,7 @@ services:
       - Smtp__User=${SMTP_USER}
       - Smtp__Password=${SMTP_PASSWORD}
       - Smtp__From=${SMTP_FROM}
+      - App__BaseUrl=${APP_BASE_URL}
     volumes:
       - /volume1/docker/trainings/data:/app/data
     networks:
