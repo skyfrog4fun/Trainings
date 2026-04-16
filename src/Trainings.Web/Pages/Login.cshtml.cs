@@ -27,7 +27,12 @@ public class LoginModel : PageModel
     public string ErrorMessage { get; set; } = string.Empty;
 
     public string AppVersion { get; } =
-        Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+        Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion
+            .Split('+')[0]
+        ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+        ?? "1.0.0";
 
     public IActionResult OnGet()
     {
