@@ -131,7 +131,7 @@ public partial class SmtpEmailService : IEmailService
         return messages.ToString();
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "SMTP not configured. Email notification skipped for subject: {Subject}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "SMTP not configured (Smtp:Host is empty). Email notification skipped for subject: {Subject}. Add SMTP_HOST and related variables to the .env file.")]
     private static partial void LogSmtpNotConfigured(ILogger logger, string subject);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Sending email via {Host}:{Port} from {From} to {To}, subject: {Subject}")]

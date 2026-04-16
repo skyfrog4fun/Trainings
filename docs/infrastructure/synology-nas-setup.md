@@ -246,6 +246,8 @@ A `.env.example` file documents which variables are required. See [Section 5](#5
 
 Place this file in `/volume1/docker/trainings/` on the NAS:
 
+The `docker-compose.yml` is maintained in the repository root. For reference, the current content is shown below. Use the file from the repository — do not re-create it manually.
+
 ```yaml
 # /volume1/docker/trainings/docker-compose.yml
 services:
@@ -261,12 +263,22 @@ services:
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/trainings.db
       - Seed__AdminEmail=${SEED_ADMIN_EMAIL}
       - Seed__AdminPassword=${SEED_ADMIN_PASSWORD}
+      - Smtp__Host=${SMTP_HOST}
+      - Smtp__Port=${SMTP_PORT}
+      - Smtp__User=${SMTP_USER}
+      - Smtp__Password=${SMTP_PASSWORD}
+      - Smtp__From=${SMTP_FROM}
+      - App__BaseUrl=${APP_BASE_URL}
     volumes:
       - /volume1/docker/trainings/data:/app/data
     networks:
       - trainings-net
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     healthcheck:
-      test: ["CMD-SHELL", "wget --method=HEAD -q -O /dev/null http://localhost:8080/login || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/login || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -282,13 +294,27 @@ networks:
 - If you want to edit files from Windows, map the NAS share (e.g. `\\skynas24\docker\trainings`) as a network drive.  
 - Do **not** change the `/volume1/...` path in the YAML; Docker on the NAS only understands Linux paths, not Windows UNC paths.
 
-Create a `.env` file in the same directory (never commit this file):
+Create a `.env` file in the same directory (never commit this file). **All variables listed below are required** — missing or empty values will cause the corresponding feature to silently not work:
 
 ```bash
 # /volume1/docker/trainings/.env
+
+# Initial admin user (created once on first startup)
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=ChangeMe!2025
+
+# SMTP / Email configuration
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-login@example.com
+SMTP_PASSWORD=your-api-key-here
+SMTP_FROM=noreply@yourdomain.com
+
+# Public base URL (used in confirmation and password-reset links sent by email)
+APP_BASE_URL=https://trainings.example.com
 ```
+
+> **Important:** If the SMTP variables are missing or empty, email sending is silently skipped — no error is shown to the user, but no email is delivered. Always verify email delivery after deployment using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
 
 ---
 
@@ -505,23 +531,25 @@ docs
 These variables are already wired into the `docker-compose.yml` from [Section 3.6](#36-docker-composeyml). You do **not** set them manually — they are read automatically when the container starts.
 
 - The non-secret variables (`ASPNETCORE_ENVIRONMENT`, `ASPNETCORE_URLS`, `ConnectionStrings__DefaultConnection`) are hardcoded directly in `docker-compose.yml`.
-- The secret variables (`Seed__AdminEmail`, `Seed__AdminPassword`) are referenced as `${SEED_ADMIN_EMAIL}` / `${SEED_ADMIN_PASSWORD}` in `docker-compose.yml` and must be defined in the `.env` file on the NAS (see [Section 3.6](#36-docker-composeyml)).
+- All secret and deployment-specific variables are referenced as `${VAR_NAME}` placeholders in `docker-compose.yml` and **must** be defined in the `.env` file on the NAS (see [Section 3.6](#36-docker-composeyml)).
 
 | Variable | Description | Where set |
 |---|---|---|
-| `ASPNETCORE_ENVIRONMENT` | Runtime environment | `Production` |
-| `ASPNETCORE_URLS` | Listening URL | `http://+:8080` |
-| `ConnectionStrings__DefaultConnection` | SQLite connection string | `Data Source=/app/data/trainings.db` |
-| `Seed__AdminEmail` | Initial admin user email | `admin@example.com` |
-| `Seed__AdminPassword` | Initial admin user password | `ChangeMe!2025` |
-
 | `ASPNETCORE_ENVIRONMENT` | Runtime environment (`Production`) | `docker-compose.yml` |
 | `ASPNETCORE_URLS` | Listening URL (`http://+:8080`) | `docker-compose.yml` |
 | `ConnectionStrings__DefaultConnection` | SQLite connection string | `docker-compose.yml` |
-| `Seed__AdminEmail` | Initial admin user email | `.env` file on NAS |
-| `Seed__AdminPassword` | Initial admin user password | `.env` file on NAS |
+| `SEED_ADMIN_EMAIL` | Initial admin user email | `.env` file on NAS |
+| `SEED_ADMIN_PASSWORD` | Initial admin user password | `.env` file on NAS |
+| `SMTP_HOST` | SMTP server hostname | `.env` file on NAS |
+| `SMTP_PORT` | SMTP server port (e.g. `587`) | `.env` file on NAS |
+| `SMTP_USER` | SMTP login / username | `.env` file on NAS |
+| `SMTP_PASSWORD` | SMTP password or API key | `.env` file on NAS |
+| `SMTP_FROM` | Sender address for outgoing emails | `.env` file on NAS |
+| `APP_BASE_URL` | Public URL used in email links | `.env` file on NAS |
 
 > **Important:** Replace the placeholder values in `.env` with strong, unique credentials before starting the container for the first time. The seed admin account is created on first startup — if the password is weak it cannot easily be changed afterwards without direct database access.
+>
+> If the SMTP variables are missing or empty, email delivery is silently skipped — no error is shown but no email is sent. Always verify email delivery using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
 
 ### 5.4 Prerequisites: Docker Desktop on Your Development Machine
 
