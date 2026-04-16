@@ -1,7 +1,8 @@
-using System.Net;
-using System.Net.Mail;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 using Trainings.Application.Interfaces;
 
 namespace Trainings.Infrastructure.Services;
@@ -80,24 +81,32 @@ public partial class SmtpEmailService : IEmailService
 
         try
         {
-            using var client = new SmtpClient(host, port)
-            {
-                EnableSsl = true,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(user, password),
-            };
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Trainings App", from));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+            message.Body = new TextPart("html") { Text = htmlBody };
 
-            var message = new MailMessage
-            {
-                From = new MailAddress(from, "Trainings App"),
-                Subject = subject,
-                Body = htmlBody,
-                IsBodyHtml = true
-            };
-            message.To.Add(toEmail);
+            using var client = new SmtpClient();
+            await client.ConnectAsync(host, port, SecureSocketOptions.Auto, ct);
 
-            await client.SendMailAsync(message, ct);
-            LogSmtpSent(_logger, toEmail, subject);
+            if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password))
+            {
+                await client.AuthenticateAsync(user, password, ct);
+            }
+
+            try
+            {
+                await client.SendAsync(message, ct);
+                LogSmtpSent(_logger, toEmail, subject);
+            }
+            finally
+            {
+                if (client.IsConnected)
+                {
+                    await client.DisconnectAsync(true, CancellationToken.None);
+                }
+            }
         }
         catch (Exception ex)
         {
