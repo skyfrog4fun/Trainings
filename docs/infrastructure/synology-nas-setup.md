@@ -227,6 +227,34 @@ DSM Reverse Proxy → host port 8080 → container port 8080
 
 Because the reverse proxy runs on the NAS host (not inside Docker), publishing port 8080 to the host is sufficient.
 
+### 3.3.1 SMTP Outgoing Connectivity
+
+The DSM Reverse Proxy and the NAS firewall only apply to **incoming** connections (traffic from the internet into the NAS). They have **no effect** on outgoing connections that originate inside the container.
+
+When the application sends an email, the network path is:
+
+```
+trainings-web container
+    │ DNS: smtp-relay.brevo.com → 185.x.x.x
+    │ TCP connect :587
+    ↓
+Docker bridge NAT (trainings-net → eth0)
+    ↓
+Home router NAT (LAN → WAN)
+    ↓
+smtp-relay.brevo.com:587  (Brevo SMTP server)
+```
+
+This is entirely outgoing from the container. **No Reverse Proxy entry is needed or possible for SMTP** — the DSM Reverse Proxy only supports HTTP/HTTPS protocols.
+
+#### Why SMTP fails on Synology without explicit DNS
+
+On Synology NAS, Docker containers on a custom bridge network use Docker's embedded DNS relay (127.0.0.11), which forwards lookups to the DNS servers listed in the host's `/etc/resolv.conf`. Synology typically writes only the home router's LAN IP (e.g. `192.168.1.1`) into `/etc/resolv.conf`. That address is on a different network segment and is not reachable from inside the Docker bridge — DNS queries hang and eventually time out. The application's TCP connection attempt to `smtp-relay.brevo.com:587` therefore never starts, and the email fails.
+
+**Solution:** Add `dns: [8.8.8.8, 8.8.4.4]` to the container definition in `docker-compose.yml` (already included in the file). This bypasses the host DNS relay and sends DNS queries directly to Google's public resolvers, which are always reachable from the container via Docker's NAT.
+
+> **Note on the NAS firewall:** The firewall profile controls incoming connections to the NAS. The final "Deny All" rule does not block outgoing connections from Docker containers to external internet services such as Brevo's SMTP server. Outgoing connectivity from containers is controlled entirely by Docker's iptables NAT rules and the home router.
+
 ### 3.4 Restart Policy
 
 The container is configured with `restart: unless-stopped` so it automatically recovers from:
@@ -271,6 +299,9 @@ services:
       - App__BaseUrl=${APP_BASE_URL}
     volumes:
       - /volume1/docker/trainings/data:/app/data
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - trainings-net
     ulimits:
@@ -293,6 +324,7 @@ networks:
 - When running this on your Synology NAS, always use the `/volume1/...` Linux path for volumes.  
 - If you want to edit files from Windows, map the NAS share (e.g. `\\skynas24\docker\trainings`) as a network drive.  
 - Do **not** change the `/volume1/...` path in the YAML; Docker on the NAS only understands Linux paths, not Windows UNC paths.
+- The `dns:` entries (8.8.8.8 / 8.8.4.4) are required on Synology. Without them the container relies on Docker's DNS relay, which in turn uses the host's `/etc/resolv.conf`. On Synology this typically points to the router's LAN IP, which is not reachable from inside a Docker bridge network, causing DNS lookups for external hostnames (e.g. `smtp-relay.brevo.com`) to silently fail and all outgoing SMTP connections to time out. See [Section 3.3.1](#331-smtp-outgoing-connectivity) for a full explanation.
 
 Create a `.env` file in the same directory (never commit this file). The variables below must be set for full functionality — missing or empty values will silently disable the corresponding feature:
 
@@ -760,7 +792,7 @@ The NAS firewall must block all ports except 80 and 443 from the public internet
 ### 10.2 Container Isolation
 
 - The container runs as a **non-root user** (UID 1654, the built-in `app` user from the .NET aspnet base image).
-- Only port 8080 is published to the host. The container cannot reach other services on the host network unless explicitly configured.
+- Only port 8080 is published to the host. The container cannot reach other services on the **host network** unless explicitly configured. It can, however, make outgoing connections to the **internet** (e.g. the Brevo SMTP server) through Docker's NAT — see [Section 3.3.1](#331-smtp-outgoing-connectivity).
 - The Docker network `trainings-net` is isolated from other Docker networks.
 
 ### 10.3 Database Access Control

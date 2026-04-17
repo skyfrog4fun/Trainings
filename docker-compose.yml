@@ -23,6 +23,9 @@ services:
       - App__BaseUrl=${APP_BASE_URL}
     volumes:
       - /volume1/docker/trainings/data:/app/data
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - trainings-net
     ulimits:
