@@ -74,7 +74,7 @@ The separate `PendingGroupRequest` entity is **removed**. Its lifecycle is now h
 | `RequestedAt`        | `DateTime`              | **New.** UTC timestamp of the original request |
 | `ApprovedAt`         | `DateTime?`             | **New.** UTC timestamp when approved (null if not yet approved) |
 | `DeclinedAt`         | `DateTime?`             | **New.** UTC timestamp when declined (null if not declined) |
-| `JoinedAt`           | `DateTime`              | Kept for backwards compatibility |
+| `JoinedAt`           | `DateTime`              | Legacy field from prior schema. Prefer `RequestedAt`/`ApprovedAt` for new logic. Retained to avoid a breaking migration. |
 
 > **History:** Rows are never deleted. A declined user can re-apply, creating a new `GroupMembership` row with `Status = Pending`.
 
@@ -106,7 +106,7 @@ System-level SMTP configurations defined by SuperAdmin.
 | `Host`               | `string`   | SMTP server hostname |
 | `Port`               | `int`      | SMTP port |
 | `Username`           | `string`   | SMTP username |
-| `Password`           | `string`   | SMTP password (encrypted at rest) |
+| `Password`           | `string`   | SMTP password (encrypted at rest using ASP.NET Core Data Protection API) |
 | `FromAddress`        | `string`   | Sender email address |
 | `Priority`           | `int`      | System-level priority (1 = highest). Unique. |
 | `IsActive`           | `bool`     | |
@@ -209,7 +209,7 @@ On login, the authentication cookie includes:
 
 #### Group-Scoped Checks
 
-Policies cannot know which specific group a page/action refers to. For group-specific authorization (e.g., "is this user Admin of Group 5?"), use **service-level checks** rather than policies.
+Policies cannot know which specific group a page/action refers to. For group-specific authorization (e.g., "is this user Admin of Group 5?"), use **service-level checks** via an `IAuthorizationHelper` that inspects the user's `GroupRole::{groupId}` claims at runtime. Pages pass the current group ID to the helper before executing group-scoped operations.
 
 ### 3.2 Permissions Matrix
 
@@ -352,7 +352,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 - **Steps:**
   1. Create a group with `Name`, `Identifier` (unique short code), optional `Description`. `Slug` is auto-generated from `Name`.
   2. Edit group details. **Warning shown** when changing the name: "Changing the group name will update the URL slug. Old URLs will redirect but may break external bookmarks."
-  3. On rename: old slug is saved to `SlugRedirect` table with the new slug and the date of change.
+  3. On rename: old slug is saved to `SlugRedirect` table with the new slug and the date of change. Note: this also affects search-engine-indexed URLs for public-facing pages.
   4. Deactivate or delete a group.
 - **Business Rules:**
   - `Name` and `Identifier` must be unique. Duplicate → validation error, SuperAdmin must choose a different value.
@@ -449,6 +449,7 @@ On a fresh installation (only the default seeded SuperAdmin exists):
 - The login page displays an info box: *"This is a new installation. Log in with the default SuperAdmin account: **[email]** / **[password]** to get started."*
 - The default email and password are read from `appsettings.json` under `Seed:Email` and `Seed:Password` — **single source of truth** used by both the `DbSeeder` and the login page info box.
 - The info box **disappears** once the SuperAdmin account has been changed, updated, or deleted (i.e., when the seeded SuperAdmin's email or password no longer matches the values in `appsettings.json`).
+- **Security note:** The default password `Admin123!` is intentionally simple for first-time setup. The SuperAdmin **must** change it immediately. Production deployments behind public URLs should override the `Seed` section with stronger credentials via environment variables or user secrets before first launch.
 
 ---
 
