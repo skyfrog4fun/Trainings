@@ -149,7 +149,7 @@
     private bool _showForm = false;
     private int _editUserId = 0;
     private string _formFirstName = "", _formLastName = "", _formEmail = "", _formPassword = "";
-    private string _formRole = "Participant", _formGender = "Other";
+    private string _formRole = "User", _formGender = "Other";
     private string? _formError;
 
     private bool _testEmailSending = false;
@@ -173,7 +173,7 @@
     {
         _editUserId = 0;
         _formFirstName = _formLastName = _formEmail = _formPassword = "";
-        _formRole = "Participant";
+        _formRole = "User";
         _formGender = "Other";
         _formError = null;
         _showForm = true;
