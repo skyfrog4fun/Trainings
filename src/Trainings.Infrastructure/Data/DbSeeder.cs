@@ -66,14 +66,13 @@ public class DbSeeder
             return Task.CompletedTask;
         }
 
-        const string dataSourcePrefix = "Data Source=";
-        var idx = connectionString.IndexOf(dataSourcePrefix, StringComparison.OrdinalIgnoreCase);
-        if (idx < 0)
+        var builder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString);
+        var dbPath = builder.DataSource;
+        if (string.IsNullOrEmpty(dbPath))
         {
             return Task.CompletedTask;
         }
 
-        var dbPath = connectionString[(idx + dataSourcePrefix.Length)..].Trim();
         var directory = Path.GetDirectoryName(dbPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
