@@ -40,30 +40,34 @@ public class UserRegistrationService : IUserRegistrationService
             LastName = dto.LastName,
             Email = dto.Email,
             PasswordHash = _passwordHasher.Hash(dto.Password),
-            Role = UserRole.Participant,
+            Role = UserRole.User,
             Gender = dto.Gender,
             Birthday = dto.Birthday,
             Mobile = dto.Mobile,
             City = dto.City,
             WelcomeMessage = dto.WelcomeMessage,
-            IsActive = false, // Pending approval
+            IsActive = true,
             CreationDate = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow
         };
         _context.Users.Add(user);
         await _context.SaveChangesAsync(ct);
 
-        // Add pending group requests
+        // Add group membership requests with Pending status
         foreach (var groupId in dto.RequestedGroupIds)
         {
             var groupExists = await _context.Groups.AnyAsync(g => g.Id == groupId, ct);
             if (groupExists)
             {
-                _context.PendingGroupRequests.Add(new PendingGroupRequest
+                _context.GroupMemberships.Add(new GroupMembership
                 {
                     UserId = user.Id,
                     GroupId = groupId,
-                    RequestedAt = DateTime.UtcNow
+                    Role = GroupMemberRole.Participant,
+                    Status = GroupMembershipStatus.Pending,
+                    IsActive = false,
+                    RequestedAt = DateTime.UtcNow,
+                    JoinedAt = DateTime.UtcNow
                 });
             }
         }
@@ -82,9 +86,9 @@ public class UserRegistrationService : IUserRegistrationService
         var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
         await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
 
-        // Notify admins
+        // Notify admins (SuperAdmins at system level)
         var admins = await _context.Users
-            .Where(u => u.Role == UserRole.Admin || u.Role == UserRole.SuperAdmin)
+            .Where(u => u.Role == UserRole.SuperAdmin)
             .ToListAsync(ct);
         foreach (var admin in admins)
         {
@@ -116,27 +120,20 @@ public class UserRegistrationService : IUserRegistrationService
         var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
-        user.IsActive = true;
         user.EntryDate = DateTime.UtcNow;
 
-        // Process pending group requests
-        var pendingRequests = await _context.PendingGroupRequests
-            .Where(r => r.UserId == userId)
+        // Approve pending group membership requests
+        var pendingMemberships = await _context.GroupMemberships
+            .Where(gm => gm.UserId == userId && gm.Status == GroupMembershipStatus.Pending)
             .ToListAsync(ct);
 
-        foreach (var request in pendingRequests)
+        foreach (var membership in pendingMemberships)
         {
-            _context.GroupMemberships.Add(new GroupMembership
-            {
-                UserId = userId,
-                GroupId = request.GroupId,
-                Role = GroupMemberRole.Participant,
-                IsActive = true,
-                JoinedAt = DateTime.UtcNow
-            });
+            membership.Status = GroupMembershipStatus.Approved;
+            membership.ApprovedAt = DateTime.UtcNow;
+            membership.IsActive = true;
         }
 
-        _context.PendingGroupRequests.RemoveRange(pendingRequests);
         await _context.SaveChangesAsync(ct);
     }
 
@@ -145,22 +142,33 @@ public class UserRegistrationService : IUserRegistrationService
         var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
-        // Remove pending requests
-        var pendingRequests = await _context.PendingGroupRequests
-            .Where(r => r.UserId == userId)
+        // Decline pending group membership requests
+        var pendingMemberships = await _context.GroupMemberships
+            .Where(gm => gm.UserId == userId && gm.Status == GroupMembershipStatus.Pending)
             .ToListAsync(ct);
-        _context.PendingGroupRequests.RemoveRange(pendingRequests);
 
-        _context.Users.Remove(user);
+        foreach (var membership in pendingMemberships)
+        {
+            membership.Status = GroupMembershipStatus.Declined;
+            membership.DeclinedAt = DateTime.UtcNow;
+        }
+
         await _context.SaveChangesAsync(ct);
     }
 
     public async Task<IEnumerable<UserDto>> GetPendingApprovalsAsync(CancellationToken ct = default)
     {
+        var userIds = await _context.GroupMemberships
+            .Where(gm => gm.Status == GroupMembershipStatus.Pending)
+            .Select(gm => gm.UserId)
+            .Distinct()
+            .ToListAsync(ct);
+
         var users = await _context.Users
-            .Where(u => !u.IsActive && u.Role == UserRole.Participant)
+            .Where(u => userIds.Contains(u.Id))
             .OrderBy(u => u.CreationDate)
             .ToListAsync(ct);
+
         return users.Select(MapToDto);
     }
 

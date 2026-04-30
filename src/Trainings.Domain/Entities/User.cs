@@ -9,7 +9,7 @@ public class User
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    public UserRole Role { get; set; } = UserRole.Participant;
+    public UserRole Role { get; set; } = UserRole.User;
     public bool IsActive { get; set; } = true;
     public Gender Gender { get; set; }
     public DateOnly? Birthday { get; set; }
@@ -28,6 +28,7 @@ public class User
     public ICollection<Training> TrainingsAsTrainer { get; set; } = new List<Training>();
     public ICollection<Registration> Registrations { get; set; } = new List<Registration>();
     public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+    public ICollection<GroupMembership> GroupMemberships { get; set; } = new List<GroupMembership>();
     public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
     public ICollection<EmailConfirmationToken> EmailConfirmationTokens { get; set; } = new List<EmailConfirmationToken>();
 }

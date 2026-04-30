@@ -31,6 +31,9 @@ public static class DependencyInjection
         services.AddScoped<IGroupService, GroupService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+        services.AddScoped<IMailConfigurationService, MailConfigurationService>();
+        services.AddScoped<INotificationLogService, NotificationLogService>();
+        services.AddScoped<IAuthorizationHelper, AuthorizationHelper>();
 
         return services;
     }

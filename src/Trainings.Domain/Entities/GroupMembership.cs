@@ -9,7 +9,11 @@ public class GroupMembership
     public User User { get; set; } = null!;
     public int GroupId { get; set; }
     public Group Group { get; set; } = null!;
-    public GroupMemberRole Role { get; set; }
+    public GroupMemberRole Role { get; set; } = GroupMemberRole.Participant;
+    public GroupMembershipStatus Status { get; set; } = GroupMembershipStatus.Pending;
     public bool IsActive { get; set; } = true;
+    public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ApprovedAt { get; set; }
+    public DateTime? DeclinedAt { get; set; }
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 }

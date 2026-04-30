@@ -294,8 +294,6 @@
     private string RoleBadge(UserRole role) => role switch
     {
         UserRole.SuperAdmin => "bg-dark",
-        UserRole.Admin => "bg-danger",
-        UserRole.Trainer => "bg-warning text-dark",
         _ => "bg-secondary"
     };
 }
