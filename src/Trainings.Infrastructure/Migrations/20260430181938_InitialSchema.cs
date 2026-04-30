@@ -8,6 +8,10 @@ namespace Trainings.Infrastructure.Migrations
     /// <inheritdoc />
     public partial class InitialSchema : Migration
     {
+        private static readonly string[] UserIdTrainingIdColumns = ["UserId", "TrainingId"];
+        private static readonly string[] GroupIdPriorityColumns = ["GroupId", "Priority"];
+        private static readonly string[] EntityTypeOldSlugColumns = ["EntityType", "OldSlug"];
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -411,7 +415,7 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_UserId_TrainingId",
                 table: "Attendances",
-                columns: new[] { "UserId", "TrainingId" },
+                columns: UserIdTrainingIdColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -422,7 +426,7 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_GroupMailConfigurations_GroupId_Priority",
                 table: "GroupMailConfigurations",
-                columns: new[] { "GroupId", "Priority" },
+                columns: GroupIdPriorityColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -486,13 +490,13 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Registrations_UserId_TrainingId",
                 table: "Registrations",
-                columns: new[] { "UserId", "TrainingId" },
+                columns: UserIdTrainingIdColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SlugRedirects_EntityType_OldSlug",
                 table: "SlugRedirects",
-                columns: new[] { "EntityType", "OldSlug" });
+                columns: EntityTypeOldSlugColumns);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_GroupId",
