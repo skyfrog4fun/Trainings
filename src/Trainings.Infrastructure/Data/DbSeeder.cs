@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
@@ -20,7 +21,7 @@ public class DbSeeder
 
     public async Task SeedAsync()
     {
-        await _context.Database.EnsureCreatedAsync();
+        await _context.Database.MigrateAsync();
 
         if (!_context.Users.Any())
         {

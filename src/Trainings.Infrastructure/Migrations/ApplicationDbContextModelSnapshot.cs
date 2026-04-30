@@ -88,6 +88,11 @@ namespace Trainings.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
@@ -96,9 +101,45 @@ namespace Trainings.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("Identifier")
+                        .IsUnique();
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.GroupMailConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MailConfigurationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailConfigurationId");
+
+                    b.HasIndex("GroupId", "Priority")
+                        .IsUnique();
+
+                    b.ToTable("GroupMailConfigurations");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.GroupMembership", b =>
@@ -106,6 +147,12 @@ namespace Trainings.Infrastructure.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeclinedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("INTEGER");
@@ -116,7 +163,13 @@ namespace Trainings.Infrastructure.Migrations
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
@@ -129,6 +182,107 @@ namespace Trainings.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("GroupMemberships");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.MailConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FailureCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FromAddress")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastFailedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Priority")
+                        .IsUnique();
+
+                    b.ToTable("MailConfigurations");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.NotificationLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("MailConfigurationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RecipientEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("MailConfigurationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NotificationLogs");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.PasswordResetToken", b =>
@@ -158,30 +312,6 @@ namespace Trainings.Infrastructure.Migrations
                     b.ToTable("PasswordResetTokens");
                 });
 
-            modelBuilder.Entity("Trainings.Domain.Entities.PendingGroupRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("RequestedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PendingGroupRequests");
-                });
-
             modelBuilder.Entity("Trainings.Domain.Entities.Registration", b =>
                 {
                     b.Property<int>("Id")
@@ -208,6 +338,37 @@ namespace Trainings.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Registrations");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.SlugRedirect", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NewSlug")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldSlug")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityType", "OldSlug");
+
+                    b.ToTable("SlugRedirects");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.Tag", b =>
@@ -247,7 +408,7 @@ namespace Trainings.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("GroupId")
+                    b.Property<int>("GroupId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsActive")
@@ -432,6 +593,25 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Trainings.Domain.Entities.GroupMailConfiguration", b =>
+                {
+                    b.HasOne("Trainings.Domain.Entities.Group", "Group")
+                        .WithMany("MailConfigurations")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Trainings.Domain.Entities.MailConfiguration", "MailConfiguration")
+                        .WithMany("GroupMailConfigurations")
+                        .HasForeignKey("MailConfigurationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("MailConfiguration");
+                });
+
             modelBuilder.Entity("Trainings.Domain.Entities.GroupMembership", b =>
                 {
                     b.HasOne("Trainings.Domain.Entities.Group", "Group")
@@ -441,12 +621,36 @@ namespace Trainings.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Trainings.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("GroupMemberships")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.NotificationLog", b =>
+                {
+                    b.HasOne("Trainings.Domain.Entities.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Trainings.Domain.Entities.MailConfiguration", "MailConfiguration")
+                        .WithMany("NotificationLogs")
+                        .HasForeignKey("MailConfigurationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Trainings.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Group");
+
+                    b.Navigation("MailConfiguration");
 
                     b.Navigation("User");
                 });
@@ -458,25 +662,6 @@ namespace Trainings.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Trainings.Domain.Entities.PendingGroupRequest", b =>
-                {
-                    b.HasOne("Trainings.Domain.Entities.Group", "Group")
-                        .WithMany("PendingRequests")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Trainings.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
 
                     b.Navigation("User");
                 });
@@ -515,7 +700,8 @@ namespace Trainings.Infrastructure.Migrations
                     b.HasOne("Trainings.Domain.Entities.Group", "Group")
                         .WithMany("Trainings")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Trainings.Domain.Entities.User", "Trainer")
                         .WithMany("TrainingsAsTrainer")
@@ -567,11 +753,18 @@ namespace Trainings.Infrastructure.Migrations
 
             modelBuilder.Entity("Trainings.Domain.Entities.Group", b =>
                 {
+                    b.Navigation("MailConfigurations");
+
                     b.Navigation("Memberships");
 
-                    b.Navigation("PendingRequests");
-
                     b.Navigation("Trainings");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.MailConfiguration", b =>
+                {
+                    b.Navigation("GroupMailConfigurations");
+
+                    b.Navigation("NotificationLogs");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.Tag", b =>
@@ -598,6 +791,8 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("Attendances");
 
                     b.Navigation("EmailConfirmationTokens");
+
+                    b.Navigation("GroupMemberships");
 
                     b.Navigation("PasswordResetTokens");
 
