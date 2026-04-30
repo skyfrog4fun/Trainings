@@ -9,7 +9,7 @@ using Trainings.Domain.Enums;
 
 namespace Trainings.Infrastructure.Data;
 
-public class DbSeeder
+public partial class DbSeeder
 {
     private readonly ApplicationDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
@@ -76,7 +76,7 @@ public class DbSeeder
         var directory = Path.GetDirectoryName(dbPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
-            _logger.LogInformation("Creating data directory: {Directory}", directory);
+            LogCreatingDataDirectory(_logger, directory);
             Directory.CreateDirectory(directory);
         }
 
@@ -129,9 +129,7 @@ public class DbSeeder
                 }
             }
 
-            _logger.LogWarning(
-                "Pre-existing database detected without migration history. " +
-                "Marking InitialSchema migration as applied.");
+            LogPreExistingDatabaseDetected(_logger);
 
             // Create the history table and insert the initial migration so MigrateAsync skips it.
             using var createCmd = connection.CreateCommand();
@@ -151,4 +149,10 @@ public class DbSeeder
             await connection.CloseAsync();
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Creating data directory: {Directory}")]
+    private static partial void LogCreatingDataDirectory(ILogger logger, string directory);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Pre-existing database detected without migration history. Marking InitialSchema migration as applied.")]
+    private static partial void LogPreExistingDatabaseDetected(ILogger logger);
 }
