@@ -1,20 +1,26 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using Trainings.Application.Interfaces;
+using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 
 namespace Trainings.Infrastructure.Services;
 
 public partial class SmtpEmailService : IEmailService
 {
-    private readonly IConfiguration _configuration;
+    private readonly IMailConfigurationService _mailConfigService;
+    private readonly INotificationLogService _notificationLogService;
     private readonly ILogger<SmtpEmailService> _logger;
 
-    public SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger)
+    public SmtpEmailService(
+        IMailConfigurationService mailConfigService,
+        INotificationLogService notificationLogService,
+        ILogger<SmtpEmailService> logger)
     {
-        _configuration = configuration;
+        _mailConfigService = mailConfigService;
+        _notificationLogService = notificationLogService;
         _logger = logger;
     }
 
@@ -26,7 +32,7 @@ public partial class SmtpEmailService : IEmailService
             <p><a href="{resetLink}">{resetLink}</a></p>
             <p>This link expires in 1 hour. If you did not request this, please ignore this email.</p>
             """;
-        await SendAsync(toEmail, subject, body, ct);
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.PasswordReset, null, null, ct);
     }
 
     public async Task SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default)
@@ -37,7 +43,7 @@ public partial class SmtpEmailService : IEmailService
             <p><a href="{confirmLink}">{confirmLink}</a></p>
             <p>This link expires in 24 hours.</p>
             """;
-        await SendAsync(toEmail, subject, body, ct);
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, ct);
     }
 
     public async Task SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default)
@@ -48,7 +54,7 @@ public partial class SmtpEmailService : IEmailService
             <p><strong>{userName}</strong></p>
             <p>Please review and approve or reject the registration in the admin panel.</p>
             """;
-        await SendAsync(adminEmail, subject, body, ct);
+        await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, ct);
     }
 
     public async Task SendTestEmailAsync(string toEmail, CancellationToken ct = default)
@@ -58,60 +64,66 @@ public partial class SmtpEmailService : IEmailService
             <p>This is a test email sent from the Trainings application.</p>
             <p>If you received this message, your SMTP configuration is working correctly.</p>
             """;
-        await SendAsync(toEmail, subject, body, ct);
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, ct);
     }
 
-    private async Task SendAsync(string toEmail, string subject, string htmlBody, CancellationToken ct)
+    private async Task SendWithFallbackAsync(string toEmail, string subject, string htmlBody, NotificationAction action, int? userId, int? groupId, CancellationToken ct)
     {
-        var smtpSection = _configuration.GetSection("Smtp") ?? throw new InvalidOperationException("SMTP configuration section is missing.");
-        var host = smtpSection["Host"] ?? throw new InvalidOperationException("SMTP Host is not configured.");
-        var from = smtpSection["From"] ?? smtpSection["User"] ?? throw new InvalidOperationException("SMTP From address is not configured.");
+        var configs = await _mailConfigService.GetActiveConfigsForGroupAsync(groupId, ct);
 
-        if (string.IsNullOrWhiteSpace(host))
+        if (configs.Count == 0)
         {
             LogSmtpNotConfigured(_logger, subject);
+            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, false, "No active mail configurations available.", ct);
             return;
         }
 
-        var port = int.TryParse(smtpSection["Port"], out var p) ? p : 587;
-        var user = smtpSection["User"];
-        var password = smtpSection["Password"];
+        foreach (var config in configs)
+        {
+            try
+            {
+                await SendViaConfigAsync(config, toEmail, subject, htmlBody, ct);
+                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, true, null, ct);
+                return;
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = BuildExceptionMessage(ex);
+                LogSmtpError(_logger, config.Host, config.Port, toEmail, subject, errorMessage, ex);
+                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, false, errorMessage, ct);
+            }
+        }
+    }
 
-        LogSmtpSending(_logger, host, port, from, toEmail, subject);
+    private async Task SendViaConfigAsync(MailConfiguration config, string toEmail, string subject, string htmlBody, CancellationToken ct)
+    {
+        LogSmtpSending(_logger, config.Host, config.Port, config.FromAddress, toEmail, subject);
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Trainings App", config.FromAddress));
+        message.To.Add(MailboxAddress.Parse(toEmail));
+        message.Subject = subject;
+        message.Body = new TextPart("html") { Text = htmlBody };
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(config.Host, config.Port, SecureSocketOptions.Auto, ct);
+
+        if (!string.IsNullOrEmpty(config.Username) && !string.IsNullOrEmpty(config.Password))
+        {
+            await client.AuthenticateAsync(config.Username, config.Password, ct);
+        }
 
         try
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Trainings App", from));
-            message.To.Add(MailboxAddress.Parse(toEmail));
-            message.Subject = subject;
-            message.Body = new TextPart("html") { Text = htmlBody };
-
-            using var client = new SmtpClient();
-            await client.ConnectAsync(host, port, SecureSocketOptions.Auto, ct);
-
-            if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password))
-            {
-                await client.AuthenticateAsync(user, password, ct);
-            }
-
-            try
-            {
-                await client.SendAsync(message, ct);
-                LogSmtpSent(_logger, toEmail, subject);
-            }
-            finally
-            {
-                if (client.IsConnected)
-                {
-                    await client.DisconnectAsync(true, CancellationToken.None);
-                }
-            }
+            await client.SendAsync(message, ct);
+            LogSmtpSent(_logger, toEmail, subject);
         }
-        catch (Exception ex)
+        finally
         {
-            LogSmtpError(_logger, host, port, toEmail, subject, BuildExceptionMessage(ex), ex);
-            throw new InvalidOperationException(BuildExceptionMessage(ex), ex);
+            if (client.IsConnected)
+            {
+                await client.DisconnectAsync(true, CancellationToken.None);
+            }
         }
     }
 
@@ -131,7 +143,7 @@ public partial class SmtpEmailService : IEmailService
         return messages.ToString();
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SMTP not configured (Smtp:Host is empty). Email notification skipped for subject: {Subject}. Set the SMTP_HOST environment variable (or Smtp:Host in appsettings) to enable email delivery.")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "SMTP not configured (no active mail configurations). Email notification skipped for subject: {Subject}. Configure at least one mail configuration in the admin panel.")]
     private static partial void LogSmtpNotConfigured(ILogger logger, string subject);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Sending email via {Host}:{Port} from {From} to {To}, subject: {Subject}")]

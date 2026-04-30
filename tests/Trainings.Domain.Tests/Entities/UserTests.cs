@@ -8,10 +8,10 @@ namespace Trainings.Domain.Tests.Entities;
 public class UserTests
 {
     [Fact]
-    public void UserDefaultRoleIsParticipant()
+    public void UserDefaultRoleIsUser()
     {
         var user = new User();
-        user.Role.Should().Be(UserRole.Participant);
+        user.Role.Should().Be(UserRole.User);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class UserTests
     [Fact]
     public void UserCanSetRole()
     {
-        var user = new User { Role = UserRole.Trainer };
-        user.Role.Should().Be(UserRole.Trainer);
+        var user = new User { Role = UserRole.SuperAdmin };
+        user.Role.Should().Be(UserRole.SuperAdmin);
     }
 }

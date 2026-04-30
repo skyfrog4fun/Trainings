@@ -15,10 +15,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<EmailConfirmationToken> EmailConfirmationTokens => Set<EmailConfirmationToken>();
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<GroupMembership> GroupMemberships => Set<GroupMembership>();
-    public DbSet<PendingGroupRequest> PendingGroupRequests => Set<PendingGroupRequest>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<TrainingBlock> TrainingBlocks => Set<TrainingBlock>();
     public DbSet<TrainingBlockTag> TrainingBlockTags => Set<TrainingBlockTag>();
+    public DbSet<MailConfiguration> MailConfigurations => Set<MailConfiguration>();
+    public DbSet<GroupMailConfiguration> GroupMailConfigurations => Set<GroupMailConfiguration>();
+    public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+    public DbSet<SlugRedirect> SlugRedirects => Set<SlugRedirect>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,7 +52,7 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(t => t.Group)
                 .WithMany(g => g.Trainings)
                 .HasForeignKey(t => t.GroupId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Registration>(entity =>
@@ -104,6 +107,10 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(g => g.Id);
             entity.Property(g => g.Name).IsRequired().HasMaxLength(200);
+            entity.Property(g => g.Slug).IsRequired().HasMaxLength(200);
+            entity.HasIndex(g => g.Slug).IsUnique();
+            entity.Property(g => g.Identifier).IsRequired().HasMaxLength(50);
+            entity.HasIndex(g => g.Identifier).IsUnique();
             entity.Property(g => g.Description).HasMaxLength(500);
         });
 
@@ -111,25 +118,12 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(gm => gm.Id);
             entity.HasOne(gm => gm.User)
-                .WithMany()
+                .WithMany(u => u.GroupMemberships)
                 .HasForeignKey(gm => gm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(gm => gm.Group)
                 .WithMany(g => g.Memberships)
                 .HasForeignKey(gm => gm.GroupId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<PendingGroupRequest>(entity =>
-        {
-            entity.HasKey(p => p.Id);
-            entity.HasOne(p => p.User)
-                .WithMany()
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(p => p.Group)
-                .WithMany(g => g.PendingRequests)
-                .HasForeignKey(p => p.GroupId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -168,6 +162,59 @@ public class ApplicationDbContext : DbContext
                 .WithMany(t => t.TrainingBlockTags)
                 .HasForeignKey(bt => bt.TagId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MailConfiguration>(entity =>
+        {
+            entity.HasKey(mc => mc.Id);
+            entity.Property(mc => mc.Name).IsRequired().HasMaxLength(200);
+            entity.Property(mc => mc.Host).IsRequired().HasMaxLength(200);
+            entity.Property(mc => mc.Username).IsRequired().HasMaxLength(200);
+            entity.Property(mc => mc.Password).IsRequired().HasMaxLength(500);
+            entity.Property(mc => mc.FromAddress).IsRequired().HasMaxLength(256);
+            entity.HasIndex(mc => mc.Priority).IsUnique();
+        });
+
+        modelBuilder.Entity<GroupMailConfiguration>(entity =>
+        {
+            entity.HasKey(gmc => gmc.Id);
+            entity.HasOne(gmc => gmc.Group)
+                .WithMany(g => g.MailConfigurations)
+                .HasForeignKey(gmc => gmc.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(gmc => gmc.MailConfiguration)
+                .WithMany(mc => mc.GroupMailConfigurations)
+                .HasForeignKey(gmc => gmc.MailConfigurationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(gmc => new { gmc.GroupId, gmc.Priority }).IsUnique();
+        });
+
+        modelBuilder.Entity<NotificationLog>(entity =>
+        {
+            entity.HasKey(nl => nl.Id);
+            entity.Property(nl => nl.RecipientEmail).IsRequired().HasMaxLength(256);
+            entity.Property(nl => nl.ErrorMessage).HasMaxLength(2000);
+            entity.HasOne(nl => nl.User)
+                .WithMany()
+                .HasForeignKey(nl => nl.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(nl => nl.MailConfiguration)
+                .WithMany(mc => mc.NotificationLogs)
+                .HasForeignKey(nl => nl.MailConfigurationId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(nl => nl.Group)
+                .WithMany()
+                .HasForeignKey(nl => nl.GroupId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<SlugRedirect>(entity =>
+        {
+            entity.HasKey(sr => sr.Id);
+            entity.Property(sr => sr.OldSlug).IsRequired().HasMaxLength(200);
+            entity.Property(sr => sr.NewSlug).IsRequired().HasMaxLength(200);
+            entity.Property(sr => sr.EntityType).IsRequired().HasMaxLength(100);
+            entity.HasIndex(sr => new { sr.EntityType, sr.OldSlug });
         });
     }
 }

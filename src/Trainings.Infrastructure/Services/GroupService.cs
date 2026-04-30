@@ -38,6 +38,8 @@ public class GroupService : IGroupService
         var group = new Group
         {
             Name = dto.Name,
+            Slug = GenerateSlug(dto.Name),
+            Identifier = dto.Identifier ?? GenerateSlug(dto.Name),
             Description = dto.Description,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -51,7 +53,23 @@ public class GroupService : IGroupService
     {
         var group = await _context.Groups.FindAsync([dto.Id], ct)
             ?? throw new InvalidOperationException($"Group {dto.Id} not found.");
+
+        var oldSlug = group.Slug;
+        var newSlug = GenerateSlug(dto.Name);
+
+        if (!string.Equals(oldSlug, newSlug, StringComparison.Ordinal) && !string.IsNullOrEmpty(oldSlug))
+        {
+            _context.SlugRedirects.Add(new SlugRedirect
+            {
+                OldSlug = oldSlug,
+                NewSlug = newSlug,
+                EntityType = "Group",
+                ChangedAt = DateTime.UtcNow
+            });
+        }
+
         group.Name = dto.Name;
+        group.Slug = newSlug;
         group.Description = dto.Description;
         group.IsActive = dto.IsActive;
         await _context.SaveChangesAsync(ct);
@@ -83,7 +101,10 @@ public class GroupService : IGroupService
             UserId = dto.UserId,
             GroupId = dto.GroupId,
             Role = dto.Role,
+            Status = GroupMembershipStatus.Approved,
             IsActive = true,
+            RequestedAt = DateTime.UtcNow,
+            ApprovedAt = DateTime.UtcNow,
             JoinedAt = DateTime.UtcNow
         };
         _context.GroupMemberships.Add(membership);
@@ -105,11 +126,43 @@ public class GroupService : IGroupService
         var groups = await _context.GroupMemberships
             .Include(gm => gm.Group)
                 .ThenInclude(g => g.Memberships)
-            .Where(gm => gm.UserId == userId && gm.IsActive)
+            .Where(gm => gm.UserId == userId && gm.IsActive && gm.Status == GroupMembershipStatus.Approved)
             .Select(gm => gm.Group)
             .Distinct()
             .ToListAsync(ct);
         return groups.Select(MapToDto);
+    }
+
+    private static string GenerateSlug(string name)
+    {
+        var slug = name.ToLowerInvariant()
+            .Replace("ä", "ae")
+            .Replace("ö", "oe")
+            .Replace("ü", "ue")
+            .Replace("ß", "ss");
+
+        // Replace any non-alphanumeric characters with hyphens
+        var builder = new System.Text.StringBuilder(slug.Length);
+        foreach (var c in slug)
+        {
+            if (char.IsLetterOrDigit(c))
+            {
+                builder.Append(c);
+            }
+            else
+            {
+                builder.Append('-');
+            }
+        }
+
+        // Collapse multiple hyphens and trim
+        slug = builder.ToString();
+        while (slug.Contains("--"))
+        {
+            slug = slug.Replace("--", "-");
+        }
+
+        return slug.Trim('-');
     }
 
     private static GroupDto MapToDto(Group group) => new()
@@ -119,7 +172,7 @@ public class GroupService : IGroupService
         Description = group.Description,
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,
-        MemberCount = group.Memberships.Count
+        MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved)
     };
 
     private static GroupMembershipDto MapMembershipToDto(GroupMembership gm) => new()

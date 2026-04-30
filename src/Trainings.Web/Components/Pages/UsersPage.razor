@@ -58,9 +58,7 @@
                     }
                     <div class="col-12 col-md-6">
                         <select class="form-select" @bind="_formRole">
-                            <option value="Participant">Participant</option>
-                            <option value="Trainer">Trainer</option>
-                            <option value="Admin">Admin</option>
+                            <option value="User">User</option>
                             <option value="SuperAdmin">Super Admin</option>
                         </select>
                     </div>
@@ -294,8 +292,6 @@
     private string RoleBadge(UserRole role) => role switch
     {
         UserRole.SuperAdmin => "bg-dark",
-        UserRole.Admin => "bg-danger",
-        UserRole.Trainer => "bg-warning text-dark",
         _ => "bg-secondary"
     };
 }

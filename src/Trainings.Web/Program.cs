@@ -24,7 +24,36 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SuperAdmin", policy =>
+        policy.RequireClaim("SuperAdmin", "true"));
+
+    options.AddPolicy("GroupAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim("SuperAdmin", "true") ||
+            context.User.Claims.Any(c =>
+                c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) &&
+                c.Value == "Admin")));
+
+    options.AddPolicy("GroupTrainer", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim("SuperAdmin", "true") ||
+            context.User.Claims.Any(c =>
+                c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) &&
+                (c.Value == "Admin" || c.Value == "Trainer"))));
+
+    options.AddPolicy("GroupMember", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim("SuperAdmin", "true") ||
+            context.User.Claims.Any(c =>
+                c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) &&
+                (c.Value == "Admin" || c.Value == "Trainer" || c.Value == "Participant"))));
+
+    options.AddPolicy("Authenticated", policy =>
+        policy.RequireAuthenticatedUser());
+});
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthStateProvider>();
 
