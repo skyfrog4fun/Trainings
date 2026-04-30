@@ -291,11 +291,6 @@ services:
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/trainings.db
       - Seed__AdminEmail=${SEED_ADMIN_EMAIL}
       - Seed__AdminPassword=${SEED_ADMIN_PASSWORD}
-      - Smtp__Host=${SMTP_HOST}
-      - Smtp__Port=${SMTP_PORT}
-      - Smtp__User=${SMTP_USER}
-      - Smtp__Password=${SMTP_PASSWORD}
-      - Smtp__From=${SMTP_FROM}
       - App__BaseUrl=${APP_BASE_URL}
     volumes:
       - /volume1/docker/trainings/data:/app/data
@@ -335,18 +330,14 @@ Create a `.env` file in the same directory (never commit this file). The variabl
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=ChangeMe!2025
 
-# SMTP / Email configuration
-SMTP_HOST=smtp-relay.brevo.com
-SMTP_PORT=587
-SMTP_USER=your-smtp-login@example.com
-SMTP_PASSWORD=your-api-key-here
-SMTP_FROM=noreply@yourdomain.com
+# SMTP / Email configuration is now managed via the admin panel (Mail Configurations).
+# No SMTP_* environment variables are needed.
 
 # Public base URL (used in confirmation and password-reset links sent by email)
 APP_BASE_URL=https://trainings.example.com
 ```
 
-> **Important:** If the SMTP variables are missing or empty, email sending is silently skipped for the end user, but an **Error** is logged to the application log — always check the container logs (`docker logs trainings-web`) if emails are not arriving. Verify email delivery after deployment using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
+> **Important:** SMTP / email configuration is managed through the admin panel (**Mail Configurations**). No environment variables are required for email. Verify email delivery after deployment using the **Send Test Email** button on the Users admin page (SuperAdmin role required). If emails are not arriving, check the mail configuration in the admin panel and the container logs (`docker logs trainings-web`).
 
 ---
 
@@ -572,16 +563,11 @@ These variables are already wired into the `docker-compose.yml` from [Section 3.
 | `ConnectionStrings__DefaultConnection` | SQLite connection string | `docker-compose.yml` |
 | `SEED_ADMIN_EMAIL` | Initial admin user email | `.env` file on NAS |
 | `SEED_ADMIN_PASSWORD` | Initial admin user password | `.env` file on NAS |
-| `SMTP_HOST` | SMTP server hostname | `.env` file on NAS |
-| `SMTP_PORT` | SMTP server port (e.g. `587`) | `.env` file on NAS |
-| `SMTP_USER` | SMTP login / username | `.env` file on NAS |
-| `SMTP_PASSWORD` | SMTP password or API key | `.env` file on NAS |
-| `SMTP_FROM` | Sender address for outgoing emails | `.env` file on NAS |
 | `APP_BASE_URL` | Public URL used in email links | `.env` file on NAS |
 
 > **Important:** Replace the placeholder values in `.env` with strong, unique credentials before starting the container for the first time. The seed admin account is created on first startup — if the password is weak it cannot easily be changed afterwards without direct database access.
 >
-> If the SMTP variables are missing or empty, email delivery is silently skipped for the end user, but an **Error** is logged to the application log. Check `docker logs trainings-web` if emails are not arriving, and verify delivery using the **Send Test Email** button on the Users admin page (SuperAdmin role required).
+> **Note:** SMTP / email configuration is managed through the admin panel (**Mail Configurations**), not via environment variables. Configure mail settings after first login using the SuperAdmin account.
 
 ### 5.4 Prerequisites: Docker Desktop on Your Development Machine
 
