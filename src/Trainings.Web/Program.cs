@@ -61,8 +61,17 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-    await seeder.SeedAsync();
+    try
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+        await seeder.SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
+        LogStartupFailed(logger, ex);
+        throw;
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -83,3 +92,10 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+public partial class Program
+{
+    private static readonly Action<ILogger, Exception?> LogStartupFailed =
+        LoggerMessage.Define(LogLevel.Critical, new EventId(1, nameof(LogStartupFailed)),
+            "Application startup failed during database initialization");
+}
