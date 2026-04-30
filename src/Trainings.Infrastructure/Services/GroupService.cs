@@ -135,12 +135,34 @@ public class GroupService : IGroupService
 
     private static string GenerateSlug(string name)
     {
-        return name.ToLowerInvariant()
-            .Replace(' ', '-')
+        var slug = name.ToLowerInvariant()
             .Replace("ä", "ae")
             .Replace("ö", "oe")
             .Replace("ü", "ue")
             .Replace("ß", "ss");
+
+        // Replace any non-alphanumeric characters with hyphens
+        var builder = new System.Text.StringBuilder(slug.Length);
+        foreach (var c in slug)
+        {
+            if (char.IsLetterOrDigit(c))
+            {
+                builder.Append(c);
+            }
+            else
+            {
+                builder.Append('-');
+            }
+        }
+
+        // Collapse multiple hyphens and trim
+        slug = builder.ToString();
+        while (slug.Contains("--"))
+        {
+            slug = slug.Replace("--", "-");
+        }
+
+        return slug.Trim('-');
     }
 
     private static GroupDto MapToDto(Group group) => new()
