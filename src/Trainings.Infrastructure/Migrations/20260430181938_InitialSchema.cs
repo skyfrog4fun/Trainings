@@ -9,6 +9,8 @@ namespace Trainings.Infrastructure.Migrations
     public partial class InitialSchema : Migration
     {
         private static readonly string[] UserIdTrainingIdColumns = ["UserId", "TrainingId"];
+        private static readonly string[] GroupIdPriorityColumns = ["GroupId", "Priority"];
+        private static readonly string[] EntityTypeOldSlugColumns = ["EntityType", "OldSlug"];
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,6 +22,8 @@ namespace Trainings.Infrastructure.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Slug = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Identifier = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -27,6 +31,45 @@ namespace Trainings.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Groups", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MailConfigurations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Host = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Port = table.Column<int>(type: "INTEGER", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Password = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    FromAddress = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    Priority = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FailureCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    LastFailedOn = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MailConfigurations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SlugRedirects",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OldSlug = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    NewSlug = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    EntityType = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    ChangedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SlugRedirects", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,6 +120,33 @@ namespace Trainings.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GroupMailConfigurations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    GroupId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MailConfigurationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Priority = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroupMailConfigurations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GroupMailConfigurations_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GroupMailConfigurations_MailConfigurations_MailConfigurationId",
+                        column: x => x.MailConfigurationId,
+                        principalTable: "MailConfigurations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmailConfirmationTokens",
                 columns: table => new
                 {
@@ -107,7 +177,11 @@ namespace Trainings.Infrastructure.Migrations
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     GroupId = table.Column<int>(type: "INTEGER", nullable: false),
                     Role = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    RequestedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ApprovedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    DeclinedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     JoinedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -125,6 +199,44 @@ namespace Trainings.Infrastructure.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NotificationLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Action = table.Column<int>(type: "INTEGER", nullable: false),
+                    RecipientEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: true),
+                    MailConfigurationId = table.Column<int>(type: "INTEGER", nullable: true),
+                    GroupId = table.Column<int>(type: "INTEGER", nullable: true),
+                    IsSuccess = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificationLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotificationLogs_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_NotificationLogs_MailConfigurations_MailConfigurationId",
+                        column: x => x.MailConfigurationId,
+                        principalTable: "MailConfigurations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_NotificationLogs_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -150,33 +262,6 @@ namespace Trainings.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PendingGroupRequests",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    GroupId = table.Column<int>(type: "INTEGER", nullable: false),
-                    RequestedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PendingGroupRequests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PendingGroupRequests_Groups_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "Groups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PendingGroupRequests_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Trainings",
                 columns: table => new
                 {
@@ -189,7 +274,7 @@ namespace Trainings.Infrastructure.Migrations
                     Capacity = table.Column<int>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     TrainerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    GroupId = table.Column<int>(type: "INTEGER", nullable: true)
+                    GroupId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -199,7 +284,7 @@ namespace Trainings.Infrastructure.Migrations
                         column: x => x.GroupId,
                         principalTable: "Groups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Trainings_Users_TrainerId",
                         column: x => x.TrainerId,
@@ -339,6 +424,17 @@ namespace Trainings.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GroupMailConfigurations_GroupId_Priority",
+                table: "GroupMailConfigurations",
+                columns: GroupIdPriorityColumns,
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GroupMailConfigurations_MailConfigurationId",
+                table: "GroupMailConfigurations",
+                column: "MailConfigurationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GroupMemberships_GroupId",
                 table: "GroupMemberships",
                 column: "GroupId");
@@ -349,18 +445,41 @@ namespace Trainings.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PasswordResetTokens_UserId",
-                table: "PasswordResetTokens",
-                column: "UserId");
+                name: "IX_Groups_Identifier",
+                table: "Groups",
+                column: "Identifier",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PendingGroupRequests_GroupId",
-                table: "PendingGroupRequests",
+                name: "IX_Groups_Slug",
+                table: "Groups",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MailConfigurations_Priority",
+                table: "MailConfigurations",
+                column: "Priority",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificationLogs_GroupId",
+                table: "NotificationLogs",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PendingGroupRequests_UserId",
-                table: "PendingGroupRequests",
+                name: "IX_NotificationLogs_MailConfigurationId",
+                table: "NotificationLogs",
+                column: "MailConfigurationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificationLogs_UserId",
+                table: "NotificationLogs",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PasswordResetTokens_UserId",
+                table: "PasswordResetTokens",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -373,6 +492,11 @@ namespace Trainings.Infrastructure.Migrations
                 table: "Registrations",
                 columns: UserIdTrainingIdColumns,
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SlugRedirects_EntityType_OldSlug",
+                table: "SlugRedirects",
+                columns: EntityTypeOldSlugColumns);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_GroupId",
@@ -421,19 +545,28 @@ namespace Trainings.Infrastructure.Migrations
                 name: "EmailConfirmationTokens");
 
             migrationBuilder.DropTable(
+                name: "GroupMailConfigurations");
+
+            migrationBuilder.DropTable(
                 name: "GroupMemberships");
+
+            migrationBuilder.DropTable(
+                name: "NotificationLogs");
 
             migrationBuilder.DropTable(
                 name: "PasswordResetTokens");
 
             migrationBuilder.DropTable(
-                name: "PendingGroupRequests");
-
-            migrationBuilder.DropTable(
                 name: "Registrations");
 
             migrationBuilder.DropTable(
+                name: "SlugRedirects");
+
+            migrationBuilder.DropTable(
                 name: "TrainingBlockTags");
+
+            migrationBuilder.DropTable(
+                name: "MailConfigurations");
 
             migrationBuilder.DropTable(
                 name: "Tags");
