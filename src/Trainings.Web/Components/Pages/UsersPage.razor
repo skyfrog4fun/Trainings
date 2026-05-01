@@ -4,7 +4,6 @@
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
 @inject IPasswordResetService PasswordResetService
-@inject IEmailService EmailService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -20,18 +19,7 @@
         <div class="card mb-4 border-info">
             <div class="card-header bg-info text-white fw-bold">🔧 SMTP Configuration Test</div>
             <div class="card-body">
-                <p class="mb-2 text-muted">Send a test email to your account to verify that the SMTP configuration is working correctly.</p>
-                <button class="btn btn-info" @onclick="SendTestEmail" disabled="@_testEmailSending">
-                    @if (_testEmailSending)
-                    {
-                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                    }
-                    📧 Send Test Email to Me
-                </button>
-                @if (_testEmailResult != null)
-                {
-                    <div class="alert @(_testEmailSuccess ? "alert-success" : "alert-danger") mt-2 mb-0">@_testEmailResult</div>
-                }
+                <p class="mb-2 text-muted">Send a test email to verify SMTP is working. You can configure and test SMTP on the <a href="/config/mail">Mail Config</a> page.</p>
             </div>
         </div>
     </AuthorizeView>
@@ -63,10 +51,27 @@
                     }
                     <div class="col-12 col-md-4">
                         <label class="form-label">Role</label>
-                        <select class="form-select" @bind="_formRole">
-                            <option value="User">User</option>
-                            <option value="SuperAdmin">Super Admin</option>
-                        </select>
+                        <AuthorizeView Policy="SuperAdmin">
+                            <Authorized>
+                                <select class="form-select" @bind="_formRole">
+                                    <option value="User">User</option>
+                                    <option value="SuperAdmin">Super Admin</option>
+                                </select>
+                            </Authorized>
+                            <NotAuthorized>
+                                @if (_formRole == "SuperAdmin")
+                                {
+                                    <input class="form-control" value="Super Admin" readonly />
+                                    <div class="form-text text-muted">Only a Super Admin can change this role.</div>
+                                }
+                                else
+                                {
+                                    <select class="form-select" @bind="_formRole">
+                                        <option value="User">User</option>
+                                    </select>
+                                }
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">Gender</label>
@@ -82,7 +87,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">Mobile</label>
-                        <input class="form-control" placeholder="+1 555 000 0000" @bind="_formMobile" />
+                        <input class="form-control" placeholder="+41 79 000 00000" @bind="_formMobile" />
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">City</label>
@@ -201,10 +206,6 @@
     private string _formMobile = "", _formCity = "", _formWelcomeMessage = "";
     private DateTime? _formEntryDate;
     private string? _formError;
-
-    private bool _testEmailSending = false;
-    private bool _testEmailSuccess = false;
-    private string? _testEmailResult;
 
     private bool _actionSuccess = false;
     private string? _actionResult;
@@ -365,35 +366,6 @@
         {
             _actionSuccess = false;
             _actionResult = $"Failed: {ex.Message}";
-        }
-    }
-
-    private async Task SendTestEmail()
-    {
-        _testEmailSending = true;
-        _testEmailResult = null;
-        try
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var email = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                _testEmailSuccess = false;
-                _testEmailResult = "Could not determine your email address from the current session.";
-                return;
-            }
-            await EmailService.SendTestEmailAsync(email);
-            _testEmailSuccess = true;
-            _testEmailResult = $"Test email sent successfully to {email}.";
-        }
-        catch (Exception ex)
-        {
-            _testEmailSuccess = false;
-            _testEmailResult = $"Failed to send test email: {ex.Message}";
-        }
-        finally
-        {
-            _testEmailSending = false;
         }
     }
 

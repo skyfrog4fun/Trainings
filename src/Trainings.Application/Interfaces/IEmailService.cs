@@ -5,6 +5,10 @@ public interface IEmailService
     Task SendPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default);
     Task SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default);
     Task SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default);
-    Task SendTestEmailAsync(string toEmail, CancellationToken ct = default);
+    /// <summary>
+    /// Sends a test email. Returns true if at least one mail configuration succeeded,
+    /// false if all configurations failed or none are configured.
+    /// </summary>
+    Task<bool> SendTestEmailAsync(string toEmail, CancellationToken ct = default);
     Task SendWelcomeWithPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default);
 }

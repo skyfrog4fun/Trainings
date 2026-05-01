@@ -33,13 +33,22 @@ public class GroupService : IGroupService
         return group == null ? null : MapToDto(group);
     }
 
+    public async Task<GroupDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
+    {
+        var group = await _context.Groups
+            .Include(g => g.Memberships)
+            .FirstOrDefaultAsync(g => g.Slug == slug, ct);
+        return group == null ? null : MapToDto(group);
+    }
+
     public async Task<GroupDto> CreateAsync(CreateGroupDto dto, CancellationToken ct = default)
     {
+        var slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
         var group = new Group
         {
             Name = dto.Name,
-            Slug = GenerateSlug(dto.Name),
-            Identifier = dto.Identifier ?? GenerateSlug(dto.Name),
+            Slug = slug,
+            Identifier = dto.Identifier ?? slug,
             Description = dto.Description,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -55,7 +64,7 @@ public class GroupService : IGroupService
             ?? throw new InvalidOperationException($"Group {dto.Id} not found.");
 
         var oldSlug = group.Slug;
-        var newSlug = GenerateSlug(dto.Name);
+        var newSlug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
 
         if (!string.Equals(oldSlug, newSlug, StringComparison.Ordinal) && !string.IsNullOrEmpty(oldSlug))
         {
@@ -119,6 +128,37 @@ public class GroupService : IGroupService
             _context.GroupMemberships.Remove(membership);
             await _context.SaveChangesAsync(ct);
         }
+    }
+
+    public async Task<IEnumerable<GroupMembershipDto>> GetAllMembershipsForUserAsync(int userId, CancellationToken ct = default)
+    {
+        var memberships = await _context.GroupMemberships
+            .Include(gm => gm.User)
+            .Include(gm => gm.Group)
+            .Where(gm => gm.UserId == userId)
+            .OrderBy(gm => gm.Group.Name)
+            .ToListAsync(ct);
+        return memberships.Select(MapMembershipToDto);
+    }
+
+    public async Task ApproveMemberAsync(int membershipId, CancellationToken ct = default)
+    {
+        var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
+            ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
+        membership.Status = GroupMembershipStatus.Approved;
+        membership.ApprovedAt = DateTime.UtcNow;
+        membership.IsActive = true;
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task DeclineMemberAsync(int membershipId, CancellationToken ct = default)
+    {
+        var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
+            ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
+        membership.Status = GroupMembershipStatus.Declined;
+        membership.DeclinedAt = DateTime.UtcNow;
+        membership.IsActive = false;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<IEnumerable<GroupDto>> GetGroupsForUserAsync(int userId, CancellationToken ct = default)
@@ -190,8 +230,8 @@ public class GroupService : IGroupService
     {
         Id = gm.Id,
         UserId = gm.UserId,
-        UserDisplayName = gm.User.DisplayName,
-        UserEmail = gm.User.Email,
+        UserDisplayName = gm.User?.DisplayName ?? string.Empty,
+        UserEmail = gm.User?.Email ?? string.Empty,
         GroupId = gm.GroupId,
         Role = gm.Role,
         Status = gm.Status,
