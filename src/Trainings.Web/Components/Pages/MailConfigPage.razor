@@ -1,0 +1,321 @@
+@page "/config/mail"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = "SuperAdmin")]
+@inject IMailConfigurationService MailConfigService
+@using Trainings.Domain.Entities
+
+<PageTitle>Mail Configuration</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2>⚙️ Mail Configuration</h2>
+        <button class="btn btn-success" @onclick="ShowCreateForm">+ New Configuration</button>
+    </div>
+
+    <p class="text-muted">Define SMTP server configurations used to send emails. Configurations are tried in priority order (1 = highest). On failure, the next configuration is tried.</p>
+
+    @if (_showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header fw-bold">@(_editId == 0 ? "New Mail Configuration" : "Edit Mail Configuration")</div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Name *</label>
+                        <input class="form-control" placeholder="e.g. Primary SMTP" @bind="_formName" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Priority *</label>
+                        <input class="form-control" type="number" min="1" @bind="_formPriority" />
+                        <div class="form-text">1 = highest priority</div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label d-block">&nbsp;</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="chkActive" />
+                            <label class="form-check-label" for="chkActive">Active</label>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">SMTP Host *</label>
+                        <input class="form-control" placeholder="smtp.example.com" @bind="_formHost" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Port *</label>
+                        <input class="form-control" type="number" @bind="_formPort" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Username</label>
+                        <input class="form-control" placeholder="SMTP username" @bind="_formUsername" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Password</label>
+                        <input class="form-control" type="password" placeholder="SMTP password" @bind="_formPassword" />
+                        @if (_editId != 0)
+                        {
+                            <div class="form-text">Leave blank to keep the existing password.</div>
+                        }
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">From Address *</label>
+                        <input class="form-control" type="email" placeholder="noreply@example.com" @bind="_formFromAddress" />
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary me-2" @onclick="SaveConfig">Save</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm">Cancel</button>
+                </div>
+                @if (_formError != null)
+                {
+                    <div class="alert alert-danger mt-2">@_formError</div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (_loading)
+    {
+        <div class="text-center"><div class="spinner-border" role="status"></div></div>
+    }
+    else if (!_configs.Any())
+    {
+        <div class="alert alert-info">
+            No mail configurations defined yet. Add at least one SMTP configuration to enable email notifications.
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var config in _configs)
+            {
+                <div class="col-12">
+                    <div class="card @(config.IsActive ? "" : "border-secondary opacity-75")">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">
+                                @config.Name
+                                <span class="badge bg-secondary ms-2">Priority @config.Priority</span>
+                                @if (config.IsActive)
+                                {
+                                    <span class="badge bg-success ms-1">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary ms-1">Inactive</span>
+                                }
+                            </span>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditConfig(config)">Edit</button>
+                                <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ToggleActive(config)">
+                                    @(config.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteConfig(config)">Delete</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 small">
+                                <div class="col-12 col-md-4">
+                                    <strong>Host:</strong> @config.Host:@config.Port
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>Username:</strong> @config.Username
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>From:</strong> @config.FromAddress
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>Created:</strong> @config.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>Failures:</strong>
+                                    @if (config.FailureCount > 0)
+                                    {
+                                        <span class="text-danger fw-bold">@config.FailureCount</span>
+                                        @if (config.LastFailedOn.HasValue)
+                                        {
+                                            <span class="text-muted ms-1">(last: @config.LastFailedOn.Value.ToLocalTime().ToString("MMM d, HH:mm"))</span>
+                                        }
+                                        <button class="btn btn-link btn-sm p-0 ms-2" @onclick="() => ResetFailures(config)">Reset</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success">None</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (_actionResult != null)
+    {
+        <div class="alert @(_actionSuccess ? "alert-success" : "alert-danger") mt-3">@_actionResult</div>
+    }
+</div>
+
+@code {
+    private List<MailConfiguration> _configs = new();
+    private bool _loading = true;
+    private bool _showForm;
+    private int _editId;
+    private string _formName = "", _formHost = "", _formUsername = "", _formPassword = "", _formFromAddress = "";
+    private int _formPort = 587, _formPriority = 1;
+    private bool _formIsActive = true;
+    private string? _formError;
+    private bool _actionSuccess;
+    private string? _actionResult;
+
+    protected override async Task OnInitializedAsync() => await LoadConfigs();
+
+    private async Task LoadConfigs()
+    {
+        _loading = true;
+        _configs = (await MailConfigService.GetAllAsync()).ToList();
+        _loading = false;
+    }
+
+    private void ShowCreateForm()
+    {
+        _editId = 0;
+        _formName = _formHost = _formUsername = _formPassword = _formFromAddress = "";
+        _formPort = 587;
+        _formPriority = _configs.Any() ? _configs.Max(c => c.Priority) + 1 : 1;
+        _formIsActive = true;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private void EditConfig(MailConfiguration config)
+    {
+        _editId = config.Id;
+        _formName = config.Name;
+        _formHost = config.Host;
+        _formPort = config.Port;
+        _formUsername = config.Username;
+        _formPassword = "";
+        _formFromAddress = config.FromAddress;
+        _formPriority = config.Priority;
+        _formIsActive = config.IsActive;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private async Task SaveConfig()
+    {
+        _formError = null;
+        if (string.IsNullOrWhiteSpace(_formName) || string.IsNullOrWhiteSpace(_formHost) || string.IsNullOrWhiteSpace(_formFromAddress))
+        {
+            _formError = "Name, Host, and From Address are required.";
+            return;
+        }
+
+        try
+        {
+            if (_editId == 0)
+            {
+                if (string.IsNullOrWhiteSpace(_formPassword))
+                {
+                    _formError = "Password is required for a new configuration.";
+                    return;
+                }
+
+                await MailConfigService.CreateAsync(new MailConfiguration
+                {
+                    Name = _formName,
+                    Host = _formHost,
+                    Port = _formPort,
+                    Username = _formUsername,
+                    Password = _formPassword,
+                    FromAddress = _formFromAddress,
+                    Priority = _formPriority,
+                    IsActive = _formIsActive
+                });
+            }
+            else
+            {
+                var existing = await MailConfigService.GetByIdAsync(_editId)
+                    ?? throw new InvalidOperationException("Configuration not found.");
+
+                existing.Name = _formName;
+                existing.Host = _formHost;
+                existing.Port = _formPort;
+                existing.Username = _formUsername;
+                existing.FromAddress = _formFromAddress;
+                existing.Priority = _formPriority;
+                existing.IsActive = _formIsActive;
+
+                if (!string.IsNullOrWhiteSpace(_formPassword))
+                {
+                    existing.Password = _formPassword;
+                }
+
+                await MailConfigService.UpdateAsync(existing);
+            }
+
+            _showForm = false;
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = "Configuration saved successfully.";
+        }
+        catch (Exception ex)
+        {
+            _formError = ex.Message;
+        }
+    }
+
+    private async Task ToggleActive(MailConfiguration config)
+    {
+        _actionResult = null;
+        try
+        {
+            config.IsActive = !config.IsActive;
+            await MailConfigService.UpdateAsync(config);
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = $"Configuration '{config.Name}' {(config.IsActive ? "activated" : "deactivated")}.";
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = $"Failed: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteConfig(MailConfiguration config)
+    {
+        _actionResult = null;
+        try
+        {
+            await MailConfigService.DeleteAsync(config.Id);
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = $"Configuration '{config.Name}' deleted.";
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = $"Failed: {ex.Message}";
+        }
+    }
+
+    private async Task ResetFailures(MailConfiguration config)
+    {
+        _actionResult = null;
+        try
+        {
+            await MailConfigService.ResetFailureCounterAsync(config.Id);
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = $"Failure counter reset for '{config.Name}'.";
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = $"Failed: {ex.Message}";
+        }
+    }
+
+    private void CancelForm() => _showForm = false;
+}

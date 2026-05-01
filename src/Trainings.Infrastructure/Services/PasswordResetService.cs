@@ -57,6 +57,37 @@ public class PasswordResetService : IPasswordResetService
         await _emailService.SendPasswordResetAsync(user.Email, resetLink, ct);
     }
 
+    public async Task SendWelcomeAsync(string email, CancellationToken ct = default)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+        if (user == null)
+        {
+            return;
+        }
+
+        // Invalidate old tokens
+        var oldTokens = await _context.PasswordResetTokens
+            .Where(t => t.UserId == user.Id && !t.IsUsed)
+            .ToListAsync(ct);
+        foreach (var old in oldTokens)
+        {
+            old.IsUsed = true;
+        }
+
+        var token = new PasswordResetToken
+        {
+            UserId = user.Id,
+            Token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"),
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            IsUsed = false
+        };
+        _context.PasswordResetTokens.Add(token);
+        await _context.SaveChangesAsync(ct);
+
+        var resetLink = $"{_baseUrl}/reset-password?token={token.Token}";
+        await _emailService.SendWelcomeWithPasswordResetAsync(email, resetLink, ct);
+    }
+
     public async Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default)
     {
         var resetToken = await _context.PasswordResetTokens

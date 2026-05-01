@@ -27,27 +27,27 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("SuperAdmin", policy =>
-        policy.RequireClaim("SuperAdmin", "true"));
+        policy.RequireClaim(AppClaimTypes.SuperAdmin, "true"));
 
     options.AddPolicy("GroupAdmin", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim("SuperAdmin", "true") ||
+            context.User.HasClaim(AppClaimTypes.SuperAdmin, "true") ||
             context.User.Claims.Any(c =>
-                c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) &&
+                c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) &&
                 c.Value == "Admin")));
 
     options.AddPolicy("GroupTrainer", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim("SuperAdmin", "true") ||
+            context.User.HasClaim(AppClaimTypes.SuperAdmin, "true") ||
             context.User.Claims.Any(c =>
-                c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) &&
+                c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) &&
                 (c.Value == "Admin" || c.Value == "Trainer"))));
 
     options.AddPolicy("GroupMember", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim("SuperAdmin", "true") ||
+            context.User.HasClaim(AppClaimTypes.SuperAdmin, "true") ||
             context.User.Claims.Any(c =>
-                c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) &&
+                c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) &&
                 (c.Value == "Admin" || c.Value == "Trainer" || c.Value == "Participant"))));
 
     options.AddPolicy("Authenticated", policy =>
