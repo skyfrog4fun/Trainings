@@ -131,6 +131,9 @@ public partial class DbSeeder
 
             LogPreExistingDatabaseDetected(_logger);
 
+            // Add columns that may be missing in databases created by older versions.
+            await AddMissingColumnsAsync(connection);
+
             // Create the history table and insert the initial migration so MigrateAsync skips it.
             using var createCmd = connection.CreateCommand();
             createCmd.CommandText =
@@ -155,4 +158,44 @@ public partial class DbSeeder
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Pre-existing database detected without migration history. Marking InitialSchema migration as applied.")]
     private static partial void LogPreExistingDatabaseDetected(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Added missing column {Column} to table {Table}.")]
+    private static partial void LogAddedMissingColumn(ILogger logger, string column, string table);
+
+    /// <summary>
+    /// Adds columns to existing tables that may have been created by an older version
+    /// of the model (via <c>EnsureCreatedAsync</c>) before the InitialSchema migration
+    /// included them.
+    /// </summary>
+    private async Task AddMissingColumnsAsync(System.Data.Common.DbConnection connection)
+    {
+        var columnsToAdd = new (string Table, string Column, string TypeAndDefault)[]
+        {
+            ("GroupMemberships", "Status",      "INTEGER NOT NULL DEFAULT 0"),
+            ("GroupMemberships", "RequestedAt",  "TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'"),
+            ("GroupMemberships", "ApprovedAt",   "TEXT"),
+            ("GroupMemberships", "DeclinedAt",   "TEXT"),
+        };
+
+        foreach (var (table, column, typeAndDefault) in columnsToAdd)
+        {
+            if (await ColumnExistsAsync(connection, table, column))
+            {
+                continue;
+            }
+
+            using var alterCmd = connection.CreateCommand();
+            alterCmd.CommandText = $"ALTER TABLE \"{table}\" ADD COLUMN \"{column}\" {typeAndDefault}";
+            await alterCmd.ExecuteNonQueryAsync();
+            LogAddedMissingColumn(_logger, column, table);
+        }
+    }
+
+    private static async Task<bool> ColumnExistsAsync(System.Data.Common.DbConnection connection, string table, string column)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = '{column}'";
+        var result = await cmd.ExecuteScalarAsync();
+        return result is long count && count > 0;
+    }
 }
