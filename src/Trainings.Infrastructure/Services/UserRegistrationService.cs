@@ -172,6 +172,34 @@ public class UserRegistrationService : IUserRegistrationService
         return users.Select(MapToDto);
     }
 
+    public async Task ResendEmailConfirmationAsync(int userId, CancellationToken ct = default)
+    {
+        var user = await _context.Users.FindAsync([userId], ct)
+            ?? throw new InvalidOperationException($"User {userId} not found.");
+
+        // Invalidate old confirmation tokens
+        var oldTokens = await _context.EmailConfirmationTokens
+            .Where(t => t.UserId == userId && !t.IsUsed)
+            .ToListAsync(ct);
+        foreach (var old in oldTokens)
+        {
+            old.IsUsed = true;
+        }
+
+        var confirmToken = new EmailConfirmationToken
+        {
+            UserId = user.Id,
+            Token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"),
+            ExpiresAt = DateTime.UtcNow.AddDays(1),
+            IsUsed = false
+        };
+        _context.EmailConfirmationTokens.Add(confirmToken);
+        await _context.SaveChangesAsync(ct);
+
+        var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
+        await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
+    }
+
     private static UserDto MapToDto(User user) => new()
     {
         Id = user.Id,

@@ -10,24 +10,38 @@
                 📅 Trainings
             </NavLink>
         </li>
-        <AuthorizeView Roles="Participant">
+        <AuthorizeView Policy="GroupMember">
             <li class="nav-item">
                 <NavLink class="nav-link" href="my-registrations">
                     📋 My Registrations
                 </NavLink>
             </li>
         </AuthorizeView>
-        <AuthorizeView Roles="Trainer">
+        <AuthorizeView Policy="GroupTrainer">
             <li class="nav-item">
                 <NavLink class="nav-link" href="trainer-trainings">
                     🎯 My Trainings
                 </NavLink>
             </li>
         </AuthorizeView>
-        <AuthorizeView Roles="Admin">
+        <AuthorizeView Policy="GroupAdmin">
             <li class="nav-item">
                 <NavLink class="nav-link" href="users">
                     👥 Users
+                </NavLink>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Policy="SuperAdmin">
+            <li class="nav-item">
+                <NavLink class="nav-link" href="groups">
+                    📂 Groups
+                </NavLink>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Policy="SuperAdmin">
+            <li class="nav-item">
+                <NavLink class="nav-link" href="config/mail">
+                    ⚙️ Config
                 </NavLink>
             </li>
         </AuthorizeView>

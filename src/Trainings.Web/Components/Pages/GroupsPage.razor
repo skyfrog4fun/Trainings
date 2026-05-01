@@ -1,6 +1,6 @@
 @page "/groups"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "SuperAdmin")]
+@attribute [Authorize(Policy = "SuperAdmin")]
 @inject IGroupService GroupService
 @inject NavigationManager NavigationManager
 

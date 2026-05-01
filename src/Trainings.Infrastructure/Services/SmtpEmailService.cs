@@ -67,6 +67,18 @@ public partial class SmtpEmailService : IEmailService
         await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, ct);
     }
 
+    public async Task SendWelcomeWithPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
+    {
+        var subject = "Welcome to Trainings – Set Your Password";
+        var body = $"""
+            <p>Welcome to the Trainings application! Your account has been created.</p>
+            <p>Please click the link below to set your password and get started:</p>
+            <p><a href="{resetLink}">{resetLink}</a></p>
+            <p>This link expires in 1 hour. If you did not expect this email, please ignore it.</p>
+            """;
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.WelcomeMail, null, null, ct);
+    }
+
     private async Task SendWithFallbackAsync(string toEmail, string subject, string htmlBody, NotificationAction action, int? userId, int? groupId, CancellationToken ct)
     {
         var configs = await _mailConfigService.GetActiveConfigsForGroupAsync(groupId, ct);

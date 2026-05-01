@@ -14,4 +14,5 @@ public interface IGroupService
     Task AddMemberAsync(AddGroupMemberDto dto, CancellationToken ct = default);
     Task RemoveMemberAsync(int membershipId, CancellationToken ct = default);
     Task<IEnumerable<GroupDto>> GetGroupsForUserAsync(int userId, CancellationToken ct = default);
+    Task<IEnumerable<GroupMembershipDto>> GetApprovedMembershipsForUserAsync(int userId, CancellationToken ct = default);
 }

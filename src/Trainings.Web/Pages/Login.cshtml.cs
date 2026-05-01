@@ -6,16 +6,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Trainings.Application.Interfaces;
+using Trainings.Domain.Enums;
 
 namespace Trainings.Web.Pages;
 
 public class LoginModel : PageModel
 {
     private readonly IUserService _userService;
+    private readonly IGroupService _groupService;
 
-    public LoginModel(IUserService userService)
+    public LoginModel(IUserService userService, IGroupService groupService)
     {
         _userService = userService;
+        _groupService = groupService;
     }
 
     [BindProperty]
@@ -60,9 +63,20 @@ public class LoginModel : PageModel
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString(CultureInfo.InvariantCulture)),
             new Claim(ClaimTypes.Name, user.DisplayName),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString())
+            new Claim(ClaimTypes.Email, user.Email)
         };
+
+        if (user.Role == UserRole.SuperAdmin)
+        {
+            claims.Add(new Claim("SuperAdmin", "true"));
+        }
+
+        // Add per-group role claims for all approved memberships
+        var memberships = await _groupService.GetApprovedMembershipsForUserAsync(user.Id);
+        foreach (var membership in memberships)
+        {
+            claims.Add(new Claim($"GroupRole::{membership.GroupId}", membership.Role.ToString()));
+        }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);

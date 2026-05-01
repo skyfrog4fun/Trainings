@@ -133,6 +133,15 @@ public class GroupService : IGroupService
         return groups.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<GroupMembershipDto>> GetApprovedMembershipsForUserAsync(int userId, CancellationToken ct = default)
+    {
+        var memberships = await _context.GroupMemberships
+            .Include(gm => gm.User)
+            .Where(gm => gm.UserId == userId && gm.Status == GroupMembershipStatus.Approved && gm.IsActive)
+            .ToListAsync(ct);
+        return memberships.Select(MapMembershipToDto);
+    }
+
     private static string GenerateSlug(string name)
     {
         var slug = name.ToLowerInvariant()
@@ -169,6 +178,8 @@ public class GroupService : IGroupService
     {
         Id = group.Id,
         Name = group.Name,
+        Slug = group.Slug,
+        Identifier = group.Identifier,
         Description = group.Description,
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,
@@ -183,7 +194,11 @@ public class GroupService : IGroupService
         UserEmail = gm.User.Email,
         GroupId = gm.GroupId,
         Role = gm.Role,
+        Status = gm.Status,
         IsActive = gm.IsActive,
-        JoinedAt = gm.JoinedAt
+        JoinedAt = gm.JoinedAt,
+        RequestedAt = gm.RequestedAt,
+        ApprovedAt = gm.ApprovedAt,
+        DeclinedAt = gm.DeclinedAt
     };
 }

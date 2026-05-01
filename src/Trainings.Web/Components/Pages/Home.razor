@@ -4,13 +4,80 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
+@inject INotificationLogService NotificationLogService
 
 <PageTitle>Dashboard</PageTitle>
 
 <div class="container-fluid px-2 px-md-4">
     <h2 class="my-3">Welcome, @_userName!</h2>
 
-    @if (_isAdmin)
+    @if (_isSuperAdmin)
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card text-bg-primary">
+                    <div class="card-body text-center">
+                        <h3>@_totalTrainings</h3>
+                        <p class="mb-0">Total Trainings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-bg-success">
+                    <div class="card-body text-center">
+                        <h3>@_successCount30d</h3>
+                        <p class="mb-0">Emails Sent (30d)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card text-bg-danger">
+                    <div class="card-body text-center">
+                        <h3>@_failureCount30d</h3>
+                        <p class="mb-0">Email Failures (30d)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (_recentLogs.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-bold">📊 Recent Notification Activity</div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr><th>Date</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in _recentLogs.Take(10))
+                            {
+                                <tr>
+                                    <td class="small">@log.CreatedAt.ToLocalTime().ToString("MMM d, HH:mm")</td>
+                                    <td class="small">@log.Action</td>
+                                    <td class="small text-muted">@log.RecipientEmail</td>
+                                    <td>
+                                        @if (log.IsSuccess)
+                                        {
+                                            <span class="badge bg-success">✓</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">✗</span>
+                                        }
+                                    </td>
+                                    <td class="small text-danger">@log.ErrorMessage</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <p><a href="/users" class="btn btn-primary me-2">Manage Users</a><a href="/config/mail" class="btn btn-outline-secondary">Mail Config</a></p>
+    }
+    else if (_isGroupAdmin)
     {
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3">
@@ -25,14 +92,14 @@
         <p><a href="/users" class="btn btn-primary">Manage Users</a></p>
     }
 
-    @if (_isTrainer)
+    @if (_isGroupTrainer)
     {
         <h4>Your Upcoming Trainings</h4>
         <TrainingList Trainings="_trainerTrainings" ShowActions="true" />
         <a href="/trainer-trainings" class="btn btn-primary mt-2">Manage All Trainings</a>
     }
 
-    @if (_isParticipant)
+    @if (_isGroupMember)
     {
         <h4>Upcoming Trainings</h4>
         <TrainingList Trainings="_upcomingTrainings" ShowRegisterButton="true" CurrentUserId="_userId" />
@@ -43,10 +110,12 @@
 @code {
     private string _userName = "";
     private int _userId;
-    private bool _isAdmin, _isTrainer, _isParticipant;
+    private bool _isSuperAdmin, _isGroupAdmin, _isGroupTrainer, _isGroupMember;
     private int _totalTrainings;
+    private int _successCount30d, _failureCount30d;
     private List<TrainingDto> _trainerTrainings = new();
     private List<TrainingDto> _upcomingTrainings = new();
+    private IReadOnlyList<Trainings.Domain.Entities.NotificationLog> _recentLogs = Array.Empty<Trainings.Domain.Entities.NotificationLog>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,20 +123,32 @@
         var user = authState.User;
         _userName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User";
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
-        _isAdmin = user.IsInRole("Admin");
-        _isTrainer = user.IsInRole("Trainer");
-        _isParticipant = user.IsInRole("Participant");
 
-        if (_isAdmin)
+        _isSuperAdmin = user.HasClaim("SuperAdmin", "true");
+        _isGroupAdmin = _isSuperAdmin || user.Claims.Any(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin");
+        _isGroupTrainer = _isGroupAdmin || user.Claims.Any(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Trainer");
+        _isGroupMember = _isGroupTrainer || user.Claims.Any(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal));
+
+        if (_isSuperAdmin || _isGroupAdmin)
         {
             var all = await TrainingService.GetAllAsync();
             _totalTrainings = all.Count();
         }
-        if (_isTrainer)
+
+        if (_isSuperAdmin)
+        {
+            var since30d = DateTime.UtcNow.AddDays(-30);
+            _successCount30d = await NotificationLogService.GetSuccessCountAsync(since30d);
+            _failureCount30d = await NotificationLogService.GetFailureCountAsync(since30d);
+            _recentLogs = await NotificationLogService.GetRecentLogsAsync(10);
+        }
+
+        if (_isGroupTrainer)
         {
             _trainerTrainings = (await TrainingService.GetByTrainerIdAsync(_userId)).Take(5).ToList();
         }
-        if (_isParticipant)
+
+        if (_isGroupMember)
         {
             _upcomingTrainings = (await TrainingService.GetActiveAsync())
                 .Where(t => t.DateTime >= DateTime.Now)
