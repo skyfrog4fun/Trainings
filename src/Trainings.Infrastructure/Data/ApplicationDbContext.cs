@@ -52,7 +52,8 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(t => t.Group)
                 .WithMany(g => g.Trainings)
                 .HasForeignKey(t => t.GroupId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Registration>(entity =>

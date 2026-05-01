@@ -49,7 +49,24 @@
 
 <main>
     <article class="content container-fluid px-2 px-md-4 py-3">
-        @Body
+        <ErrorBoundary @ref="_errorBoundary">
+            <ChildContent>
+                @Body
+            </ChildContent>
+            <ErrorContent Context="ex">
+                <div class="container px-2 px-md-4 py-5">
+                    <div class="alert alert-danger shadow-sm" role="alert">
+                        <h4 class="alert-heading">⚠️ Something went wrong</h4>
+                        <p>An unexpected error occurred while loading this page. Please try again.</p>
+                        <hr />
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError">🔄 Try Again</button>
+                            <a href="/" class="btn btn-outline-secondary btn-sm">🏠 Go to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
     </article>
 </main>
 
@@ -60,6 +77,10 @@
 </div>
 
 @code {
+    private ErrorBoundary? _errorBoundary;
+
     private string _version = System.Reflection.Assembly
         .GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+
+    private void ResetError() => _errorBoundary?.Recover();
 }

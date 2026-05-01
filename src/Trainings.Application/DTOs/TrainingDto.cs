@@ -12,7 +12,7 @@ public class TrainingDto
     public int TrainerId { get; set; }
     public string TrainerName { get; set; } = string.Empty;
     public int RegisteredCount { get; set; }
-    public int GroupId { get; set; }
+    public int? GroupId { get; set; }
     public string? GroupName { get; set; }
     public List<TrainingBlockDto> Blocks { get; set; } = new();
 }
@@ -25,7 +25,7 @@ public class CreateTrainingDto
     public DateTime DateTime { get; set; }
     public int Capacity { get; set; }
     public int TrainerId { get; set; }
-    public int GroupId { get; set; }
+    public int? GroupId { get; set; }
 }
 
 public class UpdateTrainingDto
@@ -37,5 +37,5 @@ public class UpdateTrainingDto
     public DateTime DateTime { get; set; }
     public int Capacity { get; set; }
     public bool IsActive { get; set; }
-    public int GroupId { get; set; }
+    public int? GroupId { get; set; }
 }
