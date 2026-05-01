@@ -1,6 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @attribute [Authorize]
+@using Trainings.Web.Auth
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
@@ -124,10 +125,10 @@
         _userName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User";
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
 
-        _isSuperAdmin = user.HasClaim("SuperAdmin", "true");
-        _isGroupAdmin = _isSuperAdmin || user.Claims.Any(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin");
-        _isGroupTrainer = _isGroupAdmin || user.Claims.Any(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Trainer");
-        _isGroupMember = _isGroupTrainer || user.Claims.Any(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal));
+        _isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        _isGroupAdmin = _isSuperAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin");
+        _isGroupTrainer = _isGroupAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Trainer");
+        _isGroupMember = _isGroupTrainer || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal));
 
         if (_isSuperAdmin || _isGroupAdmin)
         {

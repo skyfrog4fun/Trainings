@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Enums;
+using Trainings.Web.Auth;
 
 namespace Trainings.Web.Pages;
 
@@ -68,14 +69,14 @@ public class LoginModel : PageModel
 
         if (user.Role == UserRole.SuperAdmin)
         {
-            claims.Add(new Claim("SuperAdmin", "true"));
+            claims.Add(new Claim(AppClaimTypes.SuperAdmin, "true"));
         }
 
         // Add per-group role claims for all approved memberships
         var memberships = await _groupService.GetApprovedMembershipsForUserAsync(user.Id);
         foreach (var membership in memberships)
         {
-            claims.Add(new Claim($"GroupRole::{membership.GroupId}", membership.Role.ToString()));
+            claims.Add(new Claim(AppClaimTypes.GroupRole(membership.GroupId), membership.Role.ToString()));
         }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
