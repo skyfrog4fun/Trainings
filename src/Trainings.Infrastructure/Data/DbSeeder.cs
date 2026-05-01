@@ -171,10 +171,11 @@ public partial class DbSeeder
     {
         var columnsToAdd = new (string Table, string Column, string TypeAndDefault)[]
         {
-            ("GroupMemberships", "Status",      "INTEGER NOT NULL DEFAULT 0"),
-            ("GroupMemberships", "RequestedAt",  "TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'"),
-            ("GroupMemberships", "ApprovedAt",   "TEXT"),
-            ("GroupMemberships", "DeclinedAt",   "TEXT"),
+            ("GroupMemberships", "Status",        "INTEGER NOT NULL DEFAULT 0"),
+            ("GroupMemberships", "RequestedAt",    "TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'"),
+            ("GroupMemberships", "ApprovedAt",     "TEXT"),
+            ("GroupMemberships", "DeclinedAt",     "TEXT"),
+            ("NotificationLogs", "AttemptId",      "TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'"),
         };
 
         foreach (var (table, column, typeAndDefault) in columnsToAdd)

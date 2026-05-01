@@ -1,9 +1,10 @@
-@page "/groups/{GroupId:int}/members"
+@page "/groups/{Slug}/members"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "GroupAdmin")]
 @inject IGroupService GroupService
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
+@using Trainings.Domain.Enums
 
 <PageTitle>Group Members</PageTitle>
 
@@ -51,7 +52,7 @@
     }
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5>Members (@_members.Count)</h5>
+        <h5>Members (@_approvedMembers.Count approved)</h5>
         <button class="btn btn-success btn-sm" @onclick="() => _showAddForm = true">+ Add Member</button>
     </div>
 
@@ -61,18 +62,126 @@
     }
     else
     {
+        @if (_pendingMembers.Any())
+        {
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">⏳ Pending Requests (@_pendingMembers.Count)</div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Role</th><th>Requested</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in _pendingMembers)
+                            {
+                                <tr>
+                                    <td>@m.UserDisplayName</td>
+                                    <td class="text-muted small">@m.UserEmail</td>
+                                    <td><span class="badge bg-secondary">@m.Role</span></td>
+                                    <td class="small">@m.RequestedAt.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveMember(m)">Approve</button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeclineMember(m)">Decline</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (_adminMembers.Any())
+        {
+            <div class="card mb-3 border-primary">
+                <div class="card-header bg-primary text-white fw-bold">🛡️ Admins (@_adminMembers.Count)</div>
+                @RenderMemberTable(_adminMembers)
+            </div>
+        }
+
+        @if (_trainerMembers.Any())
+        {
+            <div class="card mb-3 border-info">
+                <div class="card-header bg-info text-dark fw-bold">🎯 Trainers (@_trainerMembers.Count)</div>
+                @RenderMemberTable(_trainerMembers)
+            </div>
+        }
+
+        @if (_participantMembers.Any())
+        {
+            <div class="card mb-3">
+                <div class="card-header fw-bold">👥 Participants (@_participantMembers.Count)</div>
+                @RenderMemberTable(_participantMembers)
+            </div>
+        }
+
+        @if (!_approvedMembers.Any() && !_pendingMembers.Any())
+        {
+            <div class="alert alert-info">No members yet.</div>
+        }
+    }
+
+    @if (_actionResult != null)
+    {
+        <div class="alert @_actionAlertClass mt-2">@_actionResult</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+
+    private GroupDto? _group;
+    private List<GroupMembershipDto> _allMembers = new();
+    private List<GroupMembershipDto> _pendingMembers = new();
+    private List<GroupMembershipDto> _approvedMembers = new();
+    private List<GroupMembershipDto> _adminMembers = new();
+    private List<GroupMembershipDto> _trainerMembers = new();
+    private List<GroupMembershipDto> _participantMembers = new();
+    private List<UserDto> _allUsers = new();
+    private bool _loading = true, _showAddForm;
+    private int _addUserId;
+    private string _addRole = "Participant";
+    private string? _addError;
+    private string _actionAlertClass = "alert-success";
+    private string? _actionResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _group = await GroupService.GetBySlugAsync(Slug);
+        if (_group == null)
+        {
+            NavigationManager.NavigateTo("/groups");
+            return;
+        }
+        _allUsers = (await UserService.GetAllAsync()).Where(u => u.IsActive).ToList();
+        await LoadMembers();
+    }
+
+    private async Task LoadMembers()
+    {
+        _loading = true;
+        _allMembers = (await GroupService.GetMembersAsync(_group!.Id)).ToList();
+        _pendingMembers = _allMembers.Where(m => m.Status == GroupMembershipStatus.Pending).ToList();
+        _approvedMembers = _allMembers.Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive).ToList();
+        _adminMembers = _approvedMembers.Where(m => m.Role == GroupMemberRole.Admin).ToList();
+        _trainerMembers = _approvedMembers.Where(m => m.Role == GroupMemberRole.Trainer).ToList();
+        _participantMembers = _approvedMembers.Where(m => m.Role == GroupMemberRole.Participant).ToList();
+        _loading = false;
+    }
+
+    private RenderFragment RenderMemberTable(List<GroupMembershipDto> members) => __builder =>
+    {
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-sm mb-0">
                 <thead>
-                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th>Joined</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Email</th><th>Active</th><th>Joined</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                    @foreach (var m in _members)
+                    @foreach (var m in members)
                     {
                         <tr>
                             <td>@m.UserDisplayName</td>
                             <td class="text-muted small">@m.UserEmail</td>
-                            <td><span class="badge bg-secondary">@m.Role</span></td>
                             <td>@(m.IsActive ? "✓" : "✗")</td>
                             <td class="small">@m.JoinedAt.ToString("MMM d, yyyy")</td>
                             <td>
@@ -83,37 +192,7 @@
                 </tbody>
             </table>
         </div>
-        @if (!_members.Any())
-        {
-            <div class="alert alert-info">No members yet.</div>
-        }
-    }
-</div>
-
-@code {
-    [Parameter] public int GroupId { get; set; }
-
-    private GroupDto? _group;
-    private List<GroupMembershipDto> _members = new();
-    private List<UserDto> _allUsers = new();
-    private bool _loading = true, _showAddForm;
-    private int _addUserId;
-    private string _addRole = "Participant";
-    private string? _addError;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _group = await GroupService.GetByIdAsync(GroupId);
-        _allUsers = (await UserService.GetAllAsync()).Where(u => u.IsActive).ToList();
-        await LoadMembers();
-    }
-
-    private async Task LoadMembers()
-    {
-        _loading = true;
-        _members = (await GroupService.GetMembersAsync(GroupId)).ToList();
-        _loading = false;
-    }
+    };
 
     private async Task AddMember()
     {
@@ -127,7 +206,7 @@
         {
             await GroupService.AddMemberAsync(new AddGroupMemberDto
             {
-                GroupId = GroupId,
+                GroupId = _group!.Id,
                 UserId = _addUserId,
                 Role = Enum.Parse<GroupMemberRole>(_addRole)
             });
@@ -138,6 +217,40 @@
         catch (Exception ex)
         {
             _addError = ex.Message;
+        }
+    }
+
+    private async Task ApproveMember(GroupMembershipDto m)
+    {
+        _actionResult = null;
+        try
+        {
+            await GroupService.ApproveMemberAsync(m.Id);
+            _actionAlertClass = "alert-success";
+            _actionResult = $"{m.UserDisplayName} approved.";
+            await LoadMembers();
+        }
+        catch (Exception ex)
+        {
+            _actionAlertClass = "alert-danger";
+            _actionResult = $"Failed: {ex.Message}";
+        }
+    }
+
+    private async Task DeclineMember(GroupMembershipDto m)
+    {
+        _actionResult = null;
+        try
+        {
+            await GroupService.DeclineMemberAsync(m.Id);
+            _actionAlertClass = "alert-info";
+            _actionResult = $"{m.UserDisplayName} declined.";
+            await LoadMembers();
+        }
+        catch (Exception ex)
+        {
+            _actionAlertClass = "alert-danger";
+            _actionResult = $"Failed: {ex.Message}";
         }
     }
 

@@ -1,6 +1,6 @@
 @page "/trainer-trainings"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Trainer,Admin")]
+@attribute [Authorize(Policy = "GroupTrainer")]
 @inject ITrainingService TrainingService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager

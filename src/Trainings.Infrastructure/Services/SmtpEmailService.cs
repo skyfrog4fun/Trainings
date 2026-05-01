@@ -57,14 +57,14 @@ public partial class SmtpEmailService : IEmailService
         await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, ct);
     }
 
-    public async Task SendTestEmailAsync(string toEmail, CancellationToken ct = default)
+    public async Task<bool> SendTestEmailAsync(string toEmail, CancellationToken ct = default)
     {
         var subject = "Test Email – SMTP Configuration Check";
         var body = """
             <p>This is a test email sent from the Trainings application.</p>
             <p>If you received this message, your SMTP configuration is working correctly.</p>
             """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, ct);
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, ct);
     }
 
     public async Task SendWelcomeWithPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
@@ -79,15 +79,16 @@ public partial class SmtpEmailService : IEmailService
         await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.WelcomeMail, null, null, ct);
     }
 
-    private async Task SendWithFallbackAsync(string toEmail, string subject, string htmlBody, NotificationAction action, int? userId, int? groupId, CancellationToken ct)
+    private async Task<bool> SendWithFallbackAsync(string toEmail, string subject, string htmlBody, NotificationAction action, int? userId, int? groupId, CancellationToken ct)
     {
         var configs = await _mailConfigService.GetActiveConfigsForGroupAsync(groupId, ct);
+        var attemptId = Guid.NewGuid();
 
         if (configs.Count == 0)
         {
             LogSmtpNotConfigured(_logger, subject);
-            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, false, "No active mail configurations available.", ct);
-            return;
+            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, false, "No active mail configurations available.", attemptId, ct);
+            return false;
         }
 
         foreach (var config in configs)
@@ -95,16 +96,18 @@ public partial class SmtpEmailService : IEmailService
             try
             {
                 await SendViaConfigAsync(config, toEmail, subject, htmlBody, ct);
-                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, true, null, ct);
-                return;
+                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, true, null, attemptId, ct);
+                return true;
             }
             catch (Exception ex)
             {
                 var errorMessage = BuildExceptionMessage(ex);
                 LogSmtpError(_logger, config.Host, config.Port, toEmail, subject, errorMessage, ex);
-                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, false, errorMessage, ct);
+                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, false, errorMessage, attemptId, ct);
             }
         }
+
+        return false;
     }
 
     private async Task SendViaConfigAsync(MailConfiguration config, string toEmail, string subject, string htmlBody, CancellationToken ct)

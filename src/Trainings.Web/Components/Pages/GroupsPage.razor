@@ -22,6 +22,11 @@
                         <label class="form-label">Name</label>
                         <input class="form-control" @bind="_formName" placeholder="Group name" />
                     </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Slug</label>
+                        <input class="form-control" @bind="_formSlug" placeholder="e.g. my-group (auto-generated from name if blank)" />
+                        <div class="form-text">Used in URLs. Leave blank to auto-generate from name.</div>
+                    </div>
                     <div class="col-12">
                         <label class="form-label">Description</label>
                         <textarea class="form-control" rows="2" @bind="_formDescription"></textarea>
@@ -65,7 +70,7 @@
                             <td>@group.MemberCount</td>
                             <td>@(group.IsActive ? "✓" : "✗")</td>
                             <td>
-                                <a href="/groups/@group.Id/members" class="btn btn-sm btn-outline-primary me-1">Members</a>
+                                <a href="/groups/@group.Slug/members" class="btn btn-sm btn-outline-primary me-1">Members</a>
                                 <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => EditGroup(group)">Edit</button>
                                 <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteGroup(group)">Delete</button>
                             </td>
@@ -85,7 +90,7 @@
     private List<GroupDto> _groups = new();
     private bool _loading = true, _showForm;
     private int _editGroupId;
-    private string _formName = "", _formDescription = "";
+    private string _formName = "", _formSlug = "", _formDescription = "";
     private bool _formIsActive = true;
     private string? _formError;
 
@@ -101,7 +106,7 @@
     private void ShowCreateForm()
     {
         _editGroupId = 0;
-        _formName = _formDescription = "";
+        _formName = _formSlug = _formDescription = "";
         _formIsActive = true;
         _formError = null;
         _showForm = true;
@@ -111,6 +116,7 @@
     {
         _editGroupId = group.Id;
         _formName = group.Name;
+        _formSlug = group.Slug;
         _formDescription = group.Description ?? "";
         _formIsActive = group.IsActive;
         _formError = null;
@@ -127,6 +133,7 @@
                 await GroupService.CreateAsync(new CreateGroupDto
                 {
                     Name = _formName,
+                    Slug = string.IsNullOrWhiteSpace(_formSlug) ? null : _formSlug,
                     Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription
                 });
             }
@@ -136,6 +143,7 @@
                 {
                     Id = _editGroupId,
                     Name = _formName,
+                    Slug = string.IsNullOrWhiteSpace(_formSlug) ? null : _formSlug,
                     Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription,
                     IsActive = _formIsActive
                 });

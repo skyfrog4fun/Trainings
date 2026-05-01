@@ -5,6 +5,8 @@ namespace Trainings.Domain.Entities;
 public class NotificationLog
 {
     public int Id { get; set; }
+    /// <summary>Groups all log entries that belong to the same send attempt (one per config tried).</summary>
+    public Guid AttemptId { get; set; } = Guid.Empty;
     public NotificationAction Action { get; set; }
     public string RecipientEmail { get; set; } = string.Empty;
     public int? UserId { get; set; }

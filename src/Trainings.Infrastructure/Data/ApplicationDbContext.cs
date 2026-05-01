@@ -193,6 +193,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<NotificationLog>(entity =>
         {
             entity.HasKey(nl => nl.Id);
+            entity.Property(nl => nl.AttemptId).HasColumnType("TEXT");
             entity.Property(nl => nl.RecipientEmail).IsRequired().HasMaxLength(256);
             entity.Property(nl => nl.ErrorMessage).HasMaxLength(2000);
             entity.HasOne(nl => nl.User)

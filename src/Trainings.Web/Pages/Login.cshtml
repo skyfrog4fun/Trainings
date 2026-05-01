@@ -37,8 +37,17 @@
                         &nbsp;·&nbsp;
                         <a href="/register" class="text-decoration-none small">Register</a>
                     </div>
+                    @if (Model.ShowInitialCredentials)
+                    {
+                        <div class="alert alert-info mt-3 small">
+                            <strong>🔐 Initial Setup</strong><br/>
+                            No users exist yet. Use these default credentials to log in:<br/>
+                            <strong>Email:</strong> @Model.SeedEmail<br/>
+                            <strong>Password:</strong> Admin123!
+                        </div>
+                    }
                     <div class="text-end mt-2">
-                        <small class="text-muted">v@Model.AppVersion</small>
+                        <small class="text-muted">v@(Model.AppVersion)</small>
                     </div>
                 </div>
             </div>

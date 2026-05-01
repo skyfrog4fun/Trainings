@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "SuperAdmin")]
 @inject IMailConfigurationService MailConfigService
+@inject IEmailService EmailService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @using Trainings.Domain.Entities
 
 <PageTitle>Mail Configuration</PageTitle>
@@ -153,6 +155,32 @@
     {
         <div class="alert @(_actionSuccess ? "alert-success" : "alert-danger") mt-3">@_actionResult</div>
     }
+
+    <div class="card mt-4">
+        <div class="card-header fw-bold">📧 Test Email</div>
+        <div class="card-body">
+            <p class="text-muted mb-2">Send a test email to verify your SMTP configuration is working correctly.</p>
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Recipient Email</label>
+                    <input class="form-control" type="email" @bind="_testEmail" placeholder="you@example.com" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <button class="btn btn-info w-100" @onclick="SendTestEmail" disabled="@_testEmailSending">
+                        @if (_testEmailSending)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        }
+                        Send Test Email
+                    </button>
+                </div>
+            </div>
+            @if (_testEmailResult != null)
+            {
+                <div class="alert @(_testEmailSuccess ? "alert-success" : "alert-danger") mt-2 mb-0">@_testEmailResult</div>
+            }
+        </div>
+    </div>
 </div>
 
 @code {
@@ -167,7 +195,17 @@
     private bool _actionSuccess;
     private string? _actionResult;
 
-    protected override async Task OnInitializedAsync() => await LoadConfigs();
+    private string _testEmail = "";
+    private bool _testEmailSending;
+    private bool _testEmailSuccess;
+    private string? _testEmailResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConfigs();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+    }
 
     private async Task LoadConfigs()
     {
@@ -318,4 +356,33 @@
     }
 
     private void CancelForm() => _showForm = false;
+
+    private async Task SendTestEmail()
+    {
+        _testEmailResult = null;
+        if (string.IsNullOrWhiteSpace(_testEmail))
+        {
+            _testEmailSuccess = false;
+            _testEmailResult = "Please enter a recipient email address.";
+            return;
+        }
+        _testEmailSending = true;
+        try
+        {
+            var succeeded = await EmailService.SendTestEmailAsync(_testEmail);
+            _testEmailSuccess = succeeded;
+            _testEmailResult = succeeded
+                ? $"✓ Test email sent successfully to {_testEmail}."
+                : $"✗ Failed to send test email to {_testEmail}. Check the notification log for details.";
+        }
+        catch (Exception ex)
+        {
+            _testEmailSuccess = false;
+            _testEmailResult = $"✗ Error: {ex.Message}";
+        }
+        finally
+        {
+            _testEmailSending = false;
+        }
+    }
 }

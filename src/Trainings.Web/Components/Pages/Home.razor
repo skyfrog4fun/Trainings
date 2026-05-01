@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 @attribute [Authorize]
 @using Trainings.Web.Auth
@@ -6,6 +6,7 @@
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject INotificationLogService NotificationLogService
+@inject IGroupService GroupService
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -41,33 +42,35 @@
             </div>
         </div>
 
-        @if (_recentLogs.Any())
+        @if (_recentAttempts.Any())
         {
             <div class="card mb-4">
                 <div class="card-header fw-bold">📊 Recent Notification Activity</div>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
-                            <tr><th>Date</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
+                            <tr><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
                         </thead>
                         <tbody>
-                            @foreach (var log in _recentLogs.Take(10))
+                            @foreach (var attempt in _recentAttempts)
                             {
+                                var last = attempt.Last();
+                                var count = attempt.Count;
                                 <tr>
-                                    <td class="small">@log.CreatedAt.ToLocalTime().ToString("MMM d, HH:mm")</td>
-                                    <td class="small">@log.Action</td>
-                                    <td class="small text-muted">@log.RecipientEmail</td>
+                                    <td class="small">@last.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
+                                    <td class="small">@last.Action</td>
+                                    <td class="small text-muted">@last.RecipientEmail</td>
                                     <td>
-                                        @if (log.IsSuccess)
+                                        @if (last.IsSuccess)
                                         {
-                                            <span class="badge bg-success">✓</span>
+                                            <span class="badge bg-success" title="@count config(s) tried">✓ @count</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger">✗</span>
+                                            <span class="badge bg-danger" title="@count config(s) tried, all failed">✗ @count</span>
                                         }
                                     </td>
-                                    <td class="small text-danger">@log.ErrorMessage</td>
+                                    <td class="small text-danger">@last.ErrorMessage</td>
                                 </tr>
                             }
                         </tbody>
@@ -90,7 +93,60 @@
                 </div>
             </div>
         </div>
-        <p><a href="/users" class="btn btn-primary">Manage Users</a></p>
+        <p>
+            <a href="/users" class="btn btn-primary me-2">Manage Users</a>
+            @if (_adminGroupSlug != null)
+            {
+                <a href="/groups/@_adminGroupSlug/members" class="btn btn-outline-primary">Manage Group</a>
+            }
+        </p>
+    }
+    else if (!_isGroupMember && !_isGroupTrainer)
+    {
+        @* Plain user with no group roles — show their membership status *@
+        @if (_userMemberships.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-bold">📋 Your Group Memberships</div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr><th>Group</th><th>Role</th><th>Status</th><th>Requested</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in _userMemberships)
+                            {
+                                <tr>
+                                    <td>@m.GroupName</td>
+                                    <td><span class="badge bg-secondary">@m.Role</span></td>
+                                    <td>
+                                        @switch (m.Status)
+                                        {
+                                            case Trainings.Domain.Enums.GroupMembershipStatus.Approved:
+                                                <span class="badge bg-success">Approved</span>
+                                                break;
+                                            case Trainings.Domain.Enums.GroupMembershipStatus.Pending:
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                break;
+                                            case Trainings.Domain.Enums.GroupMembershipStatus.Declined:
+                                                <span class="badge bg-danger">Declined</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="small text-muted">@m.RequestedAt.ToString("MMM d, yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                You are not a member of any group yet. <a href="/trainings">Browse trainings</a> or wait for an administrator to add you to a group.
+            </div>
+        }
     }
 
     @if (_isGroupTrainer)
@@ -117,6 +173,15 @@
     private List<TrainingDto> _trainerTrainings = new();
     private List<TrainingDto> _upcomingTrainings = new();
     private IReadOnlyList<Trainings.Domain.Entities.NotificationLog> _recentLogs = Array.Empty<Trainings.Domain.Entities.NotificationLog>();
+    private List<List<Trainings.Domain.Entities.NotificationLog>> _recentAttempts = new();
+    private List<UserMembershipViewModel> _userMemberships = new();
+    private string? _adminGroupSlug;
+
+    private record UserMembershipViewModel(
+        string GroupName,
+        Trainings.Domain.Enums.GroupMemberRole Role,
+        Trainings.Domain.Enums.GroupMembershipStatus Status,
+        DateTime RequestedAt);
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,7 +206,30 @@
             var since30d = DateTime.UtcNow.AddDays(-30);
             _successCount30d = await NotificationLogService.GetSuccessCountAsync(since30d);
             _failureCount30d = await NotificationLogService.GetFailureCountAsync(since30d);
-            _recentLogs = await NotificationLogService.GetRecentLogsAsync(10);
+            _recentLogs = await NotificationLogService.GetRecentLogsAsync(50);
+
+            // Group logs by AttemptId; take the 10 most recent distinct attempts
+            _recentAttempts = _recentLogs
+                .GroupBy(l => l.AttemptId)
+                .Select(g => g.OrderBy(l => l.CreatedAt).ToList())
+                .OrderByDescending(g => g.Last().CreatedAt)
+                .Take(10)
+                .ToList();
+        }
+
+        if (_isGroupAdmin && !_isSuperAdmin)
+        {
+            // Find first group the user admins so we can provide a direct link
+            var adminGroupIdClaim = user.Claims
+                .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin")
+                .Select(c => c.Type.Replace(AppClaimTypes.GroupRolePrefix, ""))
+                .FirstOrDefault();
+            if (int.TryParse(adminGroupIdClaim, out var adminGroupId))
+            {
+                var adminGroup = await GroupService.GetByIdAsync(adminGroupId);
+                var slug = adminGroup?.Slug;
+                _adminGroupSlug = string.IsNullOrEmpty(slug) ? null : slug;
+            }
         }
 
         if (_isGroupTrainer)
@@ -154,6 +242,21 @@
             _upcomingTrainings = (await TrainingService.GetActiveAsync())
                 .Where(t => t.DateTime >= DateTime.Now)
                 .Take(5)
+                .ToList();
+        }
+
+        // For plain users (not admin/trainer), show their membership statuses
+        if (!_isGroupAdmin && !_isGroupTrainer && _userId > 0)
+        {
+            var memberships = await GroupService.GetAllMembershipsForUserAsync(_userId);
+            var groups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
+            _userMemberships = memberships
+                .Select(m => new UserMembershipViewModel(
+                    groups.TryGetValue(m.GroupId, out var groupName) ? groupName : "Unknown",
+                    m.Role,
+                    m.Status,
+                    m.RequestedAt))
+                .OrderBy(m => m.GroupName)
                 .ToList();
         }
     }

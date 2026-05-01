@@ -15,10 +15,11 @@ public class NotificationLogService : INotificationLogService
         _context = context;
     }
 
-    public async Task LogAsync(NotificationAction action, string recipientEmail, int? userId, int? mailConfigurationId, int? groupId, bool isSuccess, string? errorMessage = null, CancellationToken ct = default)
+    public async Task LogAsync(NotificationAction action, string recipientEmail, int? userId, int? mailConfigurationId, int? groupId, bool isSuccess, string? errorMessage = null, Guid attemptId = default, CancellationToken ct = default)
     {
         var log = new NotificationLog
         {
+            AttemptId = attemptId == default ? Guid.NewGuid() : attemptId,
             Action = action,
             RecipientEmail = recipientEmail,
             UserId = userId,

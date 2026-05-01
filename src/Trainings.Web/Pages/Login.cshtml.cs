@@ -15,11 +15,13 @@ public class LoginModel : PageModel
 {
     private readonly IUserService _userService;
     private readonly IGroupService _groupService;
+    private readonly IConfiguration _configuration;
 
-    public LoginModel(IUserService userService, IGroupService groupService)
+    public LoginModel(IUserService userService, IGroupService groupService, IConfiguration configuration)
     {
         _userService = userService;
         _groupService = groupService;
+        _configuration = configuration;
     }
 
     [BindProperty]
@@ -38,10 +40,21 @@ public class LoginModel : PageModel
         ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
         ?? "1.0.0";
 
-    public IActionResult OnGet()
+    public bool ShowInitialCredentials { get; private set; }
+    public string SeedEmail { get; private set; } = string.Empty;
+
+    public async Task<IActionResult> OnGetAsync()
     {
         if (User.Identity?.IsAuthenticated == true)
             return Redirect("/");
+
+        var users = await _userService.GetAllAsync();
+        if (!users.Any())
+        {
+            ShowInitialCredentials = true;
+            SeedEmail = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
+        }
+
         return Page();
     }
 
