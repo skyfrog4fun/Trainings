@@ -12,6 +12,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
+      - TZ=Europe/Zurich
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/trainings.db
       - Seed__AdminEmail=${SEED_ADMIN_EMAIL}
       - Seed__AdminPassword=${SEED_ADMIN_PASSWORD}
