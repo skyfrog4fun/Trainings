@@ -6,6 +6,7 @@ using Trainings.Infrastructure;
 using Trainings.Infrastructure.Data;
 using Trainings.Web.Auth;
 using Trainings.Web.Components;
+using Trainings.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,4 +104,3 @@ public partial class Program
             "Application startup failed during database initialization");
 }
 
-internal sealed record ServerTimeResponse(string LocalDateTime);
