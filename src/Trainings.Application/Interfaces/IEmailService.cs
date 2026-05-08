@@ -1,3 +1,5 @@
+using Trainings.Application.DTOs;
+
 namespace Trainings.Application.Interfaces;
 
 public interface IEmailService
@@ -6,9 +8,10 @@ public interface IEmailService
     Task SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default);
     Task SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default);
     /// <summary>
-    /// Sends a test email. Returns true if at least one mail configuration succeeded,
-    /// false if all configurations failed or none are configured.
+    /// Sends a test email and returns the ordered per-configuration attempts.
+    /// When mailConfigurationId is null, all configurations are tested in priority order.
+    /// When mailConfigurationId is provided, that configuration is used even if inactive.
     /// </summary>
-    Task<bool> SendTestEmailAsync(string toEmail, CancellationToken ct = default);
+    Task<EmailSendResult> SendTestEmailAsync(string toEmail, int? mailConfigurationId = null, CancellationToken ct = default);
     Task SendWelcomeWithPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default);
 }

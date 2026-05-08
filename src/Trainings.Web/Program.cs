@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Trainings.Application;
@@ -5,6 +6,7 @@ using Trainings.Infrastructure;
 using Trainings.Infrastructure.Data;
 using Trainings.Web.Auth;
 using Trainings.Web.Components;
+using Trainings.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -88,6 +91,7 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorPages();
+app.MapGet("/api/time/server", () => TypedResults.Ok(new ServerTimeResponse(DateTimeOffset.Now.ToString("MMM d, yyyy HH:mm:ss zzz", CultureInfo.CurrentCulture))));
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
@@ -99,3 +103,4 @@ public partial class Program
         LoggerMessage.Define(LogLevel.Critical, new EventId(1, nameof(LogStartupFailed)),
             "Application startup failed during database initialization");
 }
+

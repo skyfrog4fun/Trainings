@@ -1,3 +1,5 @@
+using Trainings.Domain.Enums;
+
 namespace Trainings.Domain.Entities;
 
 public class MailConfiguration
@@ -11,9 +13,10 @@ public class MailConfiguration
     public string FromAddress { get; set; } = string.Empty;
     public int Priority { get; set; } = 1;
     public bool IsActive { get; set; } = true;
-    public int FailureCount { get; set; }
-    public DateTime? LastFailedOn { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? LastSuccessSentAt { get; set; }
+    public MailConfigurationStatus Status { get; set; } = MailConfigurationStatus.Unknown;
+    public string? LastError { get; set; }
 
     public ICollection<GroupMailConfiguration> GroupMailConfigurations { get; set; } = new List<GroupMailConfiguration>();
     public ICollection<NotificationLog> NotificationLogs { get; set; } = new List<NotificationLog>();

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
@@ -73,13 +74,27 @@ public class MailConfigurationService : IMailConfigurationService
             .ToListAsync(ct);
     }
 
-    public async Task ResetFailureCounterAsync(int id, CancellationToken ct = default)
+    public async Task RecordSuccessfulSendAsync(int id, DateTime sentAtUtc, CancellationToken ct = default)
     {
         var config = await _context.MailConfigurations.FindAsync([id], ct);
         if (config is not null)
         {
-            config.FailureCount = 0;
-            config.LastFailedOn = null;
+            config.LastSuccessSentAt = sentAtUtc;
+            config.Status = MailConfigurationStatus.Successful;
+            config.LastError = null;
+            await _context.SaveChangesAsync(ct);
+        }
+    }
+
+    public async Task RecordFailedSendAsync(int id, string errorMessage, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(errorMessage);
+
+        var config = await _context.MailConfigurations.FindAsync([id], ct);
+        if (config is not null)
+        {
+            config.Status = MailConfigurationStatus.Failed;
+            config.LastError = errorMessage;
             await _context.SaveChangesAsync(ct);
         }
     }

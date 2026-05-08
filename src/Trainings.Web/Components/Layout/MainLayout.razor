@@ -24,7 +24,7 @@
                         <NavLink class="dropdown-item" href="trainer-trainings">🎯 My Trainings</NavLink>
                     </li>
                 </AuthorizeView>
-                <AuthorizeView Roles="Admin,SuperAdmin">
+                <AuthorizeView Policy="GroupAdmin">
                     <li>
                         <NavLink class="dropdown-item" href="users">👥 Users</NavLink>
                     </li>
@@ -32,6 +32,11 @@
                 <AuthorizeView Roles="SuperAdmin">
                     <li>
                         <NavLink class="dropdown-item" href="groups">🏢 Groups</NavLink>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Policy="SuperAdmin">
+                    <li>
+                        <NavLink class="dropdown-item" href="config/mail">⚙️ Config</NavLink>
                     </li>
                 </AuthorizeView>
                 <li><hr class="dropdown-divider" /></li>
