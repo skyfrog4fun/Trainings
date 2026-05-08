@@ -293,7 +293,11 @@
     private void ShowCreateForm()
     {
         _editId = 0;
-        _formName = _formHost = _formUsername = _formPassword = _formFromAddress = string.Empty;
+        _formName = string.Empty;
+        _formHost = string.Empty;
+        _formUsername = string.Empty;
+        _formPassword = string.Empty;
+        _formFromAddress = string.Empty;
         _formPort = 587;
         _formPriority = _configs.Any() ? _configs.Max(c => c.Priority) + 1 : 1;
         _formIsActive = true;
