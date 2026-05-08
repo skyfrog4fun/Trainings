@@ -1,8 +1,7 @@
-using Trainings.Domain.Enums;
-
 using Microsoft.EntityFrameworkCore;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
