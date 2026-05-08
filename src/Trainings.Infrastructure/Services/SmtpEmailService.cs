@@ -2,6 +2,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
@@ -32,7 +33,7 @@ public partial class SmtpEmailService : IEmailService
             <p><a href="{resetLink}">{resetLink}</a></p>
             <p>This link expires in 1 hour. If you did not request this, please ignore this email.</p>
             """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.PasswordReset, null, null, ct);
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.PasswordReset, null, null, null, ct);
     }
 
     public async Task SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default)
@@ -43,7 +44,7 @@ public partial class SmtpEmailService : IEmailService
             <p><a href="{confirmLink}">{confirmLink}</a></p>
             <p>This link expires in 24 hours.</p>
             """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, ct);
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, null, ct);
     }
 
     public async Task SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default)
@@ -54,17 +55,17 @@ public partial class SmtpEmailService : IEmailService
             <p><strong>{userName}</strong></p>
             <p>Please review and approve or reject the registration in the admin panel.</p>
             """;
-        await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, ct);
+        await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
     }
 
-    public async Task<bool> SendTestEmailAsync(string toEmail, CancellationToken ct = default)
+    public async Task<EmailSendResult> SendTestEmailAsync(string toEmail, int? mailConfigurationId = null, CancellationToken ct = default)
     {
         var subject = "Test Email – SMTP Configuration Check";
         var body = """
             <p>This is a test email sent from the Trainings application.</p>
             <p>If you received this message, your SMTP configuration is working correctly.</p>
             """;
-        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, ct);
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, mailConfigurationId, ct);
     }
 
     public async Task SendWelcomeWithPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
@@ -76,19 +77,35 @@ public partial class SmtpEmailService : IEmailService
             <p><a href="{resetLink}">{resetLink}</a></p>
             <p>This link expires in 1 hour. If you did not expect this email, please ignore it.</p>
             """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.WelcomeMail, null, null, ct);
+        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.WelcomeMail, null, null, null, ct);
     }
 
-    private async Task<bool> SendWithFallbackAsync(string toEmail, string subject, string htmlBody, NotificationAction action, int? userId, int? groupId, CancellationToken ct)
+    private async Task<EmailSendResult> SendWithFallbackAsync(
+        string toEmail,
+        string subject,
+        string htmlBody,
+        NotificationAction action,
+        int? userId,
+        int? groupId,
+        int? mailConfigurationId,
+        CancellationToken ct)
     {
-        var configs = await _mailConfigService.GetActiveConfigsForGroupAsync(groupId, ct);
+        var configs = await GetConfigsAsync(groupId, mailConfigurationId, action == NotificationAction.TestEmail, ct);
         var attemptId = Guid.NewGuid();
+        var attempts = new List<EmailSendAttemptResult>();
 
         if (configs.Count == 0)
         {
             LogSmtpNotConfigured(_logger, subject);
-            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, false, "No active mail configurations available.", attemptId, ct);
-            return false;
+            var message = action == NotificationAction.TestEmail && mailConfigurationId.HasValue
+                ? "The selected mail configuration could not be found."
+                : "No mail configurations available.";
+            await _notificationLogService.LogAsync(action, toEmail, userId, mailConfigurationId, groupId, false, message, attemptId, ct);
+            return new EmailSendResult
+            {
+                IsSuccess = false,
+                Attempts = attempts
+            };
         }
 
         foreach (var config in configs)
@@ -96,21 +113,48 @@ public partial class SmtpEmailService : IEmailService
             try
             {
                 await SendViaConfigAsync(config, toEmail, subject, htmlBody, ct);
+                await _mailConfigService.RecordSuccessfulSendAsync(config.Id, DateTime.UtcNow, ct);
                 await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, true, null, attemptId, ct);
-                return true;
+                attempts.Add(new EmailSendAttemptResult
+                {
+                    MailConfigurationId = config.Id,
+                    ConfigurationName = config.Name,
+                    IsActive = config.IsActive,
+                    IsSuccess = true,
+                    Message = $"Sent successfully via {config.Name}."
+                });
+
+                return new EmailSendResult
+                {
+                    IsSuccess = true,
+                    Attempts = attempts
+                };
             }
             catch (Exception ex)
             {
                 var errorMessage = BuildExceptionMessage(ex);
                 LogSmtpError(_logger, config.Host, config.Port, toEmail, subject, errorMessage, ex);
+                await _mailConfigService.RecordFailedSendAsync(config.Id, errorMessage, ct);
                 await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, false, errorMessage, attemptId, ct);
+                attempts.Add(new EmailSendAttemptResult
+                {
+                    MailConfigurationId = config.Id,
+                    ConfigurationName = config.Name,
+                    IsActive = config.IsActive,
+                    IsSuccess = false,
+                    Message = $"{config.Name}: {errorMessage}"
+                });
             }
         }
 
-        return false;
+        return new EmailSendResult
+        {
+            IsSuccess = false,
+            Attempts = attempts
+        };
     }
 
-    private async Task SendViaConfigAsync(MailConfiguration config, string toEmail, string subject, string htmlBody, CancellationToken ct)
+    protected virtual async Task SendViaConfigAsync(MailConfiguration config, string toEmail, string subject, string htmlBody, CancellationToken ct)
     {
         LogSmtpSending(_logger, config.Host, config.Port, config.FromAddress, toEmail, subject);
 
@@ -156,6 +200,22 @@ public partial class SmtpEmailService : IEmailService
             current = current.InnerException;
         }
         return messages.ToString();
+    }
+
+    private async Task<IReadOnlyList<MailConfiguration>> GetConfigsAsync(int? groupId, int? mailConfigurationId, bool includeInactiveForTest, CancellationToken ct)
+    {
+        if (mailConfigurationId.HasValue)
+        {
+            var selectedConfig = await _mailConfigService.GetByIdAsync(mailConfigurationId.Value, ct);
+            return selectedConfig is null ? [] : [selectedConfig];
+        }
+
+        if (includeInactiveForTest)
+        {
+            return await _mailConfigService.GetAllAsync(ct);
+        }
+
+        return await _mailConfigService.GetActiveConfigsForGroupAsync(groupId, ct);
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "SMTP not configured (no active mail configurations). Email notification skipped for subject: {Subject}. Configure at least one mail configuration in the admin panel.")]

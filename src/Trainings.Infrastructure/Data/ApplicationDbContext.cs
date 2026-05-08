@@ -173,6 +173,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(mc => mc.Username).IsRequired().HasMaxLength(200);
             entity.Property(mc => mc.Password).IsRequired().HasMaxLength(500);
             entity.Property(mc => mc.FromAddress).IsRequired().HasMaxLength(256);
+            entity.Property(mc => mc.LastError).HasMaxLength(2000);
             entity.HasIndex(mc => mc.Priority).IsUnique();
         });
 

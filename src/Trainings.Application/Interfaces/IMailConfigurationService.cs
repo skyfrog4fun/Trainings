@@ -10,5 +10,6 @@ public interface IMailConfigurationService
     Task UpdateAsync(MailConfiguration config, CancellationToken ct = default);
     Task DeleteAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<MailConfiguration>> GetActiveConfigsForGroupAsync(int? groupId, CancellationToken ct = default);
-    Task ResetFailureCounterAsync(int id, CancellationToken ct = default);
+    Task RecordSuccessfulSendAsync(int id, DateTime sentAtUtc, CancellationToken ct = default);
+    Task RecordFailedSendAsync(int id, string errorMessage, CancellationToken ct = default);
 }

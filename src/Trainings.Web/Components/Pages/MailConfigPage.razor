@@ -1,10 +1,18 @@
 @page "/config/mail"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "SuperAdmin")]
+@using System.Net.Http.Json
+@using System.Globalization
+@using Microsoft.JSInterop
+@using Trainings.Application.DTOs
+@using Trainings.Domain.Entities
+@using Trainings.Domain.Enums
 @inject IMailConfigurationService MailConfigService
 @inject IEmailService EmailService
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using Trainings.Domain.Entities
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <PageTitle>Mail Configuration</PageTitle>
 
@@ -14,7 +22,28 @@
         <button class="btn btn-success" @onclick="ShowCreateForm">+ New Configuration</button>
     </div>
 
-    <p class="text-muted">Define SMTP server configurations used to send emails. Configurations are tried in priority order (1 = highest). On failure, the next configuration is tried.</p>
+    <p class="text-muted">Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</p>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center fw-bold">
+            <span>🕒 Server and Client Time</span>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshDateTimesAsync">Refresh</button>
+        </div>
+        <div class="card-body">
+            <div class="row g-2 small">
+                <div class="col-12 col-md-6">
+                    <strong>Server date/time:</strong> @_serverDateTime
+                </div>
+                <div class="col-12 col-md-6">
+                    <strong>Client date/time:</strong> @_clientDateTime
+                </div>
+            </div>
+            @if (_timeError is not null)
+            {
+                <div class="alert alert-warning mt-3 mb-0">@_timeError</div>
+            }
+        </div>
+    </div>
 
     @if (_showForm)
     {
@@ -125,24 +154,21 @@
                                     <strong>From:</strong> @config.FromAddress
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>Created:</strong> @config.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")
+                                    <strong>Created:</strong> @FormatServerDateTime(config.CreatedAt)
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>Failures:</strong>
-                                    @if (config.FailureCount > 0)
-                                    {
-                                        <span class="text-danger fw-bold">@config.FailureCount</span>
-                                        @if (config.LastFailedOn.HasValue)
-                                        {
-                                            <span class="text-muted ms-1">(last: @config.LastFailedOn.Value.ToLocalTime().ToString("MMM d, HH:mm"))</span>
-                                        }
-                                        <button class="btn btn-link btn-sm p-0 ms-2" @onclick="() => ResetFailures(config)">Reset</button>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-success">None</span>
-                                    }
+                                    <strong>Last Success Sent:</strong> @FormatServerDateTime(config.LastSuccessSentAt)
                                 </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>Status:</strong>
+                                    <span class="badge @GetStatusBadgeClass(config.Status) ms-1">@FormatStatus(config.Status)</span>
+                                </div>
+                                @if (config.Status != MailConfigurationStatus.Successful && !string.IsNullOrWhiteSpace(config.LastError))
+                                {
+                                    <div class="col-12 text-danger">
+                                        <strong>Latest Error:</strong> @config.LastError
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -159,11 +185,22 @@
     <div class="card mt-4">
         <div class="card-header fw-bold">📧 Test Email</div>
         <div class="card-body">
-            <p class="text-muted mb-2">Send a test email to verify your SMTP configuration is working correctly.</p>
+            <p class="text-muted mb-2">Send a test email against all configurations in priority order or against a single selected configuration.</p>
             <div class="row g-2 align-items-end">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-4">
                     <label class="form-label">Recipient Email</label>
                     <input class="form-control" type="email" @bind="_testEmail" placeholder="you@example.com" />
+                </div>
+                <div class="col-12 col-md-5">
+                    <label class="form-label">Mail Configuration</label>
+                    <select class="form-select" @bind="_selectedTestTarget">
+                        <option value="@AllConfigurationsValue">All configurations</option>
+                        @foreach (var config in _configs)
+                        {
+                            <option value="@config.Id">@GetConfigOptionLabel(config)</option>
+                        }
+                    </select>
+                    <div class="form-text">Inactive configurations remain selectable for targeted testing.</div>
                 </div>
                 <div class="col-12 col-md-3">
                     <button class="btn btn-info w-100" @onclick="SendTestEmail" disabled="@_testEmailSending">
@@ -175,36 +212,74 @@
                     </button>
                 </div>
             </div>
-            @if (_testEmailResult != null)
+            @if (_testEmailResult is not null)
             {
-                <div class="alert @(_testEmailSuccess ? "alert-success" : "alert-danger") mt-2 mb-0">@_testEmailResult</div>
+                <div class="alert @(_testEmailResult.IsSuccess ? "alert-success" : "alert-danger") mt-3">
+                    @GetTestResultSummary()
+                </div>
+
+                @if (_testEmailResult.Attempts.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var attempt in _testEmailResult.Attempts)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <span class="@(attempt.IsSuccess ? "text-success" : "text-danger")">@attempt.Message</span>
+                                @if (!attempt.IsActive)
+                                {
+                                    <span class="badge text-bg-secondary">Inactive</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
             }
         </div>
     </div>
 </div>
 
 @code {
+    private const string AllConfigurationsValue = "all";
+
     private List<MailConfiguration> _configs = new();
     private bool _loading = true;
     private bool _showForm;
     private int _editId;
-    private string _formName = "", _formHost = "", _formUsername = "", _formPassword = "", _formFromAddress = "";
-    private int _formPort = 587, _formPriority = 1;
+    private string _formName = string.Empty;
+    private string _formHost = string.Empty;
+    private string _formUsername = string.Empty;
+    private string _formPassword = string.Empty;
+    private string _formFromAddress = string.Empty;
+    private int _formPort = 587;
+    private int _formPriority = 1;
     private bool _formIsActive = true;
     private string? _formError;
     private bool _actionSuccess;
     private string? _actionResult;
 
-    private string _testEmail = "";
+    private string _testEmail = string.Empty;
     private bool _testEmailSending;
-    private bool _testEmailSuccess;
-    private string? _testEmailResult;
+    private string _selectedTestTarget = AllConfigurationsValue;
+    private EmailSendResult? _testEmailResult;
+
+    private string _serverDateTime = "Loading...";
+    private string _clientDateTime = "Loading...";
+    private string? _timeError;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadConfigs();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+        _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshDateTimesAsync();
+            StateHasChanged();
+        }
     }
 
     private async Task LoadConfigs()
@@ -217,7 +292,7 @@
     private void ShowCreateForm()
     {
         _editId = 0;
-        _formName = _formHost = _formUsername = _formPassword = _formFromAddress = "";
+        _formName = _formHost = _formUsername = _formPassword = _formFromAddress = string.Empty;
         _formPort = 587;
         _formPriority = _configs.Any() ? _configs.Max(c => c.Priority) + 1 : 1;
         _formIsActive = true;
@@ -232,7 +307,7 @@
         _formHost = config.Host;
         _formPort = config.Port;
         _formUsername = config.Username;
-        _formPassword = "";
+        _formPassword = string.Empty;
         _formFromAddress = config.FromAddress;
         _formPriority = config.Priority;
         _formIsActive = config.IsActive;
@@ -338,23 +413,6 @@
         }
     }
 
-    private async Task ResetFailures(MailConfiguration config)
-    {
-        _actionResult = null;
-        try
-        {
-            await MailConfigService.ResetFailureCounterAsync(config.Id);
-            await LoadConfigs();
-            _actionSuccess = true;
-            _actionResult = $"Failure counter reset for '{config.Name}'.";
-        }
-        catch (Exception ex)
-        {
-            _actionSuccess = false;
-            _actionResult = $"Failed: {ex.Message}";
-        }
-    }
-
     private void CancelForm() => _showForm = false;
 
     private async Task SendTestEmail()
@@ -362,27 +420,118 @@
         _testEmailResult = null;
         if (string.IsNullOrWhiteSpace(_testEmail))
         {
-            _testEmailSuccess = false;
-            _testEmailResult = "Please enter a recipient email address.";
+            _testEmailResult = new EmailSendResult
+            {
+                IsSuccess = false,
+                Attempts =
+                [
+                    new EmailSendAttemptResult
+                    {
+                        MailConfigurationId = 0,
+                        ConfigurationName = "Mail Test",
+                        IsActive = true,
+                        IsSuccess = false,
+                        Message = "Please enter a recipient email address."
+                    }
+                ]
+            };
             return;
         }
+
+        _actionResult = null;
         _testEmailSending = true;
+
         try
         {
-            var succeeded = await EmailService.SendTestEmailAsync(_testEmail);
-            _testEmailSuccess = succeeded;
-            _testEmailResult = succeeded
-                ? $"✓ Test email sent successfully to {_testEmail}."
-                : $"✗ Failed to send test email to {_testEmail}. Check the notification log for details.";
+            _testEmailResult = await EmailService.SendTestEmailAsync(_testEmail, GetSelectedTestConfigurationId());
+            await LoadConfigs();
         }
         catch (Exception ex)
         {
-            _testEmailSuccess = false;
-            _testEmailResult = $"✗ Error: {ex.Message}";
+            _testEmailResult = new EmailSendResult
+            {
+                IsSuccess = false,
+                Attempts =
+                [
+                    new EmailSendAttemptResult
+                    {
+                        MailConfigurationId = 0,
+                        ConfigurationName = "Mail Test",
+                        IsActive = true,
+                        IsSuccess = false,
+                        Message = ex.Message
+                    }
+                ]
+            };
         }
         finally
         {
             _testEmailSending = false;
         }
+    }
+
+    private async Task RefreshDateTimesAsync()
+    {
+        _timeError = null;
+
+        try
+        {
+            await RefreshServerDateTimeAsync();
+            _clientDateTime = await JSRuntime.InvokeAsync<string>("trainings.mailConfig.getClientLocalDateTime");
+        }
+        catch (Exception ex)
+        {
+            _timeError = $"Unable to refresh server/client date and time: {ex.Message}";
+        }
+    }
+
+    private async Task RefreshServerDateTimeAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient();
+        var serverTime = await httpClient.GetFromJsonAsync<ServerTimeResponse>(NavigationManager.ToAbsoluteUri("/api/time/server"));
+        _serverDateTime = serverTime?.LocalDateTime ?? "Unavailable";
+    }
+
+    private int? GetSelectedTestConfigurationId()
+        => _selectedTestTarget == AllConfigurationsValue ? null : int.Parse(_selectedTestTarget);
+
+    private string GetTestResultSummary()
+    {
+        var targetLabel = GetSelectedTestConfigurationId().HasValue ? "selected configuration" : "configured fallback order";
+
+        return _testEmailResult?.IsSuccess == true
+            ? $"✓ Test email sent successfully using the {targetLabel}."
+            : $"✗ Test email failed using the {targetLabel}.";
+    }
+
+    private static string GetConfigOptionLabel(MailConfiguration config)
+        => config.IsActive
+            ? $"{config.Priority}. {config.Name}"
+            : $"{config.Priority}. {config.Name} (inactive)";
+
+    private static string FormatServerDateTime(DateTime? value)
+        => value.HasValue
+            ? value.Value.ToLocalTime().ToString("MMM d, yyyy HH:mm:ss", CultureInfo.CurrentCulture)
+            : "Never";
+
+    private static string FormatStatus(MailConfigurationStatus status)
+        => status switch
+        {
+            MailConfigurationStatus.Successful => "Successful",
+            MailConfigurationStatus.Failed => "Failed",
+            _ => "Unknown"
+        };
+
+    private static string GetStatusBadgeClass(MailConfigurationStatus status)
+        => status switch
+        {
+            MailConfigurationStatus.Successful => "bg-success",
+            MailConfigurationStatus.Failed => "bg-danger",
+            _ => "bg-secondary"
+        };
+
+    private sealed class ServerTimeResponse
+    {
+        public string LocalDateTime { get; set; } = "Unavailable";
     }
 }
