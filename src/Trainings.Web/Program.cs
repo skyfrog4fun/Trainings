@@ -13,7 +13,6 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddRazorPages();
 
-
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
