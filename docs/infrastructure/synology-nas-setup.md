@@ -229,7 +229,7 @@ Because the reverse proxy runs on the NAS host (not inside Docker), publishing p
 
 ### 3.3.1 SMTP Outgoing Connectivity
 
-The DSM Reverse Proxy and the NAS firewall only apply to **incoming** connections (traffic from the internet into the NAS). They have **no effect** on outgoing connections that originate inside the container.
+SMTP delivery from the application is an outbound flow from the `trainings-web` container. No DSM Reverse Proxy rule is used for SMTP.
 
 When the application sends an email, the network path is:
 
@@ -251,9 +251,9 @@ This is entirely outgoing from the container. **No Reverse Proxy entry is needed
 
 On Synology NAS, Docker containers on a custom bridge network use Docker's embedded DNS relay (127.0.0.11), which forwards lookups to the DNS servers listed in the host's `/etc/resolv.conf`. Synology typically writes only the home router's LAN IP (e.g. `192.168.1.1`) into `/etc/resolv.conf`. That address is on a different network segment and is not reachable from inside the Docker bridge — DNS queries hang and eventually time out. The application's TCP connection attempt to `smtp-relay.brevo.com:587` therefore never starts, and the email fails.
 
-**Solution:** Add `dns: [8.8.8.8, 8.8.4.4]` to the container definition in `docker-compose.yml` (already included in the file). This bypasses the host DNS relay and sends DNS queries directly to Google's public resolvers, which are always reachable from the container via Docker's NAT.
+**Solution:** Add `dns: [8.8.8.8, 8.8.4.4]` to the container definition in `docker-compose.yml` (already included in the file). This bypasses the host DNS relay and sends DNS queries directly to public resolvers.
 
-> **Note on the NAS firewall:** The firewall profile controls incoming connections to the NAS. The final "Deny All" rule does not block outgoing connections from Docker containers to external internet services such as Brevo's SMTP server. Outgoing connectivity from containers is controlled entirely by Docker's iptables NAT rules and the home router.
+> **Important (DSM firewall):** In practice, Synology firewall profiles can still break Docker container egress when a broad final deny rule is active. If DNS and SMTP fail from containers, add an explicit **allow** rule for Docker bridge source ranges **before** the final deny rule in the active profile (for example, `172.16.0.0/255.240.0.0`). Then recreate the stack (`docker compose down && docker compose up -d --force-recreate`) and retest from inside a container.
 
 ### 3.4 Restart Policy
 
@@ -1169,6 +1169,7 @@ Use this checklist when setting up the environment on a new NAS:
 - [ ] Install Container Manager from Package Center
 - [ ] Create `docker-svc` user with access to `/volume1/docker/`
 - [ ] Configure NAS firewall (allow 80, 443, local subnet; deny all else)
+- [ ] In DSM firewall profile, add Docker bridge source allow rule before final deny (example: `All / All / 172.16.0.0/255.240.0.0 / Allow`)
 - [ ] Disable default `admin` account, enable 2FA on admin account
 - [ ] Create `/volume1/docker/trainings/data/` directory
 - [ ] Create `/volume1/docker/trainings/docker-compose.yml` (from Section 3.6)
@@ -1195,3 +1196,4 @@ Use this checklist when setting up the environment on a new NAS:
 | Blazor SignalR disconnects | WebSocket not enabled on proxy | Enable WebSocket support in DSM Reverse Proxy |
 | `docker compose pull` — permission denied | Docker socket not accessible without root | Use `sudo docker compose pull` on Synology DSM |
 | `docker compose pull` — manifest unknown | Image tagged `:latest` not yet published | Ensure the GitHub Actions workflow has run and pushed the `latest` tag |
+| SMTP test email fails and server time is unavailable; `nslookup` fails in container | Docker DNS/egress blocked by DSM firewall profile | Verify inside container: `docker run --rm busybox nslookup google.com` and `docker run --rm busybox ping -c 3 1.1.1.1`; ensure `dns:` entries exist in `docker-compose.yml`; add DSM firewall allow for Docker bridge ranges (e.g. `172.16.0.0/255.240.0.0`) before final deny; recreate stack |
