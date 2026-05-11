@@ -1,17 +1,14 @@
 @page "/config/mail"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "SuperAdmin")]
-@using System.Net.Http.Json
 @using System.Globalization
 @using Microsoft.JSInterop
 @using Trainings.Application.DTOs
 @using Trainings.Domain.Entities
 @using Trainings.Domain.Enums
-@using Trainings.Web.Models
 @inject IMailConfigurationService MailConfigService
 @inject IEmailService EmailService
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IHttpClientFactory HttpClientFactory
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
@@ -481,20 +478,13 @@
 
         try
         {
-            await RefreshServerDateTimeAsync();
+            _serverDateTime = DateTimeOffset.Now.ToString("MMM d, yyyy HH:mm:ss zzz", CultureInfo.CurrentCulture);
             _clientDateTime = await JSRuntime.InvokeAsync<string>("trainings.mailConfig.getClientLocalDateTime");
         }
         catch (Exception ex)
         {
             _timeError = $"Unable to refresh server/client date and time: {ex.Message}";
         }
-    }
-
-    private async Task RefreshServerDateTimeAsync()
-    {
-        var httpClient = HttpClientFactory.CreateClient();
-        var serverTime = await httpClient.GetFromJsonAsync<ServerTimeResponse>(NavigationManager.ToAbsoluteUri("/api/time/server"));
-        _serverDateTime = serverTime?.LocalDateTime ?? "Unavailable";
     }
 
     private int? GetSelectedTestConfigurationId()

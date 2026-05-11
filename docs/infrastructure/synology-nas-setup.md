@@ -131,9 +131,12 @@ To deactivate the default `admin` account:
 | 1 | All | 443 | Allow |
 | 2 | All | 80 | Allow |
 | 3 | 192.168.1.0/Subnet 255.255.0.0 | All | Allow |
-| 4 | All | All | Deny |
+| 4 | 172.16.0.0/Subnet 255.240.0.0 | All | Allow |
+| 5 | All | All | Deny |
 
 > **Note:** Port 80 is needed for Let's Encrypt HTTP-01 certificate validation. After the certificate is issued, you may restrict port 80 to only the Let's Encrypt validation service, or redirect it to 443.
+>
+> **Important (Docker profile):** Keep the Docker bridge allow rule (`172.16.0.0/255.240.0.0`) **above** the final deny rule. Without it, container egress can fail (DNS lookup timeouts, failed SMTP sends, and missing server-time retrieval in the app).
 
 ### 2.3.1 Verifying Port Reachability
 
@@ -151,6 +154,17 @@ If a port shows as **closed** or **timed out**:
 - Some ISPs (including Sunrise on certain residential plans) block inbound port 80. If port forwarding is correctly configured but port 80 remains blocked, contact your ISP.
 
 > **Sunrise Internet Box:** The router admin UI is typically at `http://192.168.1.1` or `http://internetbox.home`. Port forwarding is under **Network** → **Port Forwarding** ("NAT / Portweiterleitung"). Add TCP rules for external ports 80 and 443 pointing to the NAS LAN IP.
+
+### 2.3.2 Verifying Docker Container Egress
+
+After firewall changes, validate outbound connectivity from a temporary container:
+
+```bash
+sudo docker run --rm busybox ping -c 3 1.1.1.1
+sudo docker run --rm busybox nslookup google.com
+```
+
+Both commands must succeed. If they fail, re-check the Docker profile rule order in [Section 2.3](#23-firewall-configuration).
 
 ### 2.4 User Permissions
 
@@ -185,6 +199,34 @@ If you enable SSH in the future, be sure to harden it:
   ```
 4. Add your SSH public key via **Control Panel** → **User & Group** → **Advanced** → **User Home** and place it in `~/.ssh/authorized_keys`.
 5. Disable SSH again when not needed.
+
+### 2.6 Container Manager DNS (Optional Hardening)
+
+If you want a daemon-level DNS fallback for all Docker containers, you can define DNS servers in:
+
+`/var/packages/ContainerManager/etc/dockerd.json`
+
+Example:
+
+```json
+{
+  "bip":"172.31.0.1/24",
+  "data-root":"/var/packages/ContainerManager/var/docker",
+  "log-driver":"db",
+  "registry-mirrors":[],
+  "seccomp-profile":"unconfined",
+  "storage-driver":"btrfs",
+  "dns":["1.1.1.1","8.8.8.8"]
+}
+```
+
+Apply changes:
+
+```bash
+sudo synopkg restart ContainerManager
+```
+
+> **Recommendation:** Keep explicit `dns:` entries in `docker-compose.yml` even when daemon DNS is configured, so the stack remains deterministic and self-contained.
 
 ---
 
@@ -229,7 +271,7 @@ Because the reverse proxy runs on the NAS host (not inside Docker), publishing p
 
 ### 3.3.1 SMTP Outgoing Connectivity
 
-The DSM Reverse Proxy and the NAS firewall only apply to **incoming** connections (traffic from the internet into the NAS). They have **no effect** on outgoing connections that originate inside the container.
+SMTP delivery from the application is an outbound flow from the `trainings-web` container. No DSM Reverse Proxy rule is used for SMTP.
 
 When the application sends an email, the network path is:
 
@@ -251,9 +293,9 @@ This is entirely outgoing from the container. **No Reverse Proxy entry is needed
 
 On Synology NAS, Docker containers on a custom bridge network use Docker's embedded DNS relay (127.0.0.11), which forwards lookups to the DNS servers listed in the host's `/etc/resolv.conf`. Synology typically writes only the home router's LAN IP (e.g. `192.168.1.1`) into `/etc/resolv.conf`. That address is on a different network segment and is not reachable from inside the Docker bridge — DNS queries hang and eventually time out. The application's TCP connection attempt to `smtp-relay.brevo.com:587` therefore never starts, and the email fails.
 
-**Solution:** Add `dns: [8.8.8.8, 8.8.4.4]` to the container definition in `docker-compose.yml` (already included in the file). This bypasses the host DNS relay and sends DNS queries directly to Google's public resolvers, which are always reachable from the container via Docker's NAT.
+**Solution:** Add explicit DNS servers to the container definition in `docker-compose.yml` (already included in the file), e.g. `dns: [1.1.1.1, 8.8.8.8]`. This bypasses the host DNS relay and sends DNS queries directly to public resolvers.
 
-> **Note on the NAS firewall:** The firewall profile controls incoming connections to the NAS. The final "Deny All" rule does not block outgoing connections from Docker containers to external internet services such as Brevo's SMTP server. Outgoing connectivity from containers is controlled entirely by Docker's iptables NAT rules and the home router.
+> **Important (DSM firewall):** In practice, Synology firewall profiles can still break Docker container egress when a broad final deny rule is active. If DNS and SMTP fail from containers, add an explicit **allow** rule for Docker bridge source ranges **before** the final deny rule in the active profile (for example, `172.16.0.0/255.240.0.0`). Then recreate the stack (`docker compose down && docker compose up -d --force-recreate`) and retest from inside a container.
 
 ### 3.4 Restart Policy
 
@@ -288,6 +330,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
+      - TZ=Europe/Zurich
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/trainings.db
       - Seed__AdminEmail=${SEED_ADMIN_EMAIL}
       - Seed__AdminPassword=${SEED_ADMIN_PASSWORD}
@@ -295,8 +338,8 @@ services:
     volumes:
       - /volume1/docker/trainings/data:/app/data
     dns:
+      - 1.1.1.1
       - 8.8.8.8
-      - 8.8.4.4
     networks:
       - trainings-net
     ulimits:
@@ -310,6 +353,20 @@ services:
       retries: 3
       start_period: 15s
 
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json:ro
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 3 * * *
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+    command: trainings-web
+
 networks:
   trainings-net:
     driver: bridge
@@ -319,7 +376,8 @@ networks:
 - When running this on your Synology NAS, always use the `/volume1/...` Linux path for volumes.  
 - If you want to edit files from Windows, map the NAS share (e.g. `\\skynas24\docker\trainings`) as a network drive.  
 - Do **not** change the `/volume1/...` path in the YAML; Docker on the NAS only understands Linux paths, not Windows UNC paths.
-- The `dns:` entries (8.8.8.8 / 8.8.4.4) are required on Synology. Without them the container relies on Docker's DNS relay, which in turn uses the host's `/etc/resolv.conf`. On Synology this typically points to the router's LAN IP, which is not reachable from inside a Docker bridge network, causing DNS lookups for external hostnames (e.g. `smtp-relay.brevo.com`) to silently fail and all outgoing SMTP connections to time out. See [Section 3.3.1](#331-smtp-outgoing-connectivity) for a full explanation.
+- The `dns:` entries (1.1.1.1 / 8.8.8.8) are required on Synology. Without them the container relies on Docker's DNS relay, which in turn uses the host's `/etc/resolv.conf`. On Synology this typically points to the router's LAN IP, which is not reachable from inside a Docker bridge network, causing DNS lookups for external hostnames (e.g. `smtp-relay.brevo.com`) to silently fail and all outgoing SMTP connections to time out. See [Section 3.3.1](#331-smtp-outgoing-connectivity) for a full explanation.
+- Optional daemon-level DNS can be set in `/var/packages/ContainerManager/etc/dockerd.json` (see [Section 2.6](#26-container-manager-dns-optional-hardening)).
 
 Create a `.env` file in the same directory (never commit this file). The variables below must be set for full functionality — missing or empty values will silently disable the corresponding feature:
 
@@ -773,7 +831,7 @@ DSM renews Let's Encrypt certificates automatically 30 days before expiry. No ma
 
 ### 10.1 Firewall Configuration (Summary)
 
-The NAS firewall must block all ports except 80 and 443 from the public internet. Local subnet traffic can be permitted broadly. See [Section 2.3](#23-firewall-configuration) for the full rule set.
+The NAS firewall must block all ports except 80 and 443 from the public internet. Local subnet traffic can be permitted broadly. In the active Docker profile, add an allow rule for Docker bridge sources (`172.16.0.0/255.240.0.0`) before the final deny rule to preserve container egress. See [Section 2.3](#23-firewall-configuration) for the full rule set.
 
 ### 10.2 Container Isolation
 
@@ -1169,6 +1227,7 @@ Use this checklist when setting up the environment on a new NAS:
 - [ ] Install Container Manager from Package Center
 - [ ] Create `docker-svc` user with access to `/volume1/docker/`
 - [ ] Configure NAS firewall (allow 80, 443, local subnet; deny all else)
+- [ ] In DSM firewall profile, add Docker bridge source allow rule before final deny (example: `All / All / 172.16.0.0/255.240.0.0 / Allow`)
 - [ ] Disable default `admin` account, enable 2FA on admin account
 - [ ] Create `/volume1/docker/trainings/data/` directory
 - [ ] Create `/volume1/docker/trainings/docker-compose.yml` (from Section 3.6)
@@ -1195,3 +1254,4 @@ Use this checklist when setting up the environment on a new NAS:
 | Blazor SignalR disconnects | WebSocket not enabled on proxy | Enable WebSocket support in DSM Reverse Proxy |
 | `docker compose pull` — permission denied | Docker socket not accessible without root | Use `sudo docker compose pull` on Synology DSM |
 | `docker compose pull` — manifest unknown | Image tagged `:latest` not yet published | Ensure the GitHub Actions workflow has run and pushed the `latest` tag |
+| SMTP test email fails and server time is unavailable; `nslookup` fails in container | Docker DNS/egress blocked by DSM firewall profile | Verify inside container: `docker run --rm busybox nslookup google.com` and `docker run --rm busybox ping -c 3 1.1.1.1`; ensure `dns:` entries exist in `docker-compose.yml`; ensure Docker profile has allow for Docker bridge ranges (e.g. `172.16.0.0/255.240.0.0`) before final deny; optionally configure daemon DNS in `/var/packages/ContainerManager/etc/dockerd.json`; recreate stack |
