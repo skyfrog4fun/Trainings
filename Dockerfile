@@ -1,5 +1,5 @@
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:10.0.201 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.300 AS build
 WORKDIR /src
 
 COPY ["src/Trainings.Web/Trainings.Web.csproj", "src/Trainings.Web/"]
@@ -20,7 +20,7 @@ RUN dotnet publish "src/Trainings.Web/Trainings.Web.csproj" \
     --output /app/publish
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.3 AS runtime
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
