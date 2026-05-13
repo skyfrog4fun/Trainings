@@ -1,0 +1,40 @@
+@using Microsoft.AspNetCore.Components
+@using Trainings.Application.DTOs
+
+@if (Preview is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title mb-1">Email Preview</h5>
+                        <div class="small text-muted">No E-Mail mode is active, so the message was not sent.</div>
+                    </div>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row small">
+                        <dt class="col-sm-2">To</dt>
+                        <dd class="col-sm-10">@Preview.RecipientEmail</dd>
+                        <dt class="col-sm-2">Subject</dt>
+                        <dd class="col-sm-10">@Preview.Subject</dd>
+                    </dl>
+                    <div class="border rounded p-3 bg-light">
+                        @((MarkupString)Preview.HtmlBody)
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="Close">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EmailPreviewDto? Preview { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private Task Close() => OnClose.InvokeAsync();
+}

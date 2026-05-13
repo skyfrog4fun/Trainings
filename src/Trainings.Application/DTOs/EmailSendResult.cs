@@ -4,4 +4,5 @@ public sealed class EmailSendResult
 {
     public bool IsSuccess { get; init; }
     public IReadOnlyList<EmailSendAttemptResult> Attempts { get; init; } = [];
+    public EmailPreviewDto? Preview { get; init; }
 }

@@ -10,10 +10,12 @@ namespace Trainings.Infrastructure.Services;
 public class GroupService : IGroupService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
 
-    public GroupService(ApplicationDbContext context)
+    public GroupService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
     {
         _context = context;
+        _appRuntimeModeService = appRuntimeModeService;
     }
 
     public async Task<IEnumerable<GroupDto>> GetAllAsync(CancellationToken ct = default)
@@ -43,6 +45,8 @@ public class GroupService : IGroupService
 
     public async Task<GroupDto> CreateAsync(CreateGroupDto dto, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
         var group = new Group
         {
@@ -60,6 +64,8 @@ public class GroupService : IGroupService
 
     public async Task UpdateAsync(UpdateGroupDto dto, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var group = await _context.Groups.FindAsync([dto.Id], ct)
             ?? throw new InvalidOperationException($"Group {dto.Id} not found.");
 
@@ -86,6 +92,8 @@ public class GroupService : IGroupService
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var group = await _context.Groups.FindAsync([id], ct);
         if (group != null)
         {
@@ -105,6 +113,8 @@ public class GroupService : IGroupService
 
     public async Task AddMemberAsync(AddGroupMemberDto dto, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var membership = new GroupMembership
         {
             UserId = dto.UserId,
@@ -122,6 +132,8 @@ public class GroupService : IGroupService
 
     public async Task RemoveMemberAsync(int membershipId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var membership = await _context.GroupMemberships.FindAsync([membershipId], ct);
         if (membership != null)
         {
@@ -143,6 +155,8 @@ public class GroupService : IGroupService
 
     public async Task ApproveMemberAsync(int membershipId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
             ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
         membership.Status = GroupMembershipStatus.Approved;
@@ -153,6 +167,8 @@ public class GroupService : IGroupService
 
     public async Task DeclineMemberAsync(int membershipId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
             ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
         membership.Status = GroupMembershipStatus.Declined;

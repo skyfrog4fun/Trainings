@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject IAppRuntimeModeService AppRuntimeModeService
 
 <nav class="navbar sticky-top navbar-dark bg-dark shadow-sm">
     <div class="container-fluid">
@@ -14,12 +15,12 @@
                 <li>
                     <NavLink class="dropdown-item" href="trainings">📅 Trainings</NavLink>
                 </li>
-                <AuthorizeView Roles="Participant">
+                <AuthorizeView Policy="GroupMember">
                     <li>
                         <NavLink class="dropdown-item" href="my-registrations">📋 My Registrations</NavLink>
                     </li>
                 </AuthorizeView>
-                <AuthorizeView Roles="Trainer">
+                <AuthorizeView Policy="GroupTrainer">
                     <li>
                         <NavLink class="dropdown-item" href="trainer-trainings">🎯 My Trainings</NavLink>
                     </li>
@@ -29,12 +30,10 @@
                         <NavLink class="dropdown-item" href="users">👥 Users</NavLink>
                     </li>
                 </AuthorizeView>
-                <AuthorizeView Roles="SuperAdmin">
+                <AuthorizeView Policy="SuperAdmin">
                     <li>
                         <NavLink class="dropdown-item" href="groups">🏢 Groups</NavLink>
                     </li>
-                </AuthorizeView>
-                <AuthorizeView Policy="SuperAdmin">
                     <li>
                         <NavLink class="dropdown-item" href="config/mail">⚙️ Config</NavLink>
                     </li>
@@ -51,6 +50,15 @@
         </div>
     </div>
 </nav>
+
+@if (_runtimeMode.ActiveModes.Any())
+{
+    <div class="alert alert-warning rounded-0 mb-0 border-0">
+        <div class="container-fluid px-2 px-md-4">
+            <strong>Running mode:</strong> @string.Join(" · ", _runtimeMode.ActiveModes)
+        </div>
+    </div>
+}
 
 <main>
     <article class="content container-fluid px-2 px-md-4 py-3">
@@ -83,9 +91,15 @@
 
 @code {
     private ErrorBoundary? _errorBoundary;
+    private AppRuntimeModeDto _runtimeMode = new();
 
     private string _version = System.Reflection.Assembly
         .GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+
+    protected override void OnInitialized()
+    {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
+    }
 
     private void ResetError() => _errorBoundary?.Recover();
 }

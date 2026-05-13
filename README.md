@@ -1,5 +1,7 @@
 # Trainings
 
+Version: **v0.1.2**
+
 ## Overview
 
 Trainings is an application for planning and conducting training sessions, as well as reviewing past trainings. Registered participants can sign up or withdraw from sessions and view an overview of their trainings. Trainers create and manage training events, and record definitive attendance.
@@ -26,6 +28,24 @@ Trainings is an application for planning and conducting training sessions, as we
 - `src/Trainings.Infrastructure`: Data access and authentication
 - `src/Trainings.Web`: Web frontend (Blazor Server)
 - `tests/`: Unit tests
+
+## Running Modes
+
+Configure global runtime switches in `src/Trainings.Web/appsettings.json` under `App:Modes`:
+
+- `ReadOnly`: blocks write operations for everyone except SuperAdmins
+- `NoEmail`: suppresses outgoing mail and shows the generated message in an in-app preview modal where supported
+
+When either mode is active, the application shows a runtime indicator banner after sign-in.
+
+## Mail Traffic
+
+The application currently sends these mail types:
+
+- **Account / verification mail**: sent after self-registration and when an admin resends account setup for a user; contains the email verification link and is valid for 3 days
+- **Password reset mail**: sent from the "Forgot Password" flow; contains a 1-hour reset link
+- **Admin registration notification**: sent to SuperAdmins when a new self-registration is waiting for approval
+- **Test mail**: sent from the mail configuration page
 
 ## Usage
 

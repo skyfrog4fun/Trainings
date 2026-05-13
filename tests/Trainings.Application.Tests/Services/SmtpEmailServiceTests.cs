@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Trainings.Application.DTOs;
+using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;
@@ -83,11 +84,15 @@ public class SmtpEmailServiceTests
         ApplicationDbContext context,
         IReadOnlyDictionary<int, SendOutcome> outcomes)
     {
-        var mailConfigService = new MailConfigurationService(context);
+        var appRuntimeModeServiceMock = new Mock<IAppRuntimeModeService>();
+        appRuntimeModeServiceMock
+            .Setup(service => service.GetCurrent())
+            .Returns(new AppRuntimeModeDto());
+        var mailConfigService = new MailConfigurationService(context, appRuntimeModeServiceMock.Object);
         var notificationLogService = new NotificationLogService(context);
         var logger = Mock.Of<ILogger<SmtpEmailService>>();
 
-        return new TestableSmtpEmailService(mailConfigService, notificationLogService, logger, outcomes);
+        return new TestableSmtpEmailService(mailConfigService, notificationLogService, appRuntimeModeServiceMock.Object, logger, outcomes);
     }
 
     private static async Task<List<MailConfiguration>> SeedMailConfigurationsAsync(ApplicationDbContext context)
@@ -123,9 +128,10 @@ public class SmtpEmailServiceTests
         public TestableSmtpEmailService(
             MailConfigurationService mailConfigService,
             NotificationLogService notificationLogService,
+            IAppRuntimeModeService appRuntimeModeService,
             ILogger<SmtpEmailService> logger,
             IReadOnlyDictionary<int, SendOutcome> outcomes)
-            : base(mailConfigService, notificationLogService, logger)
+            : base(mailConfigService, notificationLogService, appRuntimeModeService, logger)
         {
             _outcomes = outcomes;
         }

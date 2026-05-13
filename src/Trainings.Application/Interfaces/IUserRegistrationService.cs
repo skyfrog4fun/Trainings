@@ -4,10 +4,10 @@ namespace Trainings.Application.Interfaces;
 
 public interface IUserRegistrationService
 {
-    Task<UserDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default);
-    Task ConfirmEmailAsync(string token, CancellationToken ct = default);
+    Task<RegistrationResultDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default);
+    Task<EmailConfirmationResultDto> ConfirmEmailAsync(string token, CancellationToken ct = default);
     Task ApproveUserAsync(int userId, int adminUserId, CancellationToken ct = default);
     Task RejectUserAsync(int userId, int adminUserId, CancellationToken ct = default);
     Task<IEnumerable<UserDto>> GetPendingApprovalsAsync(CancellationToken ct = default);
-    Task ResendEmailConfirmationAsync(int userId, CancellationToken ct = default);
+    Task<EmailSendResult> ResendEmailConfirmationAsync(int userId, CancellationToken ct = default);
 }

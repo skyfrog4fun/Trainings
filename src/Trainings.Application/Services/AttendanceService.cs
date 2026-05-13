@@ -9,10 +9,12 @@ namespace Trainings.Application.Services;
 public class AttendanceService : IAttendanceService
 {
     private readonly IAttendanceRepository _attendanceRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
 
-    public AttendanceService(IAttendanceRepository attendanceRepository)
+    public AttendanceService(IAttendanceRepository attendanceRepository, IAppRuntimeModeService appRuntimeModeService)
     {
         _attendanceRepository = attendanceRepository;
+        _appRuntimeModeService = appRuntimeModeService;
     }
 
     public async Task<IEnumerable<AttendanceDto>> GetByTrainingIdAsync(int trainingId)
@@ -29,6 +31,8 @@ public class AttendanceService : IAttendanceService
 
     public async Task RecordAttendanceAsync(int userId, int trainingId, AttendanceStatus status, int recordedByTrainerId)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var existing = await _attendanceRepository.GetByUserAndTrainingAsync(userId, trainingId);
         if (existing != null)
         {

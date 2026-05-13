@@ -11,11 +11,13 @@ public class TrainingService : ITrainingService
 {
     private readonly ITrainingRepository _trainingRepository;
     private readonly ApplicationDbContext _context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
 
-    public TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context)
+    public TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
     {
         _trainingRepository = trainingRepository;
         _context = context;
+        _appRuntimeModeService = appRuntimeModeService;
     }
 
     public async Task<TrainingDto?> GetByIdAsync(int id)
@@ -44,6 +46,12 @@ public class TrainingService : ITrainingService
 
     public async Task<TrainingDto> CreateAsync(CreateTrainingDto dto)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+        if (!dto.GroupId.HasValue)
+        {
+            throw new InvalidOperationException("A training group must be selected.");
+        }
+
         var training = new Training
         {
             Title = dto.Title,
@@ -61,6 +69,12 @@ public class TrainingService : ITrainingService
 
     public async Task UpdateAsync(UpdateTrainingDto dto)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+        if (!dto.GroupId.HasValue)
+        {
+            throw new InvalidOperationException("A training group must be selected.");
+        }
+
         var training = await _trainingRepository.GetByIdAsync(dto.Id)
             ?? throw new InvalidOperationException($"Training {dto.Id} not found.");
         training.Title = dto.Title;
@@ -75,6 +89,7 @@ public class TrainingService : ITrainingService
 
     public async Task DeleteAsync(int id)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
         await _trainingRepository.DeleteAsync(id);
     }
 
@@ -91,6 +106,8 @@ public class TrainingService : ITrainingService
 
     public async Task<TrainingBlockDto> AddBlockAsync(CreateTrainingBlockDto dto, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var block = new TrainingBlock
         {
             TrainingId = dto.TrainingId,
@@ -121,6 +138,8 @@ public class TrainingService : ITrainingService
 
     public async Task UpdateBlockAsync(UpdateTrainingBlockDto dto, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var block = await _context.TrainingBlocks
             .Include(b => b.TrainingBlockTags)
             .FirstOrDefaultAsync(b => b.Id == dto.Id, ct)
@@ -145,6 +164,8 @@ public class TrainingService : ITrainingService
 
     public async Task DeleteBlockAsync(int blockId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var block = await _context.TrainingBlocks.FindAsync([blockId], ct);
         if (block != null)
         {
@@ -155,6 +176,8 @@ public class TrainingService : ITrainingService
 
     public async Task CopyBlockAsync(int sourceBlockId, int targetTrainingId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var source = await _context.TrainingBlocks
             .Include(b => b.TrainingBlockTags)
             .FirstOrDefaultAsync(b => b.Id == sourceBlockId, ct)

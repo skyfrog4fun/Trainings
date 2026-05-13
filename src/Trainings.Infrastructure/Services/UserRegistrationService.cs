@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
@@ -12,23 +13,34 @@ public class UserRegistrationService : IUserRegistrationService
 {
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
+    private readonly IAuthorizationHelper _authorizationHelper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IPasswordHasher _passwordHasher;
     private readonly string _baseUrl;
 
     public UserRegistrationService(
         ApplicationDbContext context,
         IEmailService emailService,
+        IAppRuntimeModeService appRuntimeModeService,
+        IAuthorizationHelper authorizationHelper,
+        IHttpContextAccessor httpContextAccessor,
         IPasswordHasher passwordHasher,
         IConfiguration configuration)
     {
         _context = context;
         _emailService = emailService;
+        _appRuntimeModeService = appRuntimeModeService;
+        _authorizationHelper = authorizationHelper;
+        _httpContextAccessor = httpContextAccessor;
         _passwordHasher = passwordHasher;
         _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
     }
 
-    public async Task<UserDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default)
+    public async Task<RegistrationResultDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email, ct))
         {
             throw new InvalidOperationException("An account with this email already exists.");
@@ -53,79 +65,120 @@ public class UserRegistrationService : IUserRegistrationService
         _context.Users.Add(user);
         await _context.SaveChangesAsync(ct);
 
-        // Add group membership requests with Pending status
         foreach (var groupId in dto.RequestedGroupIds)
         {
             var groupExists = await _context.Groups.AnyAsync(g => g.Id == groupId, ct);
-            if (groupExists)
+            if (!groupExists)
             {
-                _context.GroupMemberships.Add(new GroupMembership
-                {
-                    UserId = user.Id,
-                    GroupId = groupId,
-                    Role = GroupMemberRole.Participant,
-                    Status = GroupMembershipStatus.Pending,
-                    IsActive = false,
-                    RequestedAt = DateTime.UtcNow,
-                    JoinedAt = DateTime.UtcNow
-                });
+                continue;
             }
+
+            _context.GroupMemberships.Add(new GroupMembership
+            {
+                UserId = user.Id,
+                GroupId = groupId,
+                Role = GroupMemberRole.Participant,
+                Status = GroupMembershipStatus.Pending,
+                IsActive = false,
+                RequestedAt = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow
+            });
         }
 
-        // Create email confirmation token
         var confirmToken = new EmailConfirmationToken
         {
             UserId = user.Id,
             Token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"),
-            ExpiresAt = DateTime.UtcNow.AddDays(1),
+            ExpiresAt = DateTime.UtcNow.AddDays(3),
             IsUsed = false
         };
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
         var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
-        await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
+        var confirmationEmail = await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
 
-        // Notify admins (SuperAdmins at system level)
         var admins = await _context.Users
             .Where(u => u.Role == UserRole.SuperAdmin)
             .ToListAsync(ct);
+
         foreach (var admin in admins)
         {
-            await _emailService.SendAdminNewParticipantNotificationAsync(
-                admin.Email, user.DisplayName, ct);
+            await _emailService.SendAdminNewParticipantNotificationAsync(admin.Email, user.DisplayName, ct);
         }
 
-        return MapToDto(user);
+        return new RegistrationResultDto
+        {
+            User = MapToDto(user),
+            ConfirmationEmail = confirmationEmail
+        };
     }
 
-    public async Task ConfirmEmailAsync(string token, CancellationToken ct = default)
+    public async Task<EmailConfirmationResultDto> ConfirmEmailAsync(string token, CancellationToken ct = default)
     {
         var confirmToken = await _context.EmailConfirmationTokens
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.Token == token, ct);
 
-        if (confirmToken == null || confirmToken.IsUsed || confirmToken.ExpiresAt < DateTime.UtcNow)
+        if (confirmToken == null)
         {
-            throw new InvalidOperationException("Invalid or expired confirmation token.");
+            return new EmailConfirmationResultDto
+            {
+                Message = "Invalid confirmation token."
+            };
+        }
+
+        if (confirmToken.IsUsed)
+        {
+            return new EmailConfirmationResultDto
+            {
+                Message = "This confirmation link has already been used."
+            };
+        }
+
+        if (confirmToken.ExpiresAt < DateTime.UtcNow)
+        {
+            return new EmailConfirmationResultDto
+            {
+                IsExpired = true,
+                UserId = confirmToken.UserId,
+                Message = "This confirmation link has expired."
+            };
         }
 
         confirmToken.User.EmailConfirmedAt = DateTime.UtcNow;
         confirmToken.IsUsed = true;
         await _context.SaveChangesAsync(ct);
+
+        return new EmailConfirmationResultDto
+        {
+            IsSuccess = true,
+            UserId = confirmToken.UserId,
+            Message = "Your email has been confirmed. Your account is pending admin approval."
+        };
     }
 
     public async Task ApproveUserAsync(int userId, int adminUserId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
         user.EntryDate = DateTime.UtcNow;
 
-        // Approve pending group membership requests
+        var managedGroupIds = GetManagedGroupIds();
         var pendingMemberships = await _context.GroupMemberships
-            .Where(gm => gm.UserId == userId && gm.Status == GroupMembershipStatus.Pending)
+            .Where(gm =>
+                gm.UserId == userId &&
+                gm.Status == GroupMembershipStatus.Pending &&
+                (managedGroupIds == null || managedGroupIds.Contains(gm.GroupId)))
             .ToListAsync(ct);
+
+        if (pendingMemberships.Count == 0)
+        {
+            throw new InvalidOperationException("No pending group requests are available for approval.");
+        }
 
         foreach (var membership in pendingMemberships)
         {
@@ -139,13 +192,23 @@ public class UserRegistrationService : IUserRegistrationService
 
     public async Task RejectUserAsync(int userId, int adminUserId, CancellationToken ct = default)
     {
-        var user = await _context.Users.FindAsync([userId], ct)
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        _ = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
-        // Decline pending group membership requests
+        var managedGroupIds = GetManagedGroupIds();
         var pendingMemberships = await _context.GroupMemberships
-            .Where(gm => gm.UserId == userId && gm.Status == GroupMembershipStatus.Pending)
+            .Where(gm =>
+                gm.UserId == userId &&
+                gm.Status == GroupMembershipStatus.Pending &&
+                (managedGroupIds == null || managedGroupIds.Contains(gm.GroupId)))
             .ToListAsync(ct);
+
+        if (pendingMemberships.Count == 0)
+        {
+            throw new InvalidOperationException("No pending group requests are available for rejection.");
+        }
 
         foreach (var membership in pendingMemberships)
         {
@@ -158,8 +221,11 @@ public class UserRegistrationService : IUserRegistrationService
 
     public async Task<IEnumerable<UserDto>> GetPendingApprovalsAsync(CancellationToken ct = default)
     {
+        var managedGroupIds = GetManagedGroupIds();
         var userIds = await _context.GroupMemberships
-            .Where(gm => gm.Status == GroupMembershipStatus.Pending)
+            .Where(gm =>
+                gm.Status == GroupMembershipStatus.Pending &&
+                (managedGroupIds == null || managedGroupIds.Contains(gm.GroupId)))
             .Select(gm => gm.UserId)
             .Distinct()
             .ToListAsync(ct);
@@ -172,15 +238,17 @@ public class UserRegistrationService : IUserRegistrationService
         return users.Select(MapToDto);
     }
 
-    public async Task ResendEmailConfirmationAsync(int userId, CancellationToken ct = default)
+    public async Task<EmailSendResult> ResendEmailConfirmationAsync(int userId, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
-        // Invalidate old confirmation tokens
         var oldTokens = await _context.EmailConfirmationTokens
             .Where(t => t.UserId == userId && !t.IsUsed)
             .ToListAsync(ct);
+
         foreach (var old in oldTokens)
         {
             old.IsUsed = true;
@@ -190,14 +258,25 @@ public class UserRegistrationService : IUserRegistrationService
         {
             UserId = user.Id,
             Token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"),
-            ExpiresAt = DateTime.UtcNow.AddDays(1),
+            ExpiresAt = DateTime.UtcNow.AddDays(3),
             IsUsed = false
         };
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
         var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
-        await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
+        return await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
+    }
+
+    private HashSet<int>? GetManagedGroupIds()
+    {
+        var user = _httpContextAccessor.HttpContext?.User;
+        if (user?.Identity?.IsAuthenticated != true || _authorizationHelper.IsSuperAdmin(user))
+        {
+            return null;
+        }
+
+        return _authorizationHelper.GetGroupIdsForRole(user, "Admin").ToHashSet();
     }
 
     private static UserDto MapToDto(User user) => new()

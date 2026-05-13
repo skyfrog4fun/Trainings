@@ -1,9 +1,11 @@
 @page "/trainings/create"
 @page "/trainings/{Id:int}/edit"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Trainer,Admin,SuperAdmin")]
+@attribute [Authorize(Policy = "GroupTrainer")]
 @inject ITrainingService TrainingService
 @inject ITagService TagService
+@inject IGroupService GroupService
+@inject IAppRuntimeModeService AppRuntimeModeService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
@@ -14,6 +16,13 @@
         <a href="/trainer-trainings" class="btn btn-sm btn-outline-secondary">← Back</a>
     </div>
     <h2>@(_isEdit ? "Edit Training" : "New Training")</h2>
+
+    @if (IsWriteBlocked)
+    {
+        <div class="alert alert-warning">
+            Read Only mode is active. Only SuperAdmins can create or edit trainings.
+        </div>
+    }
 
     <div class="card mb-4">
         <div class="card-body">
@@ -36,6 +45,16 @@
                 </div>
             </div>
             <div class="mb-3">
+                <label class="form-label">Group *</label>
+                <select class="form-select" @bind="_groupId">
+                    <option value="">Select a group</option>
+                    @foreach (var group in _availableGroups)
+                    {
+                        <option value="@group.Id">@group.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Date & Time</label>
                 <input class="form-control" type="datetime-local" @bind="_dateTime" />
             </div>
@@ -47,7 +66,7 @@
                 </div>
             }
             @if (_error != null) { <div class="alert alert-danger">@_error</div> }
-            <button class="btn btn-primary btn-lg w-100" @onclick="Save">
+            <button class="btn btn-primary btn-lg w-100" @onclick="Save" disabled="@IsWriteBlocked">
                 @(_isEdit ? "Update Training" : "Create Training")
             </button>
         </div>
@@ -58,7 +77,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Training Blocks</h4>
             <div>
-                <button class="btn btn-success btn-sm me-2" @onclick="AddBlock">+ Add Block</button>
+                <button class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@IsWriteBlocked">+ Add Block</button>
                 <button class="btn btn-outline-secondary btn-sm" @onclick="() => _showLibrary = !_showLibrary">
                     📚 From Library
                 </button>
@@ -83,7 +102,7 @@
                                         <div class="alert alert-info py-1 px-2 mt-1 small mb-0">💬 @block.TrainerComment</div>
                                     }
                                 </div>
-                                <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => CopyFromLibrary(block)">Add</button>
+                                <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => CopyFromLibrary(block)" disabled="@IsWriteBlocked">Add</button>
                             </div>
                         }
                         @if (!FilteredLibraryBlocks.Any())
@@ -131,7 +150,7 @@
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <button class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)">Save</button>
+                                    <button class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked">Save</button>
                                     <button class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit">Cancel</button>
                                 </div>
                             </div>
@@ -153,10 +172,10 @@
                                     }
                                 </div>
                                 <div class="btn-group btn-group-sm ms-2">
-                                    <button class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0)">↑</button>
-                                    <button class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1)">↓</button>
-                                    <button class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)">Edit</button>
-                                    <button class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)">✕</button>
+                                    <button class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0 || IsWriteBlocked)">↑</button>
+                                    <button class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1 || IsWriteBlocked)">↓</button>
+                                    <button class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked">Edit</button>
+                                    <button class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked">✕</button>
                                 </div>
                             </div>
                         }
@@ -178,23 +197,31 @@
     [Parameter] public int? Id { get; set; }
 
     private bool _isEdit => Id.HasValue;
-    private string _title = "", _description = "", _location = "";
+    private AppRuntimeModeDto _runtimeMode = new();
+    private List<GroupDto> _availableGroups = new();
+    private bool _isSuperAdmin;
+    private string _title = string.Empty;
+    private string _description = string.Empty;
+    private string _location = string.Empty;
     private int _capacity = 10;
     private DateTime _dateTime = DateTime.Now.AddDays(7);
     private bool _isActive = true;
     private string? _error;
     private int _trainerId;
+    private int? _groupId;
 
-    // Blocks
     private List<TrainingBlockDto> _blocks = new();
     private List<TagDto> _allTags = new();
     private List<TrainingBlockDto> _libraryBlocks = new();
     private bool _showLibrary;
-    private string _librarySearch = "";
+    private string _librarySearch = string.Empty;
     private int _editingBlockIndex = -1;
-    private string _blockTitle = "", _blockDescription = "";
+    private string _blockTitle = string.Empty;
+    private string _blockDescription = string.Empty;
     private int _blockPlannedMinutes = 30;
     private HashSet<int> _blockTagIds = new();
+
+    private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
 
     private IEnumerable<TrainingBlockDto> FilteredLibraryBlocks =>
         string.IsNullOrWhiteSpace(_librarySearch)
@@ -206,8 +233,23 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        _trainerId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        var user = authState.User;
+        _trainerId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        _isSuperAdmin = user.HasClaim("SuperAdmin", "true");
+
+        var managedGroupIds = user.Claims
+            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && (c.Value == "Admin" || c.Value == "Trainer"))
+            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+
+        var groups = await GroupService.GetAllAsync();
+        _availableGroups = _isSuperAdmin
+            ? groups.Where(g => g.IsActive).OrderBy(g => g.Name).ToList()
+            : groups.Where(g => g.IsActive && managedGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
 
         _allTags = (await TagService.GetAllAsync()).ToList();
 
@@ -222,7 +264,9 @@
                 _capacity = training.Capacity;
                 _dateTime = training.DateTime;
                 _isActive = training.IsActive;
+                _groupId = training.GroupId;
             }
+
             _blocks = (await TrainingService.GetBlocksAsync(Id.Value)).ToList();
             _libraryBlocks = (await TrainingService.GetAllBlocksLibraryAsync())
                 .Where(b => b.TrainingId != Id.Value)
@@ -233,6 +277,13 @@
     private async Task Save()
     {
         _error = null;
+
+        if (!_groupId.HasValue)
+        {
+            _error = "Please select a group.";
+            return;
+        }
+
         try
         {
             if (_isEdit && Id.HasValue)
@@ -245,7 +296,8 @@
                     Location = _location,
                     Capacity = _capacity,
                     DateTime = _dateTime,
-                    IsActive = _isActive
+                    IsActive = _isActive,
+                    GroupId = _groupId
                 });
             }
             else
@@ -257,11 +309,12 @@
                     Location = _location,
                     Capacity = _capacity,
                     DateTime = _dateTime,
-                    TrainerId = _trainerId
+                    TrainerId = _trainerId,
+                    GroupId = _groupId
                 });
-                NavigationManager.NavigateTo("/trainer-trainings");
-                return;
             }
+
+            NavigationManager.NavigateTo("/trainer-trainings");
         }
         catch (Exception ex)
         {
@@ -272,8 +325,8 @@
     private void AddBlock()
     {
         _editingBlockIndex = _blocks.Count;
-        _blockTitle = "";
-        _blockDescription = "";
+        _blockTitle = string.Empty;
+        _blockDescription = string.Empty;
         _blockPlannedMinutes = 30;
         _blockTagIds = new();
     }
@@ -283,18 +336,20 @@
         _editingBlockIndex = idx;
         var block = _blocks[idx];
         _blockTitle = block.Title;
-        _blockDescription = block.Description ?? "";
+        _blockDescription = block.Description ?? string.Empty;
         _blockPlannedMinutes = block.PlannedDurationMinutes;
         _blockTagIds = block.Tags.Select(t => t.Id).ToHashSet();
     }
 
     private async Task SaveBlock(int idx)
     {
-        if (string.IsNullOrWhiteSpace(_blockTitle)) return;
+        if (string.IsNullOrWhiteSpace(_blockTitle))
+        {
+            return;
+        }
 
         if (idx >= _blocks.Count)
         {
-            // New block
             var dto = new CreateTrainingBlockDto
             {
                 TrainingId = Id!.Value,
@@ -324,6 +379,7 @@
             await TrainingService.UpdateBlockAsync(dto);
             _blocks = (await TrainingService.GetBlocksAsync(Id!.Value)).ToList();
         }
+
         _editingBlockIndex = -1;
     }
 
@@ -333,14 +389,17 @@
     {
         await TrainingService.DeleteBlockAsync(_blocks[idx].Id);
         _blocks.RemoveAt(idx);
-        // Re-index
         await ReorderBlocks();
     }
 
     private async Task MoveBlock(int idx, int direction)
     {
         var newIdx = idx + direction;
-        if (newIdx < 0 || newIdx >= _blocks.Count) return;
+        if (newIdx < 0 || newIdx >= _blocks.Count)
+        {
+            return;
+        }
+
         (_blocks[idx], _blocks[newIdx]) = (_blocks[newIdx], _blocks[idx]);
         await ReorderBlocks();
     }
@@ -350,21 +409,23 @@
         for (var i = 0; i < _blocks.Count; i++)
         {
             var block = _blocks[i];
-            if (block.OrderIndex != i + 1)
+            if (block.OrderIndex == i + 1)
             {
-                await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
-                {
-                    Id = block.Id,
-                    OrderIndex = i + 1,
-                    Title = block.Title,
-                    Description = block.Description,
-                    PlannedDurationMinutes = block.PlannedDurationMinutes,
-                    EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                    TrainerComment = block.TrainerComment,
-                    TagIds = block.Tags.Select(t => t.Id).ToList()
-                });
-                block.OrderIndex = i + 1;
+                continue;
             }
+
+            await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
+            {
+                Id = block.Id,
+                OrderIndex = i + 1,
+                Title = block.Title,
+                Description = block.Description,
+                PlannedDurationMinutes = block.PlannedDurationMinutes,
+                EffectiveDurationMinutes = block.EffectiveDurationMinutes,
+                TrainerComment = block.TrainerComment,
+                TagIds = block.Tags.Select(t => t.Id).ToList()
+            });
+            block.OrderIndex = i + 1;
         }
     }
 
@@ -377,7 +438,13 @@
 
     private void ToggleTag(int tagId, bool selected)
     {
-        if (selected) _blockTagIds.Add(tagId);
-        else _blockTagIds.Remove(tagId);
+        if (selected)
+        {
+            _blockTagIds.Add(tagId);
+        }
+        else
+        {
+            _blockTagIds.Remove(tagId);
+        }
     }
 }

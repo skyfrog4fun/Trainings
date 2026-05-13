@@ -42,35 +42,34 @@
             </div>
         </div>
 
-        @if (_recentAttempts.Any())
+        @if (_recentLogs.Any())
         {
             <div class="card mb-4">
                 <div class="card-header fw-bold">📊 Recent Notification Activity</div>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
-                            <tr><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
+                            <tr><th>Log ID</th><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
                         </thead>
                         <tbody>
-                            @foreach (var attempt in _recentAttempts)
+                            @foreach (var log in _recentLogs.Take(10))
                             {
-                                var last = attempt.Last();
-                                var count = attempt.Count;
                                 <tr>
-                                    <td class="small">@last.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
-                                    <td class="small">@last.Action</td>
-                                    <td class="small text-muted">@last.RecipientEmail</td>
+                                    <td class="small">#@log.Id</td>
+                                    <td class="small">@log.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
+                                    <td class="small">@log.Action</td>
+                                    <td class="small text-muted">@log.RecipientEmail</td>
                                     <td>
-                                        @if (last.IsSuccess)
+                                        @if (log.IsSuccess)
                                         {
-                                            <span class="badge bg-success" title="@count config(s) tried">✓ @count</span>
+                                            <span class="badge bg-success">✓</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger" title="@count config(s) tried, all failed">✗ @count</span>
+                                            <span class="badge bg-danger">✗</span>
                                         }
                                     </td>
-                                    <td class="small text-danger">@last.ErrorMessage</td>
+                                    <td class="small text-danger">@log.ErrorMessage</td>
                                 </tr>
                             }
                         </tbody>
@@ -173,7 +172,6 @@
     private List<TrainingDto> _trainerTrainings = new();
     private List<TrainingDto> _upcomingTrainings = new();
     private IReadOnlyList<Trainings.Domain.Entities.NotificationLog> _recentLogs = Array.Empty<Trainings.Domain.Entities.NotificationLog>();
-    private List<List<Trainings.Domain.Entities.NotificationLog>> _recentAttempts = new();
     private List<UserMembershipViewModel> _userMemberships = new();
     private string? _adminGroupSlug;
 
@@ -207,14 +205,6 @@
             _successCount30d = await NotificationLogService.GetSuccessCountAsync(since30d);
             _failureCount30d = await NotificationLogService.GetFailureCountAsync(since30d);
             _recentLogs = await NotificationLogService.GetRecentLogsAsync(50);
-
-            // Group logs by AttemptId; take the 10 most recent distinct attempts
-            _recentAttempts = _recentLogs
-                .GroupBy(l => l.AttemptId)
-                .Select(g => g.OrderBy(l => l.CreatedAt).ToList())
-                .OrderByDescending(g => g.Last().CreatedAt)
-                .Take(10)
-                .ToList();
         }
 
         if (_isGroupAdmin && !_isSuperAdmin)

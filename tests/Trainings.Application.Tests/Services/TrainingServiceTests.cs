@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Trainings.Application.DTOs;
+using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Interfaces;
 using Trainings.Infrastructure.Data;
@@ -13,6 +14,7 @@ namespace Trainings.Application.Tests.Services;
 public class TrainingServiceTests
 {
     private readonly Mock<ITrainingRepository> _trainingRepoMock = new();
+    private readonly Mock<IAppRuntimeModeService> _runtimeModeServiceMock = new();
     private static ApplicationDbContext CreateInMemoryContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -29,7 +31,7 @@ public class TrainingServiceTests
     {
         using var ctx = CreateInMemoryContext();
         _trainingRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Training?)null);
-        var service = new TrainingService(_trainingRepoMock.Object, ctx);
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
         var result = await service.GetByIdAsync(99);
         result.Should().BeNull();
     }
@@ -40,7 +42,7 @@ public class TrainingServiceTests
         using var ctx = CreateInMemoryContext();
         var training = new Training { Id = 1, Title = "Yoga", Location = "Studio", DateTime = DateTime.Now, Capacity = 10 };
         _trainingRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(training);
-        var service = new TrainingService(_trainingRepoMock.Object, ctx);
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
         var result = await service.GetByIdAsync(1);
         result.Should().NotBeNull();
         result!.Title.Should().Be("Yoga");
@@ -51,8 +53,8 @@ public class TrainingServiceTests
     {
         using var ctx = CreateInMemoryContext();
         _trainingRepoMock.Setup(r => r.AddAsync(It.IsAny<Training>())).Returns(Task.CompletedTask);
-        var service = new TrainingService(_trainingRepoMock.Object, ctx);
-        var dto = new CreateTrainingDto { Title = "Pilates", Location = "Gym", DateTime = DateTime.Now.AddDays(1), Capacity = 15, TrainerId = 1 };
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
+        var dto = new CreateTrainingDto { Title = "Pilates", Location = "Gym", DateTime = DateTime.Now.AddDays(1), Capacity = 15, TrainerId = 1, GroupId = 5 };
         var result = await service.CreateAsync(dto);
         result.Should().NotBeNull();
         result.Title.Should().Be("Pilates");

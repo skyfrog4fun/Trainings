@@ -1,6 +1,6 @@
 @page "/my-registrations"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Participant")]
+@attribute [Authorize(Policy = "GroupMember")]
 @inject IRegistrationService RegistrationService
 @inject AuthenticationStateProvider AuthStateProvider
 

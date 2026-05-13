@@ -3,26 +3,24 @@
 @attribute [Authorize(Policy = "GroupAdmin")]
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
-@inject IPasswordResetService PasswordResetService
-@inject NavigationManager NavigationManager
+@inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAppRuntimeModeService AppRuntimeModeService
 
 <PageTitle>User Management</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Users</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm">+ New User</button>
+        <button class="btn btn-success" @onclick="ShowCreateForm" disabled="@IsWriteBlocked">+ New User</button>
     </div>
 
-    <AuthorizeView Policy="SuperAdmin">
-        <div class="card mb-4 border-info">
-            <div class="card-header bg-info text-white fw-bold">🔧 SMTP Configuration Test</div>
-            <div class="card-body">
-                <p class="mb-2 text-muted">Send a test email to verify SMTP is working. You can configure and test SMTP on the <a href="/config/mail">Mail Config</a> page.</p>
-            </div>
+    @if (IsWriteBlocked)
+    {
+        <div class="alert alert-warning">
+            Read Only mode is active. Only SuperAdmins can make changes.
         </div>
-    </AuthorizeView>
+    }
 
     @if (_showForm)
     {
@@ -59,17 +57,9 @@
                                 </select>
                             </Authorized>
                             <NotAuthorized>
-                                @if (_formRole == "SuperAdmin")
-                                {
-                                    <input class="form-control" value="Super Admin" readonly />
-                                    <div class="form-text text-muted">Only a Super Admin can change this role.</div>
-                                }
-                                else
-                                {
-                                    <select class="form-select" @bind="_formRole">
-                                        <option value="User">User</option>
-                                    </select>
-                                }
+                                <select class="form-select" @bind="_formRole">
+                                    <option value="User">User</option>
+                                </select>
                             </NotAuthorized>
                         </AuthorizeView>
                     </div>
@@ -93,6 +83,29 @@
                         <label class="form-label">City</label>
                         <input class="form-control" placeholder="City" @bind="_formCity" />
                     </div>
+                    <div class="col-12">
+                        <label class="form-label">@(_isSuperAdmin ? "Groups" : "Managed Groups *")</label>
+                        @if (_availableGroups.Any())
+                        {
+                            <div class="border rounded p-2" style="max-height: 220px; overflow-y: auto;">
+                                @foreach (var group in _availableGroups)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="user-group-@group.Id"
+                                               checked="@_selectedGroupIds.Contains(group.Id)"
+                                               @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
+                                        <label class="form-check-label" for="user-group-@group.Id">@group.Name</label>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-text text-muted">No groups are available for assignment.</div>
+                        }
+                    </div>
                     @if (_editUserId != 0)
                     {
                         <div class="col-12 col-md-6">
@@ -106,7 +119,7 @@
                     }
                 </div>
                 <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveUser">Save</button>
+                    <button class="btn btn-primary me-2" @onclick="SaveUser" disabled="@IsWriteBlocked">Save</button>
                     <button class="btn btn-secondary" @onclick="CancelForm">Cancel</button>
                 </div>
                 @if (_formError != null) { <div class="alert alert-danger mt-2">@_formError</div> }
@@ -129,7 +142,7 @@
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
-                            <tr><th>Name</th><th>Email</th><th>Registered</th><th>Actions</th></tr>
+                            <tr><th>Name</th><th>Email</th><th>Requested Groups</th><th>Registered</th><th>Actions</th></tr>
                         </thead>
                         <tbody>
                             @foreach (var user in _pendingUsers)
@@ -137,10 +150,11 @@
                                 <tr>
                                     <td>@user.DisplayName</td>
                                     <td>@user.Email</td>
+                                    <td>@FormatPendingGroups(user.Id)</td>
                                     <td>@user.CreationDate.ToString("MMM d, yyyy")</td>
                                     <td>
-                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)">Approve</button>
-                                        <button class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)">Reject</button>
+                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)" disabled="@IsWriteBlocked">Approve</button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)" disabled="@IsWriteBlocked">Reject</button>
                                     </td>
                                 </tr>
                             }
@@ -153,7 +167,7 @@
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
-                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Email Verified</th><th>Active</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Groups</th><th>Email Verified</th><th>Active</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var user in _users)
@@ -162,6 +176,7 @@
                             <td>@user.DisplayName</td>
                             <td>@user.Email</td>
                             <td><span class="badge @RoleBadge(user.Role)">@user.Role</span></td>
+                            <td class="small">@FormatApprovedGroups(user.Id)</td>
                             <td>
                                 @if (user.EmailConfirmedAt.HasValue)
                                 {
@@ -174,10 +189,20 @@
                             </td>
                             <td>@(user.IsActive ? "✓" : "✗")</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditUser(user)">Edit</button>
-                                <button class="btn btn-sm btn-outline-secondary me-1" title="Send email verification" @onclick="() => SendEmailVerification(user)" disabled="@(user.EmailConfirmedAt.HasValue)">📧 Verify</button>
-                                <button class="btn btn-sm btn-outline-secondary me-1" title="Send welcome & password reset" @onclick="() => SendWelcome(user)">🔑 Welcome</button>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ToggleActive(user)">
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditUser(user)" disabled="@IsWriteBlocked">Edit</button>
+                                <button class="btn btn-sm btn-outline-secondary me-1"
+                                        title="Send account mail"
+                                        @onclick="() => SendAccountMail(user)"
+                                        disabled="@IsWriteBlocked || IsUserBusy(user.Id)">
+                                    @if (IsUserBusy(user.Id))
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    }
+                                    📧 Mail
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        @onclick="() => ToggleActive(user)"
+                                        disabled="@IsWriteBlocked">
                                     @(user.IsActive ? "Deactivate" : "Activate")
                                 </button>
                             </td>
@@ -194,44 +219,113 @@
     }
 </div>
 
+<EmailPreviewModal Preview="_emailPreview" OnClose="CloseEmailPreview" />
+
 @code {
     private List<UserDto> _users = new();
     private List<UserDto> _pendingUsers = new();
+    private Dictionary<int, List<GroupMembershipDto>> _membershipsByUser = new();
+    private List<GroupDto> _availableGroups = new();
+    private HashSet<int> _managedGroupIds = new();
+    private HashSet<int> _selectedGroupIds = new();
+    private AppRuntimeModeDto _runtimeMode = new();
+    private bool _isSuperAdmin;
     private bool _loading = true;
-    private bool _showForm = false;
-    private int _editUserId = 0;
-    private string _formFirstName = "", _formLastName = "", _formEmail = "", _formPassword = "";
-    private string _formRole = "User", _formGender = "Other";
+    private bool _showForm;
+    private int _editUserId;
+    private int? _busyUserId;
+    private string _formFirstName = string.Empty;
+    private string _formLastName = string.Empty;
+    private string _formEmail = string.Empty;
+    private string _formPassword = string.Empty;
+    private string _formRole = "User";
+    private string _formGender = "Other";
     private DateTime? _formBirthday;
-    private string _formMobile = "", _formCity = "", _formWelcomeMessage = "";
+    private string _formMobile = string.Empty;
+    private string _formCity = string.Empty;
+    private string _formWelcomeMessage = string.Empty;
     private DateTime? _formEntryDate;
     private string? _formError;
-
-    private bool _actionSuccess = false;
+    private bool _actionSuccess;
     private string? _actionResult;
+    private EmailPreviewDto? _emailPreview;
+
+    private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
 
     protected override async Task OnInitializedAsync()
     {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
         await LoadUsers();
     }
 
     private async Task LoadUsers()
     {
         _loading = true;
-        _users = (await UserService.GetAllAsync()).ToList();
-        _pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUser = authState.User;
+        _isSuperAdmin = currentUser.HasClaim("SuperAdmin", "true");
+        _managedGroupIds = currentUser.Claims
+            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin")
+            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+
+        var allGroups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
+        _availableGroups = _isSuperAdmin
+            ? allGroups
+            : allGroups.Where(g => _managedGroupIds.Contains(g.Id)).ToList();
+
+        var allUsers = (await UserService.GetAllAsync()).ToList();
+        var pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
+        await LoadMembershipsAsync(allUsers.Select(u => u.Id).Concat(pendingUsers.Select(u => u.Id)));
+
+        if (_isSuperAdmin)
+        {
+            _users = allUsers;
+            _pendingUsers = pendingUsers;
+        }
+        else
+        {
+            _users = allUsers
+                .Where(user => GetMemberships(user.Id).Any(m =>
+                    m.Status == GroupMembershipStatus.Approved &&
+                    m.IsActive &&
+                    _managedGroupIds.Contains(m.GroupId)))
+                .ToList();
+
+            _pendingUsers = pendingUsers
+                .Where(user => GetMemberships(user.Id).Any(m =>
+                    m.Status == GroupMembershipStatus.Pending &&
+                    _managedGroupIds.Contains(m.GroupId)))
+                .ToList();
+        }
+
         _loading = false;
     }
+
+    private async Task LoadMembershipsAsync(IEnumerable<int> userIds)
+    {
+        _membershipsByUser.Clear();
+        foreach (var userId in userIds.Distinct())
+        {
+            _membershipsByUser[userId] = (await GroupService.GetAllMembershipsForUserAsync(userId)).ToList();
+        }
+    }
+
+    private List<GroupMembershipDto> GetMemberships(int userId) =>
+        _membershipsByUser.TryGetValue(userId, out var memberships) ? memberships : [];
 
     private void ShowCreateForm()
     {
         _editUserId = 0;
-        _formFirstName = _formLastName = _formEmail = _formPassword = "";
+        _formFirstName = _formLastName = _formEmail = _formPassword = string.Empty;
         _formRole = "User";
         _formGender = "Other";
         _formBirthday = null;
-        _formMobile = _formCity = _formWelcomeMessage = "";
+        _formMobile = _formCity = _formWelcomeMessage = string.Empty;
         _formEntryDate = null;
+        _selectedGroupIds.Clear();
         _formError = null;
         _showForm = true;
     }
@@ -245,10 +339,14 @@
         _formRole = user.Role.ToString();
         _formGender = user.Gender.ToString();
         _formBirthday = user.Birthday.HasValue ? user.Birthday.Value.ToDateTime(TimeOnly.MinValue) : null;
-        _formMobile = user.Mobile ?? "";
-        _formCity = user.City ?? "";
-        _formWelcomeMessage = user.WelcomeMessage ?? "";
+        _formMobile = user.Mobile ?? string.Empty;
+        _formCity = user.City ?? string.Empty;
+        _formWelcomeMessage = user.WelcomeMessage ?? string.Empty;
         _formEntryDate = user.EntryDate;
+        _selectedGroupIds = GetMemberships(user.Id)
+            .Where(m => _isSuperAdmin || _managedGroupIds.Contains(m.GroupId))
+            .Select(m => m.GroupId)
+            .ToHashSet();
         _formError = null;
         _showForm = true;
     }
@@ -256,13 +354,21 @@
     private async Task SaveUser()
     {
         _formError = null;
+
+        if (!_isSuperAdmin && _selectedGroupIds.Count == 0)
+        {
+            _formError = "Please assign the user to at least one managed group.";
+            return;
+        }
+
         try
         {
             var birthday = _formBirthday.HasValue ? DateOnly.FromDateTime(_formBirthday.Value) : (DateOnly?)null;
+            var userId = _editUserId;
 
             if (_editUserId == 0)
             {
-                await UserService.CreateAsync(new CreateUserDto
+                var createdUser = await UserService.CreateAsync(new CreateUserDto
                 {
                     FirstName = _formFirstName,
                     LastName = _formLastName,
@@ -274,6 +380,7 @@
                     Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
                     City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity
                 });
+                userId = createdUser.Id;
             }
             else
             {
@@ -294,12 +401,48 @@
                     WelcomeMessage = string.IsNullOrWhiteSpace(_formWelcomeMessage) ? null : _formWelcomeMessage
                 });
             }
+
+            await SyncUserGroupsAsync(userId);
             _showForm = false;
             await LoadUsers();
         }
         catch (Exception ex)
         {
             _formError = ex.Message;
+        }
+    }
+
+    private async Task SyncUserGroupsAsync(int userId)
+    {
+        var availableGroupIds = _availableGroups.Select(g => g.Id).ToHashSet();
+        var memberships = (await GroupService.GetAllMembershipsForUserAsync(userId))
+            .Where(m => availableGroupIds.Contains(m.GroupId))
+            .ToList();
+
+        foreach (var membership in memberships.Where(m => !_selectedGroupIds.Contains(m.GroupId)))
+        {
+            await GroupService.RemoveMemberAsync(membership.Id);
+        }
+
+        foreach (var groupId in _selectedGroupIds)
+        {
+            var groupMemberships = memberships.Where(m => m.GroupId == groupId).ToList();
+            if (groupMemberships.Any(m => m.Status == GroupMembershipStatus.Approved && m.IsActive))
+            {
+                continue;
+            }
+
+            foreach (var membership in groupMemberships)
+            {
+                await GroupService.RemoveMemberAsync(membership.Id);
+            }
+
+            await GroupService.AddMemberAsync(new AddGroupMemberDto
+            {
+                GroupId = groupId,
+                UserId = userId,
+                Role = GroupMemberRole.Participant
+            });
         }
     }
 
@@ -335,39 +478,74 @@
         await LoadUsers();
     }
 
+    private async Task SendAccountMail(UserDto user)
+    {
+        _actionResult = null;
+        _busyUserId = user.Id;
+
+        try
+        {
+            var result = await UserRegistrationService.ResendEmailConfirmationAsync(user.Id);
+            _actionSuccess = true;
+            _actionResult = result.Preview is null
+                ? $"Account email sent to {user.Email}."
+                : $"No E-Mail mode is active. The account email for {user.Email} is shown below.";
+            _emailPreview = result.Preview;
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = $"Failed: {ex.Message}";
+        }
+        finally
+        {
+            _busyUserId = null;
+        }
+    }
+
+    private void ToggleGroup(int groupId, bool selected)
+    {
+        if (selected)
+        {
+            _selectedGroupIds.Add(groupId);
+        }
+        else
+        {
+            _selectedGroupIds.Remove(groupId);
+        }
+    }
+
+    private Task CloseEmailPreview()
+    {
+        _emailPreview = null;
+        return Task.CompletedTask;
+    }
+
+    private bool IsUserBusy(int userId) => _busyUserId == userId;
+
+    private string FormatApprovedGroups(int userId)
+    {
+        var names = GetMemberships(userId)
+            .Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive)
+            .Select(m => _availableGroups.FirstOrDefault(g => g.Id == m.GroupId)?.Name ?? $"Group #{m.GroupId}")
+            .Distinct()
+            .ToList();
+
+        return names.Count == 0 ? "—" : string.Join(", ", names);
+    }
+
+    private string FormatPendingGroups(int userId)
+    {
+        var names = GetMemberships(userId)
+            .Where(m => m.Status == GroupMembershipStatus.Pending)
+            .Select(m => _availableGroups.FirstOrDefault(g => g.Id == m.GroupId)?.Name ?? $"Group #{m.GroupId}")
+            .Distinct()
+            .ToList();
+
+        return names.Count == 0 ? "—" : string.Join(", ", names);
+    }
+
     private void CancelForm() => _showForm = false;
-
-    private async Task SendEmailVerification(UserDto user)
-    {
-        _actionResult = null;
-        try
-        {
-            await UserRegistrationService.ResendEmailConfirmationAsync(user.Id);
-            _actionSuccess = true;
-            _actionResult = $"Email verification sent to {user.Email}.";
-        }
-        catch (Exception ex)
-        {
-            _actionSuccess = false;
-            _actionResult = $"Failed: {ex.Message}";
-        }
-    }
-
-    private async Task SendWelcome(UserDto user)
-    {
-        _actionResult = null;
-        try
-        {
-            await PasswordResetService.SendWelcomeAsync(user.Email);
-            _actionSuccess = true;
-            _actionResult = $"Welcome & password reset email sent to {user.Email}.";
-        }
-        catch (Exception ex)
-        {
-            _actionSuccess = false;
-            _actionResult = $"Failed: {ex.Message}";
-        }
-    }
 
     private string RoleBadge(UserRole role) => role switch
     {
