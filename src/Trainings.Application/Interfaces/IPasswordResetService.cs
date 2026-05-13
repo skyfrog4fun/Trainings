@@ -1,3 +1,5 @@
+using Trainings.Application.DTOs;
+
 namespace Trainings.Application.Interfaces;
 
 public interface IPasswordResetService

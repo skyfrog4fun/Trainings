@@ -1,6 +1,6 @@
 # Application Specification — Trainings
 
-> **Version:** 0.1.1
+> **Version:** 0.1.2
 > **Language:** English (US)
 > **Primary audience:** AI agents and automated tooling
 > **Secondary audience:** Human developers and stakeholders
@@ -238,8 +238,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 | View own group request statuses        |    ✔       |  ✔          | ✔             | ✔                 |
 | Update own profile                     |    ✔       |  ✔          | ✔             | ✔                 |
 | **Trigger email actions (Admin only)** |            |             |               |                   |
-| Send "verify email" to user            |    ✔       |  ✔ (own)    |               |                   |
-| Send "welcome / password reset" to user|    ✔       |  ✔ (own)    |               |                   |
+| Send account verification mail to user |    ✔       |  ✔ (own)    |               |                   |
 
 ---
 
@@ -251,7 +250,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 - **Steps:**
   1. Fill in the registration form: `FirstName`, `LastName`, `Email`, `Password`, `Gender`, `Birthday`, `Mobile`, `City`, `WelcomeMessage`.
   2. Select one or more groups to request membership (each defaults to role `Participant`).
-  3. Receive email confirmation link; click to confirm email.
+  3. Receive a neutral account email with the confirmation link; click to confirm email.
   4. Log in immediately — `IsActive = true` from creation.
   5. On the dashboard, see the status of each group request (Pending / Approved / Declined).
 - **Postcondition:** User record created with `IsActive = true`, `Role = User`. One `GroupMembership` row per requested group with `Status = Pending`.
@@ -266,8 +265,8 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
   3. Approve or decline each request.
   4. On approval: set `GroupMembership.Status = Approved`, `ApprovedAt = now`. User gains access to group trainings.
   5. On decline: set `GroupMembership.Status = Declined`, `DeclinedAt = now`. The user is **never deleted**.
-  6. An acceptance or rejection email is sent to the user (per group), including a link to the application.
-- **Postcondition:** `GroupMembership` row updated. User notified.
+  6. The membership request is updated for the managed group(s).
+- **Postcondition:** `GroupMembership` row updated.
 - **Business Rule:** If a group has no Admin, only the SuperAdmin can process requests for that group.
 
 ### UC-03 — Manage Users (Admin / SuperAdmin)
@@ -277,12 +276,11 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
   1. Navigate to user management.
   2. Group Admin sees only users of their groups and pending requests for their groups. The group column shows which group(s) each user belongs to.
   3. SuperAdmin sees all users across all groups with group information displayed.
-  4. Create a new user within a group: select role(s) — default is `Participant`, but Admin can assign `Trainer` and/or `Admin`.
+  4. Create a new user and assign one or more groups. Group Admins can only choose from groups they manage.
   5. Edit or deactivate an existing user.
-  6. **Trigger email actions** (two separate buttons, available at any time — not just on creation):
-     - **"Send Email Verification"** → sends a "please verify your email" link.
-     - **"Send Welcome & Password Reset"** → sends a welcome email with a password reset link.
-  7. Users created by Admin are **not automatically notified**. The Admin explicitly triggers emails.
+  6. **Trigger email actions** with a single account-mail action that sends a neutral verification/setup email.
+  7. Password reset mail is a separate self-service flow ("Forgot Password").
+  8. Users created by Admin are **not automatically notified**. The Admin explicitly triggers the account mail.
 - **Postcondition:** User record persisted; password stored as bcrypt hash.
 - **Visual indicator:** Show whether the user has verified their email and/or reset their password.
 
@@ -291,14 +289,14 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 - **Actor:** Group Trainer or Group Admin or SuperAdmin
 - **Steps:**
   1. Create a training with `Title`, `Description`, `Location`, `DateTime`, `Capacity`, assigned to a specific `Group` (required).
-  2. Trainer can only create trainings for groups where they hold the `Trainer` role.
+  2. Trainer can only create trainings for groups where they hold the `Trainer` or `Admin` role.
   3. Edit or deactivate an existing training.
 - **Business Rules:**
   - `GroupId` is required — every training belongs to exactly one group.
   - A Trainer may only manage trainings in their own group(s).
   - `Capacity` must be ≥ 1.
   - `DateTime` must be strictly in the future at creation time.
-  - Copying a training across groups is **out of scope** for v0.1.1.
+  - Copying a training across groups is **out of scope** for v0.1.2.
 
 ### UC-05 — Manage Training Blocks (Trainer / Admin)
 
@@ -380,7 +378,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
   2. Assign each a `Priority` (1 = highest). Priority 1 is tried first; on failure, priority 2 is tried, etc.
   3. View failure counters and `LastFailedOn` per configuration.
   4. Activate / deactivate individual configurations.
-- **Usage:** System-level configs are used for all mail types: password reset, registration, email confirmation, welcome, group approval/rejection, test emails.
+- **Usage:** System-level configs are used for all mail types: account verification, password reset, admin registration notification, and test emails.
 
 ### UC-14 — Manage Group Mail Configuration (Group Admin)
 
@@ -400,7 +398,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
      - Green counter: successful messages within the last 30 days.
      - Red counter: failed messages within the last 30 days.
      - Total counters (since beginning): green and red.
-  2. Reset counters by setting a cutoff `DateTime`. Messages older than this date are excluded from counters and log display.
+   2. Use the notification log ID as the reference pointer when reviewing recent mail activity.
 - **Data source:** `NotificationLog` table.
 
 ---
@@ -421,7 +419,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 ⚙️ Config                 ← visible to SuperAdmin (and GroupAdmin for group-specific settings)
 ───────────────────
 🚪 Logout
-v0.1.1
+v0.1.2
 ```
 
 ### 5.2 Role Badges
@@ -450,6 +448,15 @@ On a fresh installation (only the default seeded SuperAdmin exists):
 - The default email and password are read from `appsettings.json` under `Seed:Email` and `Seed:Password` — **single source of truth** used by both the `DbSeeder` and the login page info box.
 - The info box **disappears** once the SuperAdmin account has been changed, updated, or deleted (i.e., when the seeded SuperAdmin's email or password no longer matches the values in `appsettings.json`).
 - **Security note:** The default password `Admin123!` is intentionally simple for first-time setup. The SuperAdmin **must** change it immediately. Production deployments behind public URLs should override the `Seed` section with stronger credentials via environment variables or user secrets before first launch.
+
+### 5.5 Global Running Modes
+
+The application supports two global runtime switches configured via `App:Modes` in `appsettings.json`:
+
+- **Read Only** — blocks write operations for everyone except SuperAdmin.
+- **No E-Mail** — suppresses outgoing email and shows the generated message in an in-app preview where the flow supports it.
+
+When one or more runtime switches are active, the signed-in UI shows a visible mode indicator banner.
 
 ---
 
@@ -558,8 +565,8 @@ IUserService
   Task                                 ChangePasswordAsync(int userId, string newPassword, CancellationToken ct)
   Task                                 SendEmailVerificationAsync(int userId, CancellationToken ct)
     // Admin-triggered: sends "verify your email" link
-  Task                                 SendWelcomeWithPasswordResetAsync(int userId, CancellationToken ct)
-    // Admin-triggered: sends welcome email with password reset link
+  Task                                 SendAccountMailAsync(int userId, CancellationToken ct)
+    // Admin-triggered: sends the neutral account verification/setup email
 
 IRegistrationService
   Task<IEnumerable<RegistrationDto>>   GetByUserIdAsync(int userId, CancellationToken ct)

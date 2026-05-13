@@ -92,12 +92,12 @@ public partial class SmtpEmailService : IEmailService
 
         if (runtimeMode.IsEmailSuppressed)
         {
-            var attemptId = Guid.NewGuid();
+            var previewAttemptId = Guid.NewGuid();
             var message = runtimeMode.IsReadOnly
                 ? "Email delivery skipped because the application is running in Read Only mode."
                 : "Email delivery skipped because the application is running in No E-Mail mode.";
 
-            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, true, message, attemptId, ct);
+            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, true, message, previewAttemptId, ct);
 
             return new EmailSendResult
             {

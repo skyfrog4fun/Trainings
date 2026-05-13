@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Trainings.Application.DTOs;
+using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Interfaces;
 using Trainings.Infrastructure.Data;

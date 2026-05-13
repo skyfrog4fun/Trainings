@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Trainings.Application.DTOs;
+using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;

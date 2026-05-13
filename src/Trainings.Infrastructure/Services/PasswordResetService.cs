@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Infrastructure.Data;
