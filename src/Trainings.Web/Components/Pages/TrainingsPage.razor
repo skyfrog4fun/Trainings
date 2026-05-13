@@ -9,7 +9,7 @@
 <div class="container-fluid px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Trainings</h2>
-        <AuthorizeView Roles="Trainer,Admin">
+        <AuthorizeView Policy="GroupTrainer">
             <a href="/trainings/create" class="btn btn-success">+ New Training</a>
         </AuthorizeView>
     </div>

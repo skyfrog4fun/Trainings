@@ -10,11 +10,13 @@ public class RegistrationService : IRegistrationService
 {
     private readonly IRegistrationRepository _registrationRepository;
     private readonly ITrainingRepository _trainingRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
 
-    public RegistrationService(IRegistrationRepository registrationRepository, ITrainingRepository trainingRepository)
+    public RegistrationService(IRegistrationRepository registrationRepository, ITrainingRepository trainingRepository, IAppRuntimeModeService appRuntimeModeService)
     {
         _registrationRepository = registrationRepository;
         _trainingRepository = trainingRepository;
+        _appRuntimeModeService = appRuntimeModeService;
     }
 
     public async Task<IEnumerable<RegistrationDto>> GetByUserIdAsync(int userId)
@@ -31,6 +33,8 @@ public class RegistrationService : IRegistrationService
 
     public async Task<RegistrationDto> RegisterAsync(int userId, int trainingId)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var training = await _trainingRepository.GetByIdAsync(trainingId)
             ?? throw new InvalidOperationException("Training not found.");
 
@@ -63,6 +67,8 @@ public class RegistrationService : IRegistrationService
 
     public async Task CancelAsync(int userId, int trainingId)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var registration = await _registrationRepository.GetByUserAndTrainingAsync(userId, trainingId)
             ?? throw new InvalidOperationException("Registration not found.");
         registration.Status = RegistrationStatus.Cancelled;

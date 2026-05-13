@@ -1,6 +1,7 @@
 @page "/confirm-email"
 @rendermode InteractiveServer
 @inject IUserRegistrationService UserRegistrationService
+@inject IAppRuntimeModeService AppRuntimeModeService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Confirm Email</PageTitle>
@@ -19,14 +20,30 @@
                     {
                         <div class="text-success mb-3" style="font-size:3rem;">✓</div>
                         <h5>Email Confirmed!</h5>
-                        <p class="text-muted">Your email has been confirmed. Your account is pending admin approval.</p>
+                        <p class="text-muted">@_message</p>
                         <a href="/login" class="btn btn-primary w-100">Back to Login</a>
                     }
                     else
                     {
                         <div class="text-danger mb-3" style="font-size:3rem;">✗</div>
                         <h5>Confirmation Failed</h5>
-                        <p class="text-muted">@_error</p>
+                        <p class="text-muted">@_message</p>
+
+                        @if (_canResend)
+                        {
+                            <button class="btn btn-primary w-100 mb-2" @onclick="ResendAsync" disabled="@(_resending || _runtimeMode.IsReadOnly)">
+                                @if (_resending)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                }
+                                Send New Verification Mail
+                            </button>
+                            @if (_runtimeMode.IsReadOnly)
+                            {
+                                <div class="small text-muted mb-2">Read Only mode is active, so a replacement verification mail cannot be created right now.</div>
+                            }
+                        }
+
                         <a href="/login" class="btn btn-outline-primary w-100">Back to Login</a>
                     }
                 </div>
@@ -35,35 +52,81 @@
     </div>
 </div>
 
+<EmailPreviewModal Preview="_emailPreview" OnClose="CloseEmailPreview" />
+
 @code {
-    private bool _loading = true, _success;
-    private string? _error;
+    private AppRuntimeModeDto _runtimeMode = new();
+    private bool _loading = true;
+    private bool _success;
+    private bool _canResend;
+    private bool _resending;
+    private int? _userId;
+    private string _message = string.Empty;
+    private EmailPreviewDto? _emailPreview;
 
     protected override async Task OnInitializedAsync()
     {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
+
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        var token = query.TryGetValue("token", out var t) ? t.ToString() : "";
+        var token = query.TryGetValue("token", out var t) ? t.ToString() : string.Empty;
 
         if (string.IsNullOrEmpty(token))
         {
-            _error = "Invalid or missing confirmation token.";
+            _message = "Invalid or missing confirmation token.";
             _loading = false;
             return;
         }
 
         try
         {
-            await UserRegistrationService.ConfirmEmailAsync(token);
-            _success = true;
+            var result = await UserRegistrationService.ConfirmEmailAsync(token);
+            _success = result.IsSuccess;
+            _message = result.Message;
+            _canResend = result.IsExpired && result.UserId.HasValue;
+            _userId = result.UserId;
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
+            _message = ex.Message;
         }
         finally
         {
             _loading = false;
         }
+    }
+
+    private async Task ResendAsync()
+    {
+        if (!_userId.HasValue)
+        {
+            return;
+        }
+
+        _resending = true;
+        try
+        {
+            var result = await UserRegistrationService.ResendEmailConfirmationAsync(_userId.Value);
+            _message = result.Preview is null
+                ? "A new verification mail has been sent."
+                : "No E-Mail mode is active. Review the preview below and use the new verification link.";
+            _emailPreview = result.Preview;
+            _canResend = false;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+        }
+        finally
+        {
+            _resending = false;
+        }
+    }
+
+    private Task CloseEmailPreview()
+    {
+        _emailPreview = null;
+        return Task.CompletedTask;
     }
 }

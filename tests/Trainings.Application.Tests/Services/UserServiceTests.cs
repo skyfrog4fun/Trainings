@@ -13,12 +13,13 @@ namespace Trainings.Application.Tests.Services;
 public class UserServiceTests
 {
     private readonly Mock<IUserRepository> _userRepoMock = new();
+    private readonly Mock<IAppRuntimeModeService> _runtimeModeServiceMock = new();
     private readonly Mock<IPasswordHasher> _hasherMock = new();
     private readonly UserService _service;
 
     public UserServiceTests()
     {
-        _service = new UserService(_userRepoMock.Object, _hasherMock.Object);
+        _service = new UserService(_userRepoMock.Object, _runtimeModeServiceMock.Object, _hasherMock.Object);
     }
 
     [Fact]

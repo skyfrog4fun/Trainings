@@ -13,19 +13,22 @@ public partial class SmtpEmailService : IEmailService
 {
     private readonly IMailConfigurationService _mailConfigService;
     private readonly INotificationLogService _notificationLogService;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
     private readonly ILogger<SmtpEmailService> _logger;
 
     public SmtpEmailService(
         IMailConfigurationService mailConfigService,
         INotificationLogService notificationLogService,
+        IAppRuntimeModeService appRuntimeModeService,
         ILogger<SmtpEmailService> logger)
     {
         _mailConfigService = mailConfigService;
         _notificationLogService = notificationLogService;
+        _appRuntimeModeService = appRuntimeModeService;
         _logger = logger;
     }
 
-    public async Task SendPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
+    public async Task<EmailSendResult> SendPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
     {
         var subject = "Password Reset Request";
         var body = $"""
@@ -33,21 +36,22 @@ public partial class SmtpEmailService : IEmailService
             <p><a href="{resetLink}">{resetLink}</a></p>
             <p>This link expires in 1 hour. If you did not request this, please ignore this email.</p>
             """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.PasswordReset, null, null, null, ct);
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.PasswordReset, null, null, null, ct);
     }
 
-    public async Task SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default)
+    public async Task<EmailSendResult> SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default)
     {
-        var subject = "Confirm Your Email Address";
+        var subject = "Your Trainings Account";
         var body = $"""
-            <p>Thank you for registering! Please confirm your email address by clicking the link below:</p>
+            <p>Your Trainings account is ready.</p>
+            <p>Please use the link below to verify your email address and finish the sign-in setup:</p>
             <p><a href="{confirmLink}">{confirmLink}</a></p>
-            <p>This link expires in 24 hours.</p>
+            <p>This link expires in 3 days.</p>
             """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, null, ct);
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, null, ct);
     }
 
-    public async Task SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default)
+    public async Task<EmailSendResult> SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default)
     {
         var subject = "New Participant Registration Pending Approval";
         var body = $"""
@@ -55,7 +59,7 @@ public partial class SmtpEmailService : IEmailService
             <p><strong>{userName}</strong></p>
             <p>Please review and approve or reject the registration in the admin panel.</p>
             """;
-        await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
+        return await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
     }
 
     public async Task<EmailSendResult> SendTestEmailAsync(string toEmail, int? mailConfigurationId = null, CancellationToken ct = default)
@@ -68,18 +72,6 @@ public partial class SmtpEmailService : IEmailService
         return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, mailConfigurationId, ct);
     }
 
-    public async Task SendWelcomeWithPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
-    {
-        var subject = "Welcome to Trainings – Set Your Password";
-        var body = $"""
-            <p>Welcome to the Trainings application! Your account has been created.</p>
-            <p>Please click the link below to set your password and get started:</p>
-            <p><a href="{resetLink}">{resetLink}</a></p>
-            <p>This link expires in 1 hour. If you did not expect this email, please ignore it.</p>
-            """;
-        await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.WelcomeMail, null, null, null, ct);
-    }
-
     private async Task<EmailSendResult> SendWithFallbackAsync(
         string toEmail,
         string subject,
@@ -90,6 +82,41 @@ public partial class SmtpEmailService : IEmailService
         int? mailConfigurationId,
         CancellationToken ct)
     {
+        var runtimeMode = _appRuntimeModeService.GetCurrent();
+        var preview = new EmailPreviewDto
+        {
+            RecipientEmail = toEmail,
+            Subject = subject,
+            HtmlBody = htmlBody
+        };
+
+        if (runtimeMode.IsEmailSuppressed)
+        {
+            var attemptId = Guid.NewGuid();
+            var message = runtimeMode.IsReadOnly
+                ? "Email delivery skipped because the application is running in Read Only mode."
+                : "Email delivery skipped because the application is running in No E-Mail mode.";
+
+            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, true, message, attemptId, ct);
+
+            return new EmailSendResult
+            {
+                IsSuccess = true,
+                Preview = preview,
+                Attempts =
+                [
+                    new EmailSendAttemptResult
+                    {
+                        MailConfigurationId = 0,
+                        ConfigurationName = "Preview Only",
+                        IsActive = false,
+                        IsSuccess = true,
+                        Message = message
+                    }
+                ]
+            };
+        }
+
         var configs = await GetConfigsAsync(groupId, mailConfigurationId, action == NotificationAction.TestEmail, ct);
         var attemptId = Guid.NewGuid();
         var attempts = new List<EmailSendAttemptResult>();
@@ -104,7 +131,8 @@ public partial class SmtpEmailService : IEmailService
             return new EmailSendResult
             {
                 IsSuccess = false,
-                Attempts = attempts
+                Attempts = attempts,
+                Preview = preview
             };
         }
 
@@ -127,7 +155,8 @@ public partial class SmtpEmailService : IEmailService
                 return new EmailSendResult
                 {
                     IsSuccess = true,
-                    Attempts = attempts
+                    Attempts = attempts,
+                    Preview = preview
                 };
             }
             catch (Exception ex)
@@ -150,7 +179,8 @@ public partial class SmtpEmailService : IEmailService
         return new EmailSendResult
         {
             IsSuccess = false,
-            Attempts = attempts
+            Attempts = attempts,
+            Preview = preview
         };
     }
 

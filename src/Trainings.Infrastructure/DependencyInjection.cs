@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Interfaces;
+using Trainings.Infrastructure.Configuration;
 using Trainings.Infrastructure.Auth;
 using Trainings.Infrastructure.Data;
 using Trainings.Infrastructure.Repositories;
@@ -14,6 +15,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        services.Configure<AppModeOptions>(configuration.GetSection("App:Modes"));
+
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(configuration.GetConnectionString("DefaultConnection")
                 ?? "Data Source=trainings.db"));
@@ -34,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IMailConfigurationService, MailConfigurationService>();
         services.AddScoped<INotificationLogService, NotificationLogService>();
         services.AddScoped<IAuthorizationHelper, AuthorizationHelper>();
+        services.AddScoped<IAppRuntimeModeService, AppRuntimeModeService>();
 
         return services;
     }

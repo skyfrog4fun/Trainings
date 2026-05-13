@@ -9,10 +9,12 @@ namespace Trainings.Infrastructure.Services;
 public class MailConfigurationService : IMailConfigurationService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
 
-    public MailConfigurationService(ApplicationDbContext context)
+    public MailConfigurationService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
     {
         _context = context;
+        _appRuntimeModeService = appRuntimeModeService;
     }
 
     public async Task<IReadOnlyList<MailConfiguration>> GetAllAsync(CancellationToken ct = default)
@@ -29,6 +31,7 @@ public class MailConfigurationService : IMailConfigurationService
 
     public async Task<MailConfiguration> CreateAsync(MailConfiguration config, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
         _context.MailConfigurations.Add(config);
         await _context.SaveChangesAsync(ct);
         return config;
@@ -36,12 +39,14 @@ public class MailConfigurationService : IMailConfigurationService
 
     public async Task UpdateAsync(MailConfiguration config, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
         _context.MailConfigurations.Update(config);
         await _context.SaveChangesAsync(ct);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
         var config = await _context.MailConfigurations.FindAsync([id], ct);
         if (config is not null)
         {

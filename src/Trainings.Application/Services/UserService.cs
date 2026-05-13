@@ -9,11 +9,13 @@ namespace Trainings.Application.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService;
     private readonly IPasswordHasher _passwordHasher;
 
-    public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher)
+    public UserService(IUserRepository userRepository, IAppRuntimeModeService appRuntimeModeService, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
+        _appRuntimeModeService = appRuntimeModeService;
         _passwordHasher = passwordHasher;
     }
 
@@ -43,6 +45,8 @@ public class UserService : IUserService
 
     public async Task<UserDto> CreateAsync(CreateUserDto dto)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var user = new User
         {
             FirstName = dto.FirstName,
@@ -64,6 +68,8 @@ public class UserService : IUserService
 
     public async Task UpdateAsync(UpdateUserDto dto)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var user = await _userRepository.GetByIdAsync(dto.Id)
             ?? throw new InvalidOperationException($"User {dto.Id} not found.");
         user.FirstName = dto.FirstName;
@@ -82,11 +88,14 @@ public class UserService : IUserService
 
     public async Task DeleteAsync(int id)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
         await _userRepository.DeleteAsync(id);
     }
 
     public async Task ChangePasswordAsync(int userId, string newPasswordHash)
     {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
         var user = await _userRepository.GetByIdAsync(userId)
             ?? throw new InvalidOperationException($"User {userId} not found.");
         user.PasswordHash = newPasswordHash;
