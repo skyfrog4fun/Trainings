@@ -8,6 +8,7 @@
 @using Trainings.Domain.Enums
 @inject IMailConfigurationService MailConfigService
 @inject IEmailService EmailService
+@inject IAppRuntimeModeService AppRuntimeModeService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
@@ -21,6 +22,44 @@
     </div>
 
     <p class="text-muted">Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</p>
+
+    <div class="card mb-4">
+        <div class="card-header fw-bold">🚦 Running Modes</div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                Override the startup configuration defaults for the current session.
+                Changes take effect immediately for all users and are reset to the configured defaults on application restart.
+            </p>
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-auto">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chkReadOnly" @bind="_modeReadOnly" />
+                        <label class="form-check-label" for="chkReadOnly">
+                            <strong>Read Only</strong>
+                            <span class="text-muted small d-block">Blocks write operations for everyone except SuperAdmins</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-12 col-md-auto ms-md-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chkNoEmail" @bind="_modeNoEmail" />
+                        <label class="form-check-label" for="chkNoEmail">
+                            <strong>No E-Mail</strong>
+                            <span class="text-muted small d-block">Suppresses outgoing email and shows an in-app preview instead</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-12 col-md-auto ms-md-auto">
+                    <button class="btn btn-primary me-2" @onclick="ApplyModes">Apply</button>
+                    <button class="btn btn-outline-secondary" @onclick="ResetModesToDefaults" title="Reset to startup configuration defaults">Reset to Defaults</button>
+                </div>
+            </div>
+            @if (_modeActionResult is not null)
+            {
+                <div class="alert @(_modeActionSuccess ? "alert-success" : "alert-danger") mt-3 mb-0">@_modeActionResult</div>
+            }
+        </div>
+    </div>
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center fw-bold">
@@ -264,11 +303,20 @@
     private string _clientDateTime = "Loading...";
     private string? _timeError;
 
+    private bool _modeReadOnly;
+    private bool _modeNoEmail;
+    private bool _modeActionSuccess;
+    private string? _modeActionResult;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadConfigs();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+
+        var current = AppRuntimeModeService.GetCurrent();
+        _modeReadOnly = current.IsReadOnly;
+        _modeNoEmail = current.IsNoEmail;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -524,4 +572,39 @@
             MailConfigurationStatus.Failed => "bg-danger",
             _ => "bg-secondary"
         };
+
+    private void ApplyModes()
+    {
+        _modeActionResult = null;
+        try
+        {
+            AppRuntimeModeService.SetModes(_modeReadOnly, _modeNoEmail);
+            _modeActionSuccess = true;
+            _modeActionResult = "Running modes updated successfully.";
+        }
+        catch (Exception ex)
+        {
+            _modeActionSuccess = false;
+            _modeActionResult = $"Failed to update modes: {ex.Message}";
+        }
+    }
+
+    private void ResetModesToDefaults()
+    {
+        _modeActionResult = null;
+        try
+        {
+            AppRuntimeModeService.ResetToDefaults();
+            var defaults = AppRuntimeModeService.GetDefaults();
+            _modeReadOnly = defaults.IsReadOnly;
+            _modeNoEmail = defaults.IsNoEmail;
+            _modeActionSuccess = true;
+            _modeActionResult = "Running modes reset to startup configuration defaults.";
+        }
+        catch (Exception ex)
+        {
+            _modeActionSuccess = false;
+            _modeActionResult = $"Failed to reset modes: {ex.Message}";
+        }
+    }
 }

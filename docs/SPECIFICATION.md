@@ -451,10 +451,14 @@ On a fresh installation (only the default seeded SuperAdmin exists):
 
 ### 5.5 Global Running Modes
 
-The application supports two global runtime switches configured via `App:Modes` in `appsettings.json`:
+The application supports two global runtime switches:
 
 - **Read Only** — blocks write operations for everyone except SuperAdmin.
 - **No E-Mail** — suppresses outgoing email and shows the generated message in an in-app preview where the flow supports it.
+
+The initial values are loaded from `App:Modes` in `appsettings.json` at startup.
+A SuperAdmin can override both modes at any time via **⚙️ Config → Running Modes** without restarting the application.
+Runtime overrides take effect immediately for all users and are automatically reset to the configured defaults on the next application restart.
 
 When one or more runtime switches are active, the signed-in UI shows a visible mode indicator banner.
 

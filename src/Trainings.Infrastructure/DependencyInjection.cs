@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Interfaces;
 using Trainings.Infrastructure.Auth;
@@ -17,6 +18,11 @@ public static class DependencyInjection
     {
         services.AddHttpContextAccessor();
         services.Configure<AppModeOptions>(configuration.GetSection("App:Modes"));
+        services.AddSingleton(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<AppModeOptions>>();
+            return new AppRuntimeModeState(options.Value);
+        });
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(configuration.GetConnectionString("DefaultConnection")

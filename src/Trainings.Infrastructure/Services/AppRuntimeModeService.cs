@@ -1,36 +1,45 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
-using Trainings.Infrastructure.Configuration;
 
 namespace Trainings.Infrastructure.Services;
 
 public class AppRuntimeModeService : IAppRuntimeModeService
 {
-    private readonly AppModeOptions _options;
+    private readonly AppRuntimeModeState _state;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAuthorizationHelper _authorizationHelper;
 
     public AppRuntimeModeService(
-        IOptions<AppModeOptions> options,
+        AppRuntimeModeState state,
         IHttpContextAccessor httpContextAccessor,
         IAuthorizationHelper authorizationHelper)
     {
-        _options = options.Value;
+        _state = state;
         _httpContextAccessor = httpContextAccessor;
         _authorizationHelper = authorizationHelper;
     }
 
-    public AppRuntimeModeDto GetCurrent() => new()
+    public AppRuntimeModeDto GetCurrent()
     {
-        IsReadOnly = _options.ReadOnly,
-        IsNoEmail = _options.NoEmail
-    };
+        var (readOnly, noEmail) = _state.GetEffective();
+        return new() { IsReadOnly = readOnly, IsNoEmail = noEmail };
+    }
+
+    public AppRuntimeModeDto GetDefaults()
+    {
+        var (readOnly, noEmail) = _state.GetDefaults();
+        return new() { IsReadOnly = readOnly, IsNoEmail = noEmail };
+    }
+
+    public void SetModes(bool isReadOnly, bool isNoEmail) => _state.Set(isReadOnly, isNoEmail);
+
+    public void ResetToDefaults() => _state.ResetToDefaults();
 
     public void EnsureWriteAllowed()
     {
-        if (!_options.ReadOnly)
+        var (readOnly, noEmail) = _state.GetEffective();
+        if (!readOnly)
         {
             return;
         }
@@ -44,3 +53,4 @@ public class AppRuntimeModeService : IAppRuntimeModeService
         throw new InvalidOperationException("The application is currently in read-only mode. Only SuperAdmins can make changes.");
     }
 }
+

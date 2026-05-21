@@ -31,12 +31,12 @@ Trainings is an application for planning and conducting training sessions, as we
 
 ## Running Modes
 
-Configure global runtime switches in `src/Trainings.Web/appsettings.json` under `App:Modes`:
+Configure the startup defaults in `src/Trainings.Web/appsettings.json` under `App:Modes`:
 
 - `ReadOnly`: blocks write operations for everyone except SuperAdmins
 - `NoEmail`: suppresses outgoing mail and shows the generated message in an in-app preview modal where supported
 
-When either mode is active, the application shows a runtime indicator banner after sign-in.
+These values are loaded once at startup. A SuperAdmin can override both modes at any time via **⚙️ Config → Running Modes** without restarting the application. Runtime overrides take effect immediately for all users and are automatically reset to the configured defaults on the next application restart.
 
 ## Mail Traffic
 
