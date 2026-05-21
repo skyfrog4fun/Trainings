@@ -38,7 +38,7 @@ public class AppRuntimeModeService : IAppRuntimeModeService
 
     public void EnsureWriteAllowed()
     {
-        var (readOnly, _) = _state.GetEffective();
+        var (readOnly, noEmail) = _state.GetEffective();
         if (!readOnly)
         {
             return;
