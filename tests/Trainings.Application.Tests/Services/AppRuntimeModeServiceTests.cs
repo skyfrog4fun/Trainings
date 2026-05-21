@@ -21,7 +21,7 @@ public class AppRuntimeModeServiceTests
         => new(state, _httpContextAccessorMock.Object, _authorizationHelperMock.Object);
 
     [Fact]
-    public void GetCurrent_ReturnsConfigDefaults_WhenNotOverridden()
+    public void GetCurrentReturnsConfigDefaultsWhenNotOverridden()
     {
         var state = CreateState(readOnly: true, noEmail: false);
         var service = CreateService(state);
@@ -33,7 +33,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void GetDefaults_AlwaysReturnsConfigDefaults_EvenAfterOverride()
+    public void GetDefaultsAlwaysReturnsConfigDefaultsEvenAfterOverride()
     {
         var state = CreateState(readOnly: false, noEmail: false);
         var service = CreateService(state);
@@ -46,7 +46,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void SetModes_UpdatesEffectiveState()
+    public void SetModesUpdatesEffectiveState()
     {
         var state = CreateState(readOnly: false, noEmail: false);
         var service = CreateService(state);
@@ -59,7 +59,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void ResetToDefaults_RestoresConfigValues()
+    public void ResetToDefaultsRestoresConfigValues()
     {
         var state = CreateState(readOnly: false, noEmail: false);
         var service = CreateService(state);
@@ -73,7 +73,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void ResetToDefaults_RestoresTrueDefaults()
+    public void ResetToDefaultsRestoresTrueDefaults()
     {
         var state = CreateState(readOnly: true, noEmail: true);
         var service = CreateService(state);
@@ -87,7 +87,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void EnsureWriteAllowed_DoesNotThrow_WhenNotReadOnly()
+    public void EnsureWriteAllowedDoesNotThrowWhenNotReadOnly()
     {
         var state = CreateState(readOnly: false);
         var service = CreateService(state);
@@ -98,7 +98,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void EnsureWriteAllowed_Throws_WhenReadOnlyAndUserNotAuthenticated()
+    public void EnsureWriteAllowedThrowsWhenReadOnlyAndUserNotAuthenticated()
     {
         var state = CreateState(readOnly: true);
         var service = CreateService(state);
@@ -111,7 +111,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void EnsureWriteAllowed_DoesNotThrow_WhenReadOnlyAndUserIsSuperAdmin()
+    public void EnsureWriteAllowedDoesNotThrowWhenReadOnlyAndUserIsSuperAdmin()
     {
         var state = CreateState(readOnly: true);
         var service = CreateService(state);
@@ -129,7 +129,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void EnsureWriteAllowed_Throws_WhenReadOnlyAndUserIsNotSuperAdmin()
+    public void EnsureWriteAllowedThrowsWhenReadOnlyAndUserIsNotSuperAdmin()
     {
         var state = CreateState(readOnly: true);
         var service = CreateService(state);
@@ -148,7 +148,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void EnsureWriteAllowed_DoesNotThrow_AfterSetModesDisablesReadOnly()
+    public void EnsureWriteAllowedDoesNotThrowAfterSetModesDisablesReadOnly()
     {
         var state = CreateState(readOnly: true);
         var service = CreateService(state);
@@ -162,7 +162,7 @@ public class AppRuntimeModeServiceTests
     }
 
     [Fact]
-    public void IsEmailSuppressed_IsTrueWhenEitherModeActive()
+    public void IsEmailSuppressedIsTrueWhenEitherModeActive()
     {
         var state = CreateState(readOnly: false, noEmail: false);
         var service = CreateService(state);
