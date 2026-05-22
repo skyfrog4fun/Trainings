@@ -3,48 +3,58 @@
 
 <nav class="navbar sticky-top navbar-dark bg-dark shadow-sm">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/">🏋️ Trainings</a>
+        <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-bolt me-1" aria-hidden="true"></i>Trainings</a>
         <div class="dropdown">
             <button class="btn btn-outline-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu">
                 ☰
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
                 <li>
-                    <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All">🏠 Dashboard</NavLink>
+                    <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Dashboard</NavLink>
                 </li>
-                <li>
-                    <NavLink class="dropdown-item" href="trainings">📅 Trainings</NavLink>
-                </li>
-                <AuthorizeView Policy="GroupMember">
+                <AuthorizeView Policy="GroupAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="my-registrations">📋 My Registrations</NavLink>
-                    </li>
-                </AuthorizeView>
-                <AuthorizeView Policy="GroupTrainer">
-                    <li>
-                        <NavLink class="dropdown-item" href="trainer-trainings">🎯 My Trainings</NavLink>
+                        <NavLink class="dropdown-item" href="groups"><i class="fa-solid fa-object-group me-2" aria-hidden="true"></i>Groups</NavLink>
                     </li>
                 </AuthorizeView>
                 <AuthorizeView Policy="GroupAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="users">👥 Users</NavLink>
+                        <NavLink class="dropdown-item" href="users"><i class="fa-solid fa-users me-2" aria-hidden="true"></i>Users</NavLink>
                     </li>
                 </AuthorizeView>
-                <AuthorizeView Policy="SuperAdmin">
+                <li>
+                    <NavLink class="dropdown-item" href="trainings"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings</NavLink>
+                </li>
+                <AuthorizeView Policy="GroupMember">
                     <li>
-                        <NavLink class="dropdown-item" href="groups">🏢 Groups</NavLink>
+                        <NavLink class="dropdown-item" href="my-registrations"><i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>My Registrations</NavLink>
                     </li>
+                </AuthorizeView>
+                <AuthorizeView Policy="GroupTrainer">
                     <li>
-                        <NavLink class="dropdown-item" href="config/mail">⚙️ Config</NavLink>
+                        <NavLink class="dropdown-item" href="trainer-trainings"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>My Trainings</NavLink>
                     </li>
                 </AuthorizeView>
                 <li><hr class="dropdown-divider" /></li>
+                <AuthorizeView Policy="SuperAdmin">
+                    <li>
+                        <NavLink class="dropdown-item" href="config/mail"><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Config</NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="dropdown-item" href="config/locations"><i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i>Locations</NavLink>
+                    </li>
+                </AuthorizeView>
+                <AuthorizeView Policy="GroupAdmin">
+                    <li>
+                        <NavLink class="dropdown-item" href="users"><i class="fa-solid fa-user me-2" aria-hidden="true"></i>User Information</NavLink>
+                    </li>
+                </AuthorizeView>
                 <li>
-                    <a class="dropdown-item text-danger" href="/logout">🚪 Logout</a>
+                    <a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i>Logout</a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
-                    <span class="dropdown-item-text text-muted small">v@_version</span>
+                    <span class="dropdown-item-text text-muted small"><i class="fa-solid fa-tag me-2" aria-hidden="true"></i>v@_version</span>
                 </li>
             </ul>
         </div>
@@ -69,12 +79,12 @@
             <ErrorContent Context="ex">
                 <div class="container px-2 px-md-4 py-5">
                     <div class="alert alert-danger shadow-sm" role="alert">
-                        <h4 class="alert-heading">⚠️ Something went wrong</h4>
+                        <h4 class="alert-heading">Something went wrong</h4>
                         <p>An unexpected error occurred while loading this page. Please try again.</p>
                         <hr />
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError">🔄 Try Again</button>
-                            <a href="/" class="btn btn-outline-secondary btn-sm">🏠 Go to Dashboard</a>
+                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError"><i class="fa-solid fa-rotate-right me-1" aria-hidden="true"></i>Try Again</button>
+                            <a href="/" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-house me-1" aria-hidden="true"></i>Go to Dashboard</a>
                         </div>
                     </div>
                 </div>
@@ -85,8 +95,8 @@
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <a href="." class="reload"><i class="fa-solid fa-rotate-right me-1" aria-hidden="true"></i>Reload</a>
+    <span class="dismiss"><i class="fa-solid fa-xmark" aria-hidden="true"></i></span>
 </div>
 
 @code {

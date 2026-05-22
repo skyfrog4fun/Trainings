@@ -2,46 +2,46 @@
     <ul class="navbar-nav">
         <li class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                🏠 Dashboard
+                <i class="fa-solid fa-house me-2" aria-hidden="true"></i>Dashboard
             </NavLink>
         </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="trainings">
-                📅 Trainings
-            </NavLink>
-        </li>
-        <AuthorizeView Policy="GroupMember">
+        <AuthorizeView Policy="GroupAdmin">
             <li class="nav-item">
-                <NavLink class="nav-link" href="my-registrations">
-                    📋 My Registrations
-                </NavLink>
-            </li>
-        </AuthorizeView>
-        <AuthorizeView Policy="GroupTrainer">
-            <li class="nav-item">
-                <NavLink class="nav-link" href="trainer-trainings">
-                    🎯 My Trainings
+                <NavLink class="nav-link" href="groups">
+                    <i class="fa-solid fa-object-group me-2" aria-hidden="true"></i>Groups
                 </NavLink>
             </li>
         </AuthorizeView>
         <AuthorizeView Policy="GroupAdmin">
             <li class="nav-item">
                 <NavLink class="nav-link" href="users">
-                    👥 Users
+                    <i class="fa-solid fa-users me-2" aria-hidden="true"></i>Users
                 </NavLink>
             </li>
         </AuthorizeView>
-        <AuthorizeView Policy="GroupAdmin">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="trainings">
+                <i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings
+            </NavLink>
+        </li>
+        <AuthorizeView Policy="GroupMember">
             <li class="nav-item">
-                <NavLink class="nav-link" href="groups">
-                    📂 Groups
+                <NavLink class="nav-link" href="my-registrations">
+                    <i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>My Registrations
+                </NavLink>
+            </li>
+        </AuthorizeView>
+        <AuthorizeView Policy="GroupTrainer">
+            <li class="nav-item">
+                <NavLink class="nav-link" href="trainer-trainings">
+                    <i class="fa-solid fa-fire me-2" aria-hidden="true"></i>My Trainings
                 </NavLink>
             </li>
         </AuthorizeView>
         <AuthorizeView Policy="SuperAdmin">
             <li class="nav-item">
                 <NavLink class="nav-link" href="config/mail">
-                    ⚙️ Config
+                    <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Config
                 </NavLink>
             </li>
         </AuthorizeView>

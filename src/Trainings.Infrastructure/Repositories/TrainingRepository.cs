@@ -19,6 +19,7 @@ public class TrainingRepository : ITrainingRepository
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
             .Include(t => t.Group)
+            .Include(t => t.Location)
             .Include(t => t.Blocks)
                 .ThenInclude(b => b.TrainingBlockTags)
                     .ThenInclude(bt => bt.Tag)
@@ -28,6 +29,8 @@ public class TrainingRepository : ITrainingRepository
         await _context.Trainings
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
+            .Include(t => t.Group)
+            .Include(t => t.Location)
             .OrderByDescending(t => t.DateTime)
             .ToListAsync();
 
@@ -35,6 +38,8 @@ public class TrainingRepository : ITrainingRepository
         await _context.Trainings
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
+            .Include(t => t.Group)
+            .Include(t => t.Location)
             .Where(t => t.IsActive)
             .OrderBy(t => t.DateTime)
             .ToListAsync();
@@ -43,6 +48,8 @@ public class TrainingRepository : ITrainingRepository
         await _context.Trainings
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
+            .Include(t => t.Group)
+            .Include(t => t.Location)
             .Where(t => t.TrainerId == trainerId)
             .OrderByDescending(t => t.DateTime)
             .ToListAsync();

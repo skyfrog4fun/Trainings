@@ -1,7 +1,9 @@
 @page "/groups"
 @rendermode InteractiveServer
-@attribute [Authorize(Policy = "SuperAdmin")]
+@attribute [Authorize(Policy = "GroupAdmin")]
 @inject IGroupService GroupService
+@inject ILocationService LocationService
+@inject IDateTimeFormatService DateTimeFormatService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Groups</PageTitle>
@@ -9,7 +11,7 @@
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Groups</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm">+ New Group</button>
+        <button class="btn btn-success" @onclick="ShowCreateForm"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Group</button>
     </div>
 
     @if (_showForm)
@@ -18,34 +20,79 @@
             <div class="card-body">
                 <h5>@(_editGroupId == 0 ? "Create Group" : "Edit Group")</h5>
                 <div class="row g-2">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-4">
                         <label class="form-label">Name</label>
                         <input class="form-control" @bind="_formName" placeholder="Group name" />
                     </div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-4">
                         <label class="form-label">Slug</label>
-                        <input class="form-control" @bind="_formSlug" placeholder="e.g. my-group (auto-generated from name if blank)" />
-                        <div class="form-text">Used in URLs. Leave blank to auto-generate from name.</div>
+                        <input class="form-control" @bind="_formSlug" placeholder="e.g. my-group" />
                     </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="grpActive" />
+                            <label class="form-check-label" for="grpActive">Active</label>
+                        </div>
+                    </div>
+
                     <div class="col-12">
                         <label class="form-label">Description</label>
                         <textarea class="form-control" rows="2" @bind="_formDescription"></textarea>
                     </div>
-                    @if (_editGroupId != 0)
-                    {
-                        <div class="col-12">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="grpActive" />
-                                <label class="form-check-label" for="grpActive">Active</label>
-                            </div>
-                        </div>
-                    }
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Location</label>
+                        <select class="form-select" @bind="_formLocationId">
+                            <option value="">Select location</option>
+                            @foreach (var location in _locations)
+                            {
+                                <option value="@location.Id">@location.Name (@location.CityName)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Max Participant</label>
+                        <input class="form-control" type="number" min="1" @bind="_formMaxParticipants" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Weekday</label>
+                        <select class="form-select" @bind="_formWeekday" @bind:after="CalculateGroupEndTime">
+                            <option value="">Select day</option>
+                            @foreach (var day in Enum.GetValues<DayOfWeek>())
+                            {
+                                <option value="@day">@day</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Start</label>
+                        <input class="form-control" type="time" @bind="_formStartTime" @bind:after="CalculateGroupEndTime" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Duration (minutes)</label>
+                        <input class="form-control" type="number" min="1" @bind="FormDurationMinutesValue" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">End</label>
+                        <input class="form-control" type="time" value="@_formEndTime" readonly />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Country</label>
+                        <input class="form-control" placeholder="CH" @bind="_formCountry" />
+                    </div>
                 </div>
+
                 <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveGroup">Save</button>
-                    <button class="btn btn-secondary" @onclick="CancelForm">Cancel</button>
+                    <button class="btn btn-primary me-2" @onclick="SaveGroup"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
                 </div>
-                @if (_formError != null) { <div class="alert alert-danger mt-2">@_formError</div> }
+                @if (_formError != null)
+                {
+                    <div class="alert alert-danger mt-2">@_formError</div>
+                }
             </div>
         </div>
     }
@@ -59,20 +106,35 @@
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
-                    <tr><th>Name</th><th>Description</th><th>Members</th><th>Active</th><th>Actions</th></tr>
+                    <tr>
+                        <th>Name</th>
+                        <th class="d-none d-md-table-cell">Description</th>
+                        <th>Members</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var group in _groups)
                     {
                         <tr>
                             <td>@group.Name</td>
-                            <td class="text-muted small">@group.Description</td>
+                            <td class="text-muted small d-none d-md-table-cell">@group.Description</td>
                             <td>@group.MemberCount</td>
-                            <td>@(group.IsActive ? "✓" : "✗")</td>
                             <td>
-                                <a href="/groups/@group.Slug/members" class="btn btn-sm btn-outline-primary me-1">Members</a>
-                                <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => EditGroup(group)">Edit</button>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteGroup(group)">Delete</button>
+                                @if (group.IsActive)
+                                {
+                                    <i class="fa-solid fa-check text-success" aria-hidden="true"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-xmark text-danger" aria-hidden="true"></i>
+                                }
+                            </td>
+                            <td>
+                                <a href="/groups/@group.Slug/members" class="btn btn-sm btn-outline-primary me-1" title="Members"><i class="fa-solid fa-user-group" aria-hidden="true"></i></a>
+                                <button class="btn btn-sm btn-outline-secondary me-1" title="Edit" @onclick="() => EditGroup(group)"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="Delete" @onclick="() => DeleteGroup(group)"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                             </td>
                         </tr>
                     }
@@ -88,27 +150,60 @@
 
 @code {
     private List<GroupDto> _groups = new();
-    private bool _loading = true, _showForm;
+    private List<LocationDto> _locations = new();
+    private bool _loading = true;
+    private bool _showForm;
     private int _editGroupId;
-    private string _formName = "", _formSlug = "", _formDescription = "";
+    private string _formName = string.Empty;
+    private string _formSlug = string.Empty;
+    private string _formDescription = string.Empty;
     private bool _formIsActive = true;
+    private DayOfWeek? _formWeekday;
+    private int? _formLocationId;
+    private TimeOnly? _formStartTime = new(19, 0);
+    private int? _formDurationMinutes = 90;
+    private string _formEndTime = "20:30";
+    private int? _formMaxParticipants = 10;
+    private string _formCountry = "CH";
     private string? _formError;
 
-    protected override async Task OnInitializedAsync() => await LoadGroups();
+    private int? FormDurationMinutesValue
+    {
+        get => _formDurationMinutes;
+        set
+        {
+            _formDurationMinutes = value;
+            CalculateGroupEndTime();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _formCountry = DateTimeFormatService.GetDefaultCountry();
+        await LoadGroups();
+    }
 
     private async Task LoadGroups()
     {
         _loading = true;
         _groups = (await GroupService.GetAllAsync()).ToList();
+        _locations = (await LocationService.GetAllAsync()).Where(l => l.IsActive).OrderBy(l => l.Name).ToList();
         _loading = false;
     }
 
     private void ShowCreateForm()
     {
         _editGroupId = 0;
-        _formName = _formSlug = _formDescription = "";
+        _formName = _formSlug = _formDescription = string.Empty;
         _formIsActive = true;
+        _formWeekday = null;
+        _formLocationId = null;
+        _formStartTime = new TimeOnly(19, 0);
+        _formDurationMinutes = 90;
+        _formCountry = DateTimeFormatService.GetDefaultCountry();
+        _formMaxParticipants = 10;
         _formError = null;
+        CalculateGroupEndTime();
         _showForm = true;
     }
 
@@ -117,15 +212,38 @@
         _editGroupId = group.Id;
         _formName = group.Name;
         _formSlug = group.Slug;
-        _formDescription = group.Description ?? "";
+        _formDescription = group.Description ?? string.Empty;
         _formIsActive = group.IsActive;
+        _formWeekday = group.Weekday;
+        _formLocationId = group.LocationId;
+        _formStartTime = group.StartTime ?? new TimeOnly(19, 0);
+        _formDurationMinutes = group.DurationMinutes ?? 90;
+        _formCountry = group.Country;
+        _formMaxParticipants = group.MaxParticipants;
         _formError = null;
+        CalculateGroupEndTime();
         _showForm = true;
+    }
+
+    private void CalculateGroupEndTime()
+    {
+        var duration = _formDurationMinutes.GetValueOrDefault(0);
+        if (duration <= 0)
+        {
+            duration = 1;
+        }
+
+        var start = _formStartTime ?? new TimeOnly(19, 0);
+
+        _formEndTime = start.AddMinutes(duration).ToString("HH:mm");
     }
 
     private async Task SaveGroup()
     {
         _formError = null;
+
+        var startTime = _formStartTime;
+
         try
         {
             if (_editGroupId == 0)
@@ -134,20 +252,36 @@
                 {
                     Name = _formName,
                     Slug = string.IsNullOrWhiteSpace(_formSlug) ? null : _formSlug,
-                    Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription
+                    Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription,
+                    Weekday = _formWeekday,
+                    LocationId = _formLocationId,
+                    StartTime = startTime,
+                    DurationMinutes = _formDurationMinutes,
+                    MaxParticipants = _formMaxParticipants,
+                    Country = _formCountry,
+                    AllowedLocationIds = []
                 });
             }
             else
             {
+                var group = _groups.First(g => g.Id == _editGroupId);
                 await GroupService.UpdateAsync(new UpdateGroupDto
                 {
                     Id = _editGroupId,
                     Name = _formName,
                     Slug = string.IsNullOrWhiteSpace(_formSlug) ? null : _formSlug,
                     Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription,
+                    Weekday = _formWeekday,
+                    LocationId = _formLocationId,
+                    StartTime = startTime,
+                    DurationMinutes = _formDurationMinutes,
+                    MaxParticipants = _formMaxParticipants,
+                    Country = _formCountry,
+                    AllowedLocationIds = group.AllowedLocationIds,
                     IsActive = _formIsActive
                 });
             }
+
             _showForm = false;
             await LoadGroups();
         }

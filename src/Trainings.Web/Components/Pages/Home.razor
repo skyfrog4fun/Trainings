@@ -62,11 +62,11 @@
                                     <td>
                                         @if (log.IsSuccess)
                                         {
-                                            <span class="badge bg-success">✓</span>
+                                            <span class="badge bg-success"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger">✗</span>
+                                            <span class="badge bg-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i></span>
                                         }
                                     </td>
                                     <td class="small text-danger">@log.ErrorMessage</td>
@@ -106,7 +106,7 @@
         @if (_userMemberships.Any())
         {
             <div class="card mb-4">
-                <div class="card-header fw-bold">📋 Your Group Memberships</div>
+                <div class="card-header fw-bold"><i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>Your Group Memberships</div>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
@@ -151,7 +151,7 @@
     @if (_isGroupTrainer)
     {
         <h4>Your Upcoming Trainings</h4>
-        <TrainingList Trainings="_trainerTrainings" ShowActions="true" />
+        <TrainingList Trainings="_trainerTrainings" ShowActions="true" CurrentUserId="_userId" />
         <a href="/trainer-trainings" class="btn btn-primary mt-2">Manage All Trainings</a>
     }
 

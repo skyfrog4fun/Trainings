@@ -22,6 +22,8 @@ public class GroupService : IGroupService
     {
         var groups = await _context.Groups
             .Include(g => g.Memberships)
+            .Include(g => g.Location)
+            .Include(g => g.AllowedLocations)
             .OrderBy(g => g.Name)
             .ToListAsync(ct);
         return groups.Select(MapToDto);
@@ -31,6 +33,8 @@ public class GroupService : IGroupService
     {
         var group = await _context.Groups
             .Include(g => g.Memberships)
+            .Include(g => g.Location)
+            .Include(g => g.AllowedLocations)
             .FirstOrDefaultAsync(g => g.Id == id, ct);
         return group == null ? null : MapToDto(group);
     }
@@ -39,6 +43,8 @@ public class GroupService : IGroupService
     {
         var group = await _context.Groups
             .Include(g => g.Memberships)
+            .Include(g => g.Location)
+            .Include(g => g.AllowedLocations)
             .FirstOrDefaultAsync(g => g.Slug == slug, ct);
         return group == null ? null : MapToDto(group);
     }
@@ -54,11 +60,29 @@ public class GroupService : IGroupService
             Slug = slug,
             Identifier = dto.Identifier ?? slug,
             Description = dto.Description,
+            Weekday = dto.Weekday,
+            LocationId = dto.LocationId,
+            StartTime = dto.StartTime,
+            DurationMinutes = dto.DurationMinutes,
+            MaxParticipants = dto.MaxParticipants,
+            Country = string.IsNullOrWhiteSpace(dto.Country) ? "CH" : dto.Country.Trim().ToUpperInvariant(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
         _context.Groups.Add(group);
         await _context.SaveChangesAsync(ct);
+
+        if (dto.AllowedLocationIds.Any())
+        {
+            var assignments = dto.AllowedLocationIds
+                .Distinct()
+                .Select(locationId => new GroupLocation { GroupId = group.Id, LocationId = locationId });
+            _context.GroupLocations.AddRange(assignments);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        await _context.Entry(group).Reference(g => g.Location).LoadAsync(ct);
+        await _context.Entry(group).Collection(g => g.AllowedLocations).LoadAsync(ct);
         return MapToDto(group);
     }
 
@@ -66,7 +90,9 @@ public class GroupService : IGroupService
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var group = await _context.Groups.FindAsync([dto.Id], ct)
+        var group = await _context.Groups
+            .Include(g => g.AllowedLocations)
+            .FirstOrDefaultAsync(g => g.Id == dto.Id, ct)
             ?? throw new InvalidOperationException($"Group {dto.Id} not found.");
 
         var oldSlug = group.Slug;
@@ -86,7 +112,27 @@ public class GroupService : IGroupService
         group.Name = dto.Name;
         group.Slug = newSlug;
         group.Description = dto.Description;
+        group.Weekday = dto.Weekday;
+        group.LocationId = dto.LocationId;
+        group.StartTime = dto.StartTime;
+        group.DurationMinutes = dto.DurationMinutes;
+        group.MaxParticipants = dto.MaxParticipants;
+        group.Country = string.IsNullOrWhiteSpace(dto.Country) ? "CH" : dto.Country.Trim().ToUpperInvariant();
         group.IsActive = dto.IsActive;
+
+        var requestedLocationIds = dto.AllowedLocationIds.Distinct().ToHashSet();
+        var existingLocationIds = group.AllowedLocations.Select(x => x.LocationId).ToHashSet();
+
+        var toRemove = group.AllowedLocations.Where(x => !requestedLocationIds.Contains(x.LocationId)).ToList();
+        if (toRemove.Any())
+        {
+            _context.GroupLocations.RemoveRange(toRemove);
+        }
+
+        var toAdd = requestedLocationIds.Where(id => !existingLocationIds.Contains(id))
+            .Select(id => new GroupLocation { GroupId = group.Id, LocationId = id });
+        _context.GroupLocations.AddRange(toAdd);
+
         await _context.SaveChangesAsync(ct);
     }
 
@@ -237,6 +283,14 @@ public class GroupService : IGroupService
         Slug = group.Slug,
         Identifier = group.Identifier,
         Description = group.Description,
+        Weekday = group.Weekday,
+        LocationId = group.LocationId,
+        LocationName = group.Location?.Name,
+        StartTime = group.StartTime,
+        DurationMinutes = group.DurationMinutes,
+        MaxParticipants = group.MaxParticipants,
+        Country = group.Country,
+        AllowedLocationIds = group.AllowedLocations.Select(x => x.LocationId).ToList(),
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,
         MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved)

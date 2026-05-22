@@ -56,7 +56,9 @@ public class TrainingService : ITrainingService
         {
             Title = dto.Title,
             Description = dto.Description,
-            Location = dto.Location,
+            LocationId = dto.LocationId,
+            SpecialLocationDescription = dto.SpecialLocationDescription,
+            MeetingPoint = dto.MeetingPoint,
             DateTime = dto.DateTime,
             Capacity = dto.Capacity,
             TrainerId = dto.TrainerId,
@@ -79,10 +81,13 @@ public class TrainingService : ITrainingService
             ?? throw new InvalidOperationException($"Training {dto.Id} not found.");
         training.Title = dto.Title;
         training.Description = dto.Description;
-        training.Location = dto.Location;
+        training.LocationId = dto.LocationId;
+        training.SpecialLocationDescription = dto.SpecialLocationDescription;
+        training.MeetingPoint = dto.MeetingPoint;
         training.DateTime = dto.DateTime;
         training.Capacity = dto.Capacity;
         training.IsActive = dto.IsActive;
+        training.TrainerId = dto.TrainerId;
         training.GroupId = dto.GroupId;
         await _trainingRepository.UpdateAsync(training);
     }
@@ -223,7 +228,10 @@ public class TrainingService : ITrainingService
         Id = t.Id,
         Title = t.Title,
         Description = t.Description,
-        Location = t.Location,
+        LocationId = t.LocationId,
+        LocationName = t.Location?.Name,
+        SpecialLocationDescription = t.SpecialLocationDescription,
+        MeetingPoint = t.MeetingPoint,
         DateTime = t.DateTime,
         Capacity = t.Capacity,
         IsActive = t.IsActive,
@@ -231,7 +239,8 @@ public class TrainingService : ITrainingService
         TrainerName = t.Trainer?.DisplayName ?? string.Empty,
         RegisteredCount = t.Registrations?.Count(r => r.Status == Domain.Enums.RegistrationStatus.Registered) ?? 0,
         GroupId = t.GroupId,
-        GroupName = t.Group?.Name
+        GroupName = t.Group?.Name,
+        GroupCountry = t.Group?.Country
     };
 
     private static TrainingBlockDto MapBlockToDto(TrainingBlock b) => new()

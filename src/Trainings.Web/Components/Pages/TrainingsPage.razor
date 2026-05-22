@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 @inject ITrainingService TrainingService
+@inject IUserService UserService
+@inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Trainings</PageTitle>
@@ -10,7 +12,7 @@
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Trainings</h2>
         <AuthorizeView Policy="GroupTrainer">
-            <a href="/trainings/create" class="btn btn-success">+ New Training</a>
+            <a href="/trainings/create" class="btn btn-success"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Training</a>
         </AuthorizeView>
     </div>
 
@@ -28,10 +30,10 @@
                         <div class="card-body">
                             <h5 class="card-title">@training.Title</h5>
                             <p class="card-text text-muted small">
-                                📅 @training.DateTime.ToString("ddd, MMM d, yyyy HH:mm")<br/>
-                                📍 @training.Location<br/>
-                                👤 @training.TrainerName<br/>
-                                👥 @training.RegisteredCount / @training.Capacity
+                                <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(training)<br/>
+                                <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")<br/>
+                                <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@training.TrainerName<br/>
+                                <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@training.RegisteredCount / @training.Capacity
                             </p>
                             <p class="card-text">@training.Description</p>
                         </div>
@@ -52,10 +54,24 @@
 @code {
     private List<TrainingDto> _trainings = new();
     private bool _loading = true;
+    private string _userCountry = "CH";
 
     protected override async Task OnInitializedAsync()
     {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        if (userId > 0)
+        {
+            _userCountry = (await UserService.GetByIdAsync(userId))?.Country ?? DateTimeFormatService.GetDefaultCountry();
+        }
+
         _trainings = (await TrainingService.GetActiveAsync()).ToList();
         _loading = false;
+    }
+
+    private string FormatTrainingDate(TrainingDto training)
+    {
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        return training.DateTime.ToString("g", culture);
     }
 }

@@ -1,0 +1,211 @@
+@page "/config/locations"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = "SuperAdmin")]
+@inject ILocationService LocationService
+@inject IGroupService GroupService
+
+<PageTitle>Locations</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2><i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i>Locations</h2>
+        <button class="btn btn-success" @onclick="ShowCreateForm"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Location</button>
+    </div>
+
+    @if (_showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>@(_editId == 0 ? "Create Location" : "Edit Location")</h5>
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Name</label>
+                        <input class="form-control" @bind="_formName" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">City Name</label>
+                        <input class="form-control" @bind="_formCityName" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" id="isSystemWide" type="checkbox" @bind="_formIsSystemWide" />
+                            <label class="form-check-label" for="isSystemWide">System wide (Outside / Special)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary me-2" @onclick="Save"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
+                    <button class="btn btn-secondary" @onclick="Cancel"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="table-responsive mb-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>System wide</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var location in _locations)
+                {
+                    <tr>
+                        <td>@location.Name</td>
+                        <td>@location.CityName</td>
+                        <td>@(location.IsSystemWide ? "Yes" : "No")</td>
+                        <td>@(location.IsActive ? "Yes" : "No")</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => Edit(location)"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(location.Id)" disabled="@location.IsSystemWide"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h4>Group Location Access</h4>
+    @foreach (var group in _groups)
+    {
+        <div class="card mb-3">
+            <div class="card-header fw-bold">@group.Name</div>
+            <div class="card-body">
+                <div class="row g-2">
+                    @foreach (var location in _locations.Where(l => !l.IsSystemWide))
+                    {
+                        var key = $"{group.Id}:{location.Id}";
+                        <div class="col-12 col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       id="grp-loc-@group.Id-@location.Id"
+                                       checked="@_groupLocationAssignments.Contains(key)"
+                                       @onchange="e => ToggleGroupLocation(group.Id, location.Id, (bool)(e.Value ?? false))" />
+                                <label class="form-check-label" for="grp-loc-@group.Id-@location.Id">@location.Name (@location.CityName)</label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<LocationDto> _locations = new();
+    private List<GroupDto> _groups = new();
+    private HashSet<string> _groupLocationAssignments = new();
+
+    private bool _showForm;
+    private int _editId;
+    private string _formName = string.Empty;
+    private string _formCityName = string.Empty;
+    private bool _formIsSystemWide;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _locations = (await LocationService.GetAllAsync()).ToList();
+        _groups = (await GroupService.GetAllAsync()).ToList();
+
+        _groupLocationAssignments = _groups
+            .SelectMany(g => g.AllowedLocationIds.Select(id => $"{g.Id}:{id}"))
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    private void ShowCreateForm()
+    {
+        _editId = 0;
+        _formName = string.Empty;
+        _formCityName = string.Empty;
+        _formIsSystemWide = false;
+        _showForm = true;
+    }
+
+    private void Edit(LocationDto location)
+    {
+        _editId = location.Id;
+        _formName = location.Name;
+        _formCityName = location.CityName;
+        _formIsSystemWide = location.IsSystemWide;
+        _showForm = true;
+    }
+
+    private async Task Save()
+    {
+        if (_editId == 0)
+        {
+            await LocationService.CreateAsync(new CreateLocationDto
+            {
+                Name = _formName,
+                CityName = _formCityName,
+                IsSystemWide = _formIsSystemWide
+            });
+        }
+        else
+        {
+            var existing = _locations.First(x => x.Id == _editId);
+            await LocationService.UpdateAsync(new UpdateLocationDto
+            {
+                Id = _editId,
+                Name = _formName,
+                CityName = _formCityName,
+                IsSystemWide = _formIsSystemWide,
+                IsActive = existing.IsActive
+            });
+        }
+
+        _showForm = false;
+        await LoadData();
+    }
+
+    private async Task Delete(int id)
+    {
+        await LocationService.DeleteAsync(id);
+        await LoadData();
+    }
+
+    private void Cancel() => _showForm = false;
+
+    private async Task ToggleGroupLocation(int groupId, int locationId, bool selected)
+    {
+        var group = _groups.First(g => g.Id == groupId);
+        var allowed = group.AllowedLocationIds.ToHashSet();
+        if (selected)
+        {
+            allowed.Add(locationId);
+        }
+        else
+        {
+            allowed.Remove(locationId);
+        }
+
+        await GroupService.UpdateAsync(new UpdateGroupDto
+        {
+            Id = group.Id,
+            Name = group.Name,
+            Slug = group.Slug,
+            Description = group.Description,
+            Weekday = group.Weekday,
+            LocationId = group.LocationId,
+            StartTime = group.StartTime,
+            DurationMinutes = group.DurationMinutes,
+            MaxParticipants = group.MaxParticipants,
+            Country = group.Country,
+            AllowedLocationIds = allowed.ToList(),
+            IsActive = group.IsActive
+        });
+
+        await LoadData();
+    }
+}

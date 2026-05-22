@@ -4,6 +4,8 @@
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IAttendanceService AttendanceService
+@inject IUserService UserService
+@inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
@@ -21,19 +23,19 @@
     else
     {
         <div class="my-3">
-            <a href="/trainings" class="btn btn-sm btn-outline-secondary">← Back</a>
+            <a href="/trainings" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
         </div>
         <div class="card shadow mb-4">
             <div class="card-body">
                 <h2>@_training.Title</h2>
                 <p class="text-muted">
-                    📅 @_training.DateTime.ToString("dddd, MMMM d, yyyy 'at' HH:mm")<br/>
-                    📍 @_training.Location<br/>
-                    👤 Trainer: @_training.TrainerName<br/>
-                    👥 @_training.RegisteredCount / @_training.Capacity registered
+                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(_training)<br/>
+                    <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(_training.LocationName ?? "-")<br/>
+                    <i class="fa-solid fa-user me-1" aria-hidden="true"></i>Trainer: @_training.TrainerName<br/>
+                    <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@_training.RegisteredCount / @_training.Capacity registered
                     @if (_training.GroupName != null)
                     {
-                        <><br/>🏢 @_training.GroupName</>
+                        <><br/><i class="fa-solid fa-object-group me-1" aria-hidden="true"></i>@_training.GroupName</>
                     }
                 </p>
                 <p>@_training.Description</p>
@@ -43,7 +45,7 @@
                     @if (_isRegistered)
                     {
                         <button class="btn btn-danger" @onclick="CancelRegistration">Cancel Registration</button>
-                        <span class="badge bg-success ms-2">✓ Registered</span>
+                        <span class="badge bg-success ms-2"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Registered</span>
                     }
                     else if (_training.RegisteredCount < _training.Capacity)
                     {
@@ -57,7 +59,7 @@
 
                 @if (_isTrainer && _training.TrainerId == _userId)
                 {
-                    <a href="/trainings/@_training.Id/run" class="btn btn-success ms-2">▶ Run Training</a>
+                    <a href="/trainings/@_training.Id/run" class="btn btn-success ms-2"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Run Training</a>
                     <a href="/trainings/@_training.Id/attendance" class="btn btn-primary ms-2">Record Attendance</a>
                     <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary ms-2">Edit</a>
                 }
@@ -86,7 +88,7 @@
                                     <p class="card-text text-muted small">@block.Description</p>
                                 }
                                 <div class="small text-muted">
-                                    ⏱ Planned: @block.PlannedDurationMinutes min
+                                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Planned: @block.PlannedDurationMinutes min
                                     @if (block.EffectiveDurationMinutes.HasValue)
                                     {
                                         <> · Actual: @block.EffectiveDurationMinutes min</>
@@ -132,12 +134,17 @@
     private List<RegistrationDto> _registrations = new();
     private string? _message;
     private bool _isError;
+    private string _userCountry = "CH";
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        if (_userId > 0)
+        {
+            _userCountry = (await UserService.GetByIdAsync(_userId))?.Country ?? DateTimeFormatService.GetDefaultCountry();
+        }
         _isParticipant = user.IsInRole("Participant");
         _isTrainer = user.IsInRole("Trainer");
         _isAdmin = user.IsInRole("Admin") || user.IsInRole("SuperAdmin");
@@ -170,6 +177,12 @@
             _message = ex.Message;
             _isError = true;
         }
+    }
+
+    private string FormatTrainingDate(TrainingDto training)
+    {
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        return training.DateTime.ToString("f", culture);
     }
 
     private async Task CancelRegistration()

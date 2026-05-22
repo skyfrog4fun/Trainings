@@ -9,6 +9,14 @@ public class GroupDto
     public string Slug { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public DayOfWeek? Weekday { get; set; }
+    public int? LocationId { get; set; }
+    public string? LocationName { get; set; }
+    public TimeOnly? StartTime { get; set; }
+    public int? DurationMinutes { get; set; }
+    public int? MaxParticipants { get; set; }
+    public string Country { get; set; } = "CH";
+    public List<int> AllowedLocationIds { get; set; } = new();
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public int MemberCount { get; set; }
@@ -20,6 +28,13 @@ public class CreateGroupDto
     public string? Slug { get; set; }
     public string? Identifier { get; set; }
     public string? Description { get; set; }
+    public DayOfWeek? Weekday { get; set; }
+    public int? LocationId { get; set; }
+    public TimeOnly? StartTime { get; set; }
+    public int? DurationMinutes { get; set; }
+    public int? MaxParticipants { get; set; }
+    public string Country { get; set; } = "CH";
+    public List<int> AllowedLocationIds { get; set; } = new();
 }
 
 public class UpdateGroupDto
@@ -28,6 +43,13 @@ public class UpdateGroupDto
     public string Name { get; set; } = string.Empty;
     public string? Slug { get; set; }
     public string? Description { get; set; }
+    public DayOfWeek? Weekday { get; set; }
+    public int? LocationId { get; set; }
+    public TimeOnly? StartTime { get; set; }
+    public int? DurationMinutes { get; set; }
+    public int? MaxParticipants { get; set; }
+    public string Country { get; set; } = "CH";
+    public List<int> AllowedLocationIds { get; set; } = new();
     public bool IsActive { get; set; }
 }
 

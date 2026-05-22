@@ -8,6 +8,7 @@
     <title>Login - Trainings</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/lib/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-light">
 <div class="container">
@@ -15,7 +16,7 @@
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
             <div class="card shadow">
                 <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">🏋️ Trainings</h2>
+                    <h2 class="card-title text-center mb-4"><i class="fa-solid fa-bolt me-2" aria-hidden="true"></i>Trainings</h2>
                     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                     {
                         <div class="alert alert-danger">@Model.ErrorMessage</div>
@@ -40,7 +41,7 @@
                     @if (Model.ShowInitialCredentials)
                     {
                         <div class="alert alert-info mt-3 small">
-                            <strong>🔐 Initial Setup</strong><br/>
+                            <strong>Initial Setup</strong><br/>
                             No users exist yet. Use these default credentials to log in:<br/>
                             <strong>Email:</strong> @Model.SeedEmail<br/>
                             <strong>Password:</strong> Admin123!

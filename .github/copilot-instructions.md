@@ -90,6 +90,12 @@ Trainings.Web             ← Blazor Server UI, DI composition root
 - Prefer using pure .NET / Blazor / built-in functionality whenever possible instead of adding third-party libraries or NuGet packages.
 - If a third-party library is suggested, explicitly name it and explain the advantages over a built-in or custom solution.
 
+## Icons Policy
+
+- Use Font Awesome **Free** icons only.
+- For every new icon request, first find the best matching icon in Font Awesome Free before considering any alternate icon.
+- Do not use Font Awesome Pro-only icons.
+
 ## What to Avoid
 
 - Do not add new NuGet packages without discussing trade-offs first.
