@@ -40,7 +40,8 @@ public class TrainingServiceTests
     public async Task GetByIdAsyncReturnsDtoWhenFound()
     {
         using var ctx = CreateInMemoryContext();
-        var training = new Training { Id = 1, Title = "Yoga", Location = "Studio", DateTime = DateTime.Now, Capacity = 10 };
+        var location = new Location { Id = 1, Name = "Studio", CityName = "Zurich", IsActive = true };
+        var training = new Training { Id = 1, Title = "Yoga", LocationId = 1, Location = location, DateTime = DateTime.Now, Capacity = 10 };
         _trainingRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(training);
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
         var result = await service.GetByIdAsync(1);
@@ -54,7 +55,7 @@ public class TrainingServiceTests
         using var ctx = CreateInMemoryContext();
         _trainingRepoMock.Setup(r => r.AddAsync(It.IsAny<Training>())).Returns(Task.CompletedTask);
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
-        var dto = new CreateTrainingDto { Title = "Pilates", Location = "Gym", DateTime = DateTime.Now.AddDays(1), Capacity = 15, TrainerId = 1, GroupId = 5 };
+        var dto = new CreateTrainingDto { Title = "Pilates", LocationId = 2, DateTime = DateTime.Now.AddDays(1), Capacity = 15, TrainerId = 1, GroupId = 5 };
         var result = await service.CreateAsync(dto);
         result.Should().NotBeNull();
         result.Title.Should().Be("Pilates");

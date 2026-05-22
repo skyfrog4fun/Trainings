@@ -17,14 +17,14 @@
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
-        <h2>⚙️ Mail Configuration</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm">+ New Configuration</button>
+        <h2><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Mail Configuration</h2>
+        <button class="btn btn-success" @onclick="ShowCreateForm"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Configuration</button>
     </div>
 
     <p class="text-muted">Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</p>
 
     <div class="card mb-4">
-        <div class="card-header fw-bold">🚦 Running Modes</div>
+        <div class="card-header fw-bold">Running Modes</div>
         <div class="card-body">
             <p class="text-muted mb-3">
                 Override the startup configuration defaults for the current session.
@@ -63,7 +63,7 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center fw-bold">
-            <span>🕒 Server and Client Time</span>
+        <span>Server and Client Time</span>
             <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshDateTimesAsync">Refresh</button>
         </div>
         <div class="card-body">
@@ -543,8 +543,8 @@
         var targetLabel = GetSelectedTestConfigurationId().HasValue ? "selected configuration" : "configured fallback order";
 
         return _testEmailResult?.IsSuccess == true
-            ? $"✓ Test email sent successfully using the {targetLabel}."
-            : $"✗ Test email failed using the {targetLabel}.";
+            ? $"Test email sent successfully using the {targetLabel}."
+            : $"Test email failed using the {targetLabel}.";
     }
 
     private static string GetConfigOptionLabel(MailConfiguration config)

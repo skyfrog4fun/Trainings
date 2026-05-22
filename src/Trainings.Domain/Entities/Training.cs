@@ -5,7 +5,10 @@ public class Training
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Location { get; set; } = string.Empty;
+    public int? LocationId { get; set; }
+    public Location? Location { get; set; }
+    public string? SpecialLocationDescription { get; set; }
+    public string? MeetingPoint { get; set; }
     public DateTime DateTime { get; set; }
     public int Capacity { get; set; }
     public bool IsActive { get; set; } = true;

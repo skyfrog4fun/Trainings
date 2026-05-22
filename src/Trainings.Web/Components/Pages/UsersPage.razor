@@ -6,13 +6,14 @@
 @inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
+@inject IDateTimeFormatService DateTimeFormatService
 
 <PageTitle>User Management</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Users</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm" disabled="@IsWriteBlocked">+ New User</button>
+        <button class="btn btn-success" @onclick="ShowCreateForm" disabled="@IsWriteBlocked"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New User</button>
     </div>
 
     @if (IsWriteBlocked)
@@ -83,6 +84,10 @@
                         <label class="form-label">City</label>
                         <input class="form-control" placeholder="City" @bind="_formCity" />
                     </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Country</label>
+                        <input class="form-control" placeholder="CH" @bind="_formCountry" />
+                    </div>
                     <div class="col-12">
                         <label class="form-label">@(_isSuperAdmin ? "Groups" : "Managed Groups *")</label>
                         @if (_availableGroups.Any())
@@ -120,7 +125,7 @@
                 </div>
                 <div class="mt-3">
                     <button class="btn btn-primary me-2" @onclick="SaveUser" disabled="@IsWriteBlocked">Save</button>
-                    <button class="btn btn-secondary" @onclick="CancelForm">Cancel</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
                 </div>
                 @if (_formError != null) { <div class="alert alert-danger mt-2">@_formError</div> }
             </div>
@@ -137,7 +142,7 @@
         {
             <div class="card mb-4 border-warning">
                 <div class="card-header bg-warning text-dark fw-bold">
-                    ⏳ Pending Approvals (@_pendingUsers.Count)
+                    Pending Approvals (@_pendingUsers.Count)
                 </div>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
@@ -180,14 +185,23 @@
                             <td>
                                 @if (user.EmailConfirmedAt.HasValue)
                                 {
-                                    <span class="text-success" title="Confirmed @user.EmailConfirmedAt.Value.ToString("MMM d, yyyy")">✓</span>
+                                    <span class="text-success" title="Confirmed @user.EmailConfirmedAt.Value.ToString("MMM d, yyyy")"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">✗</span>
+                                    <span class="text-muted"><i class="fa-solid fa-xmark" aria-hidden="true"></i></span>
                                 }
                             </td>
-                            <td>@(user.IsActive ? "✓" : "✗")</td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <i class="fa-solid fa-check text-success" aria-hidden="true"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-xmark text-danger" aria-hidden="true"></i>
+                                }
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditUser(user)" disabled="@IsWriteBlocked">Edit</button>
                                 <button class="btn btn-sm btn-outline-secondary me-1"
@@ -198,7 +212,7 @@
                                     {
                                         <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                                     }
-                                    📧 Mail
+                                    <i class="fa-solid fa-envelope me-1" aria-hidden="true"></i>Mail
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger"
                                         @onclick="() => ToggleActive(user)"
@@ -243,6 +257,7 @@
     private DateTime? _formBirthday;
     private string _formMobile = string.Empty;
     private string _formCity = string.Empty;
+    private string _formCountry = string.Empty;
     private string _formWelcomeMessage = string.Empty;
     private DateTime? _formEntryDate;
     private string? _formError;
@@ -255,6 +270,7 @@
     protected override async Task OnInitializedAsync()
     {
         _runtimeMode = AppRuntimeModeService.GetCurrent();
+        _formCountry = DateTimeFormatService.GetDefaultCountry();
         await LoadUsers();
     }
 
@@ -324,6 +340,7 @@
         _formGender = "Other";
         _formBirthday = null;
         _formMobile = _formCity = _formWelcomeMessage = string.Empty;
+        _formCountry = DateTimeFormatService.GetDefaultCountry();
         _formEntryDate = null;
         _selectedGroupIds.Clear();
         _formError = null;
@@ -341,6 +358,7 @@
         _formBirthday = user.Birthday.HasValue ? user.Birthday.Value.ToDateTime(TimeOnly.MinValue) : null;
         _formMobile = user.Mobile ?? string.Empty;
         _formCity = user.City ?? string.Empty;
+        _formCountry = user.Country ?? DateTimeFormatService.GetDefaultCountry();
         _formWelcomeMessage = user.WelcomeMessage ?? string.Empty;
         _formEntryDate = user.EntryDate;
         _selectedGroupIds = GetMemberships(user.Id)
@@ -378,7 +396,8 @@
                     Gender = Enum.Parse<Gender>(_formGender),
                     Birthday = birthday,
                     Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
-                    City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity
+                    City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity,
+                    Country = string.IsNullOrWhiteSpace(_formCountry) ? DateTimeFormatService.GetDefaultCountry() : _formCountry
                 });
                 userId = createdUser.Id;
             }
@@ -397,6 +416,7 @@
                     Birthday = birthday,
                     Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
                     City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity,
+                    Country = string.IsNullOrWhiteSpace(_formCountry) ? DateTimeFormatService.GetDefaultCountry() : _formCountry,
                     EntryDate = _formEntryDate,
                     WelcomeMessage = string.IsNullOrWhiteSpace(_formWelcomeMessage) ? null : _formWelcomeMessage
                 });
@@ -460,6 +480,7 @@
             Birthday = user.Birthday,
             Mobile = user.Mobile,
             City = user.City,
+            Country = user.Country,
             EntryDate = user.EntryDate,
             WelcomeMessage = user.WelcomeMessage
         });

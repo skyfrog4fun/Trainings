@@ -29,11 +29,13 @@ public partial class DbSeeder
         await EnsureDataDirectoryExistsAsync();
         await HandlePreExistingDatabaseAsync();
         await _context.Database.MigrateAsync();
+        await SeedLocationsAsync();
 
         if (!_context.Users.Any())
         {
             var email = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
             var password = _configuration["Seed:Password"] ?? "Admin123!";
+            var defaultCountry = (_configuration["App:DefaultCountry"] ?? "CH").ToUpperInvariant();
 
             var superAdmin = new User
             {
@@ -43,6 +45,7 @@ public partial class DbSeeder
                 PasswordHash = _passwordHasher.Hash(password),
                 Role = UserRole.SuperAdmin,
                 Gender = Gender.Other,
+                Country = defaultCountry,
                 IsActive = true,
                 EmailConfirmedAt = DateTime.UtcNow,
                 CreationDate = DateTime.UtcNow,
@@ -51,6 +54,32 @@ public partial class DbSeeder
             _context.Users.Add(superAdmin);
             await _context.SaveChangesAsync();
         }
+    }
+
+    private async Task SeedLocationsAsync()
+    {
+        if (await _context.Locations.AnyAsync())
+        {
+            return;
+        }
+
+        _context.Locations.AddRange(
+            new Location
+            {
+                Name = "Outside",
+                CityName = string.Empty,
+                IsSystemWide = true,
+                IsActive = true
+            },
+            new Location
+            {
+                Name = "Special",
+                CityName = string.Empty,
+                IsSystemWide = true,
+                IsActive = true
+            });
+
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>

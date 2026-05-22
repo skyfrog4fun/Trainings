@@ -4,19 +4,21 @@
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IAttendanceService AttendanceService
+@inject IUserService UserService
+@inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Attendance</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/trainings/@TrainingId" class="btn btn-sm btn-outline-secondary">← Back</a>
+        <a href="/trainings/@TrainingId" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
     </div>
 
     @if (_training != null)
     {
         <h2>Attendance: @_training.Title</h2>
-        <p class="text-muted">@_training.DateTime.ToString("ddd, MMM d, yyyy HH:mm") · @_training.Location</p>
+        <p class="text-muted">@FormatTrainingDate(_training) · @(_training.LocationName ?? "-")</p>
     }
 
     @if (_loading)
@@ -39,11 +41,11 @@
                     <div class="btn-group" role="group">
                         <button class="btn btn-sm @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-success")"
                                 @onclick="() => SetAttendance(participant.UserId, AttendanceStatus.Present)">
-                            ✓ Present
+                            <i class="fa-solid fa-check me-1" aria-hidden="true"></i>Present
                         </button>
                         <button class="btn btn-sm @(status == AttendanceStatus.Absent ? "btn-danger" : "btn-outline-danger")"
                                 @onclick="() => SetAttendance(participant.UserId, AttendanceStatus.Absent)">
-                            ✗ Absent
+                            <i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Absent
                         </button>
                     </div>
                 </div>
@@ -65,11 +67,16 @@
     private bool _loading = true;
     private int _trainerId;
     private string? _message;
+    private string _userCountry = "CH";
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         _trainerId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        if (_trainerId > 0)
+        {
+            _userCountry = (await UserService.GetByIdAsync(_trainerId))?.Country ?? DateTimeFormatService.GetDefaultCountry();
+        }
 
         _training = await TrainingService.GetByIdAsync(TrainingId);
         _participants = (await RegistrationService.GetByTrainingIdAsync(TrainingId))
@@ -88,5 +95,11 @@
         _attendanceMap[userId] = status;
         _message = "Attendance saved.";
         StateHasChanged();
+    }
+
+    private string FormatTrainingDate(TrainingDto training)
+    {
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        return training.DateTime.ToString("g", culture);
     }
 }

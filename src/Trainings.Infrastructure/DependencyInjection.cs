@@ -45,6 +45,8 @@ public static class DependencyInjection
         services.AddScoped<INotificationLogService, NotificationLogService>();
         services.AddScoped<IAuthorizationHelper, AuthorizationHelper>();
         services.AddScoped<IAppRuntimeModeService, AppRuntimeModeService>();
+        services.AddScoped<ILocationService, LocationService>();
+        services.AddScoped<IDateTimeFormatService, DateTimeFormatService>();
 
         return services;
     }
