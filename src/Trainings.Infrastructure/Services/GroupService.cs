@@ -72,7 +72,7 @@ public class GroupService : IGroupService
         _context.Groups.Add(group);
         await _context.SaveChangesAsync(ct);
 
-        if (dto.AllowedLocationIds.Any())
+        if (dto.AllowedLocationIds.Count > 0)
         {
             var assignments = dto.AllowedLocationIds
                 .Distinct()
@@ -124,7 +124,7 @@ public class GroupService : IGroupService
         var existingLocationIds = group.AllowedLocations.Select(x => x.LocationId).ToHashSet();
 
         var toRemove = group.AllowedLocations.Where(x => !requestedLocationIds.Contains(x.LocationId)).ToList();
-        if (toRemove.Any())
+        if (toRemove.Count > 0)
         {
             _context.GroupLocations.RemoveRange(toRemove);
         }

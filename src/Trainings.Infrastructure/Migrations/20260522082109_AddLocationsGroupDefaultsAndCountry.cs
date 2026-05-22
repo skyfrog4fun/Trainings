@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,6 +8,8 @@ namespace Trainings.Infrastructure.Migrations
     /// <inheritdoc />
     public partial class AddLocationsGroupDefaultsAndCountry : Migration
     {
+        private static readonly string[] LocationColumns = { "Id", "Name", "CityName", "IsSystemWide", "IsActive" };
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -137,7 +139,7 @@ namespace Trainings.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Locations",
-                columns: new[] { "Id", "Name", "CityName", "IsSystemWide", "IsActive" },
+                columns: LocationColumns,
                 values: new object[,]
                 {
                     { 1, "Outside", "", true, true },
