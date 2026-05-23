@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<EmailConfirmationToken> EmailConfirmationTokens => Set<EmailConfirmationToken>();
+    public DbSet<Country> Countries => Set<Country>();
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<GroupLocation> GroupLocations => Set<GroupLocation>();
@@ -29,6 +30,14 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Country>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Code).IsRequired().HasMaxLength(10);
+            entity.HasIndex(c => c.Code).IsUnique();
+            entity.Property(c => c.Name).IsRequired().HasMaxLength(100);
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(u => u.Id);
@@ -39,9 +48,13 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.PasswordHash).IsRequired();
             entity.Property(u => u.Mobile).HasMaxLength(50);
             entity.Property(u => u.City).HasMaxLength(100);
-            entity.Property(u => u.Country).HasMaxLength(2);
             entity.Property(u => u.WelcomeMessage).HasMaxLength(500);
             entity.Ignore(u => u.DisplayName);
+            entity.HasOne(u => u.Country)
+                .WithMany(c => c.Users)
+                .HasForeignKey(u => u.CountryId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Training>(entity =>
@@ -123,10 +136,14 @@ public class ApplicationDbContext : DbContext
             entity.Property(g => g.Identifier).IsRequired().HasMaxLength(50);
             entity.HasIndex(g => g.Identifier).IsUnique();
             entity.Property(g => g.Description).HasMaxLength(500);
-            entity.Property(g => g.Country).IsRequired().HasMaxLength(2).HasDefaultValue("CH");
             entity.HasOne(g => g.Location)
                 .WithMany(l => l.DefaultForGroups)
                 .HasForeignKey(g => g.LocationId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(g => g.Country)
+                .WithMany(c => c.Groups)
+                .HasForeignKey(g => g.CountryId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
         });
@@ -136,6 +153,11 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(l => l.Id);
             entity.Property(l => l.Name).IsRequired().HasMaxLength(200);
             entity.Property(l => l.CityName).HasMaxLength(200);
+            entity.HasOne(l => l.Country)
+                .WithMany(c => c.Locations)
+                .HasForeignKey(l => l.CountryId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<GroupLocation>(entity =>

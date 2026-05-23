@@ -20,6 +20,7 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<LocationDto>> GetAllAsync(CancellationToken ct = default)
     {
         var locations = await _context.Locations
+            .Include(l => l.Country)
             .OrderBy(l => l.IsSystemWide ? 0 : 1)
             .ThenBy(l => l.Name)
             .ToListAsync(ct);
@@ -29,6 +30,7 @@ public class LocationService : ILocationService
     public async Task<IEnumerable<LocationDto>> GetByGroupIdAsync(int groupId, CancellationToken ct = default)
     {
         var locations = await _context.Locations
+            .Include(l => l.Country)
             .Where(l => l.IsSystemWide || l.AllowedForGroups.Any(gl => gl.GroupId == groupId))
             .OrderBy(l => l.IsSystemWide ? 0 : 1)
             .ThenBy(l => l.Name)
@@ -45,11 +47,13 @@ public class LocationService : ILocationService
             Name = dto.Name.Trim(),
             CityName = dto.CityName.Trim(),
             IsSystemWide = dto.IsSystemWide,
-            IsActive = dto.IsActive
+            IsActive = dto.IsActive,
+            CountryId = dto.CountryId
         };
 
         _context.Locations.Add(location);
         await _context.SaveChangesAsync(ct);
+        await _context.Entry(location).Reference(l => l.Country).LoadAsync(ct);
         return MapToDto(location);
     }
 
@@ -64,6 +68,7 @@ public class LocationService : ILocationService
         location.CityName = dto.CityName.Trim();
         location.IsSystemWide = dto.IsSystemWide;
         location.IsActive = dto.IsActive;
+        location.CountryId = dto.CountryId;
 
         await _context.SaveChangesAsync(ct);
     }
@@ -88,6 +93,9 @@ public class LocationService : ILocationService
         Name = location.Name,
         CityName = location.CityName,
         IsSystemWide = location.IsSystemWide,
-        IsActive = location.IsActive
+        IsActive = location.IsActive,
+        CountryId = location.CountryId,
+        CountryCode = location.Country?.Code,
+        CountryName = location.Country?.Name
     };
 }

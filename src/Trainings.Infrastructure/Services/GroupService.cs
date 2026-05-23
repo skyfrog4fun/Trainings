@@ -23,6 +23,7 @@ public class GroupService : IGroupService
         var groups = await _context.Groups
             .Include(g => g.Memberships)
             .Include(g => g.Location)
+            .Include(g => g.Country)
             .Include(g => g.AllowedLocations)
             .OrderBy(g => g.Name)
             .ToListAsync(ct);
@@ -34,6 +35,7 @@ public class GroupService : IGroupService
         var group = await _context.Groups
             .Include(g => g.Memberships)
             .Include(g => g.Location)
+            .Include(g => g.Country)
             .Include(g => g.AllowedLocations)
             .FirstOrDefaultAsync(g => g.Id == id, ct);
         return group == null ? null : MapToDto(group);
@@ -44,6 +46,7 @@ public class GroupService : IGroupService
         var group = await _context.Groups
             .Include(g => g.Memberships)
             .Include(g => g.Location)
+            .Include(g => g.Country)
             .Include(g => g.AllowedLocations)
             .FirstOrDefaultAsync(g => g.Slug == slug, ct);
         return group == null ? null : MapToDto(group);
@@ -65,7 +68,7 @@ public class GroupService : IGroupService
             StartTime = dto.StartTime,
             DurationMinutes = dto.DurationMinutes,
             MaxParticipants = dto.MaxParticipants,
-            Country = string.IsNullOrWhiteSpace(dto.Country) ? "CH" : dto.Country.Trim().ToUpperInvariant(),
+            CountryId = dto.CountryId,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -82,6 +85,7 @@ public class GroupService : IGroupService
         }
 
         await _context.Entry(group).Reference(g => g.Location).LoadAsync(ct);
+        await _context.Entry(group).Reference(g => g.Country).LoadAsync(ct);
         await _context.Entry(group).Collection(g => g.AllowedLocations).LoadAsync(ct);
         return MapToDto(group);
     }
@@ -117,7 +121,7 @@ public class GroupService : IGroupService
         group.StartTime = dto.StartTime;
         group.DurationMinutes = dto.DurationMinutes;
         group.MaxParticipants = dto.MaxParticipants;
-        group.Country = string.IsNullOrWhiteSpace(dto.Country) ? "CH" : dto.Country.Trim().ToUpperInvariant();
+        group.CountryId = dto.CountryId;
         group.IsActive = dto.IsActive;
 
         var requestedLocationIds = dto.AllowedLocationIds.Distinct().ToHashSet();
@@ -228,6 +232,8 @@ public class GroupService : IGroupService
         var groups = await _context.GroupMemberships
             .Include(gm => gm.Group)
                 .ThenInclude(g => g.Memberships)
+            .Include(gm => gm.Group)
+                .ThenInclude(g => g.Country)
             .Where(gm => gm.UserId == userId && gm.IsActive && gm.Status == GroupMembershipStatus.Approved)
             .Select(gm => gm.Group)
             .Distinct()
@@ -289,7 +295,8 @@ public class GroupService : IGroupService
         StartTime = group.StartTime,
         DurationMinutes = group.DurationMinutes,
         MaxParticipants = group.MaxParticipants,
-        Country = group.Country,
+        CountryId = group.CountryId,
+        CountryCode = group.Country?.Code,
         AllowedLocationIds = group.AllowedLocations.Select(x => x.LocationId).ToList(),
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,

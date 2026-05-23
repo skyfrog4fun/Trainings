@@ -13,7 +13,8 @@ public class Group
     public TimeOnly? StartTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }
-    public string Country { get; set; } = "CH";
+    public int? CountryId { get; set; }
+    public Country? Country { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

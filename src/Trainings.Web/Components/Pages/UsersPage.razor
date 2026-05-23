@@ -4,6 +4,7 @@
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
 @inject IGroupService GroupService
+@inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject IDateTimeFormatService DateTimeFormatService
@@ -86,7 +87,13 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">Country</label>
-                        <input class="form-control" placeholder="CH" @bind="_formCountry" />
+                        <select class="form-select" @bind="_formCountryId">
+                            <option value="">Select country</option>
+                            @foreach (var country in _countries)
+                            {
+                                <option value="@country.Id">@country.Code — @country.Name</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-12">
                         <label class="form-label">@(_isSuperAdmin ? "Groups" : "Managed Groups *")</label>
@@ -240,6 +247,7 @@
     private List<UserDto> _pendingUsers = new();
     private Dictionary<int, List<GroupMembershipDto>> _membershipsByUser = new();
     private List<GroupDto> _availableGroups = new();
+    private List<CountryDto> _countries = new();
     private HashSet<int> _managedGroupIds = new();
     private HashSet<int> _selectedGroupIds = new();
     private AppRuntimeModeDto _runtimeMode = new();
@@ -257,7 +265,7 @@
     private DateTime? _formBirthday;
     private string _formMobile = string.Empty;
     private string _formCity = string.Empty;
-    private string _formCountry = string.Empty;
+    private int? _formCountryId;
     private string _formWelcomeMessage = string.Empty;
     private DateTime? _formEntryDate;
     private string? _formError;
@@ -270,7 +278,6 @@
     protected override async Task OnInitializedAsync()
     {
         _runtimeMode = AppRuntimeModeService.GetCurrent();
-        _formCountry = DateTimeFormatService.GetDefaultCountry();
         await LoadUsers();
     }
 
@@ -291,6 +298,8 @@
         _availableGroups = _isSuperAdmin
             ? allGroups
             : allGroups.Where(g => _managedGroupIds.Contains(g.Id)).ToList();
+
+        _countries = (await CountryService.GetAllAsync()).ToList();
 
         var allUsers = (await UserService.GetAllAsync()).ToList();
         var pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
@@ -340,7 +349,7 @@
         _formGender = "Other";
         _formBirthday = null;
         _formMobile = _formCity = _formWelcomeMessage = string.Empty;
-        _formCountry = DateTimeFormatService.GetDefaultCountry();
+        _formCountryId = null;
         _formEntryDate = null;
         _selectedGroupIds.Clear();
         _formError = null;
@@ -358,7 +367,7 @@
         _formBirthday = user.Birthday.HasValue ? user.Birthday.Value.ToDateTime(TimeOnly.MinValue) : null;
         _formMobile = user.Mobile ?? string.Empty;
         _formCity = user.City ?? string.Empty;
-        _formCountry = user.Country ?? DateTimeFormatService.GetDefaultCountry();
+        _formCountryId = user.CountryId;
         _formWelcomeMessage = user.WelcomeMessage ?? string.Empty;
         _formEntryDate = user.EntryDate;
         _selectedGroupIds = GetMemberships(user.Id)
@@ -397,7 +406,7 @@
                     Birthday = birthday,
                     Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
                     City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity,
-                    Country = string.IsNullOrWhiteSpace(_formCountry) ? DateTimeFormatService.GetDefaultCountry() : _formCountry
+                    CountryId = _formCountryId
                 });
                 userId = createdUser.Id;
             }
@@ -416,7 +425,7 @@
                     Birthday = birthday,
                     Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
                     City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity,
-                    Country = string.IsNullOrWhiteSpace(_formCountry) ? DateTimeFormatService.GetDefaultCountry() : _formCountry,
+                    CountryId = _formCountryId,
                     EntryDate = _formEntryDate,
                     WelcomeMessage = string.IsNullOrWhiteSpace(_formWelcomeMessage) ? null : _formWelcomeMessage
                 });
@@ -480,7 +489,7 @@
             Birthday = user.Birthday,
             Mobile = user.Mobile,
             City = user.City,
-            Country = user.Country,
+            CountryId = user.CountryId,
             EntryDate = user.EntryDate,
             WelcomeMessage = user.WelcomeMessage
         });

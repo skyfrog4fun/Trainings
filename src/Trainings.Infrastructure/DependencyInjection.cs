@@ -46,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationHelper, AuthorizationHelper>();
         services.AddScoped<IAppRuntimeModeService, AppRuntimeModeService>();
         services.AddScoped<ILocationService, LocationService>();
+        services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IDateTimeFormatService, DateTimeFormatService>();
 
         return services;

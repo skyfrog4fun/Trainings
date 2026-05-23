@@ -15,7 +15,8 @@ public class User
     public DateOnly? Birthday { get; set; }
     public string? Mobile { get; set; }
     public string? City { get; set; }
-    public string? Country { get; set; }
+    public int? CountryId { get; set; }
+    public Country? Country { get; set; }
     public DateTime? EmailConfirmedAt { get; set; }
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
     public DateTime? EntryDate { get; set; }

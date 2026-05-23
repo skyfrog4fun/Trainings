@@ -240,7 +240,7 @@ public class TrainingService : ITrainingService
         RegisteredCount = t.Registrations?.Count(r => r.Status == Domain.Enums.RegistrationStatus.Registered) ?? 0,
         GroupId = t.GroupId,
         GroupName = t.Group?.Name,
-        GroupCountry = t.Group?.Country
+        GroupCountry = t.Group?.Country?.Code
     };
 
     private static TrainingBlockDto MapBlockToDto(TrainingBlock b) => new()

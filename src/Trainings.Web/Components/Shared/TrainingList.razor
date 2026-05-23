@@ -30,7 +30,7 @@
     {
         if (CurrentUserId > 0)
         {
-            _userCountry = (await UserService.GetByIdAsync(CurrentUserId))?.Country ?? DateTimeFormatService.GetDefaultCountry();
+            _userCountry = (await UserService.GetByIdAsync(CurrentUserId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
     }
 

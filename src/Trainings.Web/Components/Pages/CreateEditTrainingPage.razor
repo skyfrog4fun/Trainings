@@ -67,7 +67,7 @@
                         <option value="">Select location</option>
                         @foreach (var location in _availableLocations)
                         {
-                            <option value="@location.Id">@location.Name (@location.CityName)</option>
+                            <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
                         }
                     </select>
                 </div>
