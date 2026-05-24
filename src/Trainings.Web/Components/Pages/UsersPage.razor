@@ -558,11 +558,6 @@
         }
         finally
         {
-            if (_actionResult is null)
-            {
-                _actionSuccess = false;
-                _actionResult = $"Failed to send account email to {user.Email}.";
-            }
             _busyUserId = null;
         }
     }
