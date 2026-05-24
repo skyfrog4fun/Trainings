@@ -11,18 +11,15 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IAppRuntimeModeService _appRuntimeModeService;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IDateTimeFormatService _dateTimeFormatService;
 
     public UserService(
         IUserRepository userRepository,
         IAppRuntimeModeService appRuntimeModeService,
-        IPasswordHasher passwordHasher,
-        IDateTimeFormatService dateTimeFormatService)
+        IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _appRuntimeModeService = appRuntimeModeService;
         _passwordHasher = passwordHasher;
-        _dateTimeFormatService = dateTimeFormatService;
     }
 
     public async Task<UserDto?> GetByIdAsync(int id)
@@ -64,7 +61,7 @@ public class UserService : IUserService
             Birthday = dto.Birthday,
             Mobile = dto.Mobile,
             City = dto.City,
-            Country = string.IsNullOrWhiteSpace(dto.Country) ? _dateTimeFormatService.GetDefaultCountry() : dto.Country.Trim().ToUpperInvariant(),
+            CountryId = dto.CountryId,
             IsActive = true,
             CreationDate = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow
@@ -88,7 +85,7 @@ public class UserService : IUserService
         user.Birthday = dto.Birthday;
         user.Mobile = dto.Mobile;
         user.City = dto.City;
-        user.Country = string.IsNullOrWhiteSpace(dto.Country) ? _dateTimeFormatService.GetDefaultCountry() : dto.Country.Trim().ToUpperInvariant();
+        user.CountryId = dto.CountryId;
         user.EntryDate = dto.EntryDate;
         user.WelcomeMessage = dto.WelcomeMessage;
         await _userRepository.UpdateAsync(user);
@@ -129,7 +126,8 @@ public class UserService : IUserService
         Birthday = user.Birthday,
         Mobile = user.Mobile,
         City = user.City,
-        Country = user.Country,
+        CountryId = user.CountryId,
+        CountryCode = user.Country?.Code,
         EmailConfirmedAt = user.EmailConfirmedAt,
         CreationDate = user.CreationDate,
         EntryDate = user.EntryDate,

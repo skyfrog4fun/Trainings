@@ -16,16 +16,16 @@ public class UserRepository : IUserRepository
     }
 
     public async Task<User?> GetByIdAsync(int id) =>
-        await _context.Users.FindAsync(id);
+        await _context.Users.Include(u => u.Country).FirstOrDefaultAsync(u => u.Id == id);
 
     public async Task<User?> GetByEmailAsync(string email) =>
-        await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        await _context.Users.Include(u => u.Country).FirstOrDefaultAsync(u => u.Email == email);
 
     public async Task<IEnumerable<User>> GetAllAsync() =>
-        await _context.Users.ToListAsync();
+        await _context.Users.Include(u => u.Country).ToListAsync();
 
     public async Task<IEnumerable<User>> GetByRoleAsync(UserRole role) =>
-        await _context.Users.Where(u => u.Role == role).ToListAsync();
+        await _context.Users.Include(u => u.Country).Where(u => u.Role == role).ToListAsync();
 
     public async Task AddAsync(User user)
     {

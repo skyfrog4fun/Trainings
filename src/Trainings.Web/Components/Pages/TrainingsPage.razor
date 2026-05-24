@@ -62,7 +62,7 @@
         var userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         if (userId > 0)
         {
-            _userCountry = (await UserService.GetByIdAsync(userId))?.Country ?? DateTimeFormatService.GetDefaultCountry();
+            _userCountry = (await UserService.GetByIdAsync(userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
 
         _trainings = (await TrainingService.GetActiveAsync()).ToList();

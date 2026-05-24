@@ -3,6 +3,7 @@
 @attribute [Authorize(Policy = "GroupAdmin")]
 @inject IGroupService GroupService
 @inject ILocationService LocationService
+@inject ICountryService CountryService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject NavigationManager NavigationManager
 
@@ -45,9 +46,9 @@
                         <label class="form-label">Location</label>
                         <select class="form-select" @bind="_formLocationId">
                             <option value="">Select location</option>
-                            @foreach (var location in _locations)
+                            @foreach (var location in _formLocations)
                             {
-                                <option value="@location.Id">@location.Name (@location.CityName)</option>
+                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
                             }
                         </select>
                     </div>
@@ -81,7 +82,13 @@
 
                     <div class="col-12 col-md-6">
                         <label class="form-label">Country</label>
-                        <input class="form-control" placeholder="CH" @bind="_formCountry" />
+                        <select class="form-select" @bind="_formCountryId">
+                            <option value="">Select country</option>
+                            @foreach (var country in _countries)
+                            {
+                                <option value="@country.Id">@country.Code — @country.Name</option>
+                            }
+                        </select>
                     </div>
                 </div>
 
@@ -151,6 +158,8 @@
 @code {
     private List<GroupDto> _groups = new();
     private List<LocationDto> _locations = new();
+    private List<LocationDto> _formLocations = new();
+    private List<CountryDto> _countries = new();
     private bool _loading = true;
     private bool _showForm;
     private int _editGroupId;
@@ -164,7 +173,7 @@
     private int? _formDurationMinutes = 90;
     private string _formEndTime = "20:30";
     private int? _formMaxParticipants = 10;
-    private string _formCountry = "CH";
+    private int? _formCountryId;
     private string? _formError;
 
     private int? FormDurationMinutesValue
@@ -179,7 +188,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _formCountry = DateTimeFormatService.GetDefaultCountry();
         await LoadGroups();
     }
 
@@ -187,7 +195,8 @@
     {
         _loading = true;
         _groups = (await GroupService.GetAllAsync()).ToList();
-        _locations = (await LocationService.GetAllAsync()).Where(l => l.IsActive).OrderBy(l => l.Name).ToList();
+        _locations = (await LocationService.GetAllAsync()).Where(l => l.IsActive && !l.IsSystemWide).OrderBy(l => l.Name).ToList();
+        _countries = (await CountryService.GetAllAsync()).ToList();
         _loading = false;
     }
 
@@ -200,9 +209,10 @@
         _formLocationId = null;
         _formStartTime = new TimeOnly(19, 0);
         _formDurationMinutes = 90;
-        _formCountry = DateTimeFormatService.GetDefaultCountry();
+        _formCountryId = null;
         _formMaxParticipants = 10;
         _formError = null;
+        _formLocations = _locations;
         CalculateGroupEndTime();
         _showForm = true;
     }
@@ -218,9 +228,12 @@
         _formLocationId = group.LocationId;
         _formStartTime = group.StartTime ?? new TimeOnly(19, 0);
         _formDurationMinutes = group.DurationMinutes ?? 90;
-        _formCountry = group.Country;
+        _formCountryId = group.CountryId;
         _formMaxParticipants = group.MaxParticipants;
         _formError = null;
+        _formLocations = group.AllowedLocationIds.Count > 0
+            ? _locations.Where(l => group.AllowedLocationIds.Contains(l.Id)).ToList()
+            : _locations;
         CalculateGroupEndTime();
         _showForm = true;
     }
@@ -258,7 +271,7 @@
                     StartTime = startTime,
                     DurationMinutes = _formDurationMinutes,
                     MaxParticipants = _formMaxParticipants,
-                    Country = _formCountry,
+                    CountryId = _formCountryId,
                     AllowedLocationIds = []
                 });
             }
@@ -276,7 +289,7 @@
                     StartTime = startTime,
                     DurationMinutes = _formDurationMinutes,
                     MaxParticipants = _formMaxParticipants,
-                    Country = _formCountry,
+                    CountryId = _formCountryId,
                     AllowedLocationIds = group.AllowedLocationIds,
                     IsActive = _formIsActive
                 });

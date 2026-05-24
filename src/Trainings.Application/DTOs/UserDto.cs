@@ -15,7 +15,8 @@ public class UserDto
     public DateOnly? Birthday { get; set; }
     public string? Mobile { get; set; }
     public string? City { get; set; }
-    public string? Country { get; set; }
+    public int? CountryId { get; set; }
+    public string? CountryCode { get; set; }
     public DateTime? EmailConfirmedAt { get; set; }
     public DateTime CreationDate { get; set; }
     public DateTime? EntryDate { get; set; }
@@ -34,7 +35,7 @@ public class CreateUserDto
     public DateOnly? Birthday { get; set; }
     public string? Mobile { get; set; }
     public string? City { get; set; }
-    public string? Country { get; set; }
+    public int? CountryId { get; set; }
 }
 
 public class UpdateUserDto
@@ -49,7 +50,7 @@ public class UpdateUserDto
     public DateOnly? Birthday { get; set; }
     public string? Mobile { get; set; }
     public string? City { get; set; }
-    public string? Country { get; set; }
+    public int? CountryId { get; set; }
     public DateTime? EntryDate { get; set; }
     public string? WelcomeMessage { get; set; }
 }

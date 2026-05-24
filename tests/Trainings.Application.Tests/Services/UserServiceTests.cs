@@ -15,17 +15,14 @@ public class UserServiceTests
     private readonly Mock<IUserRepository> _userRepoMock = new();
     private readonly Mock<IAppRuntimeModeService> _runtimeModeServiceMock = new();
     private readonly Mock<IPasswordHasher> _hasherMock = new();
-    private readonly Mock<IDateTimeFormatService> _dateTimeFormatServiceMock = new();
     private readonly UserService _service;
 
     public UserServiceTests()
     {
-        _dateTimeFormatServiceMock.Setup(x => x.GetDefaultCountry()).Returns("CH");
         _service = new UserService(
             _userRepoMock.Object,
             _runtimeModeServiceMock.Object,
-            _hasherMock.Object,
-            _dateTimeFormatServiceMock.Object);
+            _hasherMock.Object);
     }
 
     [Fact]

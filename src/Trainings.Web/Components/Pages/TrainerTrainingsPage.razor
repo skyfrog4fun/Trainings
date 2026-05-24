@@ -59,7 +59,7 @@
         _trainerId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         if (_trainerId > 0)
         {
-            _userCountry = (await UserService.GetByIdAsync(_trainerId))?.Country ?? DateTimeFormatService.GetDefaultCountry();
+            _userCountry = (await UserService.GetByIdAsync(_trainerId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
 
         _trainings = (await TrainingService.GetByTrainerIdAsync(_trainerId)).ToList();

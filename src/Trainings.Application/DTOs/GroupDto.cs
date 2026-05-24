@@ -15,7 +15,8 @@ public class GroupDto
     public TimeOnly? StartTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }
-    public string Country { get; set; } = "CH";
+    public int? CountryId { get; set; }
+    public string? CountryCode { get; set; }
     public List<int> AllowedLocationIds { get; set; } = new();
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -33,7 +34,7 @@ public class CreateGroupDto
     public TimeOnly? StartTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }
-    public string Country { get; set; } = "CH";
+    public int? CountryId { get; set; }
     public List<int> AllowedLocationIds { get; set; } = new();
 }
 
@@ -48,7 +49,7 @@ public class UpdateGroupDto
     public TimeOnly? StartTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }
-    public string Country { get; set; } = "CH";
+    public int? CountryId { get; set; }
     public List<int> AllowedLocationIds { get; set; } = new();
     public bool IsActive { get; set; }
 }

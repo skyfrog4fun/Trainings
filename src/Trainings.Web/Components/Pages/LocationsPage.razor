@@ -3,6 +3,7 @@
 @attribute [Authorize(Policy = "SuperAdmin")]
 @inject ILocationService LocationService
 @inject IGroupService GroupService
+@inject ICountryService CountryService
 
 <PageTitle>Locations</PageTitle>
 
@@ -18,15 +19,25 @@
             <div class="card-body">
                 <h5>@(_editId == 0 ? "Create Location" : "Edit Location")</h5>
                 <div class="row g-2">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <label class="form-label">Name</label>
                         <input class="form-control" @bind="_formName" />
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <label class="form-label">City Name</label>
                         <input class="form-control" @bind="_formCityName" />
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Country</label>
+                        <select class="form-select" @bind="_formCountryId">
+                            <option value="">Select country</option>
+                            @foreach (var country in _countries)
+                            {
+                                <option value="@country.Id">@country.Code — @country.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
                         <div class="form-check mt-4">
                             <input class="form-check-input" id="isSystemWide" type="checkbox" @bind="_formIsSystemWide" />
                             <label class="form-check-label" for="isSystemWide">System wide (Outside / Special)</label>
@@ -41,36 +52,17 @@
         </div>
     }
 
-    <div class="table-responsive mb-4">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>City</th>
-                    <th>System wide</th>
-                    <th>Active</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var location in _locations)
-                {
-                    <tr>
-                        <td>@location.Name</td>
-                        <td>@location.CityName</td>
-                        <td>@(location.IsSystemWide ? "Yes" : "No")</td>
-                        <td>@(location.IsActive ? "Yes" : "No")</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => Edit(location)"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(location.Id)" disabled="@location.IsSystemWide"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+    @{
+        var activeLocations = _locations.Where(l => l.IsActive && !l.IsSystemWide).ToList();
+        var systemWideLocations = _locations.Where(l => l.IsSystemWide).ToList();
+        var inactiveLocations = _locations.Where(l => !l.IsActive).ToList();
+    }
 
-    <h4>Group Location Access</h4>
+    @RenderLocationGroup("Active Locations", "active-locations", activeLocations, true)
+    @RenderLocationGroup("System Wide", "system-wide-locations", systemWideLocations, true)
+    @RenderLocationGroup("Inactive", "inactive-locations", inactiveLocations, false)
+
+    <h4 class="mt-4">Group Location Access</h4>
     @foreach (var group in _groups)
     {
         <div class="card mb-3">
@@ -87,7 +79,13 @@
                                        id="grp-loc-@group.Id-@location.Id"
                                        checked="@_groupLocationAssignments.Contains(key)"
                                        @onchange="e => ToggleGroupLocation(group.Id, location.Id, (bool)(e.Value ?? false))" />
-                                <label class="form-check-label" for="grp-loc-@group.Id-@location.Id">@location.Name (@location.CityName)</label>
+                                <label class="form-check-label" for="grp-loc-@group.Id-@location.Id">
+                                    @location.Name
+                                    @if (!string.IsNullOrWhiteSpace(location.CityName))
+                                    {
+                                        <br /><small class="text-muted">@location.CityName</small>
+                                    }
+                                </label>
                             </div>
                         </div>
                     }
@@ -100,6 +98,7 @@
 @code {
     private List<LocationDto> _locations = new();
     private List<GroupDto> _groups = new();
+    private List<CountryDto> _countries = new();
     private HashSet<string> _groupLocationAssignments = new();
 
     private bool _showForm;
@@ -107,6 +106,7 @@
     private string _formName = string.Empty;
     private string _formCityName = string.Empty;
     private bool _formIsSystemWide;
+    private int? _formCountryId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,11 +117,59 @@
     {
         _locations = (await LocationService.GetAllAsync()).ToList();
         _groups = (await GroupService.GetAllAsync()).ToList();
+        _countries = (await CountryService.GetAllAsync()).ToList();
 
         _groupLocationAssignments = _groups
             .SelectMany(g => g.AllowedLocationIds.Select(id => $"{g.Id}:{id}"))
             .ToHashSet(StringComparer.Ordinal);
     }
+
+    private RenderFragment RenderLocationGroup(string title, string collapseId, List<LocationDto> locations, bool defaultOpen) => __builder =>
+    {
+        if (locations.Count == 0)
+        {
+            return;
+        }
+
+        var chevronClass = defaultOpen ? "fa-chevron-up" : "fa-chevron-down";
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#@collapseId"
+                 style="cursor:pointer;">
+                <span class="fw-bold">@title (@locations.Count)</span>
+                <i class="fa-solid @chevronClass" aria-hidden="true"></i>
+            </div>
+            <div id="@collapseId" class="collapse @(defaultOpen ? "show" : "")">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>City</th>
+                                <th>Country</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var location in locations)
+                            {
+                                <tr>
+                                    <td>@location.Name</td>
+                                    <td>@location.CityName</td>
+                                    <td>@(location.CountryCode ?? "—")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => Edit(location)"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(location.Id)" disabled="@location.IsSystemWide"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>;
+    };
 
     private void ShowCreateForm()
     {
@@ -129,6 +177,7 @@
         _formName = string.Empty;
         _formCityName = string.Empty;
         _formIsSystemWide = false;
+        _formCountryId = null;
         _showForm = true;
     }
 
@@ -138,6 +187,7 @@
         _formName = location.Name;
         _formCityName = location.CityName;
         _formIsSystemWide = location.IsSystemWide;
+        _formCountryId = location.CountryId;
         _showForm = true;
     }
 
@@ -149,7 +199,8 @@
             {
                 Name = _formName,
                 CityName = _formCityName,
-                IsSystemWide = _formIsSystemWide
+                IsSystemWide = _formIsSystemWide,
+                CountryId = _formCountryId
             });
         }
         else
@@ -161,7 +212,8 @@
                 Name = _formName,
                 CityName = _formCityName,
                 IsSystemWide = _formIsSystemWide,
-                IsActive = existing.IsActive
+                IsActive = existing.IsActive,
+                CountryId = _formCountryId
             });
         }
 
@@ -201,7 +253,7 @@
             StartTime = group.StartTime,
             DurationMinutes = group.DurationMinutes,
             MaxParticipants = group.MaxParticipants,
-            Country = group.Country,
+            CountryId = group.CountryId,
             AllowedLocationIds = allowed.ToList(),
             IsActive = group.IsActive
         });

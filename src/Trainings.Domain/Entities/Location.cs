@@ -7,6 +7,8 @@ public class Location
     public string CityName { get; set; } = string.Empty;
     public bool IsSystemWide { get; set; }
     public bool IsActive { get; set; } = true;
+    public int? CountryId { get; set; }
+    public Country? Country { get; set; }
 
     public ICollection<Group> DefaultForGroups { get; set; } = new List<Group>();
     public ICollection<Training> Trainings { get; set; } = new List<Training>();

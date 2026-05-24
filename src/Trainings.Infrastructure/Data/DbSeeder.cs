@@ -45,7 +45,6 @@ public partial class DbSeeder
                 PasswordHash = _passwordHasher.Hash(password),
                 Role = UserRole.SuperAdmin,
                 Gender = Gender.Other,
-                Country = defaultCountry,
                 IsActive = true,
                 EmailConfirmedAt = DateTime.UtcNow,
                 CreationDate = DateTime.UtcNow,
