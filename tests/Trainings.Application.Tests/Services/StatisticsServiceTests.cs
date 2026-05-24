@@ -30,7 +30,7 @@ public class StatisticsServiceTests
         var result = await service.GetStatisticsAsync(true, []);
 
         result.TotalGroups.Should().Be(2);
-        result.ActiveUsers.Should().Be(2);
+        result.ActiveUsers.Should().Be(3);
         result.TotalTrainings.Should().Be(2);
         result.TotalRegistrations.Should().Be(2);
         result.UsersNotInGroup.Should().Be(1);
@@ -57,6 +57,7 @@ public class StatisticsServiceTests
         var user1 = new User { Id = 1, FirstName = "Alice", LastName = "Admin", Email = "alice@example.com", PasswordHash = "x", IsActive = true };
         var user2 = new User { Id = 2, FirstName = "Bob", LastName = "Member", Email = "bob@example.com", PasswordHash = "x", IsActive = true };
         var user3 = new User { Id = 3, FirstName = "Carl", LastName = "Inactive", Email = "carl@example.com", PasswordHash = "x", IsActive = false };
+        var user4 = new User { Id = 4, FirstName = "Dina", LastName = "NoGroup", Email = "dina@example.com", PasswordHash = "x", IsActive = true };
 
         var group1 = new Group { Id = 1, Name = "Group 1", Slug = "group-1", Identifier = "g1", CreatedAt = DateTime.UtcNow, IsActive = true };
         var group2 = new Group { Id = 2, Name = "Group 2", Slug = "group-2", Identifier = "g2", CreatedAt = DateTime.UtcNow, IsActive = true };
@@ -64,7 +65,7 @@ public class StatisticsServiceTests
         var training1 = new Training { Id = 1, Title = "Training 1", DateTime = DateTime.UtcNow.AddDays(5), Capacity = 10, TrainerId = 1, GroupId = 1, IsActive = true };
         var training2 = new Training { Id = 2, Title = "Training 2", DateTime = DateTime.UtcNow.AddDays(10), Capacity = 10, TrainerId = 1, GroupId = 2, IsActive = true };
 
-        context.Users.AddRange(user1, user2, user3);
+        context.Users.AddRange(user1, user2, user3, user4);
         context.Groups.AddRange(group1, group2);
         await context.SaveChangesAsync();
 
