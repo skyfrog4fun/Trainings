@@ -1,6 +1,6 @@
 # Application Specification — Trainings
 
-> **Version:** 0.1.2
+> **Version:** 1.0.5
 > **Language:** English (US)
 > **Primary audience:** AI agents and automated tooling
 > **Secondary audience:** Human developers and stakeholders
@@ -296,7 +296,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
   - A Trainer may only manage trainings in their own group(s).
   - `Capacity` must be ≥ 1.
   - `DateTime` must be strictly in the future at creation time.
-  - Copying a training across groups is **out of scope** for v0.1.2.
+  - Copying a training across groups is supported via block-library and cross-training copy features.
 
 ### UC-05 — Manage Training Blocks (Trainer / Admin)
 
@@ -419,7 +419,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 ⚙️ Config                 ← visible to SuperAdmin (and GroupAdmin for group-specific settings)
 ───────────────────
 🚪 Logout
-v0.1.2
+v1.0.5
 ```
 
 ### 5.2 Role Badges

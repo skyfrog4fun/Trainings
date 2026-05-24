@@ -1,6 +1,6 @@
 # Trainings
 
-Version: **v0.1.3**
+Version: **v1.0.5**
 
 ## Overview
 

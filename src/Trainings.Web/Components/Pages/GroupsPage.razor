@@ -1,6 +1,7 @@
 @page "/groups"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "GroupAdmin")]
+@using System.Globalization
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject ICountryService CountryService
@@ -70,6 +71,7 @@
                     <div class="col-12 col-md-3">
                         <label class="form-label">Start</label>
                         <input class="form-control" type="time" @bind="_formStartTime" @bind:after="CalculateGroupEndTime" />
+                        <div class="form-text">Localized: @FormatLocalizedTime(_formStartTime)</div>
                     </div>
                     <div class="col-12 col-md-3">
                         <label class="form-label">Duration (minutes)</label>
@@ -78,6 +80,7 @@
                     <div class="col-12 col-md-3">
                         <label class="form-label">End</label>
                         <input class="form-control" type="time" value="@_formEndTime" readonly />
+                        <div class="form-text">Localized: @FormatLocalizedEndTime()</div>
                     </div>
 
                     <div class="col-12 col-md-6">
@@ -249,6 +252,29 @@
         var start = _formStartTime ?? new TimeOnly(19, 0);
 
         _formEndTime = start.AddMinutes(duration).ToString("HH:mm");
+    }
+
+    private CultureInfo GetSelectedGroupCulture()
+    {
+        var countryCode = _countries.FirstOrDefault(c => c.Id == _formCountryId)?.Code
+            ?? DateTimeFormatService.GetDefaultCountry();
+        return DateTimeFormatService.GetCultureForCountry(countryCode);
+    }
+
+    private string FormatLocalizedTime(TimeOnly? value)
+    {
+        var time = value ?? new TimeOnly(19, 0);
+        return time.ToString("t", GetSelectedGroupCulture());
+    }
+
+    private string FormatLocalizedEndTime()
+    {
+        if (!TimeOnly.TryParse(_formEndTime, out var parsed))
+        {
+            return _formEndTime;
+        }
+
+        return parsed.ToString("t", GetSelectedGroupCulture());
     }
 
     private async Task SaveGroup()

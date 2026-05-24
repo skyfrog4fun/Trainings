@@ -24,6 +24,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<MailConfiguration> MailConfigurations => Set<MailConfiguration>();
     public DbSet<GroupMailConfiguration> GroupMailConfigurations => Set<GroupMailConfiguration>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+    public DbSet<NotificationFeedState> NotificationFeedStates => Set<NotificationFeedState>();
     public DbSet<SlugRedirect> SlugRedirects => Set<SlugRedirect>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -267,6 +268,11 @@ public class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(nl => nl.GroupId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<NotificationFeedState>(entity =>
+        {
+            entity.HasKey(nfs => nfs.Id);
         });
 
         modelBuilder.Entity<SlugRedirect>(entity =>

@@ -154,21 +154,44 @@
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
-                            <tr><th>Name</th><th>Email</th><th>Requested Groups</th><th>Registered</th><th>Actions</th></tr>
+                            <tr><th></th><th>Name</th><th>Requested Group</th><th>Registration Date</th></tr>
                         </thead>
                         <tbody>
                             @foreach (var user in _pendingUsers)
                             {
                                 <tr>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" title="Toggle details" @onclick="() => TogglePendingExpand(user.Id)">
+                                            <i class="fa-solid @(_expandedPendingUserIds.Contains(user.Id) ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
                                     <td>@user.DisplayName</td>
-                                    <td>@user.Email</td>
                                     <td>@FormatPendingGroups(user.Id)</td>
                                     <td>@user.CreationDate.ToString("MMM d, yyyy")</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)" disabled="@IsWriteBlocked">Approve</button>
-                                        <button class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)" disabled="@IsWriteBlocked">Reject</button>
-                                    </td>
                                 </tr>
+                                @if (_expandedPendingUserIds.Contains(user.Id))
+                                {
+                                    <tr class="table-light">
+                                        <td colspan="4">
+                                            <div class="row g-2">
+                                                <div class="col-12 col-md-6"><strong>Email:</strong> @user.Email</div>
+                                                <div class="col-12 col-md-6"><strong>Country:</strong> @(GetCountryLabel(user.CountryId))</div>
+                                                <div class="col-12 col-md-6"><strong>City:</strong> @(string.IsNullOrWhiteSpace(user.City) ? "—" : user.City)</div>
+                                                <div class="col-12 col-md-6"><strong>Mobile:</strong> @(string.IsNullOrWhiteSpace(user.Mobile) ? "—" : user.Mobile)</div>
+                                                <div class="col-12 col-md-6"><strong>Gender:</strong> @user.Gender</div>
+                                                <div class="col-12 col-md-6"><strong>Email verified:</strong> @(user.EmailConfirmedAt.HasValue ? "Yes" : "No")</div>
+                                                <div class="col-12 text-end">
+                                                    <button type="button" class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)" disabled="@IsWriteBlocked">
+                                                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)" disabled="@IsWriteBlocked">
+                                                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
@@ -210,8 +233,11 @@
                                 }
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditUser(user)" disabled="@IsWriteBlocked">Edit</button>
-                                <button class="btn btn-sm btn-outline-secondary me-1"
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" title="Edit"
+                                        @onclick="() => EditUser(user)" disabled="@IsWriteBlocked">
+                                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1"
                                         title="Send account mail"
                                         @onclick="() => SendAccountMail(user)"
                                         disabled="@IsWriteBlocked || IsUserBusy(user.Id)">
@@ -219,12 +245,13 @@
                                     {
                                         <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                                     }
-                                    <i class="fa-solid fa-envelope me-1" aria-hidden="true"></i>Mail
+                                    <i class="fa-solid fa-envelope" aria-hidden="true"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger"
+                                <button type="button" class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                        title="@(user.IsActive ? "Deactivate" : "Activate")"
                                         @onclick="() => ToggleActive(user)"
                                         disabled="@IsWriteBlocked">
-                                    @(user.IsActive ? "Deactivate" : "Activate")
+                                    <i class="fa-solid @(user.IsActive ? "fa-user-slash" : "fa-user-check")" aria-hidden="true"></i>
                                 </button>
                             </td>
                         </tr>
@@ -248,6 +275,7 @@
     private Dictionary<int, List<GroupMembershipDto>> _membershipsByUser = new();
     private List<GroupDto> _availableGroups = new();
     private List<CountryDto> _countries = new();
+    private readonly HashSet<int> _expandedPendingUserIds = new();
     private HashSet<int> _managedGroupIds = new();
     private HashSet<int> _selectedGroupIds = new();
     private AppRuntimeModeDto _runtimeMode = new();
@@ -284,6 +312,7 @@
     private async Task LoadUsers()
     {
         _loading = true;
+        _expandedPendingUserIds.Clear();
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var currentUser = authState.User;
@@ -529,7 +558,24 @@
         }
         finally
         {
+            if (_actionResult is null)
+            {
+                _actionSuccess = false;
+                _actionResult = $"Failed to send account email to {user.Email}.";
+            }
             _busyUserId = null;
+        }
+    }
+
+    private void TogglePendingExpand(int userId)
+    {
+        if (_expandedPendingUserIds.Contains(userId))
+        {
+            _expandedPendingUserIds.Remove(userId);
+        }
+        else
+        {
+            _expandedPendingUserIds.Add(userId);
         }
     }
 
@@ -573,6 +619,17 @@
             .ToList();
 
         return names.Count == 0 ? "—" : string.Join(", ", names);
+    }
+
+    private string GetCountryLabel(int? countryId)
+    {
+        if (!countryId.HasValue)
+        {
+            return "—";
+        }
+
+        var country = _countries.FirstOrDefault(c => c.Id == countryId.Value);
+        return country is null ? "—" : $"{country.Code} — {country.Name}";
     }
 
     private void CancelForm() => _showForm = false;

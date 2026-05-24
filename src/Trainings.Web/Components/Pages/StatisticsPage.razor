@@ -1,0 +1,114 @@
+@page "/statistics"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = "GroupAdmin")]
+@using Trainings.Web.Auth
+@inject IStatisticsService StatisticsService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Statistics</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2>Statistics</h2>
+        <span class="badge bg-secondary">@_scopeLabel</span>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-primary fs-3"><i class="fa-solid fa-object-group" aria-hidden="true"></i></div>
+                        <div class="display-6">@_stats.TotalGroups</div>
+                        <div class="text-muted">Total Groups</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-success fs-3"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+                        <div class="display-6">@_stats.ActiveUsers</div>
+                        <div class="text-muted">Active Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-warning fs-3"><i class="fa-solid fa-user-minus" aria-hidden="true"></i></div>
+                        <div class="display-6">@_stats.UsersNotInGroup</div>
+                        <div class="text-muted">Users Not in Group</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-danger fs-3"><i class="fa-solid fa-fire" aria-hidden="true"></i></div>
+                        <div class="display-6">@_stats.TotalTrainings</div>
+                        <div class="text-muted">Total Trainings</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-info fs-3"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div>
+                        <div class="display-6">@_stats.TotalRegistrations</div>
+                        <div class="text-muted">Total Registrations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Annual Indicators (@DateTime.UtcNow.Year)</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Average users per group</div>
+                            <div class="fs-3">@_stats.AverageUsersPerGroup.ToString("0.##")</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Average participants per training</div>
+                            <div class="fs-3">@_stats.AverageParticipantsPerTraining.ToString("0.##")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private StatisticsDto _stats = new();
+    private bool _loading = true;
+    private string _scopeLabel = "Scope";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        var managedGroupIds = user.Claims
+            .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin")
+            .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .Distinct()
+            .ToList();
+
+        _stats = await StatisticsService.GetStatisticsAsync(isSuperAdmin, managedGroupIds);
+        _scopeLabel = isSuperAdmin ? "Global" : "Managed groups";
+        _loading = false;
+    }
+}

@@ -1,6 +1,7 @@
 @page "/trainings/{Id:int}"
 @rendermode InteractiveServer
-@attribute [Authorize]
+@attribute [Authorize(Policy = "GroupMember")]
+@using Trainings.Web.Auth
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IAttendanceService AttendanceService
@@ -40,7 +41,7 @@
                 </p>
                 <p>@_training.Description</p>
 
-                @if (_isParticipant)
+                @if (_canRegister)
                 {
                     @if (_isRegistered)
                     {
@@ -129,7 +130,7 @@
     private TrainingDto? _training;
     private bool _loading = true;
     private bool _isRegistered;
-    private bool _isParticipant, _isTrainer, _isAdmin;
+    private bool _isTrainer, _isAdmin, _canRegister;
     private int _userId;
     private List<RegistrationDto> _registrations = new();
     private string? _message;
@@ -145,15 +146,19 @@
         {
             _userCountry = (await UserService.GetByIdAsync(_userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
-        _isParticipant = user.IsInRole("Participant");
-        _isTrainer = user.IsInRole("Trainer");
-        _isAdmin = user.IsInRole("Admin") || user.IsInRole("SuperAdmin");
+        var isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        _isAdmin = isSuperAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin");
+        _isTrainer = _isAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Trainer");
 
         _training = await TrainingService.GetByIdAsync(Id);
 
         if (_training != null)
         {
-            if (_isParticipant)
+            _canRegister = isSuperAdmin || (_training.GroupId.HasValue && user.Claims.Any(c =>
+                c.Type == AppClaimTypes.GroupRole(_training.GroupId.Value) &&
+                (c.Value == "Participant" || c.Value == "Trainer" || c.Value == "Admin")));
+
+            if (_canRegister)
                 _isRegistered = await RegistrationService.IsRegisteredAsync(_userId, Id);
             if (_isTrainer || _isAdmin)
                 _registrations = (await RegistrationService.GetByTrainingIdAsync(Id)).ToList();

@@ -19,11 +19,13 @@
                 </NavLink>
             </li>
         </AuthorizeView>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="trainings">
-                <i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings
-            </NavLink>
-        </li>
+        <AuthorizeView Policy="GroupMember">
+            <li class="nav-item">
+                <NavLink class="nav-link" href="trainings">
+                    <i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings
+                </NavLink>
+            </li>
+        </AuthorizeView>
         <AuthorizeView Policy="GroupMember">
             <li class="nav-item">
                 <NavLink class="nav-link" href="my-registrations">
@@ -33,8 +35,8 @@
         </AuthorizeView>
         <AuthorizeView Policy="GroupTrainer">
             <li class="nav-item">
-                <NavLink class="nav-link" href="trainer-trainings">
-                    <i class="fa-solid fa-fire me-2" aria-hidden="true"></i>My Trainings
+                <NavLink class="nav-link" href="plan-training">
+                    <i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Plan Training
                 </NavLink>
             </li>
         </AuthorizeView>
@@ -44,6 +46,16 @@
                     <i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Config
                 </NavLink>
             </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="statistics">
+                    <i class="fa-solid fa-chart-simple me-2" aria-hidden="true"></i>Statistics
+                </NavLink>
+            </li>
         </AuthorizeView>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="user-information">
+                <i class="fa-solid fa-user me-2" aria-hidden="true"></i>User Information
+            </NavLink>
+        </li>
     </ul>
 </nav>

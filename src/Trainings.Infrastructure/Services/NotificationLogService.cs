@@ -34,14 +34,51 @@ public class NotificationLogService : INotificationLogService
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<IReadOnlyList<NotificationLog>> GetRecentLogsAsync(int count = 50, CancellationToken ct = default)
+    public async Task<IReadOnlyList<NotificationLog>> GetRecentLogsAsync(int count = 50, int? afterLogId = null, CancellationToken ct = default)
     {
-        return await _context.NotificationLogs
+        var query = _context.NotificationLogs.AsQueryable();
+        if (afterLogId.HasValue)
+        {
+            query = query.Where(nl => nl.Id > afterLogId.Value);
+        }
+
+        return await query
             .OrderByDescending(nl => nl.CreatedAt)
             .Take(count)
             .Include(nl => nl.User)
             .Include(nl => nl.MailConfiguration)
             .ToListAsync(ct);
+    }
+
+    public async Task<int?> GetResetPointerLogIdAsync(CancellationToken ct = default)
+    {
+        var state = await _context.NotificationFeedStates
+            .FirstOrDefaultAsync(x => x.Id == 1, ct);
+        return state?.ResetPointerLogId;
+    }
+
+    public async Task SetResetPointerLogIdAsync(int? logId, CancellationToken ct = default)
+    {
+        var state = await _context.NotificationFeedStates
+            .FirstOrDefaultAsync(x => x.Id == 1, ct);
+
+        if (state is null)
+        {
+            state = new NotificationFeedState
+            {
+                Id = 1,
+                ResetPointerLogId = logId,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _context.NotificationFeedStates.Add(state);
+        }
+        else
+        {
+            state.ResetPointerLogId = logId;
+            state.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<int> GetSuccessCountAsync(DateTime since, CancellationToken ct = default)

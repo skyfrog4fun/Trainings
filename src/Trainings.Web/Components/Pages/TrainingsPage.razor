@@ -1,6 +1,7 @@
 @page "/trainings"
 @rendermode InteractiveServer
-@attribute [Authorize]
+@attribute [Authorize(Policy = "GroupMember")]
+@using Trainings.Web.Auth
 @inject ITrainingService TrainingService
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
@@ -59,13 +60,21 @@
     protected override async Task OnInitializedAsync()
     {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        var isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        var accessibleGroupIds = auth.User.Claims
+            .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal))
+            .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
         var userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         if (userId > 0)
         {
             _userCountry = (await UserService.GetByIdAsync(userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
 
-        _trainings = (await TrainingService.GetActiveAsync()).ToList();
+        _trainings = (await TrainingService.GetActiveAsync())
+            .Where(t => isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value)))
+            .ToList();
         _loading = false;
     }
 

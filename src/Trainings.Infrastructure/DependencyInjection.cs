@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRegistrationService, UserRegistrationService>();
         services.AddScoped<IMailConfigurationService, MailConfigurationService>();
         services.AddScoped<INotificationLogService, NotificationLogService>();
+        services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddScoped<IAuthorizationHelper, AuthorizationHelper>();
         services.AddScoped<IAppRuntimeModeService, AppRuntimeModeService>();
         services.AddScoped<ILocationService, LocationService>();

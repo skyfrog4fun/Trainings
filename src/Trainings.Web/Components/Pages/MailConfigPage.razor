@@ -10,28 +10,29 @@
 @inject IEmailService EmailService
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserService UserService
+@inject IDateTimeFormatService DateTimeFormatService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
-<PageTitle>Mail Configuration</PageTitle>
+<PageTitle>Configuration</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
-        <h2><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Mail Configuration</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Configuration</button>
+        <h2><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Configuration</h2>
     </div>
 
     <p class="text-muted">Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</p>
 
     <div class="card mb-4">
-        <div class="card-header fw-bold">Running Modes</div>
+        <div class="card-header fw-bold">Running Mode</div>
         <div class="card-body">
             <p class="text-muted mb-3">
                 Override the startup configuration defaults for the current session.
                 Changes take effect immediately for all users and are reset to the configured defaults on application restart.
             </p>
             <div class="row g-3 align-items-end">
-                <div class="col-12 col-md-auto">
+                <div class="col-12 col-lg-5">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="chkReadOnly" @bind="_modeReadOnly" />
                         <label class="form-check-label" for="chkReadOnly">
@@ -40,7 +41,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-12 col-md-auto ms-md-4">
+                <div class="col-12 col-lg-5">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="chkNoEmail" @bind="_modeNoEmail" />
                         <label class="form-check-label" for="chkNoEmail">
@@ -49,7 +50,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-12 col-md-auto ms-md-auto">
+                <div class="col-12 col-lg-2 d-flex align-items-end justify-content-lg-end">
                     <button class="btn btn-primary me-2" @onclick="ApplyModes">Apply</button>
                     <button class="btn btn-outline-secondary" @onclick="ResetModesToDefaults" title="Reset to startup configuration defaults">Reset to Defaults</button>
                 </div>
@@ -63,7 +64,7 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center fw-bold">
-        <span>Server and Client Time</span>
+            <span>Server/Client Time</span>
             <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshDateTimesAsync">Refresh</button>
         </div>
         <div class="card-body">
@@ -79,6 +80,16 @@
             {
                 <div class="alert alert-warning mt-3 mb-0">@_timeError</div>
             }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center fw-bold">
+            <span>Mail Configuration</span>
+            <button class="btn btn-success btn-sm" @onclick="ShowCreateForm"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Configuration</button>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-0">Manage SMTP endpoints used by notification delivery and fallback retry order.</p>
         </div>
     </div>
 
@@ -220,10 +231,10 @@
     }
 
     <div class="card mt-4">
-        <div class="card-header fw-bold">📧 Test Email</div>
+        <div class="card-header fw-bold"><i class="fa-solid fa-envelope me-2" aria-hidden="true"></i>Test Email</div>
         <div class="card-body">
             <p class="text-muted mb-2">Send a test email against all configurations in priority order or against a single selected configuration.</p>
-            <div class="row g-2 align-items-end">
+            <div class="row g-2 align-items-start">
                 <div class="col-12 col-md-4">
                     <label class="form-label">Recipient Email</label>
                     <input class="form-control" type="email" @bind="_testEmail" placeholder="you@example.com" />
@@ -239,14 +250,16 @@
                     </select>
                     <div class="form-text">Inactive configurations remain selectable for targeted testing.</div>
                 </div>
-                <div class="col-12 col-md-3">
-                    <button class="btn btn-info w-100" @onclick="SendTestEmail" disabled="@_testEmailSending">
-                        @if (_testEmailSending)
-                        {
-                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                        }
-                        Send Test Email
-                    </button>
+                <div class="col-12 col-md-3 d-flex">
+                    <div class="w-100 d-flex align-items-end">
+                        <button class="btn btn-info w-100" @onclick="SendTestEmail" disabled="@_testEmailSending">
+                            @if (_testEmailSending)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            }
+                            Send Test Email
+                        </button>
+                    </div>
                 </div>
             </div>
             @if (_testEmailResult is not null)
@@ -302,6 +315,7 @@
     private string _serverDateTime = "Loading...";
     private string _clientDateTime = "Loading...";
     private string? _timeError;
+    private CultureInfo _userCulture = CultureInfo.CurrentCulture;
 
     private bool _modeReadOnly;
     private bool _modeNoEmail;
@@ -313,6 +327,11 @@
         await LoadConfigs();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+        var userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        var countryCode = userId > 0
+            ? (await UserService.GetByIdAsync(userId))?.CountryCode
+            : null;
+        _userCulture = DateTimeFormatService.GetCultureForCountry(countryCode);
 
         var current = AppRuntimeModeService.GetCurrent();
         _modeReadOnly = current.IsReadOnly;
@@ -526,8 +545,11 @@
 
         try
         {
-            _serverDateTime = DateTimeOffset.Now.ToString("MMM d, yyyy HH:mm:ss zzz", CultureInfo.CurrentCulture);
-            _clientDateTime = await JSRuntime.InvokeAsync<string>("trainings.mailConfig.getClientLocalDateTime");
+            _serverDateTime = DateTimeOffset.Now.ToString("f", _userCulture);
+            var clientIsoDateTime = await JSRuntime.InvokeAsync<string>("trainings.mailConfig.getClientLocalDateTime");
+            _clientDateTime = DateTimeOffset.TryParse(clientIsoDateTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
+                ? parsed.ToString("f", _userCulture)
+                : DateTimeOffset.Now.ToString("f", _userCulture);
         }
         catch (Exception ex)
         {
@@ -552,9 +574,9 @@
             ? $"{config.Priority}. {config.Name}"
             : $"{config.Priority}. {config.Name} (inactive)";
 
-    private static string FormatServerDateTime(DateTime? value)
+    private string FormatServerDateTime(DateTime? value)
         => value.HasValue
-            ? value.Value.ToLocalTime().ToString("MMM d, yyyy HH:mm:ss", CultureInfo.CurrentCulture)
+            ? value.Value.ToLocalTime().ToString("f", _userCulture)
             : "Never";
 
     private static string FormatStatus(MailConfigurationStatus status)
