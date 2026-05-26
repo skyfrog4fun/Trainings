@@ -72,7 +72,7 @@ Trainings.Web             ← Blazor Server UI, DI composition root
 ## Testing
 
 - Use **xUnit** with **FluentAssertions** and **Moq** (already in use).
-- Name tests: `MethodName_StateUnderTest_ExpectedBehavior`.
+- Name unit tests in **PascalCase without underscores** (for example: `MethodNameWhenStateUnderTestReturnsExpectedBehavior`).
 - Unit tests go in `tests/Trainings.*.Tests/`.
 - Mock external dependencies; do not use real databases in unit tests.
 

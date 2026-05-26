@@ -54,3 +54,16 @@ public class UpdateUserDto
     public DateTime? EntryDate { get; set; }
     public string? WelcomeMessage { get; set; }
 }
+
+public class UpdateSelfUserDto
+{
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
+    public DateOnly? Birthday { get; set; }
+    public string? Mobile { get; set; }
+    public string? City { get; set; }
+    public int? CountryId { get; set; }
+    public string? WelcomeMessage { get; set; }
+}

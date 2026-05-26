@@ -11,6 +11,7 @@ public interface IUserService
     Task<IEnumerable<UserDto>> GetByRoleAsync(UserRole role);
     Task<UserDto> CreateAsync(CreateUserDto dto);
     Task UpdateAsync(UpdateUserDto dto);
+    Task UpdateSelfAsync(UpdateSelfUserDto dto);
     Task DeleteAsync(int id);
     Task<bool> ValidatePasswordAsync(string email, string password);
     Task ChangePasswordAsync(int userId, string newPasswordHash);

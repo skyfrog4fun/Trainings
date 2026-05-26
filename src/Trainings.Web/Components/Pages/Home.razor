@@ -7,247 +7,363 @@
 @inject IRegistrationService RegistrationService
 @inject INotificationLogService NotificationLogService
 @inject IGroupService GroupService
+@inject IUserService UserService
+@inject IUserRegistrationService UserRegistrationService
 
 <PageTitle>Dashboard</PageTitle>
 
 <div class="container-fluid px-2 px-md-4">
-    <h2 class="my-3">Welcome, @_userName!</h2>
+    <div class="my-3 d-flex flex-wrap justify-content-between gap-2 align-items-start">
+        <div>
+            <h2 class="mb-1">Welcome, @_userFirstName!</h2>
+            @if (!string.IsNullOrWhiteSpace(_highestRoleLabel))
+            {
+                <span class="badge bg-dark">@_highestRoleLabel</span>
+            }
+        </div>
+        <div>
+            @if (_emailConfirmed)
+            {
+                <span class="badge bg-success"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Email verified</span>
+            }
+            else
+            {
+                <span class="badge bg-warning text-dark me-2"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Email not verified</span>
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ResendVerificationAsync">Resend verification</button>
+            }
+        </div>
+    </div>
+
+    @if (_verificationActionMessage is not null)
+    {
+        <div class="alert @(_verificationActionSuccess ? "alert-success" : "alert-danger")">@_verificationActionMessage</div>
+    }
 
     @if (_isSuperAdmin)
     {
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="card text-bg-primary">
-                    <div class="card-body text-center">
-                        <h3>@_totalTrainings</h3>
-                        <p class="mb-0">Total Trainings</p>
-                    </div>
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold" @onclick="ToggleNotifications">
+                    Notification Activity
+                    <i class="fa-solid @(_notificationsExpanded ? "fa-chevron-up" : "fa-chevron-down") ms-1" aria-hidden="true"></i>
+                </button>
+                <div class="small">
+                    <span class="text-success me-3"><i class="fa-solid fa-check" aria-hidden="true"></i> @_notificationSuccessCount</span>
+                    <span class="text-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i> @_notificationFailureCount</span>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="card text-bg-success">
-                    <div class="card-body text-center">
-                        <h3>@_successCount30d</h3>
-                        <p class="mb-0">Emails Sent (30d)</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card text-bg-danger">
-                    <div class="card-body text-center">
-                        <h3>@_failureCount30d</h3>
-                        <p class="mb-0">Email Failures (30d)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @if (_recentLogs.Any())
-        {
-            <div class="card mb-4">
-                <div class="card-header fw-bold">📊 Recent Notification Activity</div>
-                <div class="table-responsive">
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr><th>Log ID</th><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var log in _recentLogs.Take(10))
-                            {
-                                <tr>
-                                    <td class="small">#@log.Id</td>
-                                    <td class="small">@log.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
-                                    <td class="small">@log.Action</td>
-                                    <td class="small text-muted">@log.RecipientEmail</td>
-                                    <td>
-                                        @if (log.IsSuccess)
-                                        {
-                                            <span class="badge bg-success"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i></span>
-                                        }
-                                    </td>
-                                    <td class="small text-danger">@log.ErrorMessage</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        }
-
-        <p><a href="/users" class="btn btn-primary me-2">Manage Users</a><a href="/config/mail" class="btn btn-outline-secondary">Mail Config</a></p>
-    }
-    else if (_isGroupAdmin)
-    {
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-                <div class="card text-bg-primary">
-                    <div class="card-body text-center">
-                        <h3>@_totalTrainings</h3>
-                        <p class="mb-0">Total Trainings</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <p>
-            <a href="/users" class="btn btn-primary me-2">Manage Users</a>
-            @if (_adminGroupSlug != null)
+            @if (_notificationsExpanded)
             {
-                <a href="/groups/@_adminGroupSlug/members" class="btn btn-outline-primary">Manage Group</a>
+                <div class="card-body">
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ResetNotificationPointerAsync">Reset pointer</button>
+                    </div>
+
+                    @if (_recentLogs.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr><th>Log ID</th><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in _recentLogs.Take(10))
+                                    {
+                                        <tr>
+                                            <td class="small">#@log.Id</td>
+                                            <td class="small">@log.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
+                                            <td class="small">@log.Action</td>
+                                            <td class="small text-muted">@log.RecipientEmail</td>
+                                            <td>
+                                                @if (log.IsSuccess)
+                                                {
+                                                    <i class="fa-solid fa-check text-success" aria-hidden="true"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fa-solid fa-xmark text-danger" aria-hidden="true"></i>
+                                                }
+                                            </td>
+                                            <td class="small text-danger">@log.ErrorMessage</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No notification activity since the current reset pointer.</div>
+                    }
+                </div>
             }
-        </p>
+        </div>
     }
-    else if (!_isGroupMember && !_isGroupTrainer)
-    {
-        @* Plain user with no group roles — show their membership status *@
-        @if (_userMemberships.Any())
-        {
-            <div class="card mb-4">
-                <div class="card-header fw-bold"><i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>Your Group Memberships</div>
-                <div class="table-responsive">
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr><th>Group</th><th>Role</th><th>Status</th><th>Requested</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var m in _userMemberships)
+
+    <div class="row g-3">
+        <div class="col-12 col-xl-6">
+            <div class="card h-100">
+                <div class="card-header fw-bold">My next trainings (enrolled/assigned)</div>
+                <div class="card-body">
+                    @if (_myNextTrainings.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var training in _myNextTrainings.Take(5))
                             {
-                                <tr>
-                                    <td>@m.GroupName</td>
-                                    <td><span class="badge bg-secondary">@m.Role</span></td>
-                                    <td>
-                                        @switch (m.Status)
-                                        {
-                                            case Trainings.Domain.Enums.GroupMembershipStatus.Approved:
-                                                <span class="badge bg-success">Approved</span>
-                                                break;
-                                            case Trainings.Domain.Enums.GroupMembershipStatus.Pending:
-                                                <span class="badge bg-warning text-dark">Pending</span>
-                                                break;
-                                            case Trainings.Domain.Enums.GroupMembershipStatus.Declined:
-                                                <span class="badge bg-danger">Declined</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td class="small text-muted">@m.RequestedAt.ToString("MMM d, yyyy")</td>
-                                </tr>
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span>@training.Title</span>
+                                    <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">Details</a>
+                                </li>
                             }
-                        </tbody>
-                    </table>
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No upcoming trainings.</div>
+                    }
                 </div>
             </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                You are not a member of any group yet. <a href="/trainings">Browse trainings</a> or wait for an administrator to add you to a group.
+        </div>
+
+        <div class="col-12 col-xl-6">
+            <div class="card h-100">
+                <div class="card-header fw-bold">Next trainings available to attend</div>
+                <div class="card-body">
+                    @if (_availableNextTrainings.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var training in _availableNextTrainings.Take(5))
+                            {
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span>@training.Title</span>
+                                    <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">Open</a>
+                                </li>
+                            }
+                        </ul>
+                        <a href="/trainings" class="btn btn-sm btn-outline-primary mt-3">Browse trainings</a>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No available upcoming trainings.</div>
+                    }
+                </div>
             </div>
-        }
-    }
+        </div>
 
-    @if (_isGroupTrainer)
-    {
-        <h4>Your Upcoming Trainings</h4>
-        <TrainingList Trainings="_trainerTrainings" ShowActions="true" CurrentUserId="_userId" />
-        <a href="/trainer-trainings" class="btn btn-primary mt-2">Manage All Trainings</a>
-    }
+        <div class="col-12 col-xl-6">
+            <div class="card h-100">
+                <div class="card-header fw-bold">Next trainings to plan/lead</div>
+                <div class="card-body">
+                    @if (_planLeadTrainings.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var training in _planLeadTrainings.Take(5))
+                            {
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span>@training.Title</span>
+                                    <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id/edit">Edit</a>
+                                </li>
+                            }
+                        </ul>
+                        <a href="/plan-training" class="btn btn-sm btn-primary mt-3">Plan training</a>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No trainings currently assigned for planning.</div>
+                    }
+                </div>
+            </div>
+        </div>
 
-    @if (_isGroupMember)
-    {
-        <h4>Upcoming Trainings</h4>
-        <TrainingList Trainings="_upcomingTrainings" ShowRegisterButton="true" CurrentUserId="_userId" />
-        <a href="/trainings" class="btn btn-outline-primary mt-2">View All Trainings</a>
-    }
+        <div class="col-12 col-xl-6">
+            <div class="card h-100">
+                <div class="card-header fw-bold">Outstanding users to approve</div>
+                <div class="card-body">
+                    @if (_outstandingApprovals.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var user in _outstandingApprovals.Take(5))
+                            {
+                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <span>@user.DisplayName <span class="text-muted small">(@user.RequestedGroup)</span></span>
+                                    <a class="btn btn-sm btn-outline-primary" href="/users">Review</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No outstanding approvals.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
-    private string _userName = "";
+    private string _userFirstName = "User";
     private int _userId;
-    private bool _isSuperAdmin, _isGroupAdmin, _isGroupTrainer, _isGroupMember;
-    private int _totalTrainings;
-    private int _successCount30d, _failureCount30d;
-    private List<TrainingDto> _trainerTrainings = new();
-    private List<TrainingDto> _upcomingTrainings = new();
-    private IReadOnlyList<Trainings.Domain.Entities.NotificationLog> _recentLogs = Array.Empty<Trainings.Domain.Entities.NotificationLog>();
-    private List<UserMembershipViewModel> _userMemberships = new();
-    private string? _adminGroupSlug;
+    private bool _isSuperAdmin;
+    private bool _isGroupAdmin;
+    private bool _isGroupTrainer;
+    private bool _isGroupMember;
+    private string _highestRoleLabel = string.Empty;
+    private bool _emailConfirmed;
+    private string? _verificationActionMessage;
+    private bool _verificationActionSuccess;
 
-    private record UserMembershipViewModel(
-        string GroupName,
-        Trainings.Domain.Enums.GroupMemberRole Role,
-        Trainings.Domain.Enums.GroupMembershipStatus Status,
-        DateTime RequestedAt);
+    private List<TrainingDto> _myNextTrainings = new();
+    private List<TrainingDto> _availableNextTrainings = new();
+    private List<TrainingDto> _planLeadTrainings = new();
+    private List<OutstandingApprovalViewModel> _outstandingApprovals = new();
+
+    private IReadOnlyList<Trainings.Domain.Entities.NotificationLog> _recentLogs = Array.Empty<Trainings.Domain.Entities.NotificationLog>();
+    private int? _notificationPointerLogId;
+    private bool _notificationsExpanded = true;
+    private int _notificationSuccessCount;
+    private int _notificationFailureCount;
+
+    private sealed record OutstandingApprovalViewModel(string DisplayName, string RequestedGroup);
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        _userName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User";
+
+        var fullName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User";
+        _userFirstName = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? fullName;
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
 
         _isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
         _isGroupAdmin = _isSuperAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin");
         _isGroupTrainer = _isGroupAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Trainer");
-        _isGroupMember = _isGroupTrainer || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal));
+        _isGroupMember = _isGroupTrainer || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Participant");
 
-        if (_isSuperAdmin || _isGroupAdmin)
+        _highestRoleLabel = _isSuperAdmin
+            ? "SuperAdmin"
+            : _isGroupAdmin
+                ? "Group Admin"
+                : _isGroupTrainer
+                    ? "Trainer"
+                    : string.Empty;
+
+        var userDto = _userId > 0 ? await UserService.GetByIdAsync(_userId) : null;
+        _emailConfirmed = userDto?.EmailConfirmedAt.HasValue == true;
+
+        var allActiveTrainings = (await TrainingService.GetActiveAsync())
+            .Where(t => t.DateTime >= DateTime.Now)
+            .OrderBy(t => t.DateTime)
+            .ToList();
+
+        var accessibleGroupIds = user.Claims
+            .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal))
+            .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+
+        var trainerTrainings = _isGroupTrainer
+            ? (await TrainingService.GetByTrainerIdAsync(_userId)).Where(t => t.DateTime >= DateTime.Now).OrderBy(t => t.DateTime).ToList()
+            : new List<TrainingDto>();
+
+        var myRegistrationIds = new HashSet<int>();
+        if (_isGroupMember)
         {
-            var all = await TrainingService.GetAllAsync();
-            _totalTrainings = all.Count();
+            var myRegistrations = (await RegistrationService.GetByUserIdAsync(_userId)).ToList();
+            foreach (var registration in myRegistrations.Where(r => r.Status == Trainings.Domain.Enums.RegistrationStatus.Registered))
+            {
+                myRegistrationIds.Add(registration.TrainingId);
+            }
+        }
+
+        var registeredTrainings = new List<TrainingDto>();
+        foreach (var trainingId in myRegistrationIds)
+        {
+            var training = await TrainingService.GetByIdAsync(trainingId);
+            if (training is not null && training.DateTime >= DateTime.Now)
+            {
+                registeredTrainings.Add(training);
+            }
+        }
+
+        _myNextTrainings = trainerTrainings
+            .Concat(registeredTrainings)
+            .GroupBy(t => t.Id)
+            .Select(g => g.First())
+            .OrderBy(t => t.DateTime)
+            .ToList();
+
+        _planLeadTrainings = trainerTrainings;
+
+        _availableNextTrainings = (_isSuperAdmin || _isGroupMember)
+            ? allActiveTrainings
+                .Where(t =>
+                    !myRegistrationIds.Contains(t.Id) &&
+                    (_isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value))))
+                .ToList()
+            : new List<TrainingDto>();
+
+        if (_isGroupAdmin)
+        {
+            var pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
+            var allGroups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
+            _outstandingApprovals = new List<OutstandingApprovalViewModel>();
+
+            foreach (var pendingUser in pendingUsers)
+            {
+                var membership = (await GroupService.GetAllMembershipsForUserAsync(pendingUser.Id))
+                    .FirstOrDefault(m => m.Status == Trainings.Domain.Enums.GroupMembershipStatus.Pending);
+                var requestedGroup = membership is null
+                    ? "Unknown"
+                    : allGroups.TryGetValue(membership.GroupId, out var groupName) ? groupName : $"Group #{membership.GroupId}";
+
+                _outstandingApprovals.Add(new OutstandingApprovalViewModel(pendingUser.DisplayName, requestedGroup));
+            }
+        }
+        else
+        {
+            _outstandingApprovals.Clear();
         }
 
         if (_isSuperAdmin)
         {
-            var since30d = DateTime.UtcNow.AddDays(-30);
-            _successCount30d = await NotificationLogService.GetSuccessCountAsync(since30d);
-            _failureCount30d = await NotificationLogService.GetFailureCountAsync(since30d);
-            _recentLogs = await NotificationLogService.GetRecentLogsAsync(50);
+            _notificationPointerLogId = await NotificationLogService.GetResetPointerLogIdAsync();
+            _recentLogs = await NotificationLogService.GetRecentLogsAsync(50, _notificationPointerLogId);
+            _notificationSuccessCount = _recentLogs.Count(x => x.IsSuccess);
+            _notificationFailureCount = _recentLogs.Count(x => !x.IsSuccess);
         }
+    }
 
-        if (_isGroupAdmin && !_isSuperAdmin)
+    private async Task ResendVerificationAsync()
+    {
+        _verificationActionMessage = null;
+        try
         {
-            // Find first group the user admins so we can provide a direct link
-            var adminGroupIdClaim = user.Claims
-                .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin")
-                .Select(c => c.Type.Replace(AppClaimTypes.GroupRolePrefix, ""))
-                .FirstOrDefault();
-            if (int.TryParse(adminGroupIdClaim, out var adminGroupId))
-            {
-                var adminGroup = await GroupService.GetByIdAsync(adminGroupId);
-                var slug = adminGroup?.Slug;
-                _adminGroupSlug = string.IsNullOrEmpty(slug) ? null : slug;
-            }
+            await UserRegistrationService.ResendEmailConfirmationAsync(_userId);
+            _verificationActionSuccess = true;
+            _verificationActionMessage = "Verification email sent.";
         }
+        catch (Exception ex)
+        {
+            _verificationActionSuccess = false;
+            _verificationActionMessage = $"Failed to resend verification email: {ex.Message}";
+        }
+    }
 
-        if (_isGroupTrainer)
-        {
-            _trainerTrainings = (await TrainingService.GetByTrainerIdAsync(_userId)).Take(5).ToList();
-        }
+    private void ToggleNotifications()
+    {
+        _notificationsExpanded = !_notificationsExpanded;
+    }
 
-        if (_isGroupMember)
-        {
-            _upcomingTrainings = (await TrainingService.GetActiveAsync())
-                .Where(t => t.DateTime >= DateTime.Now)
-                .Take(5)
-                .ToList();
-        }
-
-        // For plain users (not admin/trainer), show their membership statuses
-        if (!_isGroupAdmin && !_isGroupTrainer && _userId > 0)
-        {
-            var memberships = await GroupService.GetAllMembershipsForUserAsync(_userId);
-            var groups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
-            _userMemberships = memberships
-                .Select(m => new UserMembershipViewModel(
-                    groups.TryGetValue(m.GroupId, out var groupName) ? groupName : "Unknown",
-                    m.Role,
-                    m.Status,
-                    m.RequestedAt))
-                .OrderBy(m => m.GroupName)
-                .ToList();
-        }
+    private async Task ResetNotificationPointerAsync()
+    {
+        var latestLogId = _recentLogs.Any() ? _recentLogs.Max(x => x.Id) : _notificationPointerLogId;
+        await NotificationLogService.SetResetPointerLogIdAsync(latestLogId);
+        await LoadAsync();
     }
 }

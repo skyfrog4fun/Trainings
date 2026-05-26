@@ -1,0 +1,199 @@
+@page "/user-information"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject IUserService UserService
+@inject IGroupService GroupService
+@inject ICountryService CountryService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>User Information</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <h2 class="my-3">User Information</h2>
+
+    @if (_loading)
+    {
+        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+    }
+    else if (_user is null)
+    {
+        <div class="alert alert-danger">Unable to load your profile.</div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header fw-bold">Profile</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">First Name</label>
+                        <input class="form-control" @bind="_firstName" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-control" @bind="_lastName" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" type="email" @bind="_email" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Mobile</label>
+                        <input class="form-control" @bind="_mobile" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">City</label>
+                        <input class="form-control" @bind="_city" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Country</label>
+                        <select class="form-select" @bind="_countryId">
+                            <option value="">Select country</option>
+                            @foreach (var country in _countries)
+                            {
+                                <option value="@country.Id">@country.Code — @country.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Welcome Message / Bio</label>
+                        <textarea class="form-control" rows="2" @bind="_welcomeMessage"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary" @onclick="SaveProfile">Save</button>
+                </div>
+
+                @if (_resultMessage is not null)
+                {
+                    <div class="alert @(_resultSuccess ? "alert-success" : "alert-danger") mt-3 mb-0">@_resultMessage</div>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header fw-bold">Group Memberships</div>
+            <div class="card-body">
+                @if (_memberships.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr><th>Group</th><th>Role</th><th>Status</th><th>Requested</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var membership in _memberships)
+                                {
+                                    <tr>
+                                        <td>@membership.GroupName</td>
+                                        <td>@membership.Role</td>
+                                        <td>@membership.Status</td>
+                                        <td>@membership.RequestedAt.ToString("MMM d, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">No group memberships yet. Group assignment requests must be approved by Group Admin or SuperAdmin.</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private UserDto? _user;
+    private bool _loading = true;
+    private int _userId;
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+    private string _email = string.Empty;
+    private string _mobile = string.Empty;
+    private string _city = string.Empty;
+    private int? _countryId;
+    private string _welcomeMessage = string.Empty;
+    private string? _resultMessage;
+    private bool _resultSuccess;
+    private List<CountryDto> _countries = new();
+    private List<MembershipRow> _memberships = new();
+
+    private sealed class MembershipRow
+    {
+        public string GroupName { get; init; } = string.Empty;
+        public GroupMemberRole Role { get; init; }
+        public GroupMembershipStatus Status { get; init; }
+        public DateTime RequestedAt { get; init; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+        _countries = (await CountryService.GetAllAsync()).ToList();
+        _user = await UserService.GetByIdAsync(_userId);
+        if (_user is not null)
+        {
+            _firstName = _user.FirstName;
+            _lastName = _user.LastName;
+            _email = _user.Email;
+            _mobile = _user.Mobile ?? string.Empty;
+            _city = _user.City ?? string.Empty;
+            _countryId = _user.CountryId;
+            _welcomeMessage = _user.WelcomeMessage ?? string.Empty;
+
+            var memberships = await GroupService.GetAllMembershipsForUserAsync(_user.Id);
+            var groups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
+            _memberships = memberships
+                .Select(m => new MembershipRow
+                {
+                    GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : $"Group #{m.GroupId}",
+                    Role = m.Role,
+                    Status = m.Status,
+                    RequestedAt = m.RequestedAt
+                })
+                .OrderBy(m => m.GroupName)
+                .ToList();
+        }
+
+        _loading = false;
+    }
+
+    private async Task SaveProfile()
+    {
+        _resultMessage = null;
+        if (_user is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await UserService.UpdateSelfAsync(new UpdateSelfUserDto
+            {
+                FirstName = _firstName,
+                LastName = _lastName,
+                Email = _email,
+                Gender = _user.Gender,
+                Birthday = _user.Birthday,
+                Mobile = string.IsNullOrWhiteSpace(_mobile) ? null : _mobile,
+                City = string.IsNullOrWhiteSpace(_city) ? null : _city,
+                CountryId = _countryId,
+                WelcomeMessage = string.IsNullOrWhiteSpace(_welcomeMessage) ? null : _welcomeMessage
+            });
+
+            _resultSuccess = true;
+            _resultMessage = "Profile updated successfully.";
+            _user = await UserService.GetByIdAsync(_userId);
+        }
+        catch (Exception ex)
+        {
+            _resultSuccess = false;
+            _resultMessage = $"Failed to update profile: {ex.Message}";
+        }
+    }
+}

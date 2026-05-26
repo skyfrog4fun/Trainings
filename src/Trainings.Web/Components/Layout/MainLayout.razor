@@ -22,9 +22,11 @@
                         <NavLink class="dropdown-item" href="users"><i class="fa-solid fa-users me-2" aria-hidden="true"></i>Users</NavLink>
                     </li>
                 </AuthorizeView>
-                <li>
-                    <NavLink class="dropdown-item" href="trainings"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings</NavLink>
-                </li>
+                <AuthorizeView Policy="GroupMember">
+                    <li>
+                        <NavLink class="dropdown-item" href="trainings"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings</NavLink>
+                    </li>
+                </AuthorizeView>
                 <AuthorizeView Policy="GroupMember">
                     <li>
                         <NavLink class="dropdown-item" href="my-registrations"><i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>My Registrations</NavLink>
@@ -32,7 +34,7 @@
                 </AuthorizeView>
                 <AuthorizeView Policy="GroupTrainer">
                     <li>
-                        <NavLink class="dropdown-item" href="trainer-trainings"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>My Trainings</NavLink>
+                        <NavLink class="dropdown-item" href="plan-training"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Plan Training</NavLink>
                     </li>
                 </AuthorizeView>
                 <li><hr class="dropdown-divider" /></li>
@@ -41,14 +43,15 @@
                         <NavLink class="dropdown-item" href="config/mail"><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Config</NavLink>
                     </li>
                     <li>
+                        <NavLink class="dropdown-item" href="statistics"><i class="fa-solid fa-chart-simple me-2" aria-hidden="true"></i>Statistics</NavLink>
+                    </li>
+                    <li>
                         <NavLink class="dropdown-item" href="config/locations"><i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i>Locations</NavLink>
                     </li>
                 </AuthorizeView>
-                <AuthorizeView Policy="GroupAdmin">
-                    <li>
-                        <NavLink class="dropdown-item" href="users"><i class="fa-solid fa-user me-2" aria-hidden="true"></i>User Information</NavLink>
-                    </li>
-                </AuthorizeView>
+                <li>
+                    <NavLink class="dropdown-item" href="user-information"><i class="fa-solid fa-user me-2" aria-hidden="true"></i>User Information</NavLink>
+                </li>
                 <li>
                     <a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i>Logout</a>
                 </li>

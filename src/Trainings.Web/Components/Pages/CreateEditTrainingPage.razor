@@ -14,7 +14,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/trainer-trainings" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
+        <a href="/plan-training" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
     </div>
 
     <h2>@(_isEdit ? "Edit Training" : "New Training")</h2>
@@ -126,17 +126,22 @@
                 <div class="alert alert-danger mt-3">@_error</div>
             }
 
-            <button class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
+            <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
                 @(_isEdit ? "Update Training" : "Create Training")
             </button>
         </div>
     </div>
 
+    @if (_actionResult is not null)
+    {
+        <div class="alert @(_actionSuccess ? "alert-success" : "alert-danger")">@_actionResult</div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Training Blocks</h4>
         <div>
-            <button class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@(!_persistedTrainingId.HasValue || IsWriteBlocked)"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add Block</button>
-            <button class="btn btn-outline-secondary btn-sm" @onclick="() => _showLibrary = !_showLibrary" disabled="@(!_persistedTrainingId.HasValue)">
+            <button type="button" class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@(!_persistedTrainingId.HasValue || IsWriteBlocked)"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add Block</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => _showLibrary = !_showLibrary" disabled="@(!_persistedTrainingId.HasValue || IsWriteBlocked)">
                 <i class="fa-solid fa-book-open me-1" aria-hidden="true"></i>From Library
             </button>
         </div>
@@ -165,7 +170,7 @@
                                     <div class="alert alert-info py-1 px-2 mt-1 small mb-0">@block.TrainerComment</div>
                                 }
                             </div>
-                            <button class="btn btn-sm btn-outline-primary ms-2" @onclick="() => CopyFromLibrary(block)" disabled="@IsWriteBlocked">Add</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" @onclick="() => CopyFromLibrary(block)" disabled="@IsWriteBlocked">Add</button>
                         </div>
                     }
                     @if (!FilteredLibraryBlocks.Any())
@@ -213,8 +218,8 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <button class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
-                                <button class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
+                                <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
+                                <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
                             </div>
                         </div>
                     }
@@ -235,10 +240,10 @@
                                 }
                             </div>
                             <div class="btn-group btn-group-sm ms-2">
-                                <button class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0 || IsWriteBlocked)">↑</button>
-                                <button class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1 || IsWriteBlocked)">↓</button>
-                                <button class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
-                                <button class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0 || IsWriteBlocked)">↑</button>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1 || IsWriteBlocked)">↓</button>
+                                <button type="button" class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
+                                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     }
@@ -288,6 +293,8 @@
     private string _blockDescription = string.Empty;
     private int _blockPlannedMinutes = 30;
     private HashSet<int> _blockTagIds = new();
+    private bool _actionSuccess;
+    private string? _actionResult;
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
     private bool _isSpecialLocationSelected =>
@@ -472,6 +479,7 @@
     private async Task Save()
     {
         _error = null;
+        _actionResult = null;
 
         if (!_groupId.HasValue)
         {
@@ -507,6 +515,8 @@
                     TrainerId = _trainerId,
                     GroupId = _groupId
                 });
+                _actionSuccess = true;
+                _actionResult = "Training updated successfully.";
             }
             else
             {
@@ -535,6 +545,8 @@
         catch (Exception ex)
         {
             _error = ex.Message;
+            _actionSuccess = false;
+            _actionResult = $"Failed to save training: {ex.Message}";
         }
     }
 
@@ -569,39 +581,46 @@
             return;
         }
 
-        if (idx >= _blocks.Count)
+        try
         {
-            var dto = new CreateTrainingBlockDto
+            if (idx >= _blocks.Count)
             {
-                TrainingId = _persistedTrainingId.Value,
-                OrderIndex = _blocks.Count + 1,
-                Title = _blockTitle,
-                Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
-                PlannedDurationMinutes = _blockPlannedMinutes,
-                TagIds = _blockTagIds.ToList()
-            };
-            var newBlock = await TrainingService.AddBlockAsync(dto);
-            _blocks.Add(newBlock);
-        }
-        else
-        {
-            var block = _blocks[idx];
-            var dto = new UpdateTrainingBlockDto
+                var dto = new CreateTrainingBlockDto
+                {
+                    TrainingId = _persistedTrainingId.Value,
+                    OrderIndex = _blocks.Count + 1,
+                    Title = _blockTitle,
+                    Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
+                    PlannedDurationMinutes = _blockPlannedMinutes,
+                    TagIds = _blockTagIds.ToList()
+                };
+                var newBlock = await TrainingService.AddBlockAsync(dto);
+                _blocks.Add(newBlock);
+            }
+            else
             {
-                Id = block.Id,
-                OrderIndex = idx + 1,
-                Title = _blockTitle,
-                Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
-                PlannedDurationMinutes = _blockPlannedMinutes,
-                EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                TrainerComment = block.TrainerComment,
-                TagIds = _blockTagIds.ToList()
-            };
-            await TrainingService.UpdateBlockAsync(dto);
-            _blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
-        }
+                var block = _blocks[idx];
+                var dto = new UpdateTrainingBlockDto
+                {
+                    Id = block.Id,
+                    OrderIndex = idx + 1,
+                    Title = _blockTitle,
+                    Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
+                    PlannedDurationMinutes = _blockPlannedMinutes,
+                    EffectiveDurationMinutes = block.EffectiveDurationMinutes,
+                    TrainerComment = block.TrainerComment,
+                    TagIds = _blockTagIds.ToList()
+                };
+                await TrainingService.UpdateBlockAsync(dto);
+                _blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
+            }
 
-        _editingBlockIndex = -1;
+            _editingBlockIndex = -1;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to save block: {ex.Message}";
+        }
     }
 
     private void CancelBlockEdit() => _editingBlockIndex = -1;
@@ -613,9 +632,16 @@
             return;
         }
 
-        await TrainingService.DeleteBlockAsync(_blocks[idx].Id);
-        _blocks.RemoveAt(idx);
-        await ReorderBlocks();
+        try
+        {
+            await TrainingService.DeleteBlockAsync(_blocks[idx].Id);
+            _blocks.RemoveAt(idx);
+            await ReorderBlocks();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to delete block: {ex.Message}";
+        }
     }
 
     private async Task MoveBlock(int idx, int direction)
@@ -631,8 +657,15 @@
             return;
         }
 
-        (_blocks[idx], _blocks[newIdx]) = (_blocks[newIdx], _blocks[idx]);
-        await ReorderBlocks();
+        try
+        {
+            (_blocks[idx], _blocks[newIdx]) = (_blocks[newIdx], _blocks[idx]);
+            await ReorderBlocks();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to move block: {ex.Message}";
+        }
     }
 
     private async Task ReorderBlocks()
@@ -672,9 +705,16 @@
             return;
         }
 
-        await TrainingService.CopyBlockAsync(block.Id, _persistedTrainingId.Value);
-        _blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
-        _showLibrary = false;
+        try
+        {
+            await TrainingService.CopyBlockAsync(block.Id, _persistedTrainingId.Value);
+            _blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
+            _showLibrary = false;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to copy block from library: {ex.Message}";
+        }
     }
 
     private void ToggleTag(int tagId, bool selected)

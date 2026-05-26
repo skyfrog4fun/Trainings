@@ -15,6 +15,7 @@ public class UserServiceTests
     private readonly Mock<IUserRepository> _userRepoMock = new();
     private readonly Mock<IAppRuntimeModeService> _runtimeModeServiceMock = new();
     private readonly Mock<IPasswordHasher> _hasherMock = new();
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock = new();
     private readonly UserService _service;
 
     public UserServiceTests()
@@ -22,7 +23,8 @@ public class UserServiceTests
         _service = new UserService(
             _userRepoMock.Object,
             _runtimeModeServiceMock.Object,
-            _hasherMock.Object);
+            _hasherMock.Object,
+            _currentUserContextMock.Object);
     }
 
     [Fact]
@@ -83,5 +85,53 @@ public class UserServiceTests
         _userRepoMock.Setup(r => r.GetByEmailAsync("user@example.com")).ReturnsAsync(user);
         var result = await _service.ValidatePasswordAsync("user@example.com", "pass");
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UpdateSelfAsyncUpdatesOnlyProfileFieldsForAuthenticatedUser()
+    {
+        var user = new User
+        {
+            Id = 7,
+            FirstName = "Old",
+            LastName = "Name",
+            Email = "old@example.com",
+            Role = UserRole.SuperAdmin,
+            IsActive = false,
+            EntryDate = DateTime.UtcNow.AddDays(-5)
+        };
+        _userRepoMock.Setup(r => r.GetByIdAsync(7)).ReturnsAsync(user);
+        _userRepoMock.Setup(r => r.UpdateAsync(user)).Returns(Task.CompletedTask);
+        _currentUserContextMock.Setup(c => c.GetCurrentUserId()).Returns(7);
+
+        await _service.UpdateSelfAsync(new UpdateSelfUserDto
+        {
+            FirstName = "New",
+            LastName = "User",
+            Email = "new@example.com",
+            City = "Basel",
+            WelcomeMessage = "Hello"
+        });
+
+        user.FirstName.Should().Be("New");
+        user.LastName.Should().Be("User");
+        user.Email.Should().Be("new@example.com");
+        user.City.Should().Be("Basel");
+        user.WelcomeMessage.Should().Be("Hello");
+        user.Role.Should().Be(UserRole.SuperAdmin);
+        user.IsActive.Should().BeFalse();
+        user.EntryDate.Should().NotBeNull();
+        _userRepoMock.Verify(r => r.UpdateAsync(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateSelfAsyncThrowsWhenNoAuthenticatedUser()
+    {
+        _currentUserContextMock.Setup(c => c.GetCurrentUserId()).Returns((int?)null);
+
+        var act = () => _service.UpdateSelfAsync(new UpdateSelfUserDto { FirstName = "A", LastName = "B", Email = "a@b.ch" });
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Authenticated user context is required.");
     }
 }
