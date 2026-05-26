@@ -173,20 +173,16 @@
 
         try
         {
-            await UserService.UpdateAsync(new UpdateUserDto
+            await UserService.UpdateSelfAsync(new UpdateSelfUserDto
             {
-                Id = _user.Id,
                 FirstName = _firstName,
                 LastName = _lastName,
                 Email = _email,
-                Role = _user.Role,
-                IsActive = _user.IsActive,
                 Gender = _user.Gender,
                 Birthday = _user.Birthday,
                 Mobile = string.IsNullOrWhiteSpace(_mobile) ? null : _mobile,
                 City = string.IsNullOrWhiteSpace(_city) ? null : _city,
                 CountryId = _countryId,
-                EntryDate = _user.EntryDate,
                 WelcomeMessage = string.IsNullOrWhiteSpace(_welcomeMessage) ? null : _welcomeMessage
             });
 

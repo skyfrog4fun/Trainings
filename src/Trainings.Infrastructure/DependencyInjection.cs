@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationLogService, NotificationLogService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddScoped<IAuthorizationHelper, AuthorizationHelper>();
+        services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
         services.AddScoped<IAppRuntimeModeService, AppRuntimeModeService>();
         services.AddScoped<ILocationService, LocationService>();
         services.AddScoped<ICountryService, CountryService>();

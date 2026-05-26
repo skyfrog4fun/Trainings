@@ -11,15 +11,18 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IAppRuntimeModeService _appRuntimeModeService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly ICurrentUserContext _currentUserContext;
 
     public UserService(
         IUserRepository userRepository,
         IAppRuntimeModeService appRuntimeModeService,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        ICurrentUserContext currentUserContext)
     {
         _userRepository = userRepository;
         _appRuntimeModeService = appRuntimeModeService;
         _passwordHasher = passwordHasher;
+        _currentUserContext = currentUserContext;
     }
 
     public async Task<UserDto?> GetByIdAsync(int id)
@@ -88,6 +91,32 @@ public class UserService : IUserService
         user.CountryId = dto.CountryId;
         user.EntryDate = dto.EntryDate;
         user.WelcomeMessage = dto.WelcomeMessage;
+        await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task UpdateSelfAsync(UpdateSelfUserDto dto)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var userId = _currentUserContext.GetCurrentUserId();
+        if (!userId.HasValue)
+        {
+            throw new InvalidOperationException("Authenticated user context is required.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId.Value)
+            ?? throw new InvalidOperationException($"User {userId.Value} not found.");
+
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.Email = dto.Email;
+        user.Gender = dto.Gender;
+        user.Birthday = dto.Birthday;
+        user.Mobile = dto.Mobile;
+        user.City = dto.City;
+        user.CountryId = dto.CountryId;
+        user.WelcomeMessage = dto.WelcomeMessage;
+
         await _userRepository.UpdateAsync(user);
     }
 
