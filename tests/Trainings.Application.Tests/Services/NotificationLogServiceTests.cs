@@ -21,7 +21,7 @@ public class NotificationLogServiceTests
     }
 
     [Fact]
-    public async Task SetResetPointerLogIdAsync_PersistsAndReturnsPointer()
+    public async Task SetResetPointerLogIdAsyncPersistsAndReturnsPointer()
     {
         using var context = CreateInMemoryContext();
         var service = new NotificationLogService(context);
@@ -33,7 +33,7 @@ public class NotificationLogServiceTests
     }
 
     [Fact]
-    public async Task GetRecentLogsAsync_FiltersByPointer()
+    public async Task GetRecentLogsAsyncFiltersByPointer()
     {
         using var context = CreateInMemoryContext();
         context.NotificationLogs.AddRange(

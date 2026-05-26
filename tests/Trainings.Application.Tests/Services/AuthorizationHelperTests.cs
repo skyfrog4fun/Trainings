@@ -9,7 +9,7 @@ public class AuthorizationHelperTests
     private readonly AuthorizationHelper _helper = new();
 
     [Fact]
-    public void IsGroupMember_WithParticipantClaim_ReturnsTrue()
+    public void IsGroupMemberWithParticipantClaimReturnsTrue()
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
@@ -22,7 +22,7 @@ public class AuthorizationHelperTests
     }
 
     [Fact]
-    public void IsGroupMember_WithDifferentGroupClaim_ReturnsFalse()
+    public void IsGroupMemberWithDifferentGroupClaimReturnsFalse()
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
@@ -35,7 +35,7 @@ public class AuthorizationHelperTests
     }
 
     [Fact]
-    public void IsGroupMember_WithSuperAdminClaim_ReturnsTrue()
+    public void IsGroupMemberWithSuperAdminClaimReturnsTrue()
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(
         [
