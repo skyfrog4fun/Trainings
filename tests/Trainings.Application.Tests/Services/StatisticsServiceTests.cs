@@ -21,7 +21,7 @@ public class StatisticsServiceTests
     }
 
     [Fact]
-    public async Task GetStatisticsAsync_SuperAdmin_ReturnsGlobalMetrics()
+    public async Task GetStatisticsAsyncWhenSuperAdminReturnsGlobalMetrics()
     {
         using var context = CreateInMemoryContext();
         await SeedAsync(context);
@@ -37,7 +37,7 @@ public class StatisticsServiceTests
     }
 
     [Fact]
-    public async Task GetStatisticsAsync_GroupAdmin_ReturnsScopedMetrics()
+    public async Task GetStatisticsAsyncWhenGroupAdminReturnsScopedMetrics()
     {
         using var context = CreateInMemoryContext();
         await SeedAsync(context);
