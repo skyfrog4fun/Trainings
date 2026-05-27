@@ -83,6 +83,11 @@ Trainings.Web             ← Blazor Server UI, DI composition root
 - Follow `.editorconfig` for indentation, line endings, and encoding.
 - Run `dotnet format` before committing to ensure consistent style.
 
+## UI Consistency
+
+- Use the shared collapsible card styles defined in `src/Trainings.Web/wwwroot/app.css` when adding or reworking collapsible cards.
+- Reuse the existing `.collapsible-card`, `.collapsible-card-header`, `.collapsible-card-toggle`, and `.collapsible-card-meta` classes so collapsible sections keep the same header spacing, link-like title, and right-aligned count or summary area.
+
 ---
 
 ## Third-Party Libraries

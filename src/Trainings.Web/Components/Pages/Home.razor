@@ -9,6 +9,7 @@
 @inject IGroupService GroupService
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
+@inject IDateTimeFormatService DateTimeFormatService
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -41,13 +42,13 @@
 
     @if (_isSuperAdmin)
     {
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold" @onclick="ToggleNotifications">
-                    Notification Activity
-                    <i class="fa-solid @(_notificationsExpanded ? "fa-chevron-up" : "fa-chevron-down") ms-1" aria-hidden="true"></i>
+        <div class="card collapsible-card mb-4">
+            <div class="card-header collapsible-card-header">
+                <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleNotifications">
+                    <span>Notification Activity</span>
+                    <i class="fa-solid @(_notificationsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
                 </button>
-                <div class="small">
+                <div class="collapsible-card-meta small">
                     <span class="text-success me-3"><i class="fa-solid fa-check" aria-hidden="true"></i> @_notificationSuccessCount</span>
                     <span class="text-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i> @_notificationFailureCount</span>
                 </div>
@@ -129,17 +130,43 @@
             <div class="card h-100">
                 <div class="card-header fw-bold">Next trainings available to attend</div>
                 <div class="card-body">
+                    @if (_availableTrainingActionMessage is not null)
+                    {
+                        <div class="alert @(_availableTrainingActionError ? "alert-danger" : "alert-success") py-2">@_availableTrainingActionMessage</div>
+                    }
+
                     @if (_availableNextTrainings.Any())
                     {
-                        <ul class="list-group list-group-flush">
-                            @foreach (var training in _availableNextTrainings.Take(5))
-                            {
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                    <span>@training.Title</span>
-                                    <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">Open</a>
-                                </li>
-                            }
-                        </ul>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Group</th>
+                                        <th>Name</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var training in _availableNextTrainings.Take(5))
+                                    {
+                                        <tr>
+                                            <td class="small">@FormatTrainingDate(training)</td>
+                                            <td class="small">@(training.GroupName ?? "-")</td>
+                                            <td>@training.Title</td>
+                                            <td class="text-end">
+                                                <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.Id" title="Open training details">
+                                                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-primary" title="Register for training" @onclick="() => RegisterForTrainingAsync(training.Id)">
+                                                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                         <a href="/trainings" class="btn btn-sm btn-outline-primary mt-3">Browse trainings</a>
                     }
                     else
@@ -212,6 +239,9 @@
     private bool _emailConfirmed;
     private string? _verificationActionMessage;
     private bool _verificationActionSuccess;
+    private string? _availableTrainingActionMessage;
+    private bool _availableTrainingActionError;
+    private string _userCountry = "CH";
 
     private List<TrainingDto> _myNextTrainings = new();
     private List<TrainingDto> _availableNextTrainings = new();
@@ -255,6 +285,7 @@
 
         var userDto = _userId > 0 ? await UserService.GetByIdAsync(_userId) : null;
         _emailConfirmed = userDto?.EmailConfirmedAt.HasValue == true;
+        _userCountry = userDto?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
 
         var allActiveTrainings = (await TrainingService.GetActiveAsync())
             .Where(t => t.DateTime >= DateTime.Now)
@@ -304,6 +335,7 @@
             ? allActiveTrainings
                 .Where(t =>
                     !myRegistrationIds.Contains(t.Id) &&
+                    t.RegisteredCount < t.Capacity &&
                     (_isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value))))
                 .ToList()
             : new List<TrainingDto>();
@@ -358,6 +390,30 @@
     private void ToggleNotifications()
     {
         _notificationsExpanded = !_notificationsExpanded;
+    }
+
+    private async Task RegisterForTrainingAsync(int trainingId)
+    {
+        _availableTrainingActionMessage = null;
+
+        try
+        {
+            await RegistrationService.RegisterAsync(_userId, trainingId);
+            await LoadAsync();
+            _availableTrainingActionError = false;
+            _availableTrainingActionMessage = "Successfully registered.";
+        }
+        catch (Exception ex)
+        {
+            _availableTrainingActionError = true;
+            _availableTrainingActionMessage = ex.Message;
+        }
+    }
+
+    private string FormatTrainingDate(TrainingDto training)
+    {
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        return training.DateTime.ToString("g", culture);
     }
 
     private async Task ResetNotificationPointerAsync()
