@@ -100,6 +100,7 @@
     private List<GroupDto> _groups = new();
     private List<CountryDto> _countries = new();
     private HashSet<string> _groupLocationAssignments = new();
+    private HashSet<string> _expandedLocationGroupIds = new(StringComparer.Ordinal);
 
     private bool _showForm;
     private int _editId;
@@ -122,6 +123,12 @@
         _groupLocationAssignments = _groups
             .SelectMany(g => g.AllowedLocationIds.Select(id => $"{g.Id}:{id}"))
             .ToHashSet(StringComparer.Ordinal);
+
+        if (_expandedLocationGroupIds.Count == 0)
+        {
+            _expandedLocationGroupIds.Add("active-locations");
+            _expandedLocationGroupIds.Add("system-wide-locations");
+        }
     }
 
     private RenderFragment RenderLocationGroup(string title, string collapseId, List<LocationDto> locations, bool defaultOpen) => __builder =>
@@ -131,43 +138,47 @@
             return;
         }
 
-        var chevronClass = defaultOpen ? "fa-chevron-up" : "fa-chevron-down";
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center"
-                 data-bs-toggle="collapse"
-                 data-bs-target="#@collapseId"
-                 style="cursor:pointer;">
-                <span class="fw-bold">@title (@locations.Count)</span>
-                <i class="fa-solid @chevronClass" aria-hidden="true"></i>
+        var isExpanded = _expandedLocationGroupIds.Contains(collapseId);
+        var chevronClass = isExpanded ? "fa-chevron-up" : "fa-chevron-down";
+        <div class="card collapsible-card mb-3">
+            <div class="card-header collapsible-card-header">
+                <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="() => ToggleLocationGroup(collapseId)">
+                    <span>@title</span>
+                    <i class="fa-solid @chevronClass" aria-hidden="true"></i>
+                </button>
+                <div class="collapsible-card-meta">@locations.Count</div>
             </div>
-            <div id="@collapseId" class="collapse @(defaultOpen ? "show" : "")">
-                <div class="table-responsive">
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>City</th>
-                                <th>Country</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var location in locations)
-                            {
+            @if (isExpanded)
+            {
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
                                 <tr>
-                                    <td>@location.Name</td>
-                                    <td>@location.CityName</td>
-                                    <td>@(location.CountryCode ?? "—")</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => Edit(location)"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(location.Id)" disabled="@location.IsSystemWide"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
-                                    </td>
+                                    <th>Name</th>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Actions</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var location in locations)
+                                {
+                                    <tr>
+                                        <td>@location.Name</td>
+                                        <td>@location.CityName</td>
+                                        <td>@(location.CountryCode ?? "—")</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => Edit(location)"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(location.Id)" disabled="@location.IsSystemWide"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            }
         </div>;
     };
 
@@ -228,6 +239,14 @@
     }
 
     private void Cancel() => _showForm = false;
+
+    private void ToggleLocationGroup(string collapseId)
+    {
+        if (!_expandedLocationGroupIds.Add(collapseId))
+        {
+            _expandedLocationGroupIds.Remove(collapseId);
+        }
+    }
 
     private async Task ToggleGroupLocation(int groupId, int locationId, bool selected)
     {

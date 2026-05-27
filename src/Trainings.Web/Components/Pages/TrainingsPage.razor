@@ -3,6 +3,7 @@
 @attribute [Authorize(Policy = "GroupMember")]
 @using Trainings.Web.Auth
 @inject ITrainingService TrainingService
+@inject IRegistrationService RegistrationService
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
@@ -17,64 +18,166 @@
         </AuthorizeView>
     </div>
 
+    @if (_actionMessage is not null)
+    {
+        <div class="alert @(_actionIsError ? "alert-danger" : "alert-success")">@_actionMessage</div>
+    }
+
     @if (_loading)
     {
         <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
     }
     else
     {
-        <div class="row g-3">
-            @foreach (var training in _trainings)
-            {
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">@training.Title</h5>
-                            <p class="card-text text-muted small">
-                                <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(training)<br/>
-                                <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")<br/>
-                                <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@training.TrainerName<br/>
-                                <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@training.RegisteredCount / @training.Capacity
-                            </p>
-                            <p class="card-text">@training.Description</p>
-                        </div>
-                        <div class="card-footer">
-                            <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">Details</a>
+        @if (_recentTrainings.Any())
+        {
+            <div class="row g-3">
+                @foreach (var training in _recentTrainings)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">@training.Title</h5>
+                                <p class="card-text text-muted small">
+                                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(training)<br/>
+                                    <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")<br/>
+                                    <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@training.TrainerName<br/>
+                                    <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@training.RegisteredCount / @training.Capacity
+                                </p>
+                                <p class="card-text">@training.Description</p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                                <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
+                                </a>
+                                @if (CanRegister(training))
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
+                                            @onclick="() => ToggleRegistrationAsync(training)"
+                                            disabled="@IsRegistrationDisabled(training)">
+                                        <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                                    </button>
+                                }
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-        @if (!_trainings.Any())
+                }
+            </div>
+        }
+        else if (!_archivedTrainings.Any())
         {
             <div class="alert alert-info mt-3">No trainings available.</div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-3">No trainings from the last 2 weeks are available.</div>
+        }
+
+        @if (_archivedTrainings.Any())
+        {
+            <div class="card collapsible-card mt-4">
+                <div class="card-header collapsible-card-header">
+                    <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleArchivedTrainings">
+                        <span>Trainings older than 2 weeks</span>
+                        <i class="fa-solid @(_archivedTrainingsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
+                    </button>
+                    <div class="collapsible-card-meta">@_archivedTrainings.Count training(s)</div>
+                </div>
+                @if (_archivedTrainingsExpanded)
+                {
+                    <div class="card-body">
+                        <div class="row g-3">
+                            @foreach (var training in _archivedTrainings)
+                            {
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@training.Title</h5>
+                                            <p class="card-text text-muted small">
+                                                <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(training)<br/>
+                                                <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")<br/>
+                                                <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@training.TrainerName<br/>
+                                                <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@training.RegisteredCount / @training.Capacity
+                                            </p>
+                                            <p class="card-text">@training.Description</p>
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                                            <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
+                                            </a>
+                                            @if (CanRegister(training))
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
+                                                        @onclick="() => ToggleRegistrationAsync(training)"
+                                                        disabled="@IsRegistrationDisabled(training)">
+                                                    <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
         }
     }
 </div>
 
 @code {
-    private List<TrainingDto> _trainings = new();
+    private List<TrainingDto> _recentTrainings = new();
+    private List<TrainingDto> _archivedTrainings = new();
+    private HashSet<int> _registeredTrainingIds = new();
+    private HashSet<int> _accessibleGroupIds = new();
     private bool _loading = true;
+    private bool _isSuperAdmin;
+    private bool _archivedTrainingsExpanded;
+    private int _userId;
     private string _userCountry = "CH";
+    private string? _actionMessage;
+    private bool _actionIsError;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        var isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
-        var accessibleGroupIds = auth.User.Claims
+        _isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        _accessibleGroupIds = auth.User.Claims
             .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal))
             .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
             .Where(groupId => groupId > 0)
             .ToHashSet();
-        var userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
-        if (userId > 0)
+
+        _userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        if (_userId > 0)
         {
-            _userCountry = (await UserService.GetByIdAsync(userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
+            _userCountry = (await UserService.GetByIdAsync(_userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
+
+            _registeredTrainingIds = (await RegistrationService.GetByUserIdAsync(_userId))
+                .Where(r => r.Status == Trainings.Domain.Enums.RegistrationStatus.Registered)
+                .Select(r => r.TrainingId)
+                .ToHashSet();
+        }
+        else
+        {
+            _registeredTrainingIds.Clear();
         }
 
-        _trainings = (await TrainingService.GetActiveAsync())
-            .Where(t => isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value)))
+        var trainings = (await TrainingService.GetActiveAsync())
+            .Where(t => _isSuperAdmin || (t.GroupId.HasValue && _accessibleGroupIds.Contains(t.GroupId.Value)))
+            .OrderByDescending(t => t.DateTime)
             .ToList();
+
+        var archiveThreshold = DateTime.Now.AddDays(-14);
+        _recentTrainings = trainings.Where(t => t.DateTime >= archiveThreshold).ToList();
+        _archivedTrainings = trainings.Where(t => t.DateTime < archiveThreshold).ToList();
         _loading = false;
     }
 
@@ -82,5 +185,44 @@
     {
         var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
         return training.DateTime.ToString("g", culture);
+    }
+
+    private bool CanRegister(TrainingDto training) =>
+        _isSuperAdmin || (training.GroupId.HasValue && _accessibleGroupIds.Contains(training.GroupId.Value));
+
+    private bool IsRegistrationDisabled(TrainingDto training) =>
+        !_registeredTrainingIds.Contains(training.Id) && training.RegisteredCount >= training.Capacity;
+
+    private async Task ToggleRegistrationAsync(TrainingDto training)
+    {
+        _actionMessage = null;
+
+        try
+        {
+            if (_registeredTrainingIds.Contains(training.Id))
+            {
+                await RegistrationService.CancelAsync(_userId, training.Id);
+                _actionIsError = false;
+                _actionMessage = "Registration cancelled.";
+            }
+            else
+            {
+                await RegistrationService.RegisterAsync(_userId, training.Id);
+                _actionIsError = false;
+                _actionMessage = "Successfully registered.";
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _actionIsError = true;
+            _actionMessage = ex.Message;
+        }
+    }
+
+    private void ToggleArchivedTrainings()
+    {
+        _archivedTrainingsExpanded = !_archivedTrainingsExpanded;
     }
 }

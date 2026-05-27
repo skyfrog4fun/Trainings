@@ -90,3 +90,40 @@ main {
         flex-direction: column;
     }
 }
+
+.collapsible-card .card-header {
+    padding: 0.75rem 1rem;
+}
+
+.collapsible-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.collapsible-card-toggle {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--bs-link-color);
+    text-decoration: underline;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.collapsible-card-toggle:hover {
+    color: var(--bs-link-hover-color);
+}
+
+.collapsible-card-toggle:focus {
+    box-shadow: none;
+}
+
+.collapsible-card-meta {
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
