@@ -19,6 +19,7 @@ public class TrainingRepository : ITrainingRepository
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
             .Include(t => t.Group)
+                .ThenInclude(g => g!.Country)
             .Include(t => t.Location)
             .Include(t => t.Blocks)
                 .ThenInclude(b => b.TrainingBlockTags)
