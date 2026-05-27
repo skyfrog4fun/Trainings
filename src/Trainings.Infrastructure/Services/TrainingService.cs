@@ -240,7 +240,11 @@ public class TrainingService : ITrainingService
         RegisteredCount = t.Registrations?.Count(r => r.Status == Domain.Enums.RegistrationStatus.Registered) ?? 0,
         GroupId = t.GroupId,
         GroupName = t.Group?.Name,
-        GroupCountry = t.Group?.Country?.Code
+        GroupCountry = t.Group?.Country?.Code,
+        Blocks = t.Blocks?
+            .OrderBy(b => b.OrderIndex)
+            .Select(MapBlockToDto)
+            .ToList() ?? new List<TrainingBlockDto>()
     };
 
     private static TrainingBlockDto MapBlockToDto(TrainingBlock b) => new()
@@ -255,11 +259,14 @@ public class TrainingService : ITrainingService
         TrainerComment = b.TrainerComment,
         SourceBlockId = b.SourceBlockId,
         CreatedAt = b.CreatedAt,
-        Tags = b.TrainingBlockTags.Select(bt => new TagDto
-        {
-            Id = bt.Tag.Id,
-            Name = bt.Tag.Name,
-            GroupId = bt.Tag.GroupId
-        }).ToList()
+        Tags = b.TrainingBlockTags
+            .Where(bt => bt.Tag is not null)
+            .Select(bt => new TagDto
+            {
+                Id = bt.Tag.Id,
+                Name = bt.Tag.Name,
+                GroupId = bt.Tag.GroupId
+            })
+            .ToList()
     };
 }
