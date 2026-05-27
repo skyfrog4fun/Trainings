@@ -158,7 +158,11 @@
                                                 <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.Id" title="Open training details">
                                                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-sm btn-primary" title="Register for training" @onclick="() => RegisterForTrainingAsync(training.Id)">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-primary"
+                                                        title="@(training.RegisteredCount >= training.Capacity ? "Training full" : "Register for training")"
+                                                        @onclick="() => RegisterForTrainingAsync(training.Id)"
+                                                        disabled="@(training.RegisteredCount >= training.Capacity)">
                                                     <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
                                                 </button>
                                             </td>
@@ -335,7 +339,6 @@
             ? allActiveTrainings
                 .Where(t =>
                     !myRegistrationIds.Contains(t.Id) &&
-                    t.RegisteredCount < t.Capacity &&
                     (_isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value))))
                 .ToList()
             : new List<TrainingDto>();
