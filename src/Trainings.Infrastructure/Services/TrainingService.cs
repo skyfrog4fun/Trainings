@@ -60,6 +60,7 @@ public class TrainingService : ITrainingService
             SpecialLocationDescription = dto.SpecialLocationDescription,
             MeetingPoint = dto.MeetingPoint,
             DateTime = dto.DateTime,
+            DurationMinutes = dto.DurationMinutes,
             Capacity = dto.Capacity,
             TrainerId = dto.TrainerId,
             GroupId = dto.GroupId,
@@ -85,6 +86,7 @@ public class TrainingService : ITrainingService
         training.SpecialLocationDescription = dto.SpecialLocationDescription;
         training.MeetingPoint = dto.MeetingPoint;
         training.DateTime = dto.DateTime;
+        training.DurationMinutes = dto.DurationMinutes;
         training.Capacity = dto.Capacity;
         training.IsActive = dto.IsActive;
         training.TrainerId = dto.TrainerId;
@@ -264,6 +266,7 @@ public class TrainingService : ITrainingService
         SpecialLocationDescription = t.SpecialLocationDescription,
         MeetingPoint = t.MeetingPoint,
         DateTime = t.DateTime,
+        DurationMinutes = t.DurationMinutes,
         Capacity = t.Capacity,
         IsActive = t.IsActive,
         TrainerId = t.TrainerId,

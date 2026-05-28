@@ -1,42 +1,49 @@
-@inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
 
-<div class="list-group">
-    @foreach (var t in Trainings)
+<div class="row g-3">
+    @foreach (var training in Trainings)
     {
-        <div class="list-group-item">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h6 class="mb-1">@t.Title</h6>
-                    <small class="text-muted">@FormatTrainingDate(t) · @(t.LocationName ?? "-")</small>
-                    <br/><small><i class="fa-solid fa-users me-1" aria-hidden="true"></i>@t.RegisteredCount / @t.Capacity · <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@t.TrainerName</small>
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm @CardCssClass">
+                <div class="card-body d-flex flex-column">
+                    <div class="training-card-title text-truncate">@training.Title</div>
+                    <div class="d-flex justify-content-between align-items-center gap-2 text-muted small mt-2">
+                        <span class="text-truncate">@FormatTrainingDate(training)</span>
+                        <span class="text-nowrap"><i class="fa-solid fa-stopwatch me-1" aria-hidden="true"></i>@FormatDuration(training.DurationMinutes)</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
+                        <span class="text-truncate"><i class="fa-solid fa-object-group me-1" aria-hidden="true"></i>@(training.GroupName ?? "-")</span>
+                        <span class="text-truncate text-end">@(training.LocationName ?? "-")</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
+                        <span class="text-truncate">@training.TrainerName</span>
+                        <span class="text-nowrap">@training.RegisteredCount/@training.Capacity</span>
+                    </div>
+                    <div class="small text-muted text-truncate mt-2">@training.Description</div>
                 </div>
-                <div>
-                    <a href="/trainings/@t.Id" class="btn btn-sm btn-outline-primary">Details</a>
-                </div>
+                @if (Actions is not null)
+                {
+                    <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                        @Actions(training)
+                    </div>
+                }
             </div>
         </div>
     }
 </div>
 
 @code {
-    [Parameter] public List<TrainingDto> Trainings { get; set; } = new();
-    [Parameter] public bool ShowActions { get; set; } = false;
-    [Parameter] public bool ShowRegisterButton { get; set; } = false;
-    [Parameter] public int CurrentUserId { get; set; }
-    private string _userCountry = "CH";
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (CurrentUserId > 0)
-        {
-            _userCountry = (await UserService.GetByIdAsync(CurrentUserId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
-        }
-    }
+    [Parameter] public IReadOnlyList<TrainingDto> Trainings { get; set; } = Array.Empty<TrainingDto>();
+    [Parameter] public string UserCountry { get; set; } = "CH";
+    [Parameter] public string CardCssClass { get; set; } = string.Empty;
+    [Parameter] public RenderFragment<TrainingDto>? Actions { get; set; }
 
     private string FormatTrainingDate(TrainingDto training)
     {
-        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? UserCountry);
         return training.DateTime.ToString("g", culture);
     }
+
+    private static string FormatDuration(int? durationMinutes) =>
+        durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
 }

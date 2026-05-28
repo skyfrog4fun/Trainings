@@ -29,7 +29,13 @@ public class RegistrationRepository : IRegistrationRepository
     public async Task<IEnumerable<Registration>> GetByUserIdAsync(int userId) =>
         await _context.Registrations
             .Include(r => r.Training)
-            .ThenInclude(t => t.Trainer)
+                .ThenInclude(t => t.Trainer)
+            .Include(r => r.Training)
+                .ThenInclude(t => t.Location)
+            .Include(r => r.Training)
+                .ThenInclude(t => t.Group)
+            .Include(r => r.Training)
+                .ThenInclude(t => t.Registrations)
             .Where(r => r.UserId == userId)
             .ToListAsync();
 

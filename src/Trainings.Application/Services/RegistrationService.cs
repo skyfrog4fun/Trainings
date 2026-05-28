@@ -88,6 +88,14 @@ public class RegistrationService : IRegistrationService
         UserName = r.User?.DisplayName ?? string.Empty,
         TrainingId = r.TrainingId,
         TrainingTitle = r.Training?.Title ?? string.Empty,
+        TrainingDateTime = r.Training?.DateTime ?? default,
+        TrainingGroupName = r.Training?.Group?.Name,
+        TrainingTrainerName = r.Training?.Trainer?.DisplayName,
+        TrainingLocationName = r.Training?.Location?.Name,
+        TrainingDurationMinutes = r.Training?.DurationMinutes,
+        TrainingDescription = r.Training?.Description ?? string.Empty,
+        TrainingCapacity = r.Training?.Capacity ?? 0,
+        TrainingRegisteredCount = r.Training?.Registrations?.Count(registration => registration.Status == RegistrationStatus.Registered) ?? 0,
         RegisteredAt = r.RegisteredAt,
         Status = r.Status
     };

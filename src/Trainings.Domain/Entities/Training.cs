@@ -10,6 +10,7 @@ public class Training
     public string? SpecialLocationDescription { get; set; }
     public string? MeetingPoint { get; set; }
     public DateTime DateTime { get; set; }
+    public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
     public bool IsActive { get; set; } = true;
     public int TrainerId { get; set; }

@@ -4,11 +4,9 @@
 @using Trainings.Web.Auth
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
-@inject IAttendanceService AttendanceService
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavigationManager
 
 <PageTitle>@(_training?.Title ?? "Training")</PageTitle>
 
@@ -19,7 +17,7 @@
     }
     else if (_training == null)
     {
-        <div class="alert alert-danger">Training not found.</div>
+        <div class="alert @(_isError ? "alert-danger" : "alert-info")">@(_message ?? "Training not found.")</div>
     }
     else
     {
@@ -27,42 +25,78 @@
             <a href="/trainings" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
         </div>
         <div class="card shadow mb-4">
-            <div class="card-body">
-                <h2>@_training.Title</h2>
-                <p class="text-muted">
-                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(_training)<br/>
-                    <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(_training.LocationName ?? "-")<br/>
-                    <i class="fa-solid fa-user me-1" aria-hidden="true"></i>Trainer: @_training.TrainerName<br/>
-                    <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@_training.RegisteredCount / @_training.Capacity registered
+            <div class="card-body position-relative">
+                <h2 class="mb-3 pe-5">@_training.Title</h2>
+
+                @if (_isRegistered)
+                {
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Registered</span>
+                }
+
+                <div class="text-muted mb-3">
                     @if (_training.GroupName != null)
                     {
-                        <><br/><i class="fa-solid fa-object-group me-1" aria-hidden="true"></i>@_training.GroupName</>
+                        <div class="mb-2"><i class="fa-solid fa-object-group me-1" aria-hidden="true"></i>@_training.GroupName</div>
                     }
-                </p>
-                <p>@_training.Description</p>
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                        <span class="text-truncate"><i class="fa-solid fa-calendar me-1" aria-hidden="true"></i>@FormatTrainingDate(_training)</span>
+                        <span class="text-nowrap"><i class="fa-solid fa-stopwatch me-1" aria-hidden="true"></i>@FormatDuration(_training.DurationMinutes)</span>
+                    </div>
+                    <div class="mb-2"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(_training.LocationName ?? "-")</div>
+                    @if (!string.IsNullOrWhiteSpace(_training.SpecialLocationDescription))
+                    {
+                        <div class="mb-2"><i class="fa-solid fa-location-crosshairs me-1" aria-hidden="true"></i>@_training.SpecialLocationDescription</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_training.MeetingPoint))
+                    {
+                        <div class="mb-2"><i class="fa-solid fa-map-pin me-1" aria-hidden="true"></i>@_training.MeetingPoint</div>
+                    }
+                    <div class="mb-2"><i class="fa-solid fa-user me-1" aria-hidden="true"></i>Trainer: @_training.TrainerName</div>
+                    <div><i class="fa-solid fa-users me-1" aria-hidden="true"></i>@_training.RegisteredCount / @_training.Capacity registered</div>
+                </div>
+
+                <p class="mb-4">@_training.Description</p>
 
                 @if (_canRegister)
                 {
-                    @if (_isRegistered)
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        @if (_isRegistered)
+                        {
+                            <button class="btn btn-danger" @onclick="PromptSelfUnregister">Unregister</button>
+                        }
+                        else if (_training.RegisteredCount < _training.Capacity)
+                        {
+                            <button class="btn btn-primary" @onclick="Register">Register</button>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">Training Full</span>
+                        }
+
+                        @if (_isTrainer && _training.TrainerId == _userId)
+                        {
+                            <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Run Training</a>
+                            <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">Record Attendance</a>
+                            <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">Edit</a>
+                        }
+                    </div>
+
+                    @if (_showUnregisterConfirm)
                     {
-                        <button class="btn btn-danger" @onclick="CancelRegistration">Cancel Registration</button>
-                        <span class="badge bg-success ms-2"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Registered</span>
-                    }
-                    else if (_training.RegisteredCount < _training.Capacity)
-                    {
-                        <button class="btn btn-primary" @onclick="Register">Register</button>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning text-dark">Training Full</span>
+                        <div class="alert alert-warning d-inline-flex flex-wrap align-items-center gap-2 mt-3 mb-0">
+                            <span>Are you sure?</span>
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmSelfUnregister">Confirm</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelPendingUnregister">Cancel</button>
+                        </div>
                     }
                 }
-
-                @if (_isTrainer && _training.TrainerId == _userId)
+                else if (_isTrainer && _training.TrainerId == _userId)
                 {
-                    <a href="/trainings/@_training.Id/run" class="btn btn-success ms-2"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Run Training</a>
-                    <a href="/trainings/@_training.Id/attendance" class="btn btn-primary ms-2">Record Attendance</a>
-                    <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary ms-2">Edit</a>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Run Training</a>
+                        <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">Record Attendance</a>
+                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">Edit</a>
+                    </div>
                 }
             </div>
         </div>
@@ -92,7 +126,7 @@
                                     <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Planned: @block.PlannedDurationMinutes min
                                     @if (block.EffectiveDurationMinutes.HasValue)
                                     {
-                                        <> · Actual: @block.EffectiveDurationMinutes min</>
+                                        <text> · Actual: @block.EffectiveDurationMinutes min</text>
                                     }
                                 </div>
                                 @if (block.Tags.Any())
@@ -111,13 +145,37 @@
             </div>
         }
 
-        @if (_registrations.Any() && (_isTrainer || _isAdmin))
+        @if (RegisteredParticipants.Any() && (_isTrainer || _isAdmin))
         {
-            <h4 class="mt-4">Registered Participants (@_registrations.Count)</h4>
+            <h4 class="mt-4">Registered Participants (@RegisteredParticipants.Count)</h4>
             <ul class="list-group">
-                @foreach (var reg in _registrations.Where(r => r.Status == RegistrationStatus.Registered))
+                @foreach (var reg in RegisteredParticipants)
                 {
-                    <li class="list-group-item">@reg.UserName <span class="badge bg-secondary float-end">@reg.RegisteredAt.ToString("MMM d")</span></li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                            <div>
+                                <div>@reg.UserName</div>
+                                <span class="badge bg-secondary">@reg.RegisteredAt.ToString("MMM d")</span>
+                            </div>
+                            @if (_isAdmin)
+                            {
+                                <div class="d-flex flex-column align-items-end gap-2 ms-auto">
+                                    @if (_pendingUnregisterUserId == reg.UserId)
+                                    {
+                                        <div class="d-inline-flex flex-wrap justify-content-end align-items-center gap-2">
+                                            <span>Are you sure?</span>
+                                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmParticipantUnregister">Confirm</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelPendingUnregister">Cancel</button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => PromptParticipantUnregister(reg)">Unregister</button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </li>
                 }
             </ul>
         }
@@ -130,38 +188,79 @@
     private TrainingDto? _training;
     private bool _loading = true;
     private bool _isRegistered;
-    private bool _isTrainer, _isAdmin, _canRegister;
+    private bool _isTrainer;
+    private bool _isAdmin;
+    private bool _canRegister;
+    private bool _showUnregisterConfirm;
     private int _userId;
+    private int? _pendingUnregisterUserId;
+    private string? _pendingUnregisterUserName;
     private List<RegistrationDto> _registrations = new();
     private string? _message;
     private bool _isError;
     private string _userCountry = "CH";
 
+    private List<RegistrationDto> RegisteredParticipants =>
+        _registrations.Where(registration => registration.Status == RegistrationStatus.Registered).ToList();
+
     protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _isError = true;
+            _loading = false;
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        CancelPendingUnregister();
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
+        var isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
+
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         if (_userId > 0)
         {
             _userCountry = (await UserService.GetByIdAsync(_userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
-        var isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
-        _isAdmin = isSuperAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin");
-        _isTrainer = _isAdmin || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Trainer");
 
         _training = await TrainingService.GetByIdAsync(Id);
-
-        if (_training != null)
+        if (_training == null)
         {
-            _canRegister = isSuperAdmin || (_training.GroupId.HasValue && user.Claims.Any(c =>
-                c.Type == AppClaimTypes.GroupRole(_training.GroupId.Value) &&
-                (c.Value == "Participant" || c.Value == "Trainer" || c.Value == "Admin")));
+            _loading = false;
+            return;
+        }
 
-            if (_canRegister)
-                _isRegistered = await RegistrationService.IsRegisteredAsync(_userId, Id);
-            if (_isTrainer || _isAdmin)
-                _registrations = (await RegistrationService.GetByTrainingIdAsync(Id)).ToList();
+        _isAdmin = isSuperAdmin || (_training.GroupId.HasValue && user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId.Value), "Admin"));
+        _isTrainer = _isAdmin || (_training.GroupId.HasValue && user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId.Value), "Trainer"));
+        _canRegister = isSuperAdmin || (_training.GroupId.HasValue && user.Claims.Any(claim =>
+            claim.Type == AppClaimTypes.GroupRole(_training.GroupId.Value) &&
+            (claim.Value == "Participant" || claim.Value == "Trainer" || claim.Value == "Admin")));
+
+        if (_canRegister && _userId > 0)
+        {
+            _isRegistered = await RegistrationService.IsRegisteredAsync(_userId, Id);
+        }
+        else
+        {
+            _isRegistered = false;
+        }
+
+        if (_isTrainer || _isAdmin)
+        {
+            _registrations = (await RegistrationService.GetByTrainingIdAsync(Id)).ToList();
+        }
+        else
+        {
+            _registrations.Clear();
         }
 
         _loading = false;
@@ -172,8 +271,7 @@
         try
         {
             await RegistrationService.RegisterAsync(_userId, Id);
-            _isRegistered = true;
-            _training = await TrainingService.GetByIdAsync(Id);
+            await LoadAsync();
             _message = "Successfully registered!";
             _isError = false;
         }
@@ -184,19 +282,19 @@
         }
     }
 
-    private string FormatTrainingDate(TrainingDto training)
+    private void PromptSelfUnregister()
     {
-        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
-        return training.DateTime.ToString("f", culture);
+        _pendingUnregisterUserId = null;
+        _pendingUnregisterUserName = null;
+        _showUnregisterConfirm = true;
     }
 
-    private async Task CancelRegistration()
+    private async Task ConfirmSelfUnregister()
     {
         try
         {
             await RegistrationService.CancelAsync(_userId, Id);
-            _isRegistered = false;
-            _training = await TrainingService.GetByIdAsync(Id);
+            await LoadAsync();
             _message = "Registration cancelled.";
             _isError = false;
         }
@@ -206,4 +304,51 @@
             _isError = true;
         }
     }
+
+    private void PromptParticipantUnregister(RegistrationDto registration)
+    {
+        _showUnregisterConfirm = false;
+        _pendingUnregisterUserId = registration.UserId;
+        _pendingUnregisterUserName = registration.UserName;
+    }
+
+    private async Task ConfirmParticipantUnregister()
+    {
+        if (!_pendingUnregisterUserId.HasValue)
+        {
+            return;
+        }
+
+        try
+        {
+            await RegistrationService.CancelAsync(_pendingUnregisterUserId.Value, Id);
+            var userName = _pendingUnregisterUserName;
+            await LoadAsync();
+            _message = string.IsNullOrWhiteSpace(userName)
+                ? "Participant unregistered."
+                : $"{userName} was unregistered.";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _isError = true;
+        }
+    }
+
+    private void CancelPendingUnregister()
+    {
+        _showUnregisterConfirm = false;
+        _pendingUnregisterUserId = null;
+        _pendingUnregisterUserName = null;
+    }
+
+    private string FormatTrainingDate(TrainingDto training)
+    {
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        return training.DateTime.ToString("f", culture);
+    }
+
+    private static string FormatDuration(int? durationMinutes) =>
+        durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
 }
