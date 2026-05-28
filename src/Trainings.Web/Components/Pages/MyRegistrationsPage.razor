@@ -123,17 +123,17 @@
             .ToList();
         _filterGroups = _registrations
             .Select(registration => registration.TrainingGroupName)
+            .OfType<string>()
             .Where(group => !string.IsNullOrWhiteSpace(group))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(group => group)
-            .Select(group => group!)
             .ToList();
         _filterTrainers = _registrations
             .Select(registration => registration.TrainingTrainerName)
+            .OfType<string>()
             .Where(trainer => !string.IsNullOrWhiteSpace(trainer))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(trainer => trainer)
-            .Select(trainer => trainer!)
             .ToList();
         _nextUpcomingTrainingId = _registrations
             .Where(registration => registration.Status == RegistrationStatus.Registered && registration.TrainingDateTime > DateTime.Now)

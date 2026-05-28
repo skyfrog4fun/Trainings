@@ -212,8 +212,8 @@
             .ToList();
 
         _filterTrainers = trainings
-            .GroupBy(training => new { training.TrainerId, training.TrainerName })
-            .Select(group => new FilterOption(group.Key.TrainerId, group.Key.TrainerName))
+            .DistinctBy(training => training.TrainerId)
+            .Select(training => new FilterOption(training.TrainerId, training.TrainerName))
             .OrderBy(trainer => trainer.Name)
             .ToList();
 
