@@ -3,6 +3,8 @@
 .vs/
 bin/
 obj/
+*\\Debug
+*\\Release
 *.db
 *.db-shm
 *.db-wal
