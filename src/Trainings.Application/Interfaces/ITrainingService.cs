@@ -19,4 +19,11 @@ public interface ITrainingService
     Task DeleteBlockAsync(int blockId, CancellationToken ct = default);
     Task CopyBlockAsync(int sourceBlockId, int targetTrainingId, CancellationToken ct = default);
     Task<IEnumerable<TrainingBlockDto>> GetAllBlocksLibraryAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns the next calendar date matching <paramref name="weekday"/> that has no
+    /// existing training for <paramref name="groupId"/>.  Steps forward by 7 days when
+    /// every occurrence is already occupied.
+    /// </summary>
+    Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default);
 }

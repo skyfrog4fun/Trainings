@@ -140,4 +140,105 @@ public class TrainingServiceTests
         result.Blocks.Select(b => b.OrderIndex).Should().ContainInOrder(1, 2);
         result.Blocks[1].Tags.Should().ContainSingle(t => t.Id == 2 && t.Name == "Technique");
     }
+
+    [Fact]
+    public async Task GetNextAvailableDateForGroupAsync_ReturnsNextWeekday_WhenNoConflict()
+    {
+        using var ctx = CreateInMemoryContext();
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
+
+        var weekday = DayOfWeek.Monday;
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 99, weekday);
+
+        result.DayOfWeek.Should().Be(weekday);
+        result.Date.Should().BeAfter(DateTime.Today);
+    }
+
+    [Fact]
+    public async Task GetNextAvailableDateForGroupAsync_SkipsOneWeek_WhenFirstDateOccupied()
+    {
+        using var ctx = CreateInMemoryContext();
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
+
+        var weekday = DayOfWeek.Wednesday;
+
+        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        if (offset == 0) offset = 7;
+        var firstOccurrence = DateTime.Today.AddDays(offset);
+
+        ctx.Trainings.Add(new Training
+        {
+            Title = "Existing",
+            DateTime = firstOccurrence.AddHours(19),
+            Capacity = 10,
+            TrainerId = 1,
+            GroupId = 42
+        });
+        await ctx.SaveChangesAsync();
+
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 42, weekday);
+
+        result.Date.Should().Be(firstOccurrence.AddDays(7).Date);
+        result.DayOfWeek.Should().Be(weekday);
+    }
+
+    [Fact]
+    public async Task GetNextAvailableDateForGroupAsync_SkipsMultipleWeeks_WhenSeveralDatesOccupied()
+    {
+        using var ctx = CreateInMemoryContext();
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
+
+        var weekday = DayOfWeek.Friday;
+
+        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        if (offset == 0) offset = 7;
+        var firstOccurrence = DateTime.Today.AddDays(offset);
+
+        for (var week = 0; week < 3; week++)
+        {
+            ctx.Trainings.Add(new Training
+            {
+                Title = $"Existing week {week}",
+                DateTime = firstOccurrence.AddDays(week * 7).AddHours(18),
+                Capacity = 10,
+                TrainerId = 1,
+                GroupId = 7
+            });
+        }
+
+        await ctx.SaveChangesAsync();
+
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 7, weekday);
+
+        result.Date.Should().Be(firstOccurrence.AddDays(3 * 7).Date);
+        result.DayOfWeek.Should().Be(weekday);
+    }
+
+    [Fact]
+    public async Task GetNextAvailableDateForGroupAsync_IgnoresOtherGroups()
+    {
+        using var ctx = CreateInMemoryContext();
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
+
+        var weekday = DayOfWeek.Tuesday;
+
+        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        if (offset == 0) offset = 7;
+        var firstOccurrence = DateTime.Today.AddDays(offset);
+
+        // Another group has a training on the same date — should not block group 5
+        ctx.Trainings.Add(new Training
+        {
+            Title = "Other group training",
+            DateTime = firstOccurrence.AddHours(20),
+            Capacity = 10,
+            TrainerId = 1,
+            GroupId = 99
+        });
+        await ctx.SaveChangesAsync();
+
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 5, weekday);
+
+        result.Date.Should().Be(firstOccurrence.Date);
+    }
 }

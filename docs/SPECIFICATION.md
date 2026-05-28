@@ -1,6 +1,6 @@
 # Application Specification — Trainings
 
-> **Version:** 1.0.7
+> **Version:** 1.0.8
 > **Language:** English (US)
 > **Primary audience:** AI agents and automated tooling
 > **Secondary audience:** Human developers and stakeholders
@@ -419,7 +419,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 ⚙️ Config                 ← visible to SuperAdmin (and GroupAdmin for group-specific settings)
 ───────────────────
 🚪 Logout
-v1.0.7
+v1.0.8
 ```
 
 ### 5.2 Role Badges
