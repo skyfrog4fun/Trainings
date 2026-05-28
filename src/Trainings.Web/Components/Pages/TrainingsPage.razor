@@ -5,18 +5,59 @@
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IUserService UserService
-@inject IDateTimeFormatService DateTimeFormatService
+@inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Trainings</PageTitle>
 
 <div class="container-fluid px-2 px-md-4">
-    <div class="d-flex justify-content-between align-items-center my-3">
-        <h2>Trainings</h2>
-        <AuthorizeView Policy="GroupTrainer">
-            <a href="/trainings/create" class="btn btn-success"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Training</a>
-        </AuthorizeView>
+    <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
+        <h2 class="mb-0">Trainings</h2>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-secondary" @onclick="ToggleFilter">
+                <i class="fa-solid fa-filter" aria-hidden="true"></i>
+            </button>
+            <AuthorizeView Policy="GroupTrainer">
+                <a href="/trainings/create" class="btn btn-success"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Training</a>
+            </AuthorizeView>
+        </div>
     </div>
+
+    @if (_showFilter)
+    {
+        <div class="row g-2 mb-3">
+            <div class="col-12 col-md-4">
+                <select class="form-select" @bind="_filterGroupId">
+                    <option value="">All groups</option>
+                    @foreach (var group in _filterGroups)
+                    {
+                        <option value="@group.Id">@group.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <select class="form-select" @bind="_filterTrainerId">
+                    <option value="">All trainers</option>
+                    @foreach (var trainer in _filterTrainers)
+                    {
+                        <option value="@trainer.Id">@trainer.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <select class="form-select" @bind="_filterAvailability">
+                    <option value="all">All</option>
+                    <option value="available">Available</option>
+                    <option value="full">Full</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-grid">
+                <button type="button" class="btn btn-outline-secondary" @onclick="ClearFilters">
+                    <i class="fa-solid fa-filter-circle-xmark me-1" aria-hidden="true"></i>Clear filters
+                </button>
+            </div>
+        </div>
+    }
 
     @if (_actionMessage is not null)
     {
@@ -29,24 +70,57 @@
     }
     else
     {
-        @if (_recentTrainings.Any())
+        @if (FilteredRecentTrainings.Any())
         {
-            <div class="row g-3">
-                @foreach (var training in _recentTrainings)
+            <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry">
+                <Actions Context="training">
+                    <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
+                        <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
+                    </a>
+                    @if (CanRegister(training))
+                    {
+                        <button type="button"
+                                class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
+                                @onclick="() => ToggleRegistrationAsync(training)"
+                                disabled="@IsRegistrationDisabled(training)">
+                            <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                        </button>
+                    }
+                </Actions>
+            </TrainingList>
+        }
+        else if (FilteredArchivedTrainings.Any())
+        {
+            <div class="alert alert-info mt-3">No recent trainings match the current filters.</div>
+        }
+        else if (_showFilter)
+        {
+            <div class="alert alert-info mt-3">No trainings match the current filters.</div>
+        }
+        else if (!_archivedTrainings.Any())
+        {
+            <div class="alert alert-info mt-3">No trainings available.</div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-3">No trainings from the last 2 weeks are available.</div>
+        }
+
+        @if (FilteredArchivedTrainings.Any())
+        {
+            <div class="card collapsible-card mt-4">
+                <div class="card-header collapsible-card-header">
+                    <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleArchivedTrainings">
+                        <span>Trainings older than 2 weeks</span>
+                        <i class="fa-solid @(_archivedTrainingsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
+                    </button>
+                    <div class="collapsible-card-meta">@FilteredArchivedTrainings.Count training(s)</div>
+                </div>
+                @if (_archivedTrainingsExpanded)
                 {
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title">@training.Title</h5>
-                                <p class="card-text text-muted small">
-                                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(training)<br/>
-                                    <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")<br/>
-                                    <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@training.TrainerName<br/>
-                                    <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@training.RegisteredCount / @training.Capacity
-                                </p>
-                                <p class="card-text">@training.Description</p>
-                            </div>
-                            <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                    <div class="card-body">
+                        <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry">
+                            <Actions Context="training">
                                 <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
                                     <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
                                 </a>
@@ -59,67 +133,8 @@
                                         <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
                                     </button>
                                 }
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else if (!_archivedTrainings.Any())
-        {
-            <div class="alert alert-info mt-3">No trainings available.</div>
-        }
-        else
-        {
-            <div class="alert alert-info mt-3">No trainings from the last 2 weeks are available.</div>
-        }
-
-        @if (_archivedTrainings.Any())
-        {
-            <div class="card collapsible-card mt-4">
-                <div class="card-header collapsible-card-header">
-                    <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleArchivedTrainings">
-                        <span>Trainings older than 2 weeks</span>
-                        <i class="fa-solid @(_archivedTrainingsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
-                    </button>
-                    <div class="collapsible-card-meta">@_archivedTrainings.Count training(s)</div>
-                </div>
-                @if (_archivedTrainingsExpanded)
-                {
-                    <div class="card-body">
-                        <div class="row g-3">
-                            @foreach (var training in _archivedTrainings)
-                            {
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="card h-100 shadow-sm">
-                                        <div class="card-body">
-                                            <h5 class="card-title">@training.Title</h5>
-                                            <p class="card-text text-muted small">
-                                                <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@FormatTrainingDate(training)<br/>
-                                                <i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")<br/>
-                                                <i class="fa-solid fa-user me-1" aria-hidden="true"></i>@training.TrainerName<br/>
-                                                <i class="fa-solid fa-users me-1" aria-hidden="true"></i>@training.RegisteredCount / @training.Capacity
-                                            </p>
-                                            <p class="card-text">@training.Description</p>
-                                        </div>
-                                        <div class="card-footer d-flex justify-content-between align-items-center gap-2">
-                                            <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
-                                                <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
-                                            </a>
-                                            @if (CanRegister(training))
-                                            {
-                                                <button type="button"
-                                                        class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
-                                                        @onclick="() => ToggleRegistrationAsync(training)"
-                                                        disabled="@IsRegistrationDisabled(training)">
-                                                    <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
-                                                </button>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+                            </Actions>
+                        </TrainingList>
                     </div>
                 }
             </div>
@@ -128,17 +143,28 @@
 </div>
 
 @code {
+    private sealed record FilterOption(int Id, string Name);
+
     private List<TrainingDto> _recentTrainings = new();
     private List<TrainingDto> _archivedTrainings = new();
+    private List<GroupDto> _filterGroups = new();
+    private List<FilterOption> _filterTrainers = new();
     private HashSet<int> _registeredTrainingIds = new();
     private HashSet<int> _accessibleGroupIds = new();
     private bool _loading = true;
     private bool _isSuperAdmin;
     private bool _archivedTrainingsExpanded;
+    private bool _showFilter;
     private int _userId;
+    private int? _filterGroupId;
+    private int? _filterTrainerId;
+    private string _filterAvailability = "all";
     private string _userCountry = "CH";
     private string? _actionMessage;
     private bool _actionIsError;
+
+    private List<TrainingDto> FilteredRecentTrainings => ApplyFilters(_recentTrainings);
+    private List<TrainingDto> FilteredArchivedTrainings => ApplyFilters(_archivedTrainings);
 
     protected override async Task OnInitializedAsync()
     {
@@ -147,6 +173,8 @@
 
     private async Task LoadAsync()
     {
+        _loading = true;
+
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
         _isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
         _accessibleGroupIds = auth.User.Claims
@@ -158,7 +186,7 @@
         _userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         if (_userId > 0)
         {
-            _userCountry = (await UserService.GetByIdAsync(_userId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
+            _userCountry = (await UserService.GetByIdAsync(_userId))?.CountryCode ?? "CH";
 
             _registeredTrainingIds = (await RegistrationService.GetByUserIdAsync(_userId))
                 .Where(r => r.Status == Trainings.Domain.Enums.RegistrationStatus.Registered)
@@ -170,9 +198,23 @@
             _registeredTrainingIds.Clear();
         }
 
+        var groups = await GroupService.GetAllAsync();
+        _filterGroups = (_isSuperAdmin
+                ? groups
+                : groups.Where(group => _accessibleGroupIds.Contains(group.Id)))
+            .Where(group => group.IsActive)
+            .OrderBy(group => group.Name)
+            .ToList();
+
         var trainings = (await TrainingService.GetActiveAsync())
             .Where(t => _isSuperAdmin || (t.GroupId.HasValue && _accessibleGroupIds.Contains(t.GroupId.Value)))
             .OrderByDescending(t => t.DateTime)
+            .ToList();
+
+        _filterTrainers = trainings
+            .GroupBy(training => new { training.TrainerId, training.TrainerName })
+            .Select(group => new FilterOption(group.Key.TrainerId, group.Key.TrainerName))
+            .OrderBy(trainer => trainer.Name)
             .ToList();
 
         var archiveThreshold = DateTime.Now.AddDays(-14);
@@ -181,10 +223,28 @@
         _loading = false;
     }
 
-    private string FormatTrainingDate(TrainingDto training)
+    private List<TrainingDto> ApplyFilters(IEnumerable<TrainingDto> trainings)
     {
-        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
-        return training.DateTime.ToString("g", culture);
+        var query = trainings;
+
+        if (_filterGroupId.HasValue)
+        {
+            query = query.Where(training => training.GroupId == _filterGroupId.Value);
+        }
+
+        if (_filterTrainerId.HasValue)
+        {
+            query = query.Where(training => training.TrainerId == _filterTrainerId.Value);
+        }
+
+        query = _filterAvailability switch
+        {
+            "available" => query.Where(training => training.RegisteredCount < training.Capacity),
+            "full" => query.Where(training => training.RegisteredCount >= training.Capacity),
+            _ => query
+        };
+
+        return query.ToList();
     }
 
     private bool CanRegister(TrainingDto training) =>
@@ -219,6 +279,18 @@
             _actionIsError = true;
             _actionMessage = ex.Message;
         }
+    }
+
+    private void ToggleFilter()
+    {
+        _showFilter = !_showFilter;
+    }
+
+    private void ClearFilters()
+    {
+        _filterGroupId = null;
+        _filterTrainerId = null;
+        _filterAvailability = "all";
     }
 
     private void ToggleArchivedTrainings()

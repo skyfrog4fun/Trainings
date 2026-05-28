@@ -373,7 +373,10 @@
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
     private bool _isSpecialLocationSelected =>
         _locationId.HasValue &&
-        _availableLocations.Any(x => x.Id == _locationId.Value && x.Name.Equals("Special", StringComparison.OrdinalIgnoreCase));
+        _availableLocations.Any(x =>
+            x.Id == _locationId.Value &&
+            (x.Name.Equals("Special", StringComparison.OrdinalIgnoreCase) ||
+             x.Name.Equals("Outside", StringComparison.OrdinalIgnoreCase)));
 
     private string SelectedGroupName => _availableGroups.FirstOrDefault(g => g.Id == _groupId)?.Name ?? string.Empty;
     private string SelectedTrainerName => _groupTrainers.FirstOrDefault(t => t.UserId == _trainerId)?.UserDisplayName ?? string.Empty;
@@ -454,6 +457,10 @@
         _meetingPoint = training.MeetingPoint ?? string.Empty;
 
         await OnGroupChangedAsync();
+
+        var selectedGroup = _availableGroups.FirstOrDefault(g => g.Id == training.GroupId);
+        _durationMinutes = training.DurationMinutes ?? selectedGroup?.DurationMinutes ?? 90;
+        CalculateEndTime();
 
         _blocks = (await TrainingService.GetBlocksAsync(id)).ToList();
         _libraryBlocks = (await TrainingService.GetAllBlocksLibraryAsync())
@@ -598,6 +605,7 @@
                     MeetingPoint = string.IsNullOrWhiteSpace(_meetingPoint) ? null : _meetingPoint,
                     Capacity = _capacity,
                     DateTime = dateTime,
+                    DurationMinutes = _durationMinutes,
                     IsActive = _isActive,
                     TrainerId = _trainerId,
                     GroupId = _groupId
@@ -616,6 +624,7 @@
                     MeetingPoint = string.IsNullOrWhiteSpace(_meetingPoint) ? null : _meetingPoint,
                     Capacity = _capacity,
                     DateTime = dateTime,
+                    DurationMinutes = _durationMinutes,
                     TrainerId = _trainerId,
                     GroupId = _groupId
                 });

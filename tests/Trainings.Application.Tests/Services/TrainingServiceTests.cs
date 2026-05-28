@@ -43,12 +43,13 @@ public class TrainingServiceTests
     {
         using var ctx = CreateInMemoryContext();
         var location = new Location { Id = 1, Name = "Studio", CityName = "Zurich", IsActive = true };
-        var training = new Training { Id = 1, Title = "Yoga", LocationId = 1, Location = location, DateTime = DateTime.Now, Capacity = 10 };
+        var training = new Training { Id = 1, Title = "Yoga", LocationId = 1, Location = location, DateTime = DateTime.Now, DurationMinutes = 75, Capacity = 10 };
         _trainingRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(training);
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
         var result = await service.GetByIdAsync(1);
         result.Should().NotBeNull();
         result!.Title.Should().Be("Yoga");
+        result.DurationMinutes.Should().Be(75);
     }
 
     [Fact]

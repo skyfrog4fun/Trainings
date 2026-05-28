@@ -10,6 +10,7 @@ public class TrainingDto
     public string? SpecialLocationDescription { get; set; }
     public string? MeetingPoint { get; set; }
     public DateTime DateTime { get; set; }
+    public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
     public bool IsActive { get; set; }
     public int TrainerId { get; set; }
@@ -29,6 +30,7 @@ public class CreateTrainingDto
     public string? SpecialLocationDescription { get; set; }
     public string? MeetingPoint { get; set; }
     public DateTime DateTime { get; set; }
+    public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
     public int TrainerId { get; set; }
     public int? GroupId { get; set; }
@@ -43,6 +45,7 @@ public class UpdateTrainingDto
     public string? SpecialLocationDescription { get; set; }
     public string? MeetingPoint { get; set; }
     public DateTime DateTime { get; set; }
+    public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
     public bool IsActive { get; set; }
     public int TrainerId { get; set; }
