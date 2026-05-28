@@ -109,6 +109,7 @@
     private string _filterGroupName = string.Empty;
     private string _filterTrainerName = string.Empty;
     private string _filterAvailability = "all";
+    private int? _nextUpcomingTrainingId;
 
     private List<RegistrationDto> FilteredRegistrations => ApplyFilters(_registrations);
 
@@ -125,15 +126,20 @@
             .Where(group => !string.IsNullOrWhiteSpace(group))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(group => group)
-            .Cast<string>()
+            .Select(group => group!)
             .ToList();
         _filterTrainers = _registrations
             .Select(registration => registration.TrainingTrainerName)
             .Where(trainer => !string.IsNullOrWhiteSpace(trainer))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(trainer => trainer)
-            .Cast<string>()
+            .Select(trainer => trainer!)
             .ToList();
+        _nextUpcomingTrainingId = _registrations
+            .Where(registration => registration.Status == RegistrationStatus.Registered && registration.TrainingDateTime > DateTime.Now)
+            .OrderBy(registration => registration.TrainingDateTime)
+            .Select(registration => (int?)registration.TrainingId)
+            .FirstOrDefault();
         _loading = false;
     }
 
@@ -167,16 +173,6 @@
         return registration.TrainingDateTime.ToString("g", culture);
     }
 
-    private int? GetNextUpcomingTrainingId()
-    {
-        var now = DateTime.Now;
-        return _registrations
-            .Where(registration => registration.Status == RegistrationStatus.Registered && registration.TrainingDateTime > now)
-            .OrderBy(registration => registration.TrainingDateTime)
-            .Select(registration => (int?)registration.TrainingId)
-            .FirstOrDefault();
-    }
-
     private string GetCardCssClass(RegistrationDto registration)
     {
         if (registration.Status == RegistrationStatus.Cancelled)
@@ -189,7 +185,7 @@
             return "training-card-status-past";
         }
 
-        return registration.TrainingId == GetNextUpcomingTrainingId()
+        return registration.TrainingId == _nextUpcomingTrainingId
             ? "training-card-status-next"
             : "training-card-status-future";
     }
