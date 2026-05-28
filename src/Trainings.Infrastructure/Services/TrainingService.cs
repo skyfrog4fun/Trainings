@@ -225,20 +225,22 @@ public class TrainingService : ITrainingService
 
     public async Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default)
     {
-        var rawDates = await _context.Trainings
+        var occupiedDates = (await _context.Trainings
             .Where(t => t.GroupId == groupId)
-            .Select(t => t.DateTime)
-            .ToListAsync(ct);
+            .Select(t => t.DateTime.Date)
+            .ToListAsync(ct))
+            .ToHashSet();
 
-        var occupiedDates = rawDates.Select(dt => dt.Date).ToHashSet();
-
+        const int maxWeeksAhead = 52;
         var candidate = GetNextWeekday(DateTime.Today, weekday);
-        while (occupiedDates.Contains(candidate.Date))
+        for (var week = 0; week < maxWeeksAhead; week++, candidate = candidate.AddDays(7))
         {
-            candidate = candidate.AddDays(7);
+            if (!occupiedDates.Contains(candidate.Date))
+                return candidate;
         }
 
-        return candidate;
+        throw new InvalidOperationException(
+            $"No available training date found for group {groupId} within {maxWeeksAhead} weeks.");
     }
 
     private static DateTime GetNextWeekday(DateTime startDate, DayOfWeek day)

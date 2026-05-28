@@ -23,6 +23,8 @@ public class TrainingServiceTests
         var ctx = new ApplicationDbContext(options);
         ctx.Database.OpenConnection();
         ctx.Database.EnsureCreated();
+        // Disable FK enforcement: these tests verify service logic, not relational integrity.
+        ctx.Database.ExecuteSqlRaw("PRAGMA foreign_keys = OFF");
         return ctx;
     }
 
@@ -142,7 +144,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetNextAvailableDateForGroupAsync_ReturnsNextWeekday_WhenNoConflict()
+    public async Task GetNextAvailableDateForGroupAsyncReturnsNextWeekdayWhenNoConflict()
     {
         using var ctx = CreateInMemoryContext();
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
@@ -155,7 +157,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetNextAvailableDateForGroupAsync_SkipsOneWeek_WhenFirstDateOccupied()
+    public async Task GetNextAvailableDateForGroupAsyncSkipsOneWeekWhenFirstDateOccupied()
     {
         using var ctx = CreateInMemoryContext();
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
@@ -183,7 +185,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetNextAvailableDateForGroupAsync_SkipsMultipleWeeks_WhenSeveralDatesOccupied()
+    public async Task GetNextAvailableDateForGroupAsyncSkipsMultipleWeeksWhenSeveralDatesOccupied()
     {
         using var ctx = CreateInMemoryContext();
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
@@ -215,7 +217,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetNextAvailableDateForGroupAsync_IgnoresOtherGroups()
+    public async Task GetNextAvailableDateForGroupAsyncIgnoresOtherGroups()
     {
         using var ctx = CreateInMemoryContext();
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
