@@ -223,6 +223,37 @@ public class TrainingService : ITrainingService
         return blocks.Select(MapBlockToDto);
     }
 
+    public async Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default)
+    {
+        var occupiedDates = (await _context.Trainings
+            .Where(t => t.GroupId == groupId)
+            .Select(t => t.DateTime.Date)
+            .ToListAsync(ct))
+            .ToHashSet();
+
+        const int maxWeeksAhead = 52;
+        var candidate = GetNextWeekday(DateTime.Today, weekday);
+        for (var week = 0; week < maxWeeksAhead; week++, candidate = candidate.AddDays(7))
+        {
+            if (!occupiedDates.Contains(candidate.Date))
+                return candidate;
+        }
+
+        throw new InvalidOperationException(
+            $"No available training date found for group {groupId} within {maxWeeksAhead} weeks.");
+    }
+
+    private static DateTime GetNextWeekday(DateTime startDate, DayOfWeek day)
+    {
+        var offset = ((int)day - (int)startDate.DayOfWeek + 7) % 7;
+        if (offset == 0)
+        {
+            offset = 7;
+        }
+
+        return startDate.AddDays(offset);
+    }
+
     private static TrainingDto MapToDto(Training t) => new()
     {
         Id = t.Id,

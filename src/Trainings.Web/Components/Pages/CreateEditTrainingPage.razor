@@ -2,11 +2,13 @@
 @page "/trainings/{Id:int}/edit"
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "GroupTrainer")]
+@using System.Globalization
 @inject ITrainingService TrainingService
 @inject ITagService TagService
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject IAppRuntimeModeService AppRuntimeModeService
+@inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
@@ -26,133 +28,163 @@
         </div>
     }
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Group *</label>
-                    <select class="form-select" @bind="_groupId" @bind:after="OnGroupChangedAsync">
-                        <option value="">Select a group</option>
-                        @foreach (var group in _availableGroups)
-                        {
-                            <option value="@group.Id">@group.Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Trainer *</label>
-                    <select class="form-select" @bind="_trainerId">
-                        <option value="0">Select a trainer</option>
-                        @foreach (var trainer in _groupTrainers)
-                        {
-                            <option value="@trainer.UserId">@trainer.UserDisplayName</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Title</label>
-                    <input class="form-control" @bind="_title" placeholder="Training title" />
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Date *</label>
-                    <input class="form-control" type="date" @bind="_date" />
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Location</label>
-                    <select class="form-select" @bind="_locationId" @bind:after="OnLocationChanged">
-                        <option value="">Select location</option>
-                        @foreach (var location in _availableLocations)
-                        {
-                            <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Max Participant</label>
-                    <input class="form-control" type="number" min="1" @bind="_capacity" />
-                </div>
-
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Start</label>
-                    <input class="form-control" type="time" @bind="_startTime" @bind:after="CalculateEndTime" />
-                </div>
-
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Duration (minutes)</label>
-                    <input class="form-control" type="number" min="1" @bind="DurationMinutesValue" />
-                </div>
-
-                <div class="col-12 col-md-3">
-                    <label class="form-label">End</label>
-                    <input class="form-control" type="time" value="@_endTime" readonly />
-                </div>
-
-                @if (_isEdit)
-                {
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" @bind="_isActive" id="isActive" />
-                            <label class="form-check-label" for="isActive">Active</label>
-                        </div>
+    @if (_detailsCollapsed)
+    {
+        <div class="card mb-4">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex flex-wrap gap-3 text-body">
+                        <span><i class="fa-solid fa-users-gear me-1 text-secondary" aria-hidden="true"></i><strong>@SelectedGroupName</strong></span>
+                        <span><i class="fa-solid fa-user me-1 text-secondary" aria-hidden="true"></i>@SelectedTrainerName</span>
+                        <span><i class="fa-solid fa-calendar me-1 text-secondary" aria-hidden="true"></i>@FormatLocalizedDate(_date)</span>
+                        <span><i class="fa-solid fa-stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes min</span>
                     </div>
-                }
-
-                @if (_isSpecialLocationSelected)
-                {
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">Special Location Description</label>
-                        <input class="form-control" @bind="_specialLocationDescription" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">Meeting Point</label>
-                        <input class="form-control" @bind="_meetingPoint" />
-                    </div>
-                }
-
-                <div class="col-12">
-                    <label class="form-label">Training Description</label>
-                    <textarea class="form-control" rows="3" @bind="_description" placeholder="Description"></textarea>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _detailsCollapsed = false">
+                        <i class="fa-solid fa-pen-to-square me-1" aria-hidden="true"></i>Edit Details
+                    </button>
                 </div>
             </div>
-
-            @if (_error != null)
-            {
-                <div class="alert alert-danger mt-3">@_error</div>
-            }
-
-            <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
-                @(_isEdit ? "Update Training" : "Create Training")
-            </button>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Group *</label>
+                        <select class="form-select" @bind="_groupId" @bind:after="OnGroupChangedAsync">
+                            <option value="">Select a group</option>
+                            @foreach (var group in _availableGroups)
+                            {
+                                <option value="@group.Id">@group.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Trainer *</label>
+                        <select class="form-select" @bind="_trainerId">
+                            <option value="0">Select a trainer</option>
+                            @foreach (var trainer in _groupTrainers)
+                            {
+                                <option value="@trainer.UserId">@trainer.UserDisplayName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Title</label>
+                        <input class="form-control" @bind="_title" placeholder="Training title" />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Date *</label>
+                        <input class="form-control" type="date" @bind="_date" />
+                        @if (_groupId.HasValue)
+                        {
+                            <div class="form-text">@FormatLocalizedDate(_date)</div>
+                        }
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Location</label>
+                        <select class="form-select" @bind="_locationId" @bind:after="OnLocationChanged">
+                            <option value="">Select location</option>
+                            @foreach (var location in _availableLocations)
+                            {
+                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Max Participant</label>
+                        <input class="form-control" type="number" min="1" @bind="_capacity" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Start</label>
+                        <input class="form-control" type="time" @bind="_startTime" @bind:after="CalculateEndTime" />
+                        @if (_groupId.HasValue)
+                        {
+                            <div class="form-text">@FormatLocalizedTime(_startTime)</div>
+                        }
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Duration (minutes)</label>
+                        <input class="form-control" type="number" min="1" @bind="DurationMinutesValue" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">End</label>
+                        <input class="form-control" type="time" value="@_endTime" readonly />
+                        @if (_groupId.HasValue)
+                        {
+                            <div class="form-text">@FormatLocalizedEndTime()</div>
+                        }
+                    </div>
+
+                    @if (_isEdit)
+                    {
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" @bind="_isActive" id="isActive" />
+                                <label class="form-check-label" for="isActive">Active</label>
+                            </div>
+                        </div>
+                    }
+
+                    @if (_isSpecialLocationSelected)
+                    {
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Special Location Description</label>
+                            <input class="form-control" @bind="_specialLocationDescription" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Meeting Point</label>
+                            <input class="form-control" @bind="_meetingPoint" />
+                        </div>
+                    }
+
+                    <div class="col-12">
+                        <label class="form-label">Training Description</label>
+                        <textarea class="form-control" rows="3" @bind="_description" placeholder="Description"></textarea>
+                    </div>
+                </div>
+
+                @if (_error != null)
+                {
+                    <div class="alert alert-danger mt-3">@_error</div>
+                }
+
+                <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
+                    @(_isEdit ? "Update Training" : "Create Training")
+                </button>
+            </div>
+        </div>
+    }
 
     @if (_actionResult is not null)
     {
         <div class="alert @(_actionSuccess ? "alert-success" : "alert-danger")">@_actionResult</div>
     }
 
+    @if (_persistedTrainingId.HasValue)
+    {
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Training Blocks</h4>
         <div>
-            <button type="button" class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@(!_persistedTrainingId.HasValue || IsWriteBlocked)"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add Block</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => _showLibrary = !_showLibrary" disabled="@(!_persistedTrainingId.HasValue || IsWriteBlocked)">
+            <button type="button" class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@IsWriteBlocked"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add Block</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => _showLibrary = !_showLibrary" disabled="@IsWriteBlocked">
                 <i class="fa-solid fa-book-open me-1" aria-hidden="true"></i>From Library
             </button>
         </div>
     </div>
 
-    @if (!_persistedTrainingId.HasValue)
-    {
-        <div class="alert alert-info">Save the training first to add blocks.</div>
-    }
-
-    @if (_showLibrary && _persistedTrainingId.HasValue)
+    @if (_showLibrary)
     {
         <div class="card mb-3 border-info">
             <div class="card-header bg-info bg-opacity-10">Block Library</div>
@@ -177,6 +209,45 @@
                     {
                         <p class="text-muted small text-center py-2">No blocks found.</p>
                     }
+                </div>
+            </div>
+        </div>
+    }
+
+    @* New-block editor: visible when AddBlock was clicked (index == _blocks.Count) *@
+    @if (_editingBlockIndex >= 0 && _editingBlockIndex >= _blocks.Count)
+    {
+        <div class="list-group mb-3">
+            <div class="list-group-item">
+                <div class="row g-2">
+                    <div class="col-12">
+                        <input class="form-control" @bind="_blockTitle" placeholder="Block title" />
+                    </div>
+                    <div class="col-12">
+                        <textarea class="form-control" rows="2" @bind="_blockDescription" placeholder="Description"></textarea>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label small">Planned Duration (min)</label>
+                        <input class="form-control" type="number" @bind="_blockPlannedMinutes" min="1" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Tags</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var tag in _allTags)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="new-tag-@tag.Id"
+                                           checked="@_blockTagIds.Contains(tag.Id)"
+                                           @onchange="e => ToggleTag(tag.Id, (bool)(e.Value ?? false))" />
+                                    <label class="form-check-label small" for="new-tag-@tag.Id">@tag.Name</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(_editingBlockIndex)" disabled="@IsWriteBlocked"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -254,6 +325,7 @@
             Total planned: @_blocks.Sum(b => b.PlannedDurationMinutes) min
         </div>
     }
+    } @* end @if (_persistedTrainingId.HasValue) *@
 </div>
 
 @code {
@@ -295,11 +367,16 @@
     private HashSet<int> _blockTagIds = new();
     private bool _actionSuccess;
     private string? _actionResult;
+    private bool _detailsCollapsed;
+    private CultureInfo _groupCulture = CultureInfo.InvariantCulture;
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
     private bool _isSpecialLocationSelected =>
         _locationId.HasValue &&
         _availableLocations.Any(x => x.Id == _locationId.Value && x.Name.Equals("Special", StringComparison.OrdinalIgnoreCase));
+
+    private string SelectedGroupName => _availableGroups.FirstOrDefault(g => g.Id == _groupId)?.Name ?? string.Empty;
+    private string SelectedTrainerName => _groupTrainers.FirstOrDefault(t => t.UserId == _trainerId)?.UserDisplayName ?? string.Empty;
 
     private int DurationMinutesValue
     {
@@ -415,7 +492,8 @@
         {
             if (selectedGroup.Weekday.HasValue)
             {
-                _date = GetNextWeekday(DateTime.Today, selectedGroup.Weekday.Value);
+                _date = await TrainingService.GetNextAvailableDateForGroupAsync(
+                    selectedGroup.Id, selectedGroup.Weekday.Value);
             }
 
             if (selectedGroup.StartTime.HasValue)
@@ -445,6 +523,7 @@
             }
         }
 
+        _groupCulture = DateTimeFormatService.GetCultureForCountry(selectedGroup.CountryCode);
         CalculateEndTime();
     }
 
@@ -457,23 +536,31 @@
         }
     }
 
-    private static DateTime GetNextWeekday(DateTime startDate, DayOfWeek day)
-    {
-        var offset = ((int)day - (int)startDate.DayOfWeek + 7) % 7;
-        if (offset == 0)
-        {
-            offset = 7;
-        }
-
-        return startDate.AddDays(offset);
-    }
-
     private void CalculateEndTime()
     {
         var start = _startTime ?? new TimeOnly(19, 0);
 
         var end = start.AddMinutes(_durationMinutes <= 0 ? 1 : _durationMinutes);
         _endTime = end.ToString("HH:mm");
+    }
+
+    private string FormatLocalizedDate(DateTime value) =>
+        value.ToString("d", _groupCulture);
+
+    private string FormatLocalizedTime(TimeOnly? value)
+    {
+        var time = value ?? new TimeOnly(19, 0);
+        return time.ToString("t", _groupCulture);
+    }
+
+    private string FormatLocalizedEndTime()
+    {
+        if (!TimeOnly.TryParse(_endTime, out var parsed))
+        {
+            return _endTime;
+        }
+
+        return parsed.ToString("t", _groupCulture);
     }
 
     private async Task Save()
@@ -533,7 +620,15 @@
                     GroupId = _groupId
                 });
 
-                NavigationManager.NavigateTo($"/trainings/{created.Id}/edit");
+                _persistedTrainingId = created.Id;
+                _detailsCollapsed = true;
+                _actionSuccess = true;
+                _actionResult = "Training created successfully.";
+
+                _blocks = new List<TrainingBlockDto>();
+                _libraryBlocks = (await TrainingService.GetAllBlocksLibraryAsync())
+                    .Where(b => b.TrainingId != created.Id)
+                    .ToList();
                 return;
             }
 
