@@ -50,7 +50,7 @@
                 </button>
                 <div class="collapsible-card-meta small">
                     <span class="dashboard-card-counter me-3">
-                        <i class="fa-solid fa-bell" aria-hidden="true"></i> @GetShownCount(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
+                        <i class="fa-solid fa-bell" aria-hidden="true"></i> @Math.Min(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
                     </span>
                     <span class="text-success me-3"><i class="fa-solid fa-check" aria-hidden="true"></i> @_notificationSuccessCount</span>
                     <span class="text-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i> @_notificationFailureCount</span>
@@ -110,7 +110,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">My next trainings (enrolled/assigned)</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> @GetShownCount(_myNextTrainings.Count, DashboardDisplayLimit)/@_myNextTrainings.Count
+                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> @Math.Min(_myNextTrainings.Count, DashboardDisplayLimit)/@_myNextTrainings.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -129,7 +129,7 @@
                                     @foreach (var training in _myNextTrainings.Take(DashboardDisplayLimit))
                                     {
                                         <tr>
-                                            <td class="small">@FormatDashboardDateTime(training.DateTime)</td>
+                                            <td class="small">@FormatDashboardDateTime(training)</td>
                                             <td>@training.Title</td>
                                             <td class="text-end">
                                                 <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id" title="Open training details">
@@ -155,7 +155,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">Next trainings available to attend</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-list-check" aria-hidden="true"></i> @GetShownCount(_availableNextTrainings.Count, DashboardDisplayLimit)/@_availableNextTrainings.Count
+                        <i class="fa-solid fa-list-check" aria-hidden="true"></i> @Math.Min(_availableNextTrainings.Count, DashboardDisplayLimit)/@_availableNextTrainings.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -215,7 +215,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">Next trainings to plan/lead</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-person-chalkboard" aria-hidden="true"></i> @GetShownCount(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
+                        <i class="fa-solid fa-person-chalkboard" aria-hidden="true"></i> @Math.Min(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -245,7 +245,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">Outstanding users to approve</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-user-clock" aria-hidden="true"></i> @GetShownCount(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
+                        <i class="fa-solid fa-user-clock" aria-hidden="true"></i> @Math.Min(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -460,14 +460,10 @@
         return training.DateTime.ToString("g", culture);
     }
 
-    private static int GetShownCount(int totalCount, int maxToShow)
+    private string FormatDashboardDateTime(TrainingDto training)
     {
-        return Math.Min(totalCount, maxToShow);
-    }
-
-    private static string FormatDashboardDateTime(DateTime dateTime)
-    {
-        return dateTime.ToString("dd.MM. HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
+        return training.DateTime.ToString("dd.MM. HH:mm", culture);
     }
 
     private async Task ResetNotificationPointerAsync()
