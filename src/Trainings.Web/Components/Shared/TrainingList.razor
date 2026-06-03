@@ -5,27 +5,37 @@
     {
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm @CardCssClass">
-                <div class="card-body d-flex flex-column">
-                    <div class="training-card-title text-truncate">@training.Title</div>
-                    <div class="d-flex justify-content-between align-items-center gap-2 text-muted small mt-2">
-                        <span class="text-truncate">@FormatTrainingDate(training)</span>
-                        <span class="text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@FormatDuration(training.DurationMinutes)</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
-                        <span class="text-truncate"><i class="@AppIcons.Group me-1" aria-hidden="true"></i>@(training.GroupName ?? "-")</span>
-                        <span class="text-truncate text-end">@(training.LocationName ?? "-")</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
-                        <span class="text-truncate">@training.TrainerName</span>
-                        <span class="text-nowrap">@training.RegisteredCount/@training.Capacity</span>
-                    </div>
-                    <div class="small text-muted text-truncate mt-2">@training.Description</div>
+                <div class="card-header collapsible-card-header p-0">
+                    <button type="button" class="btn btn-link collapsible-card-toggle training-card-toggle" @onclick="() => ToggleCollapsed(training.Id)">
+                        <span class="training-card-header-title text-truncate">@training.Title</span>
+                        <span class="training-card-header-date text-nowrap">
+                            <i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@training.DateTime.ToString("dd.MM.yy")
+                        </span>
+                    </button>
                 </div>
-                @if (Actions is not null)
+                @if (!IsCollapsed(training.Id))
                 {
-                    <div class="card-footer d-flex justify-content-between align-items-center gap-2">
-                        @Actions(training)
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center gap-2 text-muted small">
+                            <span class="text-truncate"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@FormatTrainingDate(training)</span>
+                            <span class="text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@FormatDuration(training.DurationMinutes)</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
+                            <span class="text-truncate"><i class="@AppIcons.Group me-1" aria-hidden="true"></i>@(training.GroupName ?? "-")</span>
+                            <span class="text-truncate text-end"><i class="@AppIcons.Location me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
+                            <span class="text-truncate"><i class="@AppIcons.Trainer me-1" aria-hidden="true"></i>@training.TrainerName</span>
+                            <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@training.RegisteredCount/@training.Capacity</span>
+                        </div>
+                        <div class="small text-muted text-truncate mt-2">@training.Description</div>
                     </div>
+                    @if (Actions is not null)
+                    {
+                        <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                            @Actions(training)
+                        </div>
+                    }
                 }
             </div>
         </div>
@@ -38,6 +48,8 @@
     [Parameter] public string CardCssClass { get; set; } = string.Empty;
     [Parameter] public RenderFragment<TrainingDto>? Actions { get; set; }
 
+    private readonly HashSet<int> _collapsedTrainingIds = [];
+
     private string FormatTrainingDate(TrainingDto training)
     {
         var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? UserCountry);
@@ -46,4 +58,14 @@
 
     private static string FormatDuration(int? durationMinutes) =>
         durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
+
+    private bool IsCollapsed(int trainingId) => _collapsedTrainingIds.Contains(trainingId);
+
+    private void ToggleCollapsed(int trainingId)
+    {
+        if (!_collapsedTrainingIds.Add(trainingId))
+        {
+            _collapsedTrainingIds.Remove(trainingId);
+        }
+    }
 }

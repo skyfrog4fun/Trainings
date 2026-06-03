@@ -77,13 +77,41 @@
                     <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
                         <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Details
                     </a>
+                    @if (CanDeleteTraining(training))
+                    {
+                        @if (_pendingDeleteTrainingId == training.Id)
+                        {
+                            <span class="small text-danger">Are you sure?</span>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    @onclick="CancelDeleteTraining"
+                                    disabled="@_deleteInProgress">
+                                Cancel
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-danger"
+                                    @onclick="() => ConfirmDeleteTrainingAsync(training)"
+                                    disabled="@_deleteInProgress">
+                                <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    @onclick="() => PromptDeleteTraining(training)"
+                                    disabled="@_deleteInProgress">
+                                <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                            </button>
+                        }
+                    }
                     @if (CanRegister(training))
                     {
                         <button type="button"
                                 class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
                                 @onclick="() => ToggleRegistrationAsync(training)"
                                 disabled="@IsRegistrationDisabled(training)">
-                            <i class="@AppIcons.ClipboardList me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                            <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
                         </button>
                     }
                 </Actions>
@@ -124,13 +152,41 @@
                                 <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
                                     <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Details
                                 </a>
+                                @if (CanDeleteTraining(training))
+                                {
+                                    @if (_pendingDeleteTrainingId == training.Id)
+                                    {
+                                        <span class="small text-danger">Are you sure?</span>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                @onclick="CancelDeleteTraining"
+                                                disabled="@_deleteInProgress">
+                                            Cancel
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger"
+                                                @onclick="() => ConfirmDeleteTrainingAsync(training)"
+                                                disabled="@_deleteInProgress">
+                                            <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                @onclick="() => PromptDeleteTraining(training)"
+                                                disabled="@_deleteInProgress">
+                                            <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                                        </button>
+                                    }
+                                }
                                 @if (CanRegister(training))
                                 {
                                     <button type="button"
                                             class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
                                             @onclick="() => ToggleRegistrationAsync(training)"
                                             disabled="@IsRegistrationDisabled(training)">
-                                        <i class="@AppIcons.ClipboardList me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                                        <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
                                     </button>
                                 }
                             </Actions>
@@ -151,11 +207,14 @@
     private List<FilterOption> _filterTrainers = new();
     private HashSet<int> _registeredTrainingIds = new();
     private HashSet<int> _accessibleGroupIds = new();
+    private HashSet<int> _adminGroupIds = new();
     private bool _loading = true;
     private bool _isSuperAdmin;
     private bool _archivedTrainingsExpanded;
     private bool _showFilter;
+    private bool _deleteInProgress;
     private int _userId;
+    private int? _pendingDeleteTrainingId;
     private int? _filterGroupId;
     private int? _filterTrainerId;
     private string _filterAvailability = "all";
@@ -179,6 +238,11 @@
         _isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
         _accessibleGroupIds = auth.User.Claims
             .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal))
+            .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+        _adminGroupIds = auth.User.Claims
+            .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin")
             .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
             .Where(groupId => groupId > 0)
             .ToHashSet();
@@ -220,6 +284,7 @@
         var archiveThreshold = DateTime.Now.AddDays(-14);
         _recentTrainings = trainings.Where(t => t.DateTime >= archiveThreshold).ToList();
         _archivedTrainings = trainings.Where(t => t.DateTime < archiveThreshold).ToList();
+        _pendingDeleteTrainingId = null;
         _loading = false;
     }
 
@@ -249,6 +314,9 @@
 
     private bool CanRegister(TrainingDto training) =>
         _isSuperAdmin || (training.GroupId.HasValue && _accessibleGroupIds.Contains(training.GroupId.Value));
+
+    private bool CanDeleteTraining(TrainingDto training) =>
+        _isSuperAdmin || (training.GroupId.HasValue && _adminGroupIds.Contains(training.GroupId.Value));
 
     private bool IsRegistrationDisabled(TrainingDto training) =>
         !_registeredTrainingIds.Contains(training.Id) && training.RegisteredCount >= training.Capacity;
@@ -296,5 +364,43 @@
     private void ToggleArchivedTrainings()
     {
         _archivedTrainingsExpanded = !_archivedTrainingsExpanded;
+    }
+
+    private void PromptDeleteTraining(TrainingDto training)
+    {
+        _actionMessage = null;
+        _pendingDeleteTrainingId = training.Id;
+    }
+
+    private void CancelDeleteTraining()
+    {
+        _pendingDeleteTrainingId = null;
+    }
+
+    private async Task ConfirmDeleteTrainingAsync(TrainingDto training)
+    {
+        if (_pendingDeleteTrainingId != training.Id)
+        {
+            return;
+        }
+
+        try
+        {
+            _deleteInProgress = true;
+            await TrainingService.DeleteAsync(training.Id);
+            _actionIsError = false;
+            _actionMessage = "Training deleted.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _actionIsError = true;
+            _actionMessage = ex.Message;
+        }
+        finally
+        {
+            _deleteInProgress = false;
+            _pendingDeleteTrainingId = null;
+        }
     }
 }

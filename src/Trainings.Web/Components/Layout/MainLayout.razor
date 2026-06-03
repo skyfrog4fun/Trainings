@@ -40,13 +40,7 @@
                 <li><hr class="dropdown-divider" /></li>
                 <AuthorizeView Policy="SuperAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>Config</NavLink>
-                    </li>
-                    <li>
                         <NavLink class="dropdown-item" href="statistics"><i class="@AppIcons.ChartSimple me-2" aria-hidden="true"></i>Statistics</NavLink>
-                    </li>
-                    <li>
-                        <NavLink class="dropdown-item" href="config/locations"><i class="@AppIcons.Location me-2" aria-hidden="true"></i>Locations</NavLink>
                     </li>
                 </AuthorizeView>
                 <li>
@@ -54,7 +48,13 @@
                 </li>
                 <AuthorizeView Policy="SuperAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="config/icons"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Icon Overview</NavLink>
+                        <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>Config</NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="dropdown-item" href="config/locations"><i class="@AppIcons.Location me-2" aria-hidden="true"></i>Locations</NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="dropdown-item" href="config/icons"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Icons</NavLink>
                     </li>
                 </AuthorizeView>
                 <li>

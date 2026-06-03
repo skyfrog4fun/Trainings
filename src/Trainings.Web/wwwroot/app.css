@@ -160,6 +160,31 @@ main {
     font-weight: 600;
 }
 
+.training-card-toggle {
+    width: 100%;
+    padding: 0.75rem 1rem !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.training-card-toggle:hover,
+.training-card-toggle:focus {
+    color: inherit !important;
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.training-card-header-title {
+    font-weight: 600;
+}
+
+.training-card-header-date {
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+}
+
 .training-card-status-cancelled {
     background-color: rgba(220, 53, 69, 0.1);
 }
@@ -189,4 +214,48 @@ main {
 
 .confirmation-danger-subtle {
     background-color: rgba(220, 53, 69, 0.1);
+}
+
+.training-detail-title {
+    max-width: 70%;
+}
+
+.training-detail-registration-footer {
+    min-height: 4rem;
+    display: flex;
+    align-items: center;
+}
+
+.training-detail-footer-content {
+    width: 100%;
+}
+
+.training-detail-footer-confirm {
+    background-color: rgba(255, 193, 7, 0.2);
+}
+
+.training-detail-footer-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.training-detail-footer-success {
+    background-color: rgba(25, 135, 84, 0.15);
+}
+
+.participants-card-title {
+    max-width: 70%;
+}
+
+@media (max-width: 430px) {
+    .participant-registered-at {
+        display: none;
+    }
+
+    .participant-action-text {
+        display: none;
+    }
+
+    .participants-card-title {
+        max-width: 55%;
+    }
 }
