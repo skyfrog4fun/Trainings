@@ -54,14 +54,15 @@
             </div>
         }
         <div class="card shadow mb-4">
-            <div class="card-body position-relative">
-                <h2 class="mb-3 pe-5">@_training.Title</h2>
-
-                @if (_isRegistered)
-                {
-                    <span class="badge bg-success position-absolute top-0 end-0 m-2"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Registered</span>
-                }
-
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <span class="fw-semibold text-truncate training-detail-title">@_training.Title</span>
+                    <span class="text-nowrap text-muted small">
+                        <i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@_training.DateTime.ToString("dd.MM.yy")
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
                 <div class="text-muted mb-3">
                     @if (_training.GroupName != null)
                     {
@@ -86,10 +87,34 @@
 
                 <p class="mb-4">@_training.Description</p>
 
-                @if (_canRegister)
+                @if (_isTrainer && _training.TrainerId == _userId)
                 {
                     <div class="d-flex flex-wrap gap-2 align-items-center">
-                        @if (_isRegistered)
+                        <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Run Training</a>
+                        <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">Record Attendance</a>
+                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">Edit</a>
+                    </div>
+                }
+            </div>
+            @if (_canRegister)
+            {
+                <div class="card-footer training-detail-registration-footer @GetRegistrationFooterCssClass()">
+                    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end training-detail-footer-content">
+                        @if (_registrationFooterState == RegistrationFooterState.ConfirmUnregister)
+                        {
+                            <span class="fw-semibold">Are you sure?</span>
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmSelfUnregister">Confirm</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelSelfUnregister">Cancel</button>
+                        }
+                        else if (_registrationFooterState == RegistrationFooterState.RegisteredSuccess)
+                        {
+                            <span class="fw-semibold">Successfully registered</span>
+                        }
+                        else if (_registrationFooterState == RegistrationFooterState.UnregisteredSuccess)
+                        {
+                            <span class="fw-semibold">Registration cancelled</span>
+                        }
+                        else if (_isRegistered)
                         {
                             <button class="btn btn-danger" @onclick="PromptSelfUnregister"><i class="@AppIcons.Unregister me-1" aria-hidden="true"></i>Unregister</button>
                         }
@@ -101,33 +126,9 @@
                         {
                             <span class="badge bg-warning text-dark">Training Full</span>
                         }
-
-                        @if (_isTrainer && _training.TrainerId == _userId)
-                        {
-                            <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Run Training</a>
-                            <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">Record Attendance</a>
-                            <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">Edit</a>
-                        }
                     </div>
-
-                    @if (_showUnregisterConfirm)
-                    {
-                        <div class="confirmation-panel confirmation-panel-danger d-inline-flex flex-wrap align-items-center gap-2 mt-3 mb-0">
-                            <span>Are you sure?</span>
-                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmSelfUnregister">Confirm</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelPendingUnregister">Cancel</button>
-                        </div>
-                    }
-                }
-                else if (_isTrainer && _training.TrainerId == _userId)
-                {
-                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                        <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Run Training</a>
-                        <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">Record Attendance</a>
-                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">Edit</a>
-                    </div>
-                }
-            </div>
+                </div>
+            }
         </div>
 
         @if (_message != null)
@@ -174,46 +175,73 @@
             </div>
         }
 
-        @if (RegisteredParticipants.Any() && (_isTrainer || _isAdmin))
-        {
-            <h4 class="mt-4">Registered Participants (@RegisteredParticipants.Count)</h4>
-            <ul class="list-group">
-                @foreach (var reg in RegisteredParticipants)
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <span class="fw-semibold participants-card-title text-truncate">Registered Participants</span>
+                    <span class="text-nowrap text-muted small">
+                        <i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@RegisteredParticipants.Count / @_training.Capacity
+                    </span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @if (RegisteredParticipants.Any())
                 {
-                    <li class="list-group-item @(_pendingUnregisterUserId == reg.UserId ? "confirmation-danger-subtle" : string.Empty)">
-                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                            <div>
-                                <div>@reg.UserName</div>
-                                <span class="badge bg-secondary">@reg.RegisteredAt.ToString("MMM d")</span>
-                            </div>
-                            @if (_isAdmin)
-                            {
-                                <div class="d-flex flex-column align-items-end gap-2 ms-auto">
-                                    @if (_pendingUnregisterUserId == reg.UserId)
+                    <ul class="list-group list-group-flush">
+                        @foreach (var reg in RegisteredParticipants)
+                        {
+                            <li class="list-group-item @(_pendingUnregisterUserId == reg.UserId ? "confirmation-danger-subtle" : string.Empty)">
+                                <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                                    <div class="d-flex flex-column">
+                                        <span>@reg.UserName</span>
+                                        <span class="text-muted small participant-registered-at">@reg.RegisteredAt.ToString("dd.MM.yyyy HH:mm")</span>
+                                    </div>
+                                    @if (CanActOnParticipant(reg))
                                     {
-                                        <div class="d-inline-flex flex-wrap justify-content-end align-items-center gap-2">
-                                            <span>Are you sure?</span>
-                                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmParticipantUnregister">Confirm</button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelPendingUnregister">Cancel</button>
+                                        <div class="d-inline-flex gap-2 ms-auto">
+                                            @if (_pendingUnregisterUserId == reg.UserId)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmParticipantUnregister" title="Confirm">
+                                                    <i class="@AppIcons.Check" aria-hidden="true"></i>
+                                                    <span class="participant-action-text ms-1">Confirm</span>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelParticipantUnregister" title="Cancel">
+                                                    <i class="@AppIcons.XMark" aria-hidden="true"></i>
+                                                    <span class="participant-action-text ms-1">Cancel</span>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => PromptParticipantUnregister(reg)" title="Unregister">
+                                                    <i class="@AppIcons.Unregister" aria-hidden="true"></i>
+                                                    <span class="participant-action-text ms-1">Unregister</span>
+                                                </button>
+                                            }
                                         </div>
                                     }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => PromptParticipantUnregister(reg)">
-                                            <i class="@AppIcons.Unregister me-1" aria-hidden="true"></i>Unregister
-                                        </button>
-                                    }
                                 </div>
-                            }
-                        </div>
-                    </li>
+                            </li>
+                        }
+                    </ul>
                 }
-            </ul>
-        }
+                else
+                {
+                    <div class="p-3 text-muted">No one has signed up yet — this training is currently winning the hide-and-seek championship.</div>
+                }
+            </div>
+        </div>
     }
 </div>
 
 @code {
+    private enum RegistrationFooterState
+    {
+        Normal,
+        ConfirmUnregister,
+        RegisteredSuccess,
+        UnregisteredSuccess
+    }
+
     [Parameter] public int Id { get; set; }
 
     private TrainingDto? _training;
@@ -222,16 +250,16 @@
     private bool _isTrainer;
     private bool _isAdmin;
     private bool _canRegister;
-    private bool _showUnregisterConfirm;
     private bool _showDeleteConfirm;
     private bool _deleteInProgress;
     private int _userId;
     private int? _pendingUnregisterUserId;
-    private string? _pendingUnregisterUserName;
     private List<RegistrationDto> _registrations = new();
     private string? _message;
     private bool _isError;
     private string _userCountry = "CH";
+    private RegistrationFooterState _registrationFooterState;
+    private CancellationTokenSource? _registrationFooterResetCts;
 
     private List<RegistrationDto> RegisteredParticipants =>
         _registrations.Where(registration => registration.Status == RegistrationStatus.Registered).ToList();
@@ -254,7 +282,7 @@
     private async Task LoadAsync()
     {
         _loading = true;
-        CancelPendingUnregister();
+        CancelParticipantUnregister();
         _showDeleteConfirm = false;
 
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -289,14 +317,7 @@
             _isRegistered = false;
         }
 
-        if (_isTrainer || _isAdmin)
-        {
-            _registrations = (await RegistrationService.GetByTrainingIdAsync(Id)).ToList();
-        }
-        else
-        {
-            _registrations.Clear();
-        }
+        _registrations = (await RegistrationService.GetByTrainingIdAsync(Id)).ToList();
 
         _loading = false;
     }
@@ -307,7 +328,9 @@
         {
             await RegistrationService.RegisterAsync(_userId, Id);
             await LoadAsync();
-            _message = "Successfully registered!";
+            _registrationFooterState = RegistrationFooterState.RegisteredSuccess;
+            _ = ScheduleRegistrationFooterResetAsync(RegistrationFooterState.RegisteredSuccess);
+            _message = null;
             _isError = false;
         }
         catch (Exception ex)
@@ -322,8 +345,7 @@
         _message = null;
         _showDeleteConfirm = false;
         _pendingUnregisterUserId = null;
-        _pendingUnregisterUserName = null;
-        _showUnregisterConfirm = true;
+        _registrationFooterState = RegistrationFooterState.ConfirmUnregister;
     }
 
     private async Task ConfirmSelfUnregister()
@@ -332,7 +354,9 @@
         {
             await RegistrationService.CancelAsync(_userId, Id);
             await LoadAsync();
-            _message = "Registration cancelled.";
+            _registrationFooterState = RegistrationFooterState.UnregisteredSuccess;
+            _ = ScheduleRegistrationFooterResetAsync(RegistrationFooterState.UnregisteredSuccess);
+            _message = null;
             _isError = false;
         }
         catch (Exception ex)
@@ -346,9 +370,8 @@
     {
         _message = null;
         _showDeleteConfirm = false;
-        _showUnregisterConfirm = false;
+        _registrationFooterState = RegistrationFooterState.Normal;
         _pendingUnregisterUserId = registration.UserId;
-        _pendingUnregisterUserName = registration.UserName;
     }
 
     private async Task ConfirmParticipantUnregister()
@@ -368,9 +391,17 @@
             {
                 _training.RegisteredCount--;
             }
+
+            if (_pendingUnregisterUserId == _userId)
+            {
+                _isRegistered = false;
+                _registrationFooterState = RegistrationFooterState.UnregisteredSuccess;
+                _ = ScheduleRegistrationFooterResetAsync(RegistrationFooterState.UnregisteredSuccess);
+            }
+
             _message = null;
             _isError = false;
-            CancelPendingUnregister();
+            CancelParticipantUnregister();
         }
         catch (Exception ex)
         {
@@ -379,16 +410,20 @@
         }
     }
 
-    private void CancelPendingUnregister()
+    private void CancelParticipantUnregister()
     {
-        _showUnregisterConfirm = false;
         _pendingUnregisterUserId = null;
-        _pendingUnregisterUserName = null;
+    }
+
+    private void CancelSelfUnregister()
+    {
+        _registrationFooterState = RegistrationFooterState.Normal;
     }
 
     private void PromptDeleteTraining()
     {
-        CancelPendingUnregister();
+        CancelParticipantUnregister();
+        _registrationFooterState = RegistrationFooterState.Normal;
         _message = null;
         _showDeleteConfirm = true;
     }
@@ -462,4 +497,36 @@
 
     private static string FormatDuration(int? durationMinutes) =>
         durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
+
+    private bool CanActOnParticipant(RegistrationDto registration) =>
+        _isTrainer || _isAdmin || registration.UserId == _userId;
+
+    private string GetRegistrationFooterCssClass() => _registrationFooterState switch
+    {
+        RegistrationFooterState.ConfirmUnregister => "training-detail-footer-confirm",
+        RegistrationFooterState.RegisteredSuccess => "training-detail-footer-success",
+        RegistrationFooterState.UnregisteredSuccess => "training-detail-footer-danger",
+        _ => string.Empty
+    };
+
+    private async Task ScheduleRegistrationFooterResetAsync(RegistrationFooterState sourceState)
+    {
+        _registrationFooterResetCts?.Cancel();
+        _registrationFooterResetCts?.Dispose();
+        _registrationFooterResetCts = new CancellationTokenSource();
+        var ct = _registrationFooterResetCts.Token;
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(7), ct);
+            if (!ct.IsCancellationRequested && _registrationFooterState == sourceState)
+            {
+                _registrationFooterState = RegistrationFooterState.Normal;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
 }

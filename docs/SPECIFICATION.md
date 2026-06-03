@@ -419,7 +419,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 ⚙️ Config                 ← visible to SuperAdmin (and GroupAdmin for group-specific settings)
 ───────────────────
 🚪 Logout
-v1.0.8
+v1.0.11
 ```
 
 ### 5.2 Role Badges

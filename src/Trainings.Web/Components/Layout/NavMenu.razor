@@ -40,6 +40,11 @@
                 </NavLink>
             </li>
         </AuthorizeView>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="user-information">
+                <i class="@AppIcons.User me-2" aria-hidden="true"></i>User Information
+            </NavLink>
+        </li>
         <AuthorizeView Policy="SuperAdmin">
             <li class="nav-item">
                 <NavLink class="nav-link" href="config/mail">
@@ -53,14 +58,9 @@
             </li>
             <li class="nav-item">
                 <NavLink class="nav-link" href="config/icons">
-                    <i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Icon Overview
+                    <i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Icons
                 </NavLink>
             </li>
         </AuthorizeView>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="user-information">
-                <i class="@AppIcons.User me-2" aria-hidden="true"></i>User Information
-            </NavLink>
-        </li>
     </ul>
 </nav>
