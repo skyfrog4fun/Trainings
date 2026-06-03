@@ -1,9 +1,9 @@
+using System.Globalization;
+using System.Net;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using MimeKit;
-using System.Globalization;
-using System.Net;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
