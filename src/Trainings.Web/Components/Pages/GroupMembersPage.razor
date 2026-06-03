@@ -10,7 +10,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/groups" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
+        <a href="/groups" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
     </div>
 
     @if (_group != null)
@@ -53,7 +53,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5>Members (@_approvedMembers.Count approved)</h5>
-        <button class="btn btn-success btn-sm" @onclick="() => _showAddForm = true"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add Member</button>
+        <button class="btn btn-success btn-sm" @onclick="() => _showAddForm = true"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>Add Member</button>
     </div>
 
     @if (_loading)
@@ -65,7 +65,7 @@
         @if (_pendingMembers.Any())
         {
             <div class="card mb-4 border-warning">
-                <div class="card-header bg-warning text-dark fw-bold"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>Pending Requests (@_pendingMembers.Count)</div>
+                <div class="card-header bg-warning text-dark fw-bold"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Pending Requests (@_pendingMembers.Count)</div>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
@@ -80,8 +80,8 @@
                                     <td><span class="badge bg-secondary">@m.Role</span></td>
                                     <td class="small">@m.RequestedAt.ToString("MMM d, yyyy")</td>
                                     <td>
-                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveMember(m)"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Approve</button>
-                                        <button class="btn btn-sm btn-danger" @onclick="() => DeclineMember(m)"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Decline</button>
+                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveMember(m)"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Approve</button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeclineMember(m)"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Decline</button>
                                     </td>
                                 </tr>
                             }
@@ -94,7 +94,7 @@
         @if (_adminMembers.Any())
         {
             <div class="card mb-3 border-primary">
-                <div class="card-header bg-primary text-white fw-bold"><i class="fa-solid fa-users me-2" aria-hidden="true"></i>Admins (@_adminMembers.Count)</div>
+                <div class="card-header bg-primary text-white fw-bold"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>Admins (@_adminMembers.Count)</div>
                 @RenderMemberTable(_adminMembers)
             </div>
         }
@@ -102,7 +102,7 @@
         @if (_trainerMembers.Any())
         {
             <div class="card mb-3 border-info">
-                <div class="card-header bg-info text-dark fw-bold"><i class="fa-solid fa-user-check me-2" aria-hidden="true"></i>Trainers (@_trainerMembers.Count)</div>
+                <div class="card-header bg-info text-dark fw-bold"><i class="@AppIcons.UserCheck me-2" aria-hidden="true"></i>Trainers (@_trainerMembers.Count)</div>
                 @RenderMemberTable(_trainerMembers)
             </div>
         }
@@ -110,7 +110,7 @@
         @if (_participantMembers.Any())
         {
             <div class="card mb-3">
-                <div class="card-header fw-bold"><i class="fa-solid fa-users me-2" aria-hidden="true"></i>Participants (@_participantMembers.Count)</div>
+                <div class="card-header fw-bold"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>Participants (@_participantMembers.Count)</div>
                 @RenderMemberTable(_participantMembers)
             </div>
         }
@@ -185,16 +185,16 @@
                             <td>
                                 @if (m.IsActive)
                                 {
-                                    <i class="fa-solid fa-check text-success" aria-hidden="true"></i>
+                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
                                 }
                                 else
                                 {
-                                    <i class="fa-solid fa-xmark text-danger" aria-hidden="true"></i>
+                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
                                 }
                             </td>
                             <td class="small">@m.JoinedAt.ToString("MMM d, yyyy")</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(m)"><i class="fa-solid fa-user-minus me-1" aria-hidden="true"></i>Remove</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(m)"><i class="@AppIcons.UserMinus me-1" aria-hidden="true"></i>Remove</button>
                             </td>
                         </tr>
                     }

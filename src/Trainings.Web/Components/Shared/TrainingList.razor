@@ -9,10 +9,10 @@
                     <div class="training-card-title text-truncate">@training.Title</div>
                     <div class="d-flex justify-content-between align-items-center gap-2 text-muted small mt-2">
                         <span class="text-truncate">@FormatTrainingDate(training)</span>
-                        <span class="text-nowrap"><i class="fa-solid fa-stopwatch me-1" aria-hidden="true"></i>@FormatDuration(training.DurationMinutes)</span>
+                        <span class="text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@FormatDuration(training.DurationMinutes)</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
-                        <span class="text-truncate"><i class="fa-solid fa-object-group me-1" aria-hidden="true"></i>@(training.GroupName ?? "-")</span>
+                        <span class="text-truncate"><i class="@AppIcons.Group me-1" aria-hidden="true"></i>@(training.GroupName ?? "-")</span>
                         <span class="text-truncate text-end">@(training.LocationName ?? "-")</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">

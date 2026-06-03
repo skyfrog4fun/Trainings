@@ -4,6 +4,7 @@ public enum NotificationAction
 {
     PasswordReset,
     Registration,
+    TrainingCancellation,
     EmailConfirmation,
     WelcomeMail,
     GroupApproval,

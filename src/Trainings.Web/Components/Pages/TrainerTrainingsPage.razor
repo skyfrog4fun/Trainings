@@ -13,7 +13,7 @@
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Plan Training</h2>
-        <a href="/trainings/create" class="btn btn-success"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New</a>
+        <a href="/trainings/create" class="btn btn-success"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New</a>
     </div>
 
     @if (_loading)
@@ -30,7 +30,7 @@
                         <div>
                             <h6 class="mb-1">@t.Title</h6>
                             <small class="text-muted">@FormatTrainingDate(t) · @(t.LocationName ?? "-")</small><br/>
-                            <small><i class="fa-solid fa-users me-1" aria-hidden="true"></i>@t.RegisteredCount / @t.Capacity</small>
+                            <small><i class="@AppIcons.Users me-1" aria-hidden="true"></i>@t.RegisteredCount / @t.Capacity</small>
                         </div>
                         <div class="btn-group-vertical btn-group-sm">
                             <a href="/trainings/@t.Id" class="btn btn-outline-primary btn-sm">View</a>

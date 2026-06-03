@@ -25,11 +25,11 @@
         <div>
             @if (_emailConfirmed)
             {
-                <span class="badge bg-success"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Email verified</span>
+                <span class="badge bg-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Email verified</span>
             }
             else
             {
-                <span class="badge bg-warning text-dark me-2"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Email not verified</span>
+                <span class="badge bg-warning text-dark me-2"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Email not verified</span>
                 <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ResendVerificationAsync">Resend verification</button>
             }
         </div>
@@ -46,14 +46,14 @@
             <div class="card-header collapsible-card-header dashboard-card-header">
                 <button type="button" class="collapsible-card-toggle" @onclick="ToggleNotifications">
                     <span class="fw-bold">Notification Activity</span>
-                    <i class="fa-solid @(_notificationsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
+                    <i class="@(_notificationsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
                 </button>
                 <div class="collapsible-card-meta small">
                     <span class="dashboard-card-counter me-3">
-                        <i class="fa-solid fa-bell" aria-hidden="true"></i> @Math.Min(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
+                        <i class="@AppIcons.Bell" aria-hidden="true"></i> @Math.Min(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
                     </span>
-                    <span class="text-success me-3"><i class="fa-solid fa-check" aria-hidden="true"></i> @_notificationSuccessCount</span>
-                    <span class="text-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i> @_notificationFailureCount</span>
+                    <span class="text-success me-3"><i class="@AppIcons.Check" aria-hidden="true"></i> @_notificationSuccessCount</span>
+                    <span class="text-danger"><i class="@AppIcons.XMark" aria-hidden="true"></i> @_notificationFailureCount</span>
                 </div>
             </div>
             @if (_notificationsExpanded)
@@ -81,11 +81,11 @@
                                             <td>
                                                 @if (log.IsSuccess)
                                                 {
-                                                    <i class="fa-solid fa-check text-success" aria-hidden="true"></i>
+                                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
                                                 }
                                                 else
                                                 {
-                                                    <i class="fa-solid fa-xmark text-danger" aria-hidden="true"></i>
+                                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
                                                 }
                                             </td>
                                             <td class="small text-danger">@log.ErrorMessage</td>
@@ -110,7 +110,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">My next trainings (enrolled/assigned)</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> @Math.Min(_myNextTrainings.Count, DashboardDisplayLimit)/@_myNextTrainings.Count
+                        <i class="@AppIcons.CalendarCheck" aria-hidden="true"></i> @Math.Min(_myNextTrainings.Count, DashboardDisplayLimit)/@_myNextTrainings.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -133,7 +133,7 @@
                                             <td>@training.Title</td>
                                             <td class="text-end">
                                                 <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id" title="Open training details">
-                                                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -155,7 +155,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">Next trainings available to attend</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-list-check" aria-hidden="true"></i> @Math.Min(_availableNextTrainings.Count, DashboardDisplayLimit)/@_availableNextTrainings.Count
+                        <i class="@AppIcons.ListCheck" aria-hidden="true"></i> @Math.Min(_availableNextTrainings.Count, DashboardDisplayLimit)/@_availableNextTrainings.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -185,14 +185,14 @@
                                             <td>@training.Title</td>
                                             <td class="text-end">
                                                 <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.Id" title="Open training details">
-                                                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                                                 </a>
                                                 <button type="button"
                                                         class="btn btn-sm btn-primary"
                                                         title="@(training.RegisteredCount >= training.Capacity ? "Training full" : "Register for training")"
                                                         @onclick="() => RegisterForTrainingAsync(training.Id)"
                                                         disabled="@(training.RegisteredCount >= training.Capacity)">
-                                                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                                                    <i class="@AppIcons.ClipboardList" aria-hidden="true"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -215,7 +215,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">Next trainings to plan/lead</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-person-chalkboard" aria-hidden="true"></i> @Math.Min(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
+                        <i class="@AppIcons.Trainer" aria-hidden="true"></i> @Math.Min(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
                     </span>
                 </div>
                 <div class="card-body">
@@ -245,7 +245,7 @@
                 <div class="card-header dashboard-card-header">
                     <span class="fw-bold">Outstanding users to approve</span>
                     <span class="dashboard-card-counter">
-                        <i class="fa-solid fa-user-clock" aria-hidden="true"></i> @Math.Min(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
+                        <i class="@AppIcons.UserClock" aria-hidden="true"></i> @Math.Min(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
                     </span>
                 </div>
                 <div class="card-body">
