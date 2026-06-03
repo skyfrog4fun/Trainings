@@ -2,6 +2,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using System.Globalization;
 using System.Net;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
@@ -66,7 +67,7 @@ public partial class SmtpEmailService : IEmailService
     public async Task<EmailSendResult> SendTrainingCancellationAsync(string toEmail, string trainingTitle, DateTime trainingDateTime, string appLink, CancellationToken ct = default)
     {
         var encodedTitle = WebUtility.HtmlEncode(trainingTitle);
-        var encodedDateTime = WebUtility.HtmlEncode(trainingDateTime.ToString("f"));
+        var encodedDateTime = WebUtility.HtmlEncode(trainingDateTime.ToString("f", CultureInfo.InvariantCulture));
         var encodedLink = WebUtility.HtmlEncode(appLink);
         var subject = $"Training Cancelled: {trainingTitle}";
         var body = $"""

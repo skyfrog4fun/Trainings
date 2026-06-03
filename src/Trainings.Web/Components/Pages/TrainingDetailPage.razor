@@ -416,20 +416,17 @@
             if (notifyParticipants)
             {
                 var appUrl = Navigation.BaseUri.TrimEnd('/');
-                var recipients = _registrations
+                var recipientIds = _registrations
                     .Where(registration => registration.Status == RegistrationStatus.Registered)
                     .Select(registration => registration.UserId)
-                    .Distinct()
+                    .ToHashSet();
+
+                var recipientUsers = (await UserService.GetAllAsync())
+                    .Where(user => recipientIds.Contains(user.Id) && !string.IsNullOrWhiteSpace(user.Email))
                     .ToList();
 
-                foreach (var recipientId in recipients)
+                foreach (var user in recipientUsers)
                 {
-                    var user = await UserService.GetByIdAsync(recipientId);
-                    if (user is null || string.IsNullOrWhiteSpace(user.Email))
-                    {
-                        continue;
-                    }
-
                     var sendResult = await EmailService.SendTrainingCancellationAsync(
                         user.Email,
                         _training.Title,
