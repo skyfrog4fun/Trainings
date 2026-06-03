@@ -160,16 +160,9 @@ main {
     font-weight: 600;
 }
 
-.training-card-header {
-    padding: 0;
-}
-
 .training-card-toggle {
     width: 100%;
-    border: 0;
-    text-decoration: none;
-    color: inherit;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1rem !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -178,7 +171,7 @@ main {
 
 .training-card-toggle:hover,
 .training-card-toggle:focus {
-    color: inherit;
+    color: inherit !important;
     box-shadow: none;
     text-decoration: none;
 }

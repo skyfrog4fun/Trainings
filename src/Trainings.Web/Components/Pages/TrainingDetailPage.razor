@@ -242,6 +242,8 @@
         UnregisteredSuccess
     }
 
+    private static readonly TimeSpan RegistrationStatusDisplayDuration = TimeSpan.FromSeconds(7);
+
     [Parameter] public int Id { get; set; }
 
     private TrainingDto? _training;
@@ -511,14 +513,15 @@
 
     private async Task ScheduleRegistrationFooterResetAsync(RegistrationFooterState sourceState)
     {
-        _registrationFooterResetCts?.Cancel();
-        _registrationFooterResetCts?.Dispose();
-        _registrationFooterResetCts = new CancellationTokenSource();
-        var ct = _registrationFooterResetCts.Token;
+        var newCts = new CancellationTokenSource();
+        var previousCts = Interlocked.Exchange(ref _registrationFooterResetCts, newCts);
+        previousCts?.Cancel();
+        previousCts?.Dispose();
+        var ct = newCts.Token;
 
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(7), ct);
+            await Task.Delay(RegistrationStatusDisplayDuration, ct);
             if (!ct.IsCancellationRequested && _registrationFooterState == sourceState)
             {
                 _registrationFooterState = RegistrationFooterState.Normal;
