@@ -1,0 +1,33 @@
+@page "/config/icons"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = "SuperAdmin")]
+
+<PageTitle>Icon Overview</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
+        <h2 class="mb-0">Icon Overview</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Icon</th>
+                    <th>Friendly Name</th>
+                    <th>FontAwesome Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var icon in AppIcons.All)
+                {
+                    <tr>
+                        <td><i class="@icon.CssClass" aria-hidden="true"></i></td>
+                        <td>@icon.FriendlyName</td>
+                        <td><code>@icon.CssClass</code></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

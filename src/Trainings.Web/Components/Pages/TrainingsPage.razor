@@ -15,10 +15,10 @@
         <h2 class="mb-0">Trainings</h2>
         <div class="d-flex align-items-center gap-2">
             <button type="button" class="btn btn-outline-secondary" @onclick="ToggleFilter">
-                <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                <i class="@AppIcons.Filter" aria-hidden="true"></i>
             </button>
             <AuthorizeView Policy="GroupTrainer">
-                <a href="/trainings/create" class="btn btn-success"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Training</a>
+                <a href="/trainings/create" class="btn btn-success"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New Training</a>
             </AuthorizeView>
         </div>
     </div>
@@ -53,7 +53,7 @@
             </div>
             <div class="col-12 col-md-2 d-grid">
                 <button type="button" class="btn btn-outline-secondary" @onclick="ClearFilters">
-                    <i class="fa-solid fa-filter-circle-xmark me-1" aria-hidden="true"></i>Clear filters
+                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>Clear filters
                 </button>
             </div>
         </div>
@@ -75,7 +75,7 @@
             <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry">
                 <Actions Context="training">
                     <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
-                        <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
+                        <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Details
                     </a>
                     @if (CanRegister(training))
                     {
@@ -83,7 +83,7 @@
                                 class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
                                 @onclick="() => ToggleRegistrationAsync(training)"
                                 disabled="@IsRegistrationDisabled(training)">
-                            <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                            <i class="@AppIcons.ClipboardList me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
                         </button>
                     }
                 </Actions>
@@ -112,7 +112,7 @@
                 <div class="card-header collapsible-card-header">
                     <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleArchivedTrainings">
                         <span>Trainings older than 2 weeks</span>
-                        <i class="fa-solid @(_archivedTrainingsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
+                        <i class="@(_archivedTrainingsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
                     </button>
                     <div class="collapsible-card-meta">@FilteredArchivedTrainings.Count training(s)</div>
                 </div>
@@ -122,7 +122,7 @@
                         <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry">
                             <Actions Context="training">
                                 <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
-                                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Details
+                                    <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Details
                                 </a>
                                 @if (CanRegister(training))
                                 {
@@ -130,7 +130,7 @@
                                             class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
                                             @onclick="() => ToggleRegistrationAsync(training)"
                                             disabled="@IsRegistrationDisabled(training)">
-                                        <i class="fa-solid fa-clipboard-list me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                                        <i class="@AppIcons.ClipboardList me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
                                     </button>
                                 }
                             </Actions>

@@ -3,61 +3,66 @@
 
 <nav class="navbar sticky-top navbar-dark bg-dark shadow-sm">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-bolt me-1" aria-hidden="true"></i>Trainings</a>
+        <a class="navbar-brand fw-bold" href="/"><i class="@AppIcons.Bolt me-1" aria-hidden="true"></i>Trainings</a>
         <div class="dropdown">
             <button class="btn btn-outline-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu">
                 ☰
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
                 <li>
-                    <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="fa-solid fa-house me-2" aria-hidden="true"></i>Dashboard</NavLink>
+                    <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="@AppIcons.Home me-2" aria-hidden="true"></i>Dashboard</NavLink>
                 </li>
                 <AuthorizeView Policy="GroupAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="groups"><i class="fa-solid fa-object-group me-2" aria-hidden="true"></i>Groups</NavLink>
+                        <NavLink class="dropdown-item" href="groups"><i class="@AppIcons.Group me-2" aria-hidden="true"></i>Groups</NavLink>
                     </li>
                 </AuthorizeView>
                 <AuthorizeView Policy="GroupAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="users"><i class="fa-solid fa-users me-2" aria-hidden="true"></i>Users</NavLink>
+                        <NavLink class="dropdown-item" href="users"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>Users</NavLink>
                     </li>
                 </AuthorizeView>
                 <AuthorizeView Policy="GroupMember">
                     <li>
-                        <NavLink class="dropdown-item" href="trainings"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Trainings</NavLink>
+                        <NavLink class="dropdown-item" href="trainings"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>Trainings</NavLink>
                     </li>
                 </AuthorizeView>
                 <AuthorizeView Policy="GroupMember">
                     <li>
-                        <NavLink class="dropdown-item" href="my-registrations"><i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>My Registrations</NavLink>
+                        <NavLink class="dropdown-item" href="my-registrations"><i class="@AppIcons.ClipboardList me-2" aria-hidden="true"></i>My Registrations</NavLink>
                     </li>
                 </AuthorizeView>
                 <AuthorizeView Policy="GroupTrainer">
                     <li>
-                        <NavLink class="dropdown-item" href="plan-training"><i class="fa-solid fa-fire me-2" aria-hidden="true"></i>Plan Training</NavLink>
+                        <NavLink class="dropdown-item" href="plan-training"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>Plan Training</NavLink>
                     </li>
                 </AuthorizeView>
                 <li><hr class="dropdown-divider" /></li>
                 <AuthorizeView Policy="SuperAdmin">
                     <li>
-                        <NavLink class="dropdown-item" href="config/mail"><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Config</NavLink>
+                        <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>Config</NavLink>
                     </li>
                     <li>
-                        <NavLink class="dropdown-item" href="statistics"><i class="fa-solid fa-chart-simple me-2" aria-hidden="true"></i>Statistics</NavLink>
+                        <NavLink class="dropdown-item" href="statistics"><i class="@AppIcons.ChartSimple me-2" aria-hidden="true"></i>Statistics</NavLink>
                     </li>
                     <li>
-                        <NavLink class="dropdown-item" href="config/locations"><i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i>Locations</NavLink>
+                        <NavLink class="dropdown-item" href="config/locations"><i class="@AppIcons.Location me-2" aria-hidden="true"></i>Locations</NavLink>
                     </li>
                 </AuthorizeView>
                 <li>
-                    <NavLink class="dropdown-item" href="user-information"><i class="fa-solid fa-user me-2" aria-hidden="true"></i>User Information</NavLink>
+                    <NavLink class="dropdown-item" href="user-information"><i class="@AppIcons.User me-2" aria-hidden="true"></i>User Information</NavLink>
                 </li>
+                <AuthorizeView Policy="SuperAdmin">
+                    <li>
+                        <NavLink class="dropdown-item" href="config/icons"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Icon Overview</NavLink>
+                    </li>
+                </AuthorizeView>
                 <li>
-                    <a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i>Logout</a>
+                    <a class="dropdown-item text-danger" href="/logout"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>Logout</a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
-                    <span class="dropdown-item-text text-muted small"><i class="fa-solid fa-tag me-2" aria-hidden="true"></i>v@_version</span>
+                    <span class="dropdown-item-text text-muted small"><i class="@AppIcons.Tag me-2" aria-hidden="true"></i>v@_version</span>
                 </li>
             </ul>
         </div>
@@ -86,8 +91,8 @@
                         <p>An unexpected error occurred while loading this page. Please try again.</p>
                         <hr />
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError"><i class="fa-solid fa-rotate-right me-1" aria-hidden="true"></i>Try Again</button>
-                            <a href="/" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-house me-1" aria-hidden="true"></i>Go to Dashboard</a>
+                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError"><i class="@AppIcons.Refresh me-1" aria-hidden="true"></i>Try Again</button>
+                            <a href="/" class="btn btn-outline-secondary btn-sm"><i class="@AppIcons.Home me-1" aria-hidden="true"></i>Go to Dashboard</a>
                         </div>
                     </div>
                 </div>
@@ -98,8 +103,8 @@
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
-    <a href="." class="reload"><i class="fa-solid fa-rotate-right me-1" aria-hidden="true"></i>Reload</a>
-    <span class="dismiss"><i class="fa-solid fa-xmark" aria-hidden="true"></i></span>
+    <a href="." class="reload"><i class="@AppIcons.Refresh me-1" aria-hidden="true"></i>Reload</a>
+    <span class="dismiss"><i class="@AppIcons.XMark" aria-hidden="true"></i></span>
 </div>
 
 @code {

@@ -175,3 +175,18 @@ main {
 .training-card-status-future {
     background-color: rgba(25, 135, 84, 0.1);
 }
+
+.confirmation-panel {
+    padding: 0.75rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+}
+
+.confirmation-panel-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.35);
+}
+
+.confirmation-danger-subtle {
+    background-color: rgba(220, 53, 69, 0.1);
+}

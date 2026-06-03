@@ -12,7 +12,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/trainings/@TrainingId" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
+        <a href="/trainings/@TrainingId" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
     </div>
 
     @if (_training != null)
@@ -41,11 +41,11 @@
                     <div class="btn-group" role="group">
                         <button class="btn btn-sm @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-success")"
                                 @onclick="() => SetAttendance(participant.UserId, AttendanceStatus.Present)">
-                            <i class="fa-solid fa-check me-1" aria-hidden="true"></i>Present
+                            <i class="@AppIcons.Check me-1" aria-hidden="true"></i>Present
                         </button>
                         <button class="btn btn-sm @(status == AttendanceStatus.Absent ? "btn-danger" : "btn-outline-danger")"
                                 @onclick="() => SetAttendance(participant.UserId, AttendanceStatus.Absent)">
-                            <i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Absent
+                            <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Absent
                         </button>
                     </div>
                 </div>

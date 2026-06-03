@@ -16,7 +16,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/plan-training" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back</a>
+        <a href="/plan-training" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
     </div>
 
     <h2>@(_isEdit ? "Edit Training" : "New Training")</h2>
@@ -34,13 +34,13 @@
             <div class="card-body py-2">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex flex-wrap gap-3 text-body">
-                        <span><i class="fa-solid fa-users-gear me-1 text-secondary" aria-hidden="true"></i><strong>@SelectedGroupName</strong></span>
-                        <span><i class="fa-solid fa-user me-1 text-secondary" aria-hidden="true"></i>@SelectedTrainerName</span>
-                        <span><i class="fa-solid fa-calendar me-1 text-secondary" aria-hidden="true"></i>@FormatLocalizedDate(_date)</span>
-                        <span><i class="fa-solid fa-stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes min</span>
+                        <span><i class="@AppIcons.Users-gear me-1 text-secondary" aria-hidden="true"></i><strong>@SelectedGroupName</strong></span>
+                        <span><i class="@AppIcons.User me-1 text-secondary" aria-hidden="true"></i>@SelectedTrainerName</span>
+                        <span><i class="@AppIcons.Calendar me-1 text-secondary" aria-hidden="true"></i>@FormatLocalizedDate(_date)</span>
+                        <span><i class="@AppIcons.Stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes min</span>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _detailsCollapsed = false">
-                        <i class="fa-solid fa-pen-to-square me-1" aria-hidden="true"></i>Edit Details
+                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>Edit Details
                     </button>
                 </div>
             </div>
@@ -177,9 +177,9 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Training Blocks</h4>
         <div>
-            <button type="button" class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@IsWriteBlocked"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Add Block</button>
+            <button type="button" class="btn btn-success btn-sm me-2" @onclick="AddBlock" disabled="@IsWriteBlocked"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>Add Block</button>
             <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => _showLibrary = !_showLibrary" disabled="@IsWriteBlocked">
-                <i class="fa-solid fa-book-open me-1" aria-hidden="true"></i>From Library
+                <i class="@AppIcons.BookOpen me-1" aria-hidden="true"></i>From Library
             </button>
         </div>
     </div>
@@ -196,7 +196,7 @@
                         <div class="d-flex justify-content-between align-items-start p-2 border-bottom">
                             <div>
                                 <div class="fw-bold small">@block.Title</div>
-                                <div class="text-muted small"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</div>
+                                <div class="text-muted small"><i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</div>
                                 @if (!string.IsNullOrEmpty(block.TrainerComment))
                                 {
                                     <div class="alert alert-info py-1 px-2 mt-1 small mb-0">@block.TrainerComment</div>
@@ -245,8 +245,8 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(_editingBlockIndex)" disabled="@IsWriteBlocked"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
-                        <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
+                        <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(_editingBlockIndex)" disabled="@IsWriteBlocked"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
                     </div>
                 </div>
             </div>
@@ -289,8 +289,8 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Save</button>
-                                <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
+                                <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
+                                <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
                             </div>
                         </div>
                     }
@@ -299,7 +299,7 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <div class="fw-bold">@((idx + 1)). @block.Title</div>
-                                <small class="text-muted"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</small>
+                                <small class="text-muted"><i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</small>
                                 @if (block.Tags.Any())
                                 {
                                     <div class="mt-1">
@@ -313,8 +313,8 @@
                             <div class="btn-group btn-group-sm ms-2">
                                 <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0 || IsWriteBlocked)">↑</button>
                                 <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1 || IsWriteBlocked)">↓</button>
-                                <button type="button" class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
-                                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                <button type="button" class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.Edit" aria-hidden="true"></i></button>
+                                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.Trash" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     }

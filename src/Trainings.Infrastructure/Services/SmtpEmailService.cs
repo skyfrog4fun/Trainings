@@ -2,6 +2,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using System.Net;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
@@ -60,6 +61,25 @@ public partial class SmtpEmailService : IEmailService
             <p>Please review and approve or reject the registration in the admin panel.</p>
             """;
         return await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
+    }
+
+    public async Task<EmailSendResult> SendTrainingCancellationAsync(string toEmail, string trainingTitle, DateTime trainingDateTime, string appLink, CancellationToken ct = default)
+    {
+        var encodedTitle = WebUtility.HtmlEncode(trainingTitle);
+        var encodedDateTime = WebUtility.HtmlEncode(trainingDateTime.ToString("f"));
+        var encodedLink = WebUtility.HtmlEncode(appLink);
+        var subject = $"Training Cancelled: {trainingTitle}";
+        var body = $"""
+            <p>The following training has been cancelled and removed:</p>
+            <ul>
+                <li><strong>Title:</strong> {encodedTitle}</li>
+                <li><strong>Date and time:</strong> {encodedDateTime}</li>
+            </ul>
+            <p>Please use the application to find alternative trainings:</p>
+            <p><a href="{encodedLink}">{encodedLink}</a></p>
+            """;
+
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TrainingCancellation, null, null, null, ct);
     }
 
     public async Task<EmailSendResult> SendTestEmailAsync(string toEmail, int? mailConfigurationId = null, CancellationToken ct = default)

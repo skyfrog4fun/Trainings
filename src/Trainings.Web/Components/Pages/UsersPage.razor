@@ -14,7 +14,7 @@
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
         <h2>Users</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm" disabled="@IsWriteBlocked"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New User</button>
+        <button class="btn btn-success" @onclick="ShowCreateForm" disabled="@IsWriteBlocked"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New User</button>
     </div>
 
     @if (IsWriteBlocked)
@@ -132,7 +132,7 @@
                 </div>
                 <div class="mt-3">
                     <button class="btn btn-primary me-2" @onclick="SaveUser" disabled="@IsWriteBlocked">Save</button>
-                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Cancel</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
                 </div>
                 @if (_formError != null) { <div class="alert alert-danger mt-2">@_formError</div> }
             </div>
@@ -162,7 +162,7 @@
                                 <tr>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-outline-secondary" title="Toggle details" @onclick="() => TogglePendingExpand(user.Id)">
-                                            <i class="fa-solid @(_expandedPendingUserIds.Contains(user.Id) ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
+                                            <i class="@(_expandedPendingUserIds.Contains(user.Id) ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
                                         </button>
                                     </td>
                                     <td>@user.DisplayName</td>
@@ -182,10 +182,10 @@
                                                 <div class="col-12 col-md-6"><strong>Email verified:</strong> @(user.EmailConfirmedAt.HasValue ? "Yes" : "No")</div>
                                                 <div class="col-12 text-end">
                                                     <button type="button" class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)" disabled="@IsWriteBlocked">
-                                                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                                        <i class="@AppIcons.Check" aria-hidden="true"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)" disabled="@IsWriteBlocked">
-                                                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                                                        <i class="@AppIcons.XMark" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -215,27 +215,27 @@
                             <td>
                                 @if (user.EmailConfirmedAt.HasValue)
                                 {
-                                    <span class="text-success" title="Confirmed @user.EmailConfirmedAt.Value.ToString("MMM d, yyyy")"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                                    <span class="text-success" title="Confirmed @user.EmailConfirmedAt.Value.ToString("MMM d, yyyy")"><i class="@AppIcons.Check" aria-hidden="true"></i></span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted"><i class="fa-solid fa-xmark" aria-hidden="true"></i></span>
+                                    <span class="text-muted"><i class="@AppIcons.XMark" aria-hidden="true"></i></span>
                                 }
                             </td>
                             <td>
                                 @if (user.IsActive)
                                 {
-                                    <i class="fa-solid fa-check text-success" aria-hidden="true"></i>
+                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
                                 }
                                 else
                                 {
-                                    <i class="fa-solid fa-xmark text-danger" aria-hidden="true"></i>
+                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
                                 }
                             </td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-outline-primary me-1" title="Edit"
                                         @onclick="() => EditUser(user)" disabled="@IsWriteBlocked">
-                                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                    <i class="@AppIcons.Edit" aria-hidden="true"></i>
                                 </button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary me-1"
                                         title="Send account mail"
@@ -245,13 +245,13 @@
                                     {
                                         <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                                     }
-                                    <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                                    <i class="@AppIcons.Envelope" aria-hidden="true"></i>
                                 </button>
                                 <button type="button" class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success")"
                                         title="@(user.IsActive ? "Deactivate" : "Activate")"
                                         @onclick="() => ToggleActive(user)"
                                         disabled="@IsWriteBlocked">
-                                    <i class="fa-solid @(user.IsActive ? "fa-user-slash" : "fa-user-check")" aria-hidden="true"></i>
+                                    <i class="@(user.IsActive ? AppIcons.UserSlash : AppIcons.UserCheck)" aria-hidden="true"></i>
                                 </button>
                             </td>
                         </tr>

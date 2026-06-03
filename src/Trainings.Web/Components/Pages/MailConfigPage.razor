@@ -19,7 +19,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
-        <h2><i class="fa-solid fa-gear me-2" aria-hidden="true"></i>Configuration</h2>
+        <h2><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>Configuration</h2>
     </div>
 
     <p class="text-muted">Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</p>
@@ -86,7 +86,7 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center fw-bold">
             <span>Mail Configuration</span>
-            <button class="btn btn-success btn-sm" @onclick="ShowCreateForm"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New Configuration</button>
+            <button class="btn btn-success btn-sm" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New Configuration</button>
         </div>
         <div class="card-body">
             <p class="text-muted mb-0">Manage SMTP endpoints used by notification delivery and fallback retry order.</p>
@@ -231,7 +231,7 @@
     }
 
     <div class="card mt-4">
-        <div class="card-header fw-bold"><i class="fa-solid fa-envelope me-2" aria-hidden="true"></i>Test Email</div>
+        <div class="card-header fw-bold"><i class="@AppIcons.Envelope me-2" aria-hidden="true"></i>Test Email</div>
         <div class="card-body">
             <p class="text-muted mb-2">Send a test email against all configurations in priority order or against a single selected configuration.</p>
             <div class="row g-2 align-items-start">
