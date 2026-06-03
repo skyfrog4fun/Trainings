@@ -43,12 +43,15 @@
     @if (_isSuperAdmin)
     {
         <div class="card collapsible-card mb-4">
-            <div class="card-header collapsible-card-header">
-                <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleNotifications">
-                    <span>Notification Activity</span>
+            <div class="card-header collapsible-card-header dashboard-card-header">
+                <button type="button" class="collapsible-card-toggle" @onclick="ToggleNotifications">
+                    <span class="fw-bold">Notification Activity</span>
                     <i class="fa-solid @(_notificationsExpanded ? "fa-chevron-up" : "fa-chevron-down")" aria-hidden="true"></i>
                 </button>
                 <div class="collapsible-card-meta small">
+                    <span class="dashboard-card-counter me-3">
+                        <i class="fa-solid fa-bell" aria-hidden="true"></i> @GetShownCount(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
+                    </span>
                     <span class="text-success me-3"><i class="fa-solid fa-check" aria-hidden="true"></i> @_notificationSuccessCount</span>
                     <span class="text-danger"><i class="fa-solid fa-xmark" aria-hidden="true"></i> @_notificationFailureCount</span>
                 </div>
@@ -68,7 +71,7 @@
                                     <tr><th>Log ID</th><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var log in _recentLogs.Take(10))
+                                    @foreach (var log in _recentLogs.Take(NotificationDisplayLimit))
                                     {
                                         <tr>
                                             <td class="small">#@log.Id</td>
@@ -104,19 +107,40 @@
     <div class="row g-3">
         <div class="col-12 col-xl-6">
             <div class="card h-100">
-                <div class="card-header fw-bold">My next trainings (enrolled/assigned)</div>
+                <div class="card-header dashboard-card-header">
+                    <span class="fw-bold">My next trainings (enrolled/assigned)</span>
+                    <span class="dashboard-card-counter">
+                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> @GetShownCount(_myNextTrainings.Count, DashboardDisplayLimit)/@_myNextTrainings.Count
+                    </span>
+                </div>
                 <div class="card-body">
                     @if (_myNextTrainings.Any())
                     {
-                        <ul class="list-group list-group-flush">
-                            @foreach (var training in _myNextTrainings.Take(5))
-                            {
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                    <span>@training.Title</span>
-                                    <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">Details</a>
-                                </li>
-                            }
-                        </ul>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Name</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var training in _myNextTrainings.Take(DashboardDisplayLimit))
+                                    {
+                                        <tr>
+                                            <td class="small">@FormatDashboardDateTime(training.DateTime)</td>
+                                            <td>@training.Title</td>
+                                            <td class="text-end">
+                                                <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id" title="Open training details">
+                                                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     }
                     else
                     {
@@ -128,7 +152,12 @@
 
         <div class="col-12 col-xl-6">
             <div class="card h-100">
-                <div class="card-header fw-bold">Next trainings available to attend</div>
+                <div class="card-header dashboard-card-header">
+                    <span class="fw-bold">Next trainings available to attend</span>
+                    <span class="dashboard-card-counter">
+                        <i class="fa-solid fa-list-check" aria-hidden="true"></i> @GetShownCount(_availableNextTrainings.Count, DashboardDisplayLimit)/@_availableNextTrainings.Count
+                    </span>
+                </div>
                 <div class="card-body">
                     @if (_availableTrainingActionMessage is not null)
                     {
@@ -148,7 +177,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var training in _availableNextTrainings.Take(5))
+                                    @foreach (var training in _availableNextTrainings.Take(DashboardDisplayLimit))
                                     {
                                         <tr>
                                             <td class="small">@FormatTrainingDate(training)</td>
@@ -183,12 +212,17 @@
 
         <div class="col-12 col-xl-6">
             <div class="card h-100">
-                <div class="card-header fw-bold">Next trainings to plan/lead</div>
+                <div class="card-header dashboard-card-header">
+                    <span class="fw-bold">Next trainings to plan/lead</span>
+                    <span class="dashboard-card-counter">
+                        <i class="fa-solid fa-person-chalkboard" aria-hidden="true"></i> @GetShownCount(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
+                    </span>
+                </div>
                 <div class="card-body">
                     @if (_planLeadTrainings.Any())
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var training in _planLeadTrainings.Take(5))
+                            @foreach (var training in _planLeadTrainings.Take(DashboardDisplayLimit))
                             {
                                 <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                                     <span>@training.Title</span>
@@ -208,12 +242,17 @@
 
         <div class="col-12 col-xl-6">
             <div class="card h-100">
-                <div class="card-header fw-bold">Outstanding users to approve</div>
+                <div class="card-header dashboard-card-header">
+                    <span class="fw-bold">Outstanding users to approve</span>
+                    <span class="dashboard-card-counter">
+                        <i class="fa-solid fa-user-clock" aria-hidden="true"></i> @GetShownCount(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
+                    </span>
+                </div>
                 <div class="card-body">
                     @if (_outstandingApprovals.Any())
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var user in _outstandingApprovals.Take(5))
+                            @foreach (var user in _outstandingApprovals.Take(DashboardDisplayLimit))
                             {
                                 <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                                     <span>@user.DisplayName <span class="text-muted small">(@user.RequestedGroup)</span></span>
@@ -257,6 +296,8 @@
     private bool _notificationsExpanded = true;
     private int _notificationSuccessCount;
     private int _notificationFailureCount;
+    private const int DashboardDisplayLimit = 5;
+    private const int NotificationDisplayLimit = 10;
 
     private sealed record OutstandingApprovalViewModel(string DisplayName, string RequestedGroup);
 
@@ -417,6 +458,16 @@
     {
         var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
         return training.DateTime.ToString("g", culture);
+    }
+
+    private static int GetShownCount(int totalCount, int maxToShow)
+    {
+        return Math.Min(totalCount, maxToShow);
+    }
+
+    private static string FormatDashboardDateTime(DateTime dateTime)
+    {
+        return dateTime.ToString("dd.MM. HH:mm", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     private async Task ResetNotificationPointerAsync()
