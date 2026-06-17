@@ -308,6 +308,8 @@ public class GroupService : IGroupService
         Id = gm.Id,
         UserId = gm.UserId,
         UserDisplayName = gm.User?.DisplayName ?? string.Empty,
+        UserFirstName = gm.User?.FirstName ?? string.Empty,
+        UserLastName = gm.User?.LastName ?? string.Empty,
         UserEmail = gm.User?.Email ?? string.Empty,
         GroupId = gm.GroupId,
         Role = gm.Role,

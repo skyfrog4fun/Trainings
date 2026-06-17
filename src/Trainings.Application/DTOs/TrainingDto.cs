@@ -19,6 +19,8 @@ public class TrainingDto
     public int? GroupId { get; set; }
     public string? GroupName { get; set; }
     public string? GroupCountry { get; set; }
+    public bool AttendanceLocked { get; set; }
+    public DateTime? AttendanceLockedAt { get; set; }
     public List<TrainingBlockDto> Blocks { get; set; } = new();
 }
 

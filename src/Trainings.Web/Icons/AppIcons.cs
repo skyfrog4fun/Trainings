@@ -17,6 +17,7 @@ public static class AppIcons
     public const string ChartSimple = "fa-solid fa-chart-simple";
     public const string Check = "fa-solid fa-check";
     public const string CircleInfo = "fa-solid fa-circle-info";
+    public const string ClipboardCheck = "fa-solid fa-clipboard-check";
     public const string ClipboardList = "fa-solid fa-clipboard-list";
     public const string Envelope = "fa-solid fa-envelope";
     public const string Filter = "fa-solid fa-filter";
@@ -63,6 +64,7 @@ public static class AppIcons
         new("Statistics", ChartSimple),
         new("Check", Check),
         new("Info", CircleInfo),
+        new("Registered", ClipboardCheck),
         new("Registrations", ClipboardList),
         new("Email", Envelope),
         new("Filter", Filter),

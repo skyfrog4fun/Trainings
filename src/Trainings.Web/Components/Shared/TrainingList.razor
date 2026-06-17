@@ -4,10 +4,17 @@
     @foreach (var training in Trainings)
     {
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm @CardCssClass">
+            <div class="card shadow-sm @CardCssClass">
                 <div class="card-header collapsible-card-header p-0">
                     <button type="button" class="btn btn-link collapsible-card-toggle training-card-toggle" @onclick="() => ToggleCollapsed(training.Id)">
-                        <span class="training-card-header-title text-truncate">@training.Title</span>
+                            @if (string.IsNullOrWhiteSpace(training.Title))
+                            {
+                                <span class="training-card-header-title text-muted fst-italic text-truncate">In planning ...</span>
+                            }
+                            else
+                            {
+                                <span class="training-card-header-title text-truncate">@training.Title</span>
+                            }
                         <span class="training-card-header-date text-nowrap">
                             <i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@training.DateTime.ToString("dd.MM.yy")
                         </span>

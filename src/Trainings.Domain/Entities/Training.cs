@@ -17,6 +17,8 @@ public class Training
     public User Trainer { get; set; } = null!;
     public int? GroupId { get; set; }
     public Group? Group { get; set; }
+    public bool AttendanceLocked { get; set; }
+    public DateTime? AttendanceLockedAt { get; set; }
     public ICollection<Registration> Registrations { get; set; } = new List<Registration>();
     public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
     public ICollection<TrainingBlock> Blocks { get; set; } = new List<TrainingBlock>();

@@ -27,4 +27,26 @@ public class TrainingTests
         training.Registrations.Should().NotBeNull();
         training.Registrations.Should().BeEmpty();
     }
+
+    [Fact]
+    public void TrainingAttendanceLockedDefaultIsFalse()
+    {
+        var training = new Training();
+        training.AttendanceLocked.Should().BeFalse();
+    }
+
+    [Fact]
+    public void TrainingAttendanceLockedAtDefaultIsNull()
+    {
+        var training = new Training();
+        training.AttendanceLockedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void TrainingCanSetAttendanceLocked()
+    {
+        var training = new Training { AttendanceLocked = true, AttendanceLockedAt = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc) };
+        training.AttendanceLocked.Should().BeTrue();
+        training.AttendanceLockedAt.Should().Be(new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc));
+    }
 }

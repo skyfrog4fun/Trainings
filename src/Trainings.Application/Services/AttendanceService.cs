@@ -55,6 +55,16 @@ public class AttendanceService : IAttendanceService
         }
     }
 
+    public async Task BulkSaveAsync(int trainingId, IReadOnlyDictionary<int, AttendanceStatus> attendanceMap, int savedByTrainerId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        foreach (var (userId, status) in attendanceMap)
+        {
+            await RecordAttendanceAsync(userId, trainingId, status, savedByTrainerId);
+        }
+    }
+
     private static AttendanceDto MapToDto(Attendance a) => new()
     {
         Id = a.Id,

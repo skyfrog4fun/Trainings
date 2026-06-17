@@ -220,9 +220,21 @@ public class TrainingService : ITrainingService
             .Include(b => b.TrainingBlockTags)
                 .ThenInclude(bt => bt.Tag)
             .Include(b => b.Training)
+                .ThenInclude(t => t.Trainer)
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync(ct);
         return blocks.Select(MapBlockToDto);
+    }
+
+    public async Task LockAttendanceAsync(int trainingId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+        training.AttendanceLocked = true;
+        training.AttendanceLockedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default)
@@ -275,6 +287,8 @@ public class TrainingService : ITrainingService
         GroupId = t.GroupId,
         GroupName = t.Group?.Name,
         GroupCountry = t.Group?.Country?.Code,
+        AttendanceLocked = t.AttendanceLocked,
+        AttendanceLockedAt = t.AttendanceLockedAt,
         Blocks = t.Blocks?
             .OrderBy(b => b.OrderIndex)
             .Select(MapBlockToDto)
@@ -293,6 +307,8 @@ public class TrainingService : ITrainingService
         TrainerComment = b.TrainerComment,
         SourceBlockId = b.SourceBlockId,
         CreatedAt = b.CreatedAt,
+        TrainerId = b.Training?.TrainerId ?? 0,
+        TrainerName = b.Training?.Trainer?.DisplayName ?? string.Empty,
         Tags = b.TrainingBlockTags
             .Where(bt => bt.Tag is not null)
             .Select(bt => new TagDto
