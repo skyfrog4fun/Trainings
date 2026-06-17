@@ -12,6 +12,8 @@ public class TrainingBlockDto
     public string? TrainerComment { get; set; }
     public int? SourceBlockId { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int TrainerId { get; set; }
+    public string TrainerName { get; set; } = string.Empty;
     public List<TagDto> Tags { get; set; } = new();
 }
 

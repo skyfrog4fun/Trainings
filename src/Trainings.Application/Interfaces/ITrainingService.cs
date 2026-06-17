@@ -26,4 +26,10 @@ public interface ITrainingService
     /// every occurrence is already occupied.
     /// </summary>
     Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default);
+
+    /// <summary>
+    /// Marks the attendance sheet for the specified training as locked, preventing participants
+    /// from modifying their own registration status.
+    /// </summary>
+    Task LockAttendanceAsync(int trainingId, CancellationToken ct = default);
 }

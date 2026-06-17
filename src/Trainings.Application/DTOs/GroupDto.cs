@@ -59,6 +59,8 @@ public class GroupMembershipDto
     public int Id { get; set; }
     public int UserId { get; set; }
     public string UserDisplayName { get; set; } = string.Empty;
+    public string UserFirstName { get; set; } = string.Empty;
+    public string UserLastName { get; set; } = string.Empty;
     public string UserEmail { get; set; } = string.Empty;
     public int GroupId { get; set; }
     public GroupMemberRole Role { get; set; }

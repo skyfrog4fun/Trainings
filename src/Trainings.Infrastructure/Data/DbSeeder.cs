@@ -30,6 +30,7 @@ public partial class DbSeeder
         await HandlePreExistingDatabaseAsync();
         await _context.Database.MigrateAsync();
         await SeedLocationsAsync();
+        await SeedGlobalTagsAsync();
 
         if (!_context.Users.Any())
         {
@@ -53,6 +54,27 @@ public partial class DbSeeder
             _context.Users.Add(superAdmin);
             await _context.SaveChangesAsync();
         }
+    }
+
+    private async Task SeedGlobalTagsAsync()
+    {
+        if (await _context.Tags.AnyAsync(t => t.GroupId == null))
+        {
+            return;
+        }
+
+        var globalTags = new[]
+        {
+            "Warm-up", "Stretching", "Strength", "Cardio", "Coordination",
+            "Technique", "Mental", "Game", "Cool-down", "Other"
+        };
+
+        foreach (var name in globalTags)
+        {
+            _context.Tags.Add(new Tag { Name = name, GroupId = null });
+        }
+
+        await _context.SaveChangesAsync();
     }
 
     private async Task SeedLocationsAsync()

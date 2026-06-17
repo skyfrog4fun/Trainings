@@ -38,6 +38,11 @@ public class RegistrationService : IRegistrationService
         var training = await _trainingRepository.GetByIdAsync(trainingId)
             ?? throw new InvalidOperationException("Training not found.");
 
+        if (training.AttendanceLocked)
+        {
+            throw new InvalidOperationException("Registration is no longer available – the trainer has already recorded attendance for this training.");
+        }
+
         var activeRegistrations = (await _registrationRepository.GetByTrainingIdAsync(trainingId))
             .Count(r => r.Status == RegistrationStatus.Registered);
         if (activeRegistrations >= training.Capacity)
@@ -68,6 +73,14 @@ public class RegistrationService : IRegistrationService
     public async Task CancelAsync(int userId, int trainingId)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _trainingRepository.GetByIdAsync(trainingId)
+            ?? throw new InvalidOperationException("Training not found.");
+
+        if (training.AttendanceLocked)
+        {
+            throw new InvalidOperationException("Registration changes are no longer allowed – the trainer has already recorded attendance for this training.");
+        }
 
         var registration = await _registrationRepository.GetByUserAndTrainingAsync(userId, trainingId)
             ?? throw new InvalidOperationException("Registration not found.");
