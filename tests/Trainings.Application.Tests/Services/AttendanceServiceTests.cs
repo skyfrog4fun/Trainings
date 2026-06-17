@@ -41,7 +41,9 @@ public class AttendanceServiceTests
     {
         var existing = new Attendance
         {
-            Id = 5, UserId = 1, TrainingId = 10,
+            Id = 5,
+            UserId = 1,
+            TrainingId = 10,
             Status = AttendanceStatus.Absent,
             RecordedAt = DateTime.UtcNow.AddDays(-1),
             RecordedByTrainerId = 7
