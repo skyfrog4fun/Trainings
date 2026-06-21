@@ -40,8 +40,9 @@ public class TrainingRepository : ITrainingRepository
             .Include(t => t.Trainer)
             .Include(t => t.Registrations)
             .Include(t => t.Group)
+                .ThenInclude(g => g!.Country)
             .Include(t => t.Location)
-            .Where(t => t.IsActive)
+            .Where(t => t.GroupId != null)
             .OrderBy(t => t.DateTime)
             .ToListAsync();
 

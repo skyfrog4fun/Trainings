@@ -14,5 +14,5 @@ public interface IUserService
     Task UpdateSelfAsync(UpdateSelfUserDto dto);
     Task DeleteAsync(int id);
     Task<bool> ValidatePasswordAsync(string email, string password);
-    Task ChangePasswordAsync(int userId, string newPasswordHash);
+    Task ChangePasswordAsync(int userId, string newPassword);
 }

@@ -1,3 +1,5 @@
+using Trainings.Domain.Enums;
+
 namespace Trainings.Domain.Entities;
 
 public class Training
@@ -12,6 +14,7 @@ public class Training
     public DateTime DateTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
+    public TrainingStatus Status { get; set; } = TrainingStatus.New;
     public bool IsActive { get; set; } = true;
     public int TrainerId { get; set; }
     public User Trainer { get; set; } = null!;

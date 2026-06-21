@@ -4,6 +4,7 @@ using Moq;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 using Trainings.Domain.Interfaces;
 using Trainings.Infrastructure.Data;
 using Trainings.Infrastructure.Services;
@@ -142,6 +143,29 @@ public class TrainingServiceTests
         result!.Blocks.Should().HaveCount(2);
         result.Blocks.Select(b => b.OrderIndex).Should().ContainInOrder(1, 2);
         result.Blocks[1].Tags.Should().ContainSingle(t => t.Id == 2 && t.Name == "Technique");
+    }
+
+    [Fact]
+    public async Task SetStatusAsyncChangesTrainingStatus()
+    {
+        using var ctx = CreateInMemoryContext();
+        var training = new Training
+        {
+            Id = 20,
+            Title = "Test",
+            DateTime = DateTime.UtcNow.AddDays(1),
+            Capacity = 10,
+            TrainerId = 1,
+            GroupId = 1
+        };
+        ctx.Trainings.Add(training);
+        await ctx.SaveChangesAsync();
+
+        var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
+        await service.SetStatusAsync(20, TrainingStatus.Planned);
+
+        var updated = await ctx.Trainings.FindAsync(20);
+        updated!.Status.Should().Be(TrainingStatus.Planned);
     }
 
     [Fact]

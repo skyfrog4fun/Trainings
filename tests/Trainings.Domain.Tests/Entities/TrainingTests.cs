@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 using Xunit;
 
 namespace Trainings.Domain.Tests.Entities;
@@ -7,10 +8,10 @@ namespace Trainings.Domain.Tests.Entities;
 public class TrainingTests
 {
     [Fact]
-    public void TrainingDefaultIsActiveIsTrue()
+    public void TrainingDefaultStatusIsNew()
     {
         var training = new Training();
-        training.IsActive.Should().BeTrue();
+        training.Status.Should().Be(TrainingStatus.New);
     }
 
     [Fact]

@@ -128,6 +128,19 @@
                             <label class="form-label">Welcome Message / Bio</label>
                             <textarea class="form-control" rows="2" @bind="_formWelcomeMessage" placeholder="Bio or welcome message..."></textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label">Set New Password (leave blank to keep current)</label>
+                            <div class="input-group">
+                                <input class="form-control" type="password" placeholder="New password (min 8 chars)" @bind="_formNewPassword" />
+                                <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title="Generate password">
+                                    <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_passwordValidationError))
+                            {
+                                <div class="text-danger small mt-1">@_passwordValidationError</div>
+                            }
+                        </div>
                     }
                 </div>
                 <div class="mt-3">
@@ -295,6 +308,8 @@
     private string _formCity = string.Empty;
     private int? _formCountryId;
     private string _formWelcomeMessage = string.Empty;
+    private string _formNewPassword = string.Empty;
+    private string _passwordValidationError = string.Empty;
     private DateTime? _formEntryDate;
     private string? _formError;
     private bool _actionSuccess;
@@ -377,10 +392,11 @@
         _formRole = "User";
         _formGender = "Other";
         _formBirthday = null;
-        _formMobile = _formCity = _formWelcomeMessage = string.Empty;
+        _formMobile = _formCity = _formWelcomeMessage = _formNewPassword = string.Empty;
         _formCountryId = null;
         _formEntryDate = null;
         _selectedGroupIds.Clear();
+        _passwordValidationError = string.Empty;
         _formError = null;
         _showForm = true;
     }
@@ -403,6 +419,8 @@
             .Where(m => _isSuperAdmin || _managedGroupIds.Contains(m.GroupId))
             .Select(m => m.GroupId)
             .ToHashSet();
+        _formNewPassword = string.Empty;
+        _passwordValidationError = string.Empty;
         _formError = null;
         _showForm = true;
     }
@@ -410,6 +428,7 @@
     private async Task SaveUser()
     {
         _formError = null;
+        _passwordValidationError = string.Empty;
 
         if (!_isSuperAdmin && _selectedGroupIds.Count == 0)
         {
@@ -461,6 +480,20 @@
             }
 
             await SyncUserGroupsAsync(userId);
+
+            if (!string.IsNullOrWhiteSpace(_formNewPassword) && _editUserId != 0)
+            {
+                if (!ValidatePassword(_formNewPassword, out var pwError))
+                {
+                    _passwordValidationError = pwError;
+                    return;
+                }
+
+                await UserService.ChangePasswordAsync(_editUserId, _formNewPassword);
+                _formNewPassword = string.Empty;
+                _passwordValidationError = string.Empty;
+            }
+
             _showForm = false;
             await LoadUsers();
         }
@@ -627,7 +660,55 @@
         return country is null ? "—" : $"{country.Code} — {country.Name}";
     }
 
-    private void CancelForm() => _showForm = false;
+    private void CancelForm()
+    {
+        _showForm = false;
+        _formNewPassword = string.Empty;
+        _passwordValidationError = string.Empty;
+    }
+
+    private void GeneratePassword()
+    {
+        const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lower = "abcdefghjkmnpqrstuvwxyz";
+        const string digits = "23456789";
+        const string special = "!@#$%^&*";
+        const string all = upper + lower + digits + special;
+
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        var bytes = new byte[12];
+        rng.GetBytes(bytes);
+
+        var chars = new char[12];
+        chars[0] = upper[bytes[0] % upper.Length];
+        chars[1] = lower[bytes[1] % lower.Length];
+        chars[2] = digits[bytes[2] % digits.Length];
+        chars[3] = special[bytes[3] % special.Length];
+        for (var i = 4; i < 12; i++)
+        {
+            chars[i] = all[bytes[i] % all.Length];
+        }
+
+        for (var i = chars.Length - 1; i > 0; i--)
+        {
+            var j = bytes[i % bytes.Length] % (i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        _formNewPassword = new string(chars);
+        _passwordValidationError = string.Empty;
+    }
+
+    private static bool ValidatePassword(string password, out string error)
+    {
+        error = string.Empty;
+        if (password.Length < 8) { error = "Password must be at least 8 characters."; return false; }
+        if (!password.Any(char.IsUpper)) { error = "Password must contain at least one uppercase letter."; return false; }
+        if (!password.Any(char.IsLower)) { error = "Password must contain at least one lowercase letter."; return false; }
+        if (!password.Any(char.IsDigit)) { error = "Password must contain at least one digit."; return false; }
+        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { error = "Password must contain at least one special character."; return false; }
+        return true;
+    }
 
     private string RoleBadge(UserRole role) => role switch
     {

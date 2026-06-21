@@ -38,9 +38,13 @@ public class RegistrationService : IRegistrationService
         var training = await _trainingRepository.GetByIdAsync(trainingId)
             ?? throw new InvalidOperationException("Training not found.");
 
-        if (training.AttendanceLocked)
+        var now = DateTime.UtcNow;
+        var isOpen = training.Status == TrainingStatus.Planned
+            ? training.DateTime >= now && training.DateTime <= now.AddDays(28)
+            : training.DateTime >= now && training.DateTime <= now.AddDays(4);
+        if (!isOpen)
         {
-            throw new InvalidOperationException("Registration is no longer available – the trainer has already recorded attendance for this training.");
+            throw new InvalidOperationException("Registration is not open for this training.");
         }
 
         var activeRegistrations = (await _registrationRepository.GetByTrainingIdAsync(trainingId))
@@ -77,9 +81,9 @@ public class RegistrationService : IRegistrationService
         var training = await _trainingRepository.GetByIdAsync(trainingId)
             ?? throw new InvalidOperationException("Training not found.");
 
-        if (training.AttendanceLocked)
+        if (training.AttendanceLocked || training.DateTime < DateTime.UtcNow)
         {
-            throw new InvalidOperationException("Registration changes are no longer allowed – the trainer has already recorded attendance for this training.");
+            throw new InvalidOperationException("Registration changes are no longer allowed for this training.");
         }
 
         var registration = await _registrationRepository.GetByUserAndTrainingAsync(userId, trainingId)
