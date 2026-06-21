@@ -40,71 +40,7 @@
         <div class="alert @(_verificationActionSuccess ? "alert-success" : "alert-danger")">@_verificationActionMessage</div>
     }
 
-    @if (_isSuperAdmin)
-    {
-        <div class="card collapsible-card mb-4">
-            <div class="card-header collapsible-card-header dashboard-card-header">
-                <button type="button" class="collapsible-card-toggle" @onclick="ToggleNotifications">
-                    <span class="fw-bold">Notification Activity</span>
-                    <i class="@(_notificationsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
-                </button>
-                <div class="collapsible-card-meta small">
-                    <span class="dashboard-card-counter me-3">
-                        <i class="@AppIcons.Bell" aria-hidden="true"></i> @Math.Min(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
-                    </span>
-                    <span class="text-success me-3"><i class="@AppIcons.Check" aria-hidden="true"></i> @_notificationSuccessCount</span>
-                    <span class="text-danger"><i class="@AppIcons.XMark" aria-hidden="true"></i> @_notificationFailureCount</span>
-                </div>
-            </div>
-            @if (_notificationsExpanded)
-            {
-                <div class="card-body">
-                    <div class="d-flex justify-content-end mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ResetNotificationPointerAsync">Reset pointer</button>
-                    </div>
-
-                    @if (_recentLogs.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0">
-                                <thead>
-                                    <tr><th>Log ID</th><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var log in _recentLogs.Take(NotificationDisplayLimit))
-                                    {
-                                        <tr>
-                                            <td class="small">#@log.Id</td>
-                                            <td class="small">@log.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
-                                            <td class="small">@log.Action</td>
-                                            <td class="small text-muted">@log.RecipientEmail</td>
-                                            <td>
-                                                @if (log.IsSuccess)
-                                                {
-                                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
-                                                }
-                                            </td>
-                                            <td class="small text-danger">@log.ErrorMessage</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-muted">No notification activity since the current reset pointer.</div>
-                    }
-                </div>
-            }
-        </div>
-    }
-
-    <div class="row g-3">
+    <div class="row g-3 mb-4">
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header dashboard-card-header">
@@ -210,65 +146,188 @@
             </div>
         </div>
 
-        <div class="col-12 col-xl-6">
-            <div class="card h-100">
-                <div class="card-header dashboard-card-header">
-                    <span class="fw-bold">Next trainings to plan/lead</span>
-                    <span class="dashboard-card-counter">
-                        <i class="@AppIcons.Trainer" aria-hidden="true"></i> @Math.Min(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
-                    </span>
-                </div>
-                <div class="card-body">
-                    @if (_planLeadTrainings.Any())
-                    {
-                        <ul class="list-group list-group-flush">
-                            @foreach (var training in _planLeadTrainings.Take(DashboardDisplayLimit))
-                            {
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                    <span>@training.Title</span>
-                                    <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id/edit">Edit</a>
-                                </li>
-                            }
-                        </ul>
-                        <a href="/plan-training" class="btn btn-sm btn-primary mt-3">Plan training</a>
-                    }
-                    else
-                    {
-                        <div class="text-muted">No trainings currently assigned for planning.</div>
-                    }
+        @if (_isGroupTrainer)
+        {
+            <div class="col-12 col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header dashboard-card-header">
+                        <span class="fw-bold">My trainings to plan</span>
+                        <span class="dashboard-card-counter">
+                            <i class="@AppIcons.Trainer" aria-hidden="true"></i> @Math.Min(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        @if (_planLeadTrainings.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var training in _planLeadTrainings.Take(DashboardDisplayLimit))
+                                {
+                                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="me-2">@training.DateTime.ToString("ddd dd.MM. HH:mm")</span>
+                                            <span class="text-muted small">@(training.LocationName ?? "-")</span>
+                                        </div>
+                                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id/edit">
+                                            <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>Plan
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                            <a href="/plan-training" class="btn btn-sm btn-primary mt-3">All trainings</a>
+                        }
+                        else
+                        {
+                            <div class="text-muted">No trainings to plan.</div>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
+        }
 
-        <div class="col-12 col-xl-6">
-            <div class="card h-100">
-                <div class="card-header dashboard-card-header">
-                    <span class="fw-bold">Outstanding users to approve</span>
-                    <span class="dashboard-card-counter">
-                        <i class="@AppIcons.UserClock" aria-hidden="true"></i> @Math.Min(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
-                    </span>
+        @if (_isGroupAdmin)
+        {
+            <div class="col-12 col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header dashboard-card-header">
+                        <span class="fw-bold">Outstanding users to approve</span>
+                        <span class="dashboard-card-counter">
+                            <i class="@AppIcons.UserClock" aria-hidden="true"></i> @Math.Min(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        @if (_outstandingApprovals.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var user in _outstandingApprovals.Take(DashboardDisplayLimit))
+                                {
+                                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                        <span>@user.DisplayName <span class="text-muted small">(@user.RequestedGroup)</span></span>
+                                        <a class="btn btn-sm btn-outline-primary" href="/users">Review</a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-muted">No outstanding approvals.</div>
+                        }
+                    </div>
                 </div>
+            </div>
+        }
+    </div>
+
+    @if (_isGroupAdmin && _planningOverviewByGroup.Any())
+    {
+        @foreach (var (groupName, trainings) in _planningOverviewByGroup)
+        {
+            <div class="card collapsible-card mb-4">
+                <div class="card-header collapsible-card-header dashboard-card-header">
+                    <button type="button" class="collapsible-card-toggle" @onclick="TogglePlanningOverview">
+                        <span class="fw-bold">Planning Overview: @groupName</span>
+                        <i class="@(_planningOverviewExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
+                    </button>
+                    <div class="collapsible-card-meta small">
+                        <span class="dashboard-card-counter">
+                            <i class="@AppIcons.CalendarCheck" aria-hidden="true"></i> @trainings.Count
+                        </span>
+                    </div>
+                </div>
+                @if (_planningOverviewExpanded)
+                {
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr><th>Date</th><th>Location</th><th>Trainer</th><th>Status</th><th class="text-end">Actions</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var training in trainings)
+                                    {
+                                        <tr>
+                                            <td class="small">@FormatDashboardDateTime(training)</td>
+                                            <td class="small">@(training.LocationName ?? "-")</td>
+                                            <td class="small">@training.TrainerName</td>
+                                            <td><span class="badge @GetStatusBadgeClass(training.Status)">@training.Status</span></td>
+                                            <td class="text-end">
+                                                <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">
+                                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+    @if (_isSuperAdmin)
+    {
+        <div class="card collapsible-card mb-4">
+            <div class="card-header collapsible-card-header dashboard-card-header">
+                <button type="button" class="collapsible-card-toggle" @onclick="ToggleNotifications">
+                    <span class="fw-bold">Notification Activity</span>
+                    <i class="@(_notificationsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
+                </button>
+                <div class="collapsible-card-meta small">
+                    <span class="dashboard-card-counter me-3">
+                        <i class="@AppIcons.Bell" aria-hidden="true"></i> @Math.Min(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
+                    </span>
+                    <span class="text-success me-3"><i class="@AppIcons.Check" aria-hidden="true"></i> @_notificationSuccessCount</span>
+                    <span class="text-danger"><i class="@AppIcons.XMark" aria-hidden="true"></i> @_notificationFailureCount</span>
+                </div>
+            </div>
+            @if (_notificationsExpanded)
+            {
                 <div class="card-body">
-                    @if (_outstandingApprovals.Any())
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ResetNotificationPointerAsync">Reset pointer</button>
+                    </div>
+
+                    @if (_recentLogs.Any())
                     {
-                        <ul class="list-group list-group-flush">
-                            @foreach (var user in _outstandingApprovals.Take(DashboardDisplayLimit))
-                            {
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                    <span>@user.DisplayName <span class="text-muted small">(@user.RequestedGroup)</span></span>
-                                    <a class="btn btn-sm btn-outline-primary" href="/users">Review</a>
-                                </li>
-                            }
-                        </ul>
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr><th>Log ID</th><th>Date (UTC)</th><th>Action</th><th>Recipient</th><th>Status</th><th>Error</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in _recentLogs.Take(NotificationDisplayLimit))
+                                    {
+                                        <tr>
+                                            <td class="small">#@log.Id</td>
+                                            <td class="small">@log.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
+                                            <td class="small">@log.Action</td>
+                                            <td class="small text-muted">@log.RecipientEmail</td>
+                                            <td>
+                                                @if (log.IsSuccess)
+                                                {
+                                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
+                                                }
+                                            </td>
+                                            <td class="small text-danger">@log.ErrorMessage</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     }
                     else
                     {
-                        <div class="text-muted">No outstanding approvals.</div>
+                        <div class="text-muted">No notification activity since the current reset pointer.</div>
                     }
                 </div>
-            </div>
+            }
         </div>
-    </div>
+    }
 </div>
 
 @code {
@@ -289,6 +348,8 @@
     private List<TrainingDto> _myNextTrainings = new();
     private List<TrainingDto> _availableNextTrainings = new();
     private List<TrainingDto> _planLeadTrainings = new();
+    private Dictionary<string, List<TrainingDto>> _planningOverviewByGroup = new();
+    private bool _planningOverviewExpanded = true;
     private List<OutstandingApprovalViewModel> _outstandingApprovals = new();
 
     private IReadOnlyList<Trainings.Domain.Entities.NotificationLog> _recentLogs = Array.Empty<Trainings.Domain.Entities.NotificationLog>();
@@ -332,8 +393,9 @@
         _emailConfirmed = userDto?.EmailConfirmedAt.HasValue == true;
         _userCountry = userDto?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
 
+        var now = DateTime.UtcNow;
         var allActiveTrainings = (await TrainingService.GetActiveAsync())
-            .Where(t => t.DateTime >= DateTime.Now)
+            .Where(t => t.DateTime >= now)
             .OrderBy(t => t.DateTime)
             .ToList();
 
@@ -344,14 +406,14 @@
             .ToHashSet();
 
         var trainerTrainings = _isGroupTrainer
-            ? (await TrainingService.GetByTrainerIdAsync(_userId)).Where(t => t.DateTime >= DateTime.Now).OrderBy(t => t.DateTime).ToList()
+            ? (await TrainingService.GetByTrainerIdAsync(_userId)).Where(t => t.DateTime >= now).OrderBy(t => t.DateTime).ToList()
             : new List<TrainingDto>();
 
         var myRegistrationIds = new HashSet<int>();
         if (_isGroupMember)
         {
             var myRegistrations = (await RegistrationService.GetByUserIdAsync(_userId)).ToList();
-            foreach (var registration in myRegistrations.Where(r => r.Status == Trainings.Domain.Enums.RegistrationStatus.Registered))
+            foreach (var registration in myRegistrations.Where(r => r.Status == RegistrationStatus.Registered))
             {
                 myRegistrationIds.Add(registration.TrainingId);
             }
@@ -361,7 +423,7 @@
         foreach (var trainingId in myRegistrationIds)
         {
             var training = await TrainingService.GetByIdAsync(trainingId);
-            if (training is not null && training.DateTime >= DateTime.Now)
+            if (training is not null && training.DateTime >= now)
             {
                 registeredTrainings.Add(training);
             }
@@ -374,18 +436,38 @@
             .OrderBy(t => t.DateTime)
             .ToList();
 
-        _planLeadTrainings = trainerTrainings;
+        _planLeadTrainings = trainerTrainings
+            .Where(t => t.Status != TrainingStatus.Planned)
+            .ToList();
 
         _availableNextTrainings = (_isSuperAdmin || _isGroupMember)
             ? allActiveTrainings
                 .Where(t =>
                     !myRegistrationIds.Contains(t.Id) &&
-                    (_isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value))))
+                    (_isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value))) &&
+                    (t.Status == TrainingStatus.Planned
+                        ? t.DateTime <= now.AddDays(28)
+                        : t.DateTime <= now.AddDays(4)))
                 .ToList()
             : new List<TrainingDto>();
 
         if (_isGroupAdmin)
         {
+            var utcToday = DateTime.UtcNow.Date;
+            var dayOffset = utcToday.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)utcToday.DayOfWeek - 1;
+            var startOfWeek = utcToday.AddDays(-dayOffset);
+            var planningOverviewTrainings = _isSuperAdmin
+                ? (await TrainingService.GetAllAsync())
+                : (await TrainingService.GetActiveAsync());
+
+            _planningOverviewByGroup = planningOverviewTrainings
+                .Where(t => t.DateTime.Date >= startOfWeek &&
+                            t.GroupId.HasValue &&
+                            (_isSuperAdmin || accessibleGroupIds.Contains(t.GroupId.Value)))
+                .OrderBy(t => t.DateTime)
+                .GroupBy(t => t.GroupName ?? "Unknown Group")
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             var pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
             var allGroups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
             _outstandingApprovals = new List<OutstandingApprovalViewModel>();
@@ -393,7 +475,7 @@
             foreach (var pendingUser in pendingUsers)
             {
                 var membership = (await GroupService.GetAllMembershipsForUserAsync(pendingUser.Id))
-                    .FirstOrDefault(m => m.Status == Trainings.Domain.Enums.GroupMembershipStatus.Pending);
+                    .FirstOrDefault(m => m.Status == GroupMembershipStatus.Pending);
                 var requestedGroup = membership is null
                     ? "Unknown"
                     : allGroups.TryGetValue(membership.GroupId, out var groupName) ? groupName : $"Group #{membership.GroupId}";
@@ -403,6 +485,7 @@
         }
         else
         {
+            _planningOverviewByGroup.Clear();
             _outstandingApprovals.Clear();
         }
 
@@ -436,6 +519,11 @@
         _notificationsExpanded = !_notificationsExpanded;
     }
 
+    private void TogglePlanningOverview()
+    {
+        _planningOverviewExpanded = !_planningOverviewExpanded;
+    }
+
     private async Task RegisterForTrainingAsync(int trainingId)
     {
         _availableTrainingActionMessage = null;
@@ -465,6 +553,13 @@
         var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? _userCountry);
         return training.DateTime.ToString("dd.MM. HH:mm", culture);
     }
+
+    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
+    {
+        TrainingStatus.Planned => "bg-success",
+        TrainingStatus.Planning => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
 
     private async Task ResetNotificationPointerAsync()
     {

@@ -1,4 +1,5 @@
 using Trainings.Application.DTOs;
+using Trainings.Domain.Enums;
 
 namespace Trainings.Application.Interfaces;
 
@@ -26,6 +27,9 @@ public interface ITrainingService
     /// every occurrence is already occupied.
     /// </summary>
     Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default);
+
+    /// <summary>Explicitly sets the lifecycle status of the training.</summary>
+    Task SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct = default);
 
     /// <summary>
     /// Marks the attendance sheet for the specified training as locked, preventing participants

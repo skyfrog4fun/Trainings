@@ -1,6 +1,6 @@
 # Application Specification — Trainings
 
-> **Version:** 1.0.8
+> **Version:** 1.0.13
 > **Language:** English (US)
 > **Primary audience:** AI agents and automated tooling
 > **Secondary audience:** Human developers and stakeholders
@@ -92,8 +92,9 @@ The separate `PendingGroupRequest` entity is **removed**. Its lifecycle is now h
 | Field     | Change | Detail |
 |-----------|--------|--------|
 | `GroupId` | **Now required** | Every training belongs to exactly one group. `int` (non-nullable FK → Group). |
+| `Status`  | **New** | `TrainingStatus` lifecycle with `New`, `Planning`, and `Planned`. New trainings start as `New`; moving to `Planned` is an explicit trainer/admin action. |
 
-> A trainer who wants the same training in two groups must create it separately for each group (copy is out of scope).
+> A trainer who wants the same training in two groups must create it separately for each group (copy is out of scope). Registration opens up to 4 weeks ahead for `Planned` trainings, and only within 4 days of the start time for `New` or `Planning` trainings.
 
 #### `MailConfiguration` — **New Entity**
 
@@ -318,6 +319,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
   - A participant cannot register for the same training twice.
   - Registration is not allowed when `RegisteredCount >= Capacity`.
   - Only users with `GroupMembership.Status = Approved` in the training's group can see or register.
+  - Registration windows depend on training lifecycle: `Planned` trainings open up to 4 weeks before start; `New` and `Planning` trainings open only within 4 days before start.
 
 ### UC-07 — Cancel Registration (Participant)
 
@@ -336,6 +338,8 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 - **Business Rules:**
   - Only users with an active `Registered` registration may have attendance recorded.
   - The trainer recording attendance must be the trainer of that session (or a group Admin / SuperAdmin).
+  - Attendance drafts may be saved before the training starts.
+  - Final attendance can only be finalized and locked once `Training.DateTime <= DateTime.UtcNow`.
 
 ### UC-09 — View Attendance Report (Trainer / Admin)
 

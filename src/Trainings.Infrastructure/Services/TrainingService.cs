@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 using Trainings.Domain.Interfaces;
 using Trainings.Infrastructure.Data;
 
@@ -64,7 +65,7 @@ public class TrainingService : ITrainingService
             Capacity = dto.Capacity,
             TrainerId = dto.TrainerId,
             GroupId = dto.GroupId,
-            IsActive = true
+            Status = TrainingStatus.New
         };
         await _trainingRepository.AddAsync(training);
         return MapToDto(training);
@@ -88,7 +89,7 @@ public class TrainingService : ITrainingService
         training.DateTime = dto.DateTime;
         training.DurationMinutes = dto.DurationMinutes;
         training.Capacity = dto.Capacity;
-        training.IsActive = dto.IsActive;
+        training.Status = dto.Status;
         training.TrainerId = dto.TrainerId;
         training.GroupId = dto.GroupId;
         await _trainingRepository.UpdateAsync(training);
@@ -98,6 +99,15 @@ public class TrainingService : ITrainingService
     {
         _appRuntimeModeService.EnsureWriteAllowed();
         await _trainingRepository.DeleteAsync(id);
+    }
+
+    public async Task SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+        training.Status = status;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<IEnumerable<TrainingBlockDto>> GetBlocksAsync(int trainingId, CancellationToken ct = default)
@@ -280,7 +290,7 @@ public class TrainingService : ITrainingService
         DateTime = t.DateTime,
         DurationMinutes = t.DurationMinutes,
         Capacity = t.Capacity,
-        IsActive = t.IsActive,
+        Status = t.Status,
         TrainerId = t.TrainerId,
         TrainerName = t.Trainer?.DisplayName ?? string.Empty,
         RegisteredCount = t.Registrations?.Count(r => r.Status == Domain.Enums.RegistrationStatus.Registered) ?? 0,

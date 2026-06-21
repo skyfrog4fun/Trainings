@@ -117,10 +117,21 @@
                     @if (_isEdit)
                     {
                         <div class="col-12 col-md-3">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" @bind="_isActive" id="isActive" />
-                                <label class="form-check-label" for="isActive">Active</label>
+                            <label class="form-label">Status</label>
+                            <div class="mt-1">
+                                <span class="badge @GetStatusBadgeClass(_status) me-2">@_status</span>
+                                @if (_status != TrainingStatus.Planned)
+                                {
+                                    <button type="button" class="btn btn-sm btn-success" @onclick="MarkAsPlannedAsync" title="Mark this training as Planned">
+                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>Mark as Planned
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="RevertToPlanningAsync" title="Revert to Planning">
+                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>Revert to Planning
+                                    </button>
+                                }
                             </div>
                         </div>
                     }
@@ -368,7 +379,7 @@
     private TimeOnly? _startTime = new(19, 0);
     private int _durationMinutes = 90;
     private string _endTime = "20:30";
-    private bool _isActive = true;
+    private TrainingStatus _status = TrainingStatus.New;
     private string? _error;
     private int _trainerId;
     private int? _groupId;
@@ -504,7 +515,7 @@
         _capacity = training.Capacity;
         _date = training.DateTime.Date;
         _startTime = TimeOnly.FromDateTime(training.DateTime);
-        _isActive = training.IsActive;
+        _status = training.Status;
         _groupId = training.GroupId;
         _trainerId = training.TrainerId;
         _locationId = training.LocationId;
@@ -604,6 +615,13 @@
         _endTime = end.ToString("HH:mm");
     }
 
+    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
+    {
+        TrainingStatus.Planned => "bg-success",
+        TrainingStatus.Planning => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+
     private string FormatLocalizedDate(DateTime value) =>
         value.ToString("d", _groupCulture);
 
@@ -659,7 +677,7 @@
                     Capacity = _capacity,
                     DateTime = dateTime,
                     DurationMinutes = _durationMinutes,
-                    IsActive = _isActive,
+                    Status = _status,
                     TrainerId = _trainerId,
                     GroupId = _groupId
                 });
@@ -702,6 +720,46 @@
             _error = ex.Message;
             _actionSuccess = false;
             _actionResult = $"Failed to save training: {ex.Message}";
+        }
+    }
+
+    private async Task MarkAsPlannedAsync()
+    {
+        if (!_persistedTrainingId.HasValue)
+        {
+            return;
+        }
+
+        try
+        {
+            await TrainingService.SetStatusAsync(_persistedTrainingId.Value, TrainingStatus.Planned);
+            _status = TrainingStatus.Planned;
+            _actionSuccess = true;
+            _actionResult = "Training marked as Planned.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task RevertToPlanningAsync()
+    {
+        if (!_persistedTrainingId.HasValue)
+        {
+            return;
+        }
+
+        try
+        {
+            await TrainingService.SetStatusAsync(_persistedTrainingId.Value, TrainingStatus.Planning);
+            _status = TrainingStatus.Planning;
+            _actionSuccess = true;
+            _actionResult = "Training reverted to Planning.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
         }
     }
 

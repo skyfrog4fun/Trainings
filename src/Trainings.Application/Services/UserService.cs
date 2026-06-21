@@ -126,13 +126,12 @@ public class UserService : IUserService
         await _userRepository.DeleteAsync(id);
     }
 
-    public async Task ChangePasswordAsync(int userId, string newPasswordHash)
+    public async Task ChangePasswordAsync(int userId, string newPassword)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
-
         var user = await _userRepository.GetByIdAsync(userId)
             ?? throw new InvalidOperationException($"User {userId} not found.");
-        user.PasswordHash = newPasswordHash;
+        user.PasswordHash = _passwordHasher.Hash(newPassword);
         await _userRepository.UpdateAsync(user);
     }
 
