@@ -95,16 +95,29 @@ public class UserRegistrationService : IUserRegistrationService
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
-        var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
+        var confirmLink = BuildConfirmLink(confirmToken.Token);
         var confirmationEmail = await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
 
         var admins = await _context.Users
             .Where(u => u.Role == UserRole.SuperAdmin)
             .ToListAsync(ct);
 
+        var requestedGroups = await _context.Groups
+            .Where(g => dto.RequestedGroupIds.Contains(g.Id))
+            .Select(g => g.Name)
+            .ToListAsync(ct);
+        var requestedGroupsLabel = requestedGroups.Count == 0 ? "No group selected" : string.Join(", ", requestedGroups);
+        var userDetailsLink = BuildUserDetailsLink(user.Id);
+
         foreach (var admin in admins)
         {
-            await _emailService.SendAdminNewParticipantNotificationAsync(admin.Email, user.DisplayName, ct);
+            await _emailService.SendAdminNewParticipantNotificationAsync(
+                admin.Email,
+                user.DisplayName,
+                user.Email,
+                requestedGroupsLabel,
+                userDetailsLink,
+                ct);
         }
 
         return new RegistrationResultDto
@@ -188,13 +201,15 @@ public class UserRegistrationService : IUserRegistrationService
         }
 
         await _context.SaveChangesAsync(ct);
+
+        await _emailService.SendRegistrationApprovedAsync(user.Email, BuildAppBaseUrl(), ct);
     }
 
     public async Task RejectUserAsync(int userId, int adminUserId, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        _ = await _context.Users.FindAsync([userId], ct)
+        var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
         var managedGroupIds = GetManagedGroupIds();
@@ -217,6 +232,8 @@ public class UserRegistrationService : IUserRegistrationService
         }
 
         await _context.SaveChangesAsync(ct);
+
+        await _emailService.SendRegistrationRejectedAsync(user.Email, BuildAppBaseUrl(), ct);
     }
 
     public async Task<IEnumerable<UserDto>> GetPendingApprovalsAsync(CancellationToken ct = default)
@@ -264,8 +281,31 @@ public class UserRegistrationService : IUserRegistrationService
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
-        var confirmLink = $"{_baseUrl}/confirm-email?token={confirmToken.Token}";
+        var confirmLink = BuildConfirmLink(confirmToken.Token);
         return await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
+    }
+
+    private string BuildConfirmLink(string token)
+    {
+        var baseUrl = BuildAppBaseUrl();
+        return $"{baseUrl}/confirm-email?token={token}";
+    }
+
+    private string BuildUserDetailsLink(int userId)
+    {
+        var baseUrl = BuildAppBaseUrl();
+        return $"{baseUrl}/users?editUserId={userId}";
+    }
+
+    private string BuildAppBaseUrl()
+    {
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is not null && request.Host.HasValue)
+        {
+            return $"{request.Scheme}://{request.Host.Value}";
+        }
+
+        return _baseUrl;
     }
 
     private HashSet<int>? GetManagedGroupIds()
