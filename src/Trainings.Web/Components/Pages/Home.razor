@@ -7,6 +7,8 @@
 @inject IRegistrationService RegistrationService
 @inject INotificationLogService NotificationLogService
 @inject IGroupService GroupService
+@inject ILocationService LocationService
+@inject IMailConfigurationService MailConfigurationService
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
 @inject IDateTimeFormatService DateTimeFormatService
@@ -41,6 +43,77 @@
     }
 
     <div class="row g-3 mb-4">
+        @if (_isSuperAdmin)
+        {
+            <div class="col-12 col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header dashboard-card-header">
+                        <span class="fw-bold">System Overview</span>
+                        <span class="dashboard-card-counter">
+                            <i class="@AppIcons.Gear" aria-hidden="true"></i> 5
+                        </span>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span>Mail Configuration: @_mailConfigurationCount</span>
+                            <div class="d-flex gap-1">
+                                <a class="btn btn-primary btn-sm" href="/config/mail" title="Open mail configuration overview">
+                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-success btn-sm" href="/config/mail?create=true" title="Create mail configuration">
+                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span>Locations: @_locationCount</span>
+                            <div class="d-flex gap-1">
+                                <a class="btn btn-primary btn-sm" href="/config/locations" title="Open locations overview">
+                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-success btn-sm" href="/config/locations?create=true" title="Create location">
+                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span>Groups: @_groupCount</span>
+                            <div class="d-flex gap-1">
+                                <a class="btn btn-primary btn-sm" href="/groups" title="Open groups overview">
+                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-success btn-sm" href="/groups?create=true" title="Create group">
+                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span>Users: @_userCount</span>
+                            <div class="d-flex gap-1">
+                                <a class="btn btn-primary btn-sm" href="/users" title="Open users overview">
+                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-success btn-sm" href="/users?create=true" title="Create user">
+                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span>Trainings: @_trainingCount</span>
+                            <div class="d-flex gap-1">
+                                <a class="btn btn-primary btn-sm" href="/trainings" title="Open trainings overview">
+                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-success btn-sm" href="/trainings/create" title="Create training">
+                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header dashboard-card-header">
@@ -357,6 +430,11 @@
     private bool _notificationsExpanded = true;
     private int _notificationSuccessCount;
     private int _notificationFailureCount;
+    private int _mailConfigurationCount;
+    private int _locationCount;
+    private int _groupCount;
+    private int _userCount;
+    private int _trainingCount;
     private const int DashboardDisplayLimit = 5;
     private const int NotificationDisplayLimit = 10;
 
@@ -491,10 +569,24 @@
 
         if (_isSuperAdmin)
         {
+            _mailConfigurationCount = (await MailConfigurationService.GetAllAsync()).Count;
+            _locationCount = (await LocationService.GetAllAsync()).Count();
+            _groupCount = (await GroupService.GetAllAsync()).Count();
+            _userCount = (await UserService.GetAllAsync()).Count();
+            _trainingCount = (await TrainingService.GetAllAsync()).Count();
+
             _notificationPointerLogId = await NotificationLogService.GetResetPointerLogIdAsync();
             _recentLogs = await NotificationLogService.GetRecentLogsAsync(50, _notificationPointerLogId);
             _notificationSuccessCount = _recentLogs.Count(x => x.IsSuccess);
             _notificationFailureCount = _recentLogs.Count(x => !x.IsSuccess);
+        }
+        else
+        {
+            _mailConfigurationCount = 0;
+            _locationCount = 0;
+            _groupCount = 0;
+            _userCount = 0;
+            _trainingCount = 0;
         }
     }
 

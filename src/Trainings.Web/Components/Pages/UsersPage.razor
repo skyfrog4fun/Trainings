@@ -3,11 +3,13 @@
 @attribute [Authorize(Policy = "GroupAdmin")]
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
+@inject IRegistrationService RegistrationService
 @inject IGroupService GroupService
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject IDateTimeFormatService DateTimeFormatService
+@inject NavigationManager NavigationManager
 
 <PageTitle>User Management</PageTitle>
 
@@ -143,9 +145,48 @@
                         </div>
                     }
                 </div>
-                <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveUser" disabled="@IsWriteBlocked">Save</button>
-                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
+                <div class="mt-3 d-flex flex-wrap gap-2 justify-content-between align-items-start">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-primary" @onclick="SaveUser" disabled="@IsWriteBlocked">Save</button>
+                        <button class="btn btn-secondary" @onclick="CancelForm"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
+                    </div>
+                    @if (_editUserId != 0)
+                    {
+                        var editedUser = _users.FirstOrDefault(u => u.Id == _editUserId);
+                        if (editedUser is not null)
+                        {
+                            <div class="d-flex flex-wrap gap-2 ms-md-auto">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        title="Send verification mail"
+                                        @onclick="() => SendAccountMail(editedUser)"
+                                        disabled="@IsWriteBlocked || IsUserBusy(editedUser.Id)">
+                                    @if (IsUserBusy(editedUser.Id))
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    }
+                                    <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>Verify Mail
+                                </button>
+                                @if (CanDeleteUser(editedUser.Id))
+                                {
+                                    <button type="button" class="btn btn-outline-danger"
+                                            title="Delete user"
+                                            @onclick="() => DeleteUserAsync(editedUser)"
+                                            disabled="@IsWriteBlocked">
+                                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete User
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn @(editedUser.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                            title="@(editedUser.IsActive ? "Deactivate" : "Activate")"
+                                            @onclick="() => ToggleActive(editedUser)"
+                                            disabled="@IsWriteBlocked">
+                                        <i class="@(editedUser.IsActive ? AppIcons.UserSlash : AppIcons.UserCheck) me-1" aria-hidden="true"></i>@(editedUser.IsActive ? "Deactivate User" : "Activate User")
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
                 </div>
                 @if (_formError != null) { <div class="alert alert-danger mt-2">@_formError</div> }
             </div>
@@ -213,19 +254,30 @@
         }
 
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-striped table-sm">
                 <thead>
-                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Groups</th><th>Email Verified</th><th>Active</th><th>Actions</th></tr>
+                    <tr>
+                        <th>Name</th>
+                        <th class="d-none d-md-table-cell">Email</th>
+                        <th>Role</th>
+                        <th>Groups</th>
+                        <th class="d-none d-md-table-cell">Email Verified</th>
+                        <th class="d-none d-md-table-cell">Active</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in _users)
                     {
                         <tr>
-                            <td>@user.DisplayName</td>
-                            <td>@user.Email</td>
-                            <td><span class="badge @RoleBadge(user.Role)">@user.Role</span></td>
-                            <td class="small">@FormatApprovedGroups(user.Id)</td>
+                            <td class="text-break">@user.DisplayName</td>
+                            <td class="d-none d-md-table-cell">@user.Email</td>
                             <td>
+                                <span class="badge @RoleBadge(user.Role) d-none d-md-inline">@GetDisplayRole(user)</span>
+                                <span class="badge @RoleBadge(user.Role) d-inline d-md-none">@GetRoleAbbreviation(user)</span>
+                            </td>
+                            <td class="small text-wrap">@FormatApprovedGroups(user.Id)</td>
+                            <td class="d-none d-md-table-cell">
                                 @if (user.EmailConfirmedAt.HasValue)
                                 {
                                     <span class="text-success" title="Confirmed @user.EmailConfirmedAt.Value.ToString("MMM d, yyyy")"><i class="@AppIcons.Check" aria-hidden="true"></i></span>
@@ -235,7 +287,7 @@
                                     <span class="text-muted"><i class="@AppIcons.XMark" aria-hidden="true"></i></span>
                                 }
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 @if (user.IsActive)
                                 {
                                     <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
@@ -245,12 +297,12 @@
                                     <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
                                 }
                             </td>
-                            <td>
+                            <td class="text-nowrap">
                                 <button type="button" class="btn btn-sm btn-outline-primary me-1" title="Edit"
                                         @onclick="() => EditUser(user)" disabled="@IsWriteBlocked">
                                     <i class="@AppIcons.Edit" aria-hidden="true"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary me-1"
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1 d-none d-md-inline-block"
                                         title="Send account mail"
                                         @onclick="() => SendAccountMail(user)"
                                         disabled="@IsWriteBlocked || IsUserBusy(user.Id)">
@@ -260,12 +312,24 @@
                                     }
                                     <i class="@AppIcons.Envelope" aria-hidden="true"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success")"
-                                        title="@(user.IsActive ? "Deactivate" : "Activate")"
-                                        @onclick="() => ToggleActive(user)"
-                                        disabled="@IsWriteBlocked">
-                                    <i class="@(user.IsActive ? AppIcons.UserSlash : AppIcons.UserCheck)" aria-hidden="true"></i>
-                                </button>
+                                @if (CanDeleteUser(user.Id))
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-danger d-none d-md-inline-block"
+                                            title="Delete user"
+                                            @onclick="() => DeleteUserAsync(user)"
+                                            disabled="@IsWriteBlocked">
+                                        <i class="@AppIcons.Trash" aria-hidden="true"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success") d-none d-md-inline-block"
+                                            title="@(user.IsActive ? "Deactivate" : "Activate")"
+                                            @onclick="() => ToggleActive(user)"
+                                            disabled="@IsWriteBlocked">
+                                        <i class="@(user.IsActive ? AppIcons.UserSlash : AppIcons.UserCheck)" aria-hidden="true"></i>
+                                    </button>
+                                }
                             </td>
                         </tr>
                     }
@@ -288,6 +352,7 @@
     private Dictionary<int, List<GroupMembershipDto>> _membershipsByUser = new();
     private List<GroupDto> _availableGroups = new();
     private List<CountryDto> _countries = new();
+    private readonly Dictionary<int, bool> _hasRegistrationHistoryByUser = new();
     private readonly HashSet<int> _expandedPendingUserIds = new();
     private HashSet<int> _managedGroupIds = new();
     private HashSet<int> _selectedGroupIds = new();
@@ -322,6 +387,21 @@
     {
         _runtimeMode = AppRuntimeModeService.GetCurrent();
         await LoadUsers();
+
+        if (!IsWriteBlocked && TryGetEditUserIdFromQuery(out var editUserId))
+        {
+            var userToEdit = _users.FirstOrDefault(u => u.Id == editUserId);
+            if (userToEdit is not null)
+            {
+                EditUser(userToEdit);
+                return;
+            }
+        }
+
+        if (ShouldOpenCreateFormFromQuery() && !IsWriteBlocked)
+        {
+            ShowCreateForm();
+        }
     }
 
     private async Task LoadUsers()
@@ -370,6 +450,8 @@
                 .ToList();
         }
 
+        await LoadRegistrationHistoryAsync(_users.Select(u => u.Id));
+
         _loading = false;
     }
 
@@ -382,8 +464,21 @@
         }
     }
 
+    private async Task LoadRegistrationHistoryAsync(IEnumerable<int> userIds)
+    {
+        _hasRegistrationHistoryByUser.Clear();
+        foreach (var userId in userIds.Distinct())
+        {
+            var hasHistory = (await RegistrationService.GetByUserIdAsync(userId)).Any();
+            _hasRegistrationHistoryByUser[userId] = hasHistory;
+        }
+    }
+
     private List<GroupMembershipDto> GetMemberships(int userId) =>
         _membershipsByUser.TryGetValue(userId, out var memberships) ? memberships : [];
+
+    private bool CanDeleteUser(int userId) =>
+        !_hasRegistrationHistoryByUser.GetValueOrDefault(userId);
 
     private void ShowCreateForm()
     {
@@ -399,6 +494,30 @@
         _passwordValidationError = string.Empty;
         _formError = null;
         _showForm = true;
+    }
+
+    private bool ShouldOpenCreateFormFromQuery()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query);
+        if (!query.TryGetValue("create", out var createValue))
+        {
+            return false;
+        }
+
+        var value = createValue.ToString();
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
+    }
+
+    private bool TryGetEditUserIdFromQuery(out int userId)
+    {
+        userId = 0;
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query);
+        if (!query.TryGetValue("editUserId", out var editUserIdValue))
+        {
+            return false;
+        }
+
+        return int.TryParse(editUserIdValue.ToString(), out userId) && userId > 0;
     }
 
     private void EditUser(UserDto user)
@@ -558,6 +677,41 @@
         await LoadUsers();
     }
 
+    private async Task DeleteUserAsync(UserDto user)
+    {
+        if (!CanDeleteUser(user.Id))
+        {
+            _actionSuccess = false;
+            _actionResult = $"{user.DisplayName} cannot be deleted because training registrations exist.";
+            return;
+        }
+
+        try
+        {
+            var memberships = (await GroupService.GetAllMembershipsForUserAsync(user.Id)).ToList();
+            foreach (var membership in memberships)
+            {
+                await GroupService.RemoveMemberAsync(membership.Id);
+            }
+
+            await UserService.DeleteAsync(user.Id);
+
+            if (_editUserId == user.Id)
+            {
+                CancelForm();
+            }
+
+            _actionSuccess = true;
+            _actionResult = $"{user.DisplayName} was deleted.";
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = $"Failed: {ex.Message}";
+        }
+    }
+
     private async Task ApproveUser(UserDto user)
     {
         await UserRegistrationService.ApproveUserAsync(user.Id, 0);
@@ -709,6 +863,38 @@
         if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { error = "Password must contain at least one special character."; return false; }
         return true;
     }
+
+    private string GetDisplayRole(UserDto user)
+    {
+        if (user.Role == UserRole.SuperAdmin)
+        {
+            return "SuperAdmin";
+        }
+
+        var memberships = GetMemberships(user.Id)
+            .Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive)
+            .ToList();
+
+        if (memberships.Any(m => m.Role == GroupMemberRole.Admin))
+        {
+            return "Group Admin";
+        }
+
+        if (memberships.Any(m => m.Role == GroupMemberRole.Trainer))
+        {
+            return "Trainer";
+        }
+
+        return "User";
+    }
+
+    private string GetRoleAbbreviation(UserDto user) => GetDisplayRole(user) switch
+    {
+        "SuperAdmin" => "S",
+        "Group Admin" => "A",
+        "Trainer" => "T",
+        _ => "U"
+    };
 
     private string RoleBadge(UserRole role) => role switch
     {

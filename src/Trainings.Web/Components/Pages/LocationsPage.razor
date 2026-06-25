@@ -4,6 +4,7 @@
 @inject ILocationService LocationService
 @inject IGroupService GroupService
 @inject ICountryService CountryService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Locations</PageTitle>
 
@@ -112,6 +113,11 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
+
+        if (ShouldOpenCreateFormFromQuery())
+        {
+            ShowCreateForm();
+        }
     }
 
     private async Task LoadData()
@@ -190,6 +196,18 @@
         _formIsSystemWide = false;
         _formCountryId = null;
         _showForm = true;
+    }
+
+    private bool ShouldOpenCreateFormFromQuery()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query);
+        if (!query.TryGetValue("create", out var createValue))
+        {
+            return false;
+        }
+
+        var value = createValue.ToString();
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
     }
 
     private void Edit(LocationDto location)

@@ -325,6 +325,12 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadConfigs();
+
+        if (ShouldOpenCreateFormFromQuery())
+        {
+            ShowCreateForm();
+        }
+
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
         var userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
@@ -367,6 +373,18 @@
         _formIsActive = true;
         _formError = null;
         _showForm = true;
+    }
+
+    private bool ShouldOpenCreateFormFromQuery()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query);
+        if (!query.TryGetValue("create", out var createValue))
+        {
+            return false;
+        }
+
+        var value = createValue.ToString();
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
     }
 
     private void EditConfig(MailConfiguration config)

@@ -53,15 +53,52 @@ public partial class SmtpEmailService : IEmailService
         return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, null, ct);
     }
 
-    public async Task<EmailSendResult> SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, CancellationToken ct = default)
+    public async Task<EmailSendResult> SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, string userEmail, string requestedGroups, string userDetailsLink, CancellationToken ct = default)
     {
+        var encodedUserName = WebUtility.HtmlEncode(userName);
+        var encodedUserEmail = WebUtility.HtmlEncode(userEmail);
+        var encodedRequestedGroups = WebUtility.HtmlEncode(requestedGroups);
+        var encodedUserDetailsLink = WebUtility.HtmlEncode(userDetailsLink);
         var subject = "New Participant Registration Pending Approval";
         var body = $"""
             <p>A new participant has registered and is pending approval:</p>
-            <p><strong>{userName}</strong></p>
+            <ul>
+                <li><strong>Name:</strong> {encodedUserName}</li>
+                <li><strong>Email:</strong> {encodedUserEmail}</li>
+                <li><strong>Requested group(s):</strong> {encodedRequestedGroups}</li>
+            </ul>
+            <p>Open the user directly:</p>
+            <p><a href="{encodedUserDetailsLink}">{encodedUserDetailsLink}</a></p>
             <p>Please review and approve or reject the registration in the admin panel.</p>
             """;
         return await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
+    }
+
+    public async Task<EmailSendResult> SendRegistrationApprovedAsync(string toEmail, string appLink, CancellationToken ct = default)
+    {
+        var encodedLink = WebUtility.HtmlEncode(appLink);
+        var subject = "Your registration was approved";
+        var body = $"""
+            <p>Your registration has been approved.</p>
+            <p>You can now sign in and use the Trainings app:</p>
+            <p><a href="{encodedLink}">{encodedLink}</a></p>
+            """;
+
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
+    }
+
+    public async Task<EmailSendResult> SendRegistrationRejectedAsync(string toEmail, string appLink, CancellationToken ct = default)
+    {
+        var encodedLink = WebUtility.HtmlEncode(appLink);
+        var subject = "Your registration was reviewed";
+        var body = $"""
+            <p>Your registration request was reviewed and is currently not approved.</p>
+            <p>If needed, please contact your administrator for details.</p>
+            <p>Application link:</p>
+            <p><a href="{encodedLink}">{encodedLink}</a></p>
+            """;
+
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
     }
 
     public async Task<EmailSendResult> SendTrainingCancellationAsync(string toEmail, string trainingTitle, DateTime trainingDateTime, string appLink, CancellationToken ct = default)
