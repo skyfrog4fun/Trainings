@@ -3,8 +3,10 @@
 Thank you for contributing! Please read this guide before opening a pull request.
 
 For deeper context see:
-- [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) — functional requirements and data model.
-- [`docs/DEVELOPMENT_WORKFLOW.md`](docs/DEVELOPMENT_WORKFLOW.md) — branching strategy and deployment process.
+- [`docs/architecture/SPECIFICATION.md`](docs/architecture/SPECIFICATION.md) — functional requirements and data model.
+- [`docs/process/DEVELOPMENT_WORKFLOW.md`](docs/process/DEVELOPMENT_WORKFLOW.md) — branching strategy and deployment process.
+- [`AGENTS.md`](AGENTS.md) — canonical AI and coding conventions.
+- [`CLAUDE.md`](CLAUDE.md) — Claude adapter and task routing references.
 
 ---
 
@@ -42,7 +44,7 @@ For deeper context see:
 
 - Follow the rules in [`.editorconfig`](.editorconfig).
 - Run `dotnet format` before pushing to auto-fix formatting issues.
-- Follow C# conventions documented in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+- Follow C# conventions documented in [`AGENTS.md`](AGENTS.md).
 
 ---
 

@@ -15,7 +15,7 @@ This document describes how a code change travels from idea to production.
 ### 2. Implementation
 
 - Create a feature branch from `main` (e.g. `feature/my-change` or `fix/my-bug`).
-- Implement the change following the [Clean Architecture](SPECIFICATION.md) guidelines.
+- Implement the change following the [Clean Architecture](../architecture/SPECIFICATION.md) guidelines.
 - Keep changes focused and limited to what is described in the issue.
 
 ### 3. Local Testing
