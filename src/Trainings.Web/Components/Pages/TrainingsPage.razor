@@ -7,18 +7,19 @@
 @inject IUserService UserService
 @inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>Trainings</PageTitle>
+<PageTitle>@Localizer["Trainings"]</PageTitle>
 
 <div class="container-fluid px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
-        <h2 class="mb-0">Trainings</h2>
+        <h2 class="mb-0">@Localizer["Trainings"]</h2>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-outline-secondary" @onclick="ToggleFilter">
+            <button type="button" class="btn btn-app-outline" @onclick="ToggleFilter">
                 <i class="@AppIcons.Filter" aria-hidden="true"></i>
             </button>
             <AuthorizeView Policy="GroupTrainer">
-                <a href="/trainings/create" class="btn btn-success"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New Training</a>
+                <a href="/trainings/create" class="btn btn-app-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Add"]</a>
             </AuthorizeView>
         </div>
     </div>
@@ -28,7 +29,7 @@
         <div class="row g-2 mb-3">
             <div class="col-12 col-md-4">
                 <select class="form-select" @bind="_filterGroupId">
-                    <option value="">All groups</option>
+                    <option value="">@Localizer["AllGroups"]</option>
                     @foreach (var group in _filterGroups)
                     {
                         <option value="@group.Id">@group.Name</option>
@@ -37,7 +38,7 @@
             </div>
             <div class="col-12 col-md-3">
                 <select class="form-select" @bind="_filterTrainerId">
-                    <option value="">All trainers</option>
+                    <option value="">@Localizer["AllTrainers"]</option>
                     @foreach (var trainer in _filterTrainers)
                     {
                         <option value="@trainer.Id">@trainer.Name</option>
@@ -46,14 +47,14 @@
             </div>
             <div class="col-12 col-md-3">
                 <select class="form-select" @bind="_filterAvailability">
-                    <option value="all">All</option>
-                    <option value="available">Available</option>
-                    <option value="full">Full</option>
+                    <option value="all">@Localizer["All"]</option>
+                    <option value="available">@Localizer["Available"]</option>
+                    <option value="full">@Localizer["Full"]</option>
                 </select>
             </div>
             <div class="col-12 col-md-2 d-grid">
-                <button type="button" class="btn btn-outline-secondary" @onclick="ClearFilters">
-                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>Clear filters
+                <button type="button" class="btn btn-app-outline" @onclick="ClearFilters">
+                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>@Localizer["ClearFilters"]
                 </button>
             </div>
         </div>
@@ -74,44 +75,55 @@
         {
             <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry">
                 <Actions Context="training">
-                    <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
-                        <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Details
+                    <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["View"]' aria-label='@Localizer["View"]'>
+                        <i class="fa-solid fa-eye" aria-hidden="true"></i>
                     </a>
+                    @if (CanDeleteTraining(training))
+                    {
+                        <a href="/trainings/@training.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Edit"]' aria-label='@Localizer["Edit"]'>
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                        </a>
+                    }
                     @if (CanDeleteTraining(training))
                     {
                         @if (_pendingDeleteTrainingId == training.Id)
                         {
-                            <span class="small text-danger">Are you sure?</span>
                             <button type="button"
-                                    class="btn btn-sm btn-outline-secondary"
+                                    class="btn btn-sm btn-app-icon btn-app-outline"
                                     @onclick="CancelDeleteTraining"
-                                    disabled="@_deleteInProgress">
-                                Cancel
+                                    disabled="@_deleteInProgress"
+                                    title='@Localizer["Cancel"]'
+                                    aria-label='@Localizer["Cancel"]'>
+                                <i class="@AppIcons.XMark" aria-hidden="true"></i>
                             </button>
                             <button type="button"
-                                    class="btn btn-sm btn-danger"
+                                    class="btn btn-sm btn-app-icon btn-app-outline-danger"
                                     @onclick="() => ConfirmDeleteTrainingAsync(training)"
-                                    disabled="@_deleteInProgress">
-                                <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                                    disabled="@_deleteInProgress"
+                                    title='@Localizer["Delete"]'
+                                    aria-label='@Localizer["Delete"]'>
+                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
                             </button>
                         }
                         else
                         {
                             <button type="button"
-                                    class="btn btn-sm btn-outline-danger"
+                                    class="btn btn-sm btn-app-icon btn-app-outline-danger"
                                     @onclick="() => PromptDeleteTraining(training)"
-                                    disabled="@_deleteInProgress">
-                                <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                                    disabled="@_deleteInProgress"
+                                    title='@Localizer["Delete"]'
+                                    aria-label='@Localizer["Delete"]'>
+                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
                             </button>
                         }
                     }
                     @if (CanRegister(training))
                     {
                         <button type="button"
-                                class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
+                                class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-outline-danger" : "btn-app-primary") ms-auto"
                                 @onclick="() => ToggleRegistrationAsync(training)"
                                 disabled="@IsRegistrationDisabled(training)">
-                            <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                            <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? Localizer["Unregister"] : Localizer["Register"])
                         </button>
                     }
                 </Actions>
@@ -119,19 +131,19 @@
         }
         else if (FilteredArchivedTrainings.Any())
         {
-            <div class="alert alert-info mt-3">No recent trainings match the current filters.</div>
+            <div class="alert alert-info mt-3">@Localizer["NoRecentTrainingsMatchCurrentFilters"]</div>
         }
         else if (_showFilter)
         {
-            <div class="alert alert-info mt-3">No trainings match the current filters.</div>
+            <div class="alert alert-info mt-3">@Localizer["NoTrainingsMatchCurrentFilters"]</div>
         }
         else if (!_archivedTrainings.Any())
         {
-            <div class="alert alert-info mt-3">No trainings available.</div>
+            <div class="alert alert-info mt-3">@Localizer["NoTrainingsAvailable"]</div>
         }
         else
         {
-            <div class="alert alert-info mt-3">No trainings from the last 2 weeks are available.</div>
+            <div class="alert alert-info mt-3">@Localizer["NoTrainingsFromLastTwoWeeksAvailable"]</div>
         }
 
         @if (FilteredArchivedTrainings.Any())
@@ -139,54 +151,65 @@
             <div class="card collapsible-card mt-4">
                 <div class="card-header collapsible-card-header">
                     <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleArchivedTrainings">
-                        <span>Trainings older than 2 weeks</span>
+                        <span>@Localizer["TrainingsOlderThanTwoWeeks"]</span>
                         <i class="@(_archivedTrainingsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
                     </button>
-                    <div class="collapsible-card-meta">@FilteredArchivedTrainings.Count training(s)</div>
+                    <div class="collapsible-card-meta">@Localizer["TrainingCount", FilteredArchivedTrainings.Count]</div>
                 </div>
                 @if (_archivedTrainingsExpanded)
                 {
                     <div class="card-body">
                         <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry">
                             <Actions Context="training">
-                                <a href="/trainings/@training.Id" class="btn btn-sm btn-outline-primary">
-                                    <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Details
+                                <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["View"]' aria-label='@Localizer["View"]'>
+                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                 </a>
+                                @if (CanDeleteTraining(training))
+                                {
+                                    <a href="/trainings/@training.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Edit"]' aria-label='@Localizer["Edit"]'>
+                                        <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                                    </a>
+                                }
                                 @if (CanDeleteTraining(training))
                                 {
                                     @if (_pendingDeleteTrainingId == training.Id)
                                     {
-                                        <span class="small text-danger">Are you sure?</span>
                                         <button type="button"
-                                                class="btn btn-sm btn-outline-secondary"
+                                                class="btn btn-sm btn-app-icon btn-app-outline"
                                                 @onclick="CancelDeleteTraining"
-                                                disabled="@_deleteInProgress">
-                                            Cancel
+                                                disabled="@_deleteInProgress"
+                                                title='@Localizer["Cancel"]'
+                                                aria-label='@Localizer["Cancel"]'>
+                                            <i class="@AppIcons.XMark" aria-hidden="true"></i>
                                         </button>
                                         <button type="button"
-                                                class="btn btn-sm btn-danger"
+                                                class="btn btn-sm btn-app-icon btn-app-outline-danger"
                                                 @onclick="() => ConfirmDeleteTrainingAsync(training)"
-                                                disabled="@_deleteInProgress">
-                                            <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                                                disabled="@_deleteInProgress"
+                                                title='@Localizer["Delete"]'
+                                                aria-label='@Localizer["Delete"]'>
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                         </button>
                                     }
                                     else
                                     {
                                         <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
+                                                class="btn btn-sm btn-app-icon btn-app-outline-danger"
                                                 @onclick="() => PromptDeleteTraining(training)"
-                                                disabled="@_deleteInProgress">
-                                            <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                                                disabled="@_deleteInProgress"
+                                                title='@Localizer["Delete"]'
+                                                aria-label='@Localizer["Delete"]'>
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                         </button>
                                     }
                                 }
                                 @if (CanRegister(training))
                                 {
                                     <button type="button"
-                                            class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-outline-danger" : "btn-primary") ms-auto"
+                                            class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-outline-danger" : "btn-app-primary") ms-auto"
                                             @onclick="() => ToggleRegistrationAsync(training)"
                                             disabled="@IsRegistrationDisabled(training)">
-                                        <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? "Unregister" : "Register")
+                                        <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? Localizer["Unregister"] : Localizer["Register"])
                                     </button>
                                 }
                             </Actions>
@@ -331,13 +354,13 @@
             {
                 await RegistrationService.CancelAsync(_userId, training.Id);
                 _actionIsError = false;
-                _actionMessage = "Registration cancelled.";
+                _actionMessage = Localizer["RegistrationCancelled"];
             }
             else
             {
                 await RegistrationService.RegisterAsync(_userId, training.Id);
                 _actionIsError = false;
-                _actionMessage = "Successfully registered.";
+                _actionMessage = Localizer["SuccessfullyRegistered"];
             }
 
             await LoadAsync();
@@ -389,7 +412,7 @@
             _deleteInProgress = true;
             await TrainingService.DeleteAsync(training.Id);
             _actionIsError = false;
-            _actionMessage = "Training deleted.";
+            _actionMessage = Localizer["TrainingDeleted"];
             await LoadAsync();
         }
         catch (Exception ex)

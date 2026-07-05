@@ -1,0 +1,593 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Groups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Trainings" xml:space="preserve">
+    <value>Trainings</value>
+  </data>
+  <data name="Welcome back" xml:space="preserve">
+    <value>Welcome back</value>
+  </data>
+  <data name="Active Members" xml:space="preserve">
+    <value>Active Members</value>
+  </data>
+  <data name="Upcoming Trainings" xml:space="preserve">
+    <value>Upcoming Trainings</value>
+  </data>
+  <data name="View All" xml:space="preserve">
+    <value>View All</value>
+  </data>
+  <data name="Quick Access" xml:space="preserve">
+    <value>Quick Access</value>
+  </data>
+  <data name="New Group" xml:space="preserve">
+    <value>New Group</value>
+  </data>
+  <data name="New User" xml:space="preserve">
+    <value>New User</value>
+  </data>
+  <data name="New Training" xml:space="preserve">
+    <value>New Training</value>
+  </data>
+  <data name="Export Report" xml:space="preserve">
+    <value>Export Report</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="AccountEmailSentTo" xml:space="preserve">
+    <value>Account email sent to {0}.</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Activate" xml:space="preserve">
+    <value>Activate</value>
+  </data>
+  <data name="ActivateUser" xml:space="preserve">
+    <value>Activate User</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="AllGroups" xml:space="preserve">
+    <value>All Groups</value>
+  </data>
+  <data name="AllTrainers" xml:space="preserve">
+    <value>All Trainers</value>
+  </data>
+  <data name="AllTrainings" xml:space="preserve">
+    <value>All Trainings</value>
+  </data>
+  <data name="AreYouSure" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="AssignUserToManagedGroup" xml:space="preserve">
+    <value>Please assign the user to at least one managed group.</value>
+  </data>
+  <data name="Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="BioOrWelcomeMessage" xml:space="preserve">
+    <value>Bio Or Welcome Message</value>
+  </data>
+  <data name="Birthday" xml:space="preserve">
+    <value>Birthday</value>
+  </data>
+  <data name="BrowseTrainings" xml:space="preserve">
+    <value>Browse Trainings</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Clear Filters</value>
+  </data>
+  <data name="ConfirmedOn" xml:space="preserve">
+    <value>Confirmed {0}</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="CreateGroup" xml:space="preserve">
+    <value>Create Group</value>
+  </data>
+  <data name="CreateLocation" xml:space="preserve">
+    <value>Create Location</value>
+  </data>
+  <data name="CreateMailConfiguration" xml:space="preserve">
+    <value>Create Mail Configuration</value>
+  </data>
+  <data name="CreateTraining" xml:space="preserve">
+    <value>Create Training</value>
+  </data>
+  <data name="CreateUser" xml:space="preserve">
+    <value>Create User</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="DateUtc" xml:space="preserve">
+    <value>Date UTC</value>
+  </data>
+  <data name="Deactivate" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="DeactivateUser" xml:space="preserve">
+    <value>Deactivate User</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>Delete User</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DurationInMinutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>Duration Minutes</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>Edit Group</value>
+  </data>
+  <data name="EditUser" xml:space="preserve">
+    <value>Edit User</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="EmailNotVerified" xml:space="preserve">
+    <value>Email Not Verified</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>Email Required</value>
+  </data>
+  <data name="EmailVerified" xml:space="preserve">
+    <value>Email Verified</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="EntryDate" xml:space="preserve">
+    <value>Entry Date</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="FailedMessage" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="FailedToResendVerificationEmail" xml:space="preserve">
+    <value>Failed to resend verification email: {0}</value>
+  </data>
+  <data name="Female" xml:space="preserve">
+    <value>Female</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="FirstNameRequired" xml:space="preserve">
+    <value>First Name Required</value>
+  </data>
+  <data name="Full" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="GeneratePassword" xml:space="preserve">
+    <value>Generate Password</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="GroupAdmin" xml:space="preserve">
+    <value>Group Admin</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Group Name</value>
+  </data>
+  <data name="GroupsCount" xml:space="preserve">
+    <value>Groups: {0}</value>
+  </data>
+  <data name="GroupSlugExample" xml:space="preserve">
+    <value>Group Slug Example</value>
+  </data>
+  <data name="InPlanning" xml:space="preserve">
+    <value>In Planning</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="LastNameRequired" xml:space="preserve">
+    <value>Last Name Required</value>
+  </data>
+  <data name="Localized" xml:space="preserve">
+    <value>Localized</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="LocationsCount" xml:space="preserve">
+    <value>Locations: {0}</value>
+  </data>
+  <data name="LogId" xml:space="preserve">
+    <value>Log ID</value>
+  </data>
+  <data name="MailConfigurationCount" xml:space="preserve">
+    <value>Mail Configuration: {0}</value>
+  </data>
+  <data name="Male" xml:space="preserve">
+    <value>Male</value>
+  </data>
+  <data name="ManagedGroupsRequired" xml:space="preserve">
+    <value>Managed Groups Required</value>
+  </data>
+  <data name="MaxParticipants" xml:space="preserve">
+    <value>Max Participants</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="Mobile" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="MyNextTrainingsEnrolledAssigned" xml:space="preserve">
+    <value>My Next trainings</value>
+  </data>
+  <data name="MyTrainingsToPlan" xml:space="preserve">
+    <value>My Trainings To Plan</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NewPasswordMinChars" xml:space="preserve">
+    <value>New Password Min Chars</value>
+  </data>
+  <data name="NextTrainingsAvailableToAttend" xml:space="preserve">
+    <value>Next Trainings Available To Attend</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="NoAvailableUpcomingTrainings" xml:space="preserve">
+    <value>No Available Upcoming Trainings</value>
+  </data>
+  <data name="NoEmailModePreviewShown" xml:space="preserve">
+    <value>No E-Mail mode is active. The account email for {0} is shown below.</value>
+  </data>
+  <data name="NoGroupsAvailableForAssignment" xml:space="preserve">
+    <value>No Groups Available For Assignment</value>
+  </data>
+  <data name="NoGroupsYet" xml:space="preserve">
+    <value>No Groups Yet</value>
+  </data>
+  <data name="NoNotificationActivitySinceReset" xml:space="preserve">
+    <value>No Notification Activity Since Reset</value>
+  </data>
+  <data name="NoOutstandingApprovals" xml:space="preserve">
+    <value>No Outstanding Approvals</value>
+  </data>
+  <data name="NoRecentTrainingsMatchCurrentFilters" xml:space="preserve">
+    <value>No Recent Trainings Match Current Filters</value>
+  </data>
+  <data name="NotificationActivity" xml:space="preserve">
+    <value>Notification Activity</value>
+  </data>
+  <data name="NoTrainingsAvailable" xml:space="preserve">
+    <value>No Trainings Available</value>
+  </data>
+  <data name="NoTrainingsFromLastTwoWeeksAvailable" xml:space="preserve">
+    <value>No Trainings From Last Two Weeks Available</value>
+  </data>
+  <data name="NoTrainingsMatchCurrentFilters" xml:space="preserve">
+    <value>No Trainings Match Current Filters</value>
+  </data>
+  <data name="NoTrainingsToPlan" xml:space="preserve">
+    <value>No Trainings To Plan</value>
+  </data>
+  <data name="NoUpcomingTrainings" xml:space="preserve">
+    <value>No Upcoming Trainings</value>
+  </data>
+  <data name="OpenGroupsOverview" xml:space="preserve">
+    <value>Open Groups Overview</value>
+  </data>
+  <data name="OpenLocationsOverview" xml:space="preserve">
+    <value>Open Locations Overview</value>
+  </data>
+  <data name="OpenMailConfigurationOverview" xml:space="preserve">
+    <value>Open Mail Configuration Overview</value>
+  </data>
+  <data name="OpenTrainingDetails" xml:space="preserve">
+    <value>Open Training Details</value>
+  </data>
+  <data name="OpenTrainingsOverview" xml:space="preserve">
+    <value>Open Trainings Overview</value>
+  </data>
+  <data name="OpenUsersOverview" xml:space="preserve">
+    <value>Open Users Overview</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="OutstandingUsersToApprove" xml:space="preserve">
+    <value>Outstanding Users To Approve</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Password Required</value>
+  </data>
+  <data name="PendingApprovals" xml:space="preserve">
+    <value>Pending approvals ({0})</value>
+  </data>
+  <data name="Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="PlanningOverview" xml:space="preserve">
+    <value>Planning Overview: {0}</value>
+  </data>
+  <data name="ReadOnlyModeSuperAdminOnly" xml:space="preserve">
+    <value>Read Only mode is active. Only SuperAdmins can make changes.</value>
+  </data>
+  <data name="Recipient" xml:space="preserve">
+    <value>Recipient</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="RegisterForTraining" xml:space="preserve">
+    <value>Register For Training</value>
+  </data>
+  <data name="RegistrationCancelled" xml:space="preserve">
+    <value>Registration Cancelled</value>
+  </data>
+  <data name="RegistrationDate" xml:space="preserve">
+    <value>Registration Date</value>
+  </data>
+  <data name="RequestedGroup" xml:space="preserve">
+    <value>Requested Group</value>
+  </data>
+  <data name="ResendVerification" xml:space="preserve">
+    <value>Resend Verification</value>
+  </data>
+  <data name="ResetPointer" xml:space="preserve">
+    <value>Reset Pointer</value>
+  </data>
+  <data name="Review" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SelectCountry" xml:space="preserve">
+    <value>Select Country</value>
+  </data>
+  <data name="SelectDay" xml:space="preserve">
+    <value>Select Day</value>
+  </data>
+  <data name="SelectLocation" xml:space="preserve">
+    <value>Select Location</value>
+  </data>
+  <data name="SendAccountMail" xml:space="preserve">
+    <value>Send Account Mail</value>
+  </data>
+  <data name="SendVerificationMail" xml:space="preserve">
+    <value>Send Verification Mail</value>
+  </data>
+  <data name="SetNewPasswordLeaveBlank" xml:space="preserve">
+    <value>Set New Password (leave blank to keep current)</value>
+  </data>
+  <data name="Slug" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="SuccessfullyRegistered" xml:space="preserve">
+    <value>Successfully Registered</value>
+  </data>
+  <data name="SuperAdmin" xml:space="preserve">
+    <value>SuperAdmin</value>
+  </data>
+  <data name="SystemOverview" xml:space="preserve">
+    <value>System Overview</value>
+  </data>
+  <data name="ToggleDetails" xml:space="preserve">
+    <value>Toggle Details</value>
+  </data>
+  <data name="Trainer" xml:space="preserve">
+    <value>Trainer</value>
+  </data>
+  <data name="TrainingCount" xml:space="preserve">
+    <value>{0} training(s)</value>
+  </data>
+  <data name="TrainingDeleted" xml:space="preserve">
+    <value>Training Deleted</value>
+  </data>
+  <data name="TrainingFull" xml:space="preserve">
+    <value>Training Full</value>
+  </data>
+  <data name="TrainingsCount" xml:space="preserve">
+    <value>Trainings: {0}</value>
+  </data>
+  <data name="TrainingsOlderThanTwoWeeks" xml:space="preserve">
+    <value>Trainings Older Than Two Weeks</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="UnknownGroup" xml:space="preserve">
+    <value>Unknown Group</value>
+  </data>
+  <data name="Unregister" xml:space="preserve">
+    <value>Unregister</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="UserCannotBeDeletedDueToRegistrations" xml:space="preserve">
+    <value>{0} cannot be deleted because training registrations exist.</value>
+  </data>
+  <data name="UsersCount" xml:space="preserve">
+    <value>Users: {0}</value>
+  </data>
+  <data name="UserWasDeleted" xml:space="preserve">
+    <value>{0} was deleted.</value>
+  </data>
+  <data name="VerificationEmailSent" xml:space="preserve">
+    <value>Verification Email Sent</value>
+  </data>
+  <data name="VerifyMail" xml:space="preserve">
+    <value>Verify Mail</value>
+  </data>
+  <data name="Weekday" xml:space="preserve">
+    <value>Weekday</value>
+  </data>
+  <data name="WelcomeMessageBio" xml:space="preserve">
+    <value>Welcome Message Bio</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="PasswordValidationMinLength" xml:space="preserve">
+    <value>Password must be at least 8 characters.</value>
+  </data>
+  <data name="PasswordValidationUppercase" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter.</value>
+  </data>
+  <data name="PasswordValidationLowercase" xml:space="preserve">
+    <value>Password must contain at least one lowercase letter.</value>
+  </data>
+  <data name="PasswordValidationDigit" xml:space="preserve">
+    <value>Password must contain at least one digit.</value>
+  </data>
+  <data name="PasswordValidationSpecialCharacter" xml:space="preserve">
+    <value>Password must contain at least one special character.</value>
+  </data>
+  <data name="OpenMenu" xml:space="preserve">
+    <value>Open menu</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="DarkMode" xml:space="preserve">
+    <value>Dark mode</value>
+  </data>
+  <data name="MyRegistrations" xml:space="preserve">
+    <value>My Registrations</value>
+  </data>
+  <data name="PlanTraining" xml:space="preserve">
+    <value>Plan Training</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statistics</value>
+  </data>
+  <data name="UserInformation" xml:space="preserve">
+    <value>User Information</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="Locations" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="Icons" xml:space="preserve">
+    <value>Icons</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="SomethingWentWrong" xml:space="preserve">
+    <value>Something went wrong</value>
+  </data>
+  <data name="UnexpectedErrorLoadingPage" xml:space="preserve">
+    <value>An unexpected error occurred while loading this page. Please try again.</value>
+  </data>
+  <data name="TryAgain" xml:space="preserve">
+    <value>Try Again</value>
+  </data>
+  <data name="GoToDashboard" xml:space="preserve">
+    <value>Go to Dashboard</value>
+  </data>
+  <data name="UnhandledErrorOccurred" xml:space="preserve">
+    <value>An unhandled error has occurred.</value>
+  </data>
+  <data name="Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+</root>

@@ -1,4 +1,5 @@
 @inject IDateTimeFormatService DateTimeFormatService
+@inject IStringLocalizer<SharedResources> Localizer
 
 <div class="row g-3">
     @foreach (var training in Trainings)
@@ -9,7 +10,7 @@
                     <button type="button" class="btn btn-link collapsible-card-toggle training-card-toggle" @onclick="() => ToggleCollapsed(training.Id)">
                             @if (string.IsNullOrWhiteSpace(training.Title))
                             {
-                                <span class="training-card-header-title text-muted fst-italic text-truncate">In planning ...</span>
+                                <span class="training-card-header-title text-muted fst-italic text-truncate">@Localizer["InPlanning"]</span>
                             }
                             else
                             {
@@ -63,8 +64,8 @@
         return training.DateTime.ToString("g", culture);
     }
 
-    private static string FormatDuration(int? durationMinutes) =>
-        durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
+    private string FormatDuration(int? durationMinutes) =>
+        durationMinutes.HasValue ? Localizer["DurationInMinutes", durationMinutes.Value] : "-";
 
     private bool IsCollapsed(int trainingId) => _collapsedTrainingIds.Contains(trainingId);
 

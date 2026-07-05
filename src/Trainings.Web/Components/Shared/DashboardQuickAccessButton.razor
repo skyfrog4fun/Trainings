@@ -1,0 +1,17 @@
+<a class="dashboard-quick-access-btn" href="@Href" title="@Text" aria-label="@Text">
+    <span class="dashboard-quick-access-icon" aria-hidden="true">
+        <i class="@IconClass"></i>
+    </span>
+    <span class="dashboard-quick-access-text">@Text</span>
+</a>
+
+@code {
+    [Parameter]
+    public string Href { get; set; } = "/";
+
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+
+    [Parameter]
+    public string IconClass { get; set; } = AppIcons.CircleInfo;
+}

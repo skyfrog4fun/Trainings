@@ -1,8 +1,139 @@
+.app-navbar {
+    background: var(--color-header-bg);
+}
+
+.app-navbar-brand {
+    color: var(--color-text-on-dark);
+}
+
+.app-navbar-brand:hover,
+.app-navbar-brand:focus {
+    color: var(--color-text-on-dark);
+    opacity: 0.92;
+}
+
+.app-menu-button {
+    border: none;
+    color: var(--color-text-on-dark);
+    background: transparent;
+}
+
+.app-menu-button:hover,
+.app-menu-button:focus {
+    border-color: var(--color-text-on-dark);
+    color: var(--color-text-on-dark);
+    background: var(--brand-tradition-80);
+}
+
+.app-theme-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--color-text-on-dark);
+    padding: 0.375rem 0.5rem;
+    line-height: 1;
+    font-size: 1.1rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.app-theme-button:hover,
+.app-theme-button:focus-visible {
+    color: var(--color-text-on-dark);
+    background: var(--brand-tradition-80);
+}
+
+.app-menu-dropdown {
+    min-width: 22rem;
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text);
+}
+
+.app-menu-dropdown .dropdown-item {
+    color: var(--color-text);
+}
+
+.app-menu-dropdown .dropdown-item:hover,
+.app-menu-dropdown .dropdown-item:focus {
+    background: var(--color-surface-alt);
+}
+
+.app-toggle-row {
+    color: var(--color-text);
+}
+
+.app-toggle-label {
+    font-weight: 600;
+}
+
+.app-toggle-state {
+    color: var(--color-text-muted);
+}
+
+.app-language-dropdown {
+    min-width: 10.5rem;
+}
+
+.app-language-button {
+    min-width: 10.5rem;
+    text-align: left;
+    border-color: var(--color-border);
+    color: var(--color-text);
+    background-color: var(--color-surface);
+}
+
+.app-language-button:hover,
+.app-language-button:focus,
+.app-language-button:active {
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    background-color: var(--color-surface-alt);
+}
+
+.app-language-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 102, 0.15);
+}
+
+.app-language-menu {
+    min-width: 10.5rem;
+    border-color: var(--color-border);
+    background: var(--color-surface);
+}
+
+.app-language-menu .dropdown-item.active,
+.app-language-menu .dropdown-item:active {
+    color: var(--color-text-on-dark);
+    background: var(--color-primary);
+}
+
+.app-language-menu .dropdown-item {
+    color: var(--color-text);
+}
+
+.app-language-menu .dropdown-item:hover,
+.app-language-menu .dropdown-item:focus {
+    background: var(--color-surface-alt);
+}
+
+.app-language-menu .dropdown-item.active:hover,
+.app-language-menu .dropdown-item.active:focus {
+    color: var(--color-text-on-dark);
+    background: var(--color-primary);
+}
+
+.app-language-menu .dropdown-item.active:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 102, 0.15);
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: var(--brand-appreciation-40);
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(var(--brand-tradition-rgb), 0.2);
+    box-shadow: 0 -1px 2px var(--brand-tradition-80);;
     box-sizing: border-box;
     display: none;
     left: 0;

@@ -11,7 +11,7 @@
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
         <h2 class="mb-0">My Registrations</h2>
-        <button type="button" class="btn btn-outline-secondary" @onclick="ToggleFilter">
+        <button type="button" class="btn btn-app-outline" @onclick="ToggleFilter">
             <i class="@AppIcons.Filter" aria-hidden="true"></i>
         </button>
     </div>
@@ -45,7 +45,7 @@
                 </select>
             </div>
             <div class="col-12 col-md-2 d-grid">
-                <button type="button" class="btn btn-outline-secondary" @onclick="ClearFilters">
+                <button type="button" class="btn btn-app-outline" @onclick="ClearFilters">
                     <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>Clear filters
                 </button>
             </div>
@@ -62,7 +62,7 @@
             @foreach (var reg in FilteredRegistrations)
             {
                 <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm @GetCardCssClass(reg)">
+                    <div class="card h-100 shadow-sm registration-overview-card @GetCardCssClass(reg)">
                         <div class="card-body d-flex flex-column">
                             <div class="training-card-title text-truncate">@reg.TrainingTitle</div>
                             <div class="d-flex justify-content-between align-items-center gap-2 text-muted small mt-2">
@@ -81,7 +81,9 @@
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center gap-2">
                             <span class="badge @(reg.Status == RegistrationStatus.Registered ? "bg-success" : "bg-secondary")">@reg.Status</span>
-                            <a href="/trainings/@reg.TrainingId" class="btn btn-sm btn-outline-primary ms-auto">View Details</a>
+                            <a href="/trainings/@reg.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary ms-auto" title="View Details" aria-label="View Details">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

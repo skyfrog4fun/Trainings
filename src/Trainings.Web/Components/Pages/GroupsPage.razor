@@ -7,46 +7,47 @@
 @inject ICountryService CountryService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>Groups</PageTitle>
+<PageTitle>@Localizer["Groups"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
-        <h2>Groups</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New Group</button>
+        <h2>@Localizer["Groups"]</h2>
+        <button class="btn btn-app-primary" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Add"]</button>
     </div>
 
     @if (_showForm)
     {
         <div class="card mb-4">
             <div class="card-body">
-                <h5>@(_editGroupId == 0 ? "Create Group" : "Edit Group")</h5>
+                <h5>@(_editGroupId == 0 ? Localizer["CreateGroup"] : Localizer["EditGroup"])</h5>
                 <div class="row g-2">
                     <div class="col-12 col-md-4">
-                        <label class="form-label">Name</label>
-                        <input class="form-control" @bind="_formName" placeholder="Group name" />
+                        <label class="form-label">@Localizer["Name"]</label>
+                        <input class="form-control" @bind="_formName" placeholder='@Localizer["GroupName"]' />
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">Slug</label>
-                        <input class="form-control" @bind="_formSlug" placeholder="e.g. my-group" />
+                        <label class="form-label">@Localizer["Slug"]</label>
+                        <input class="form-control" @bind="_formSlug" placeholder='@Localizer["GroupSlugExample"]' />
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <div class="form-check mt-2">
                             <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="grpActive" />
-                            <label class="form-check-label" for="grpActive">Active</label>
+                            <label class="form-check-label" for="grpActive">@Localizer["Active"]</label>
                         </div>
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label">Description</label>
+                        <label class="form-label">@Localizer["Description"]</label>
                         <textarea class="form-control" rows="2" @bind="_formDescription"></textarea>
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Location</label>
+                        <label class="form-label">@Localizer["Location"]</label>
                         <select class="form-select" @bind="_formLocationId">
-                            <option value="">Select location</option>
+                            <option value="">@Localizer["SelectLocation"]</option>
                             @foreach (var location in _formLocations)
                             {
                                 <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
@@ -54,14 +55,14 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Max Participant</label>
+                        <label class="form-label">@Localizer["MaxParticipants"]</label>
                         <input class="form-control" type="number" min="1" @bind="_formMaxParticipants" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Weekday</label>
+                        <label class="form-label">@Localizer["Weekday"]</label>
                         <select class="form-select" @bind="_formWeekday" @bind:after="CalculateGroupEndTime">
-                            <option value="">Select day</option>
+                            <option value="">@Localizer["SelectDay"]</option>
                             @foreach (var day in Enum.GetValues<DayOfWeek>())
                             {
                                 <option value="@day">@day</option>
@@ -69,24 +70,24 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Start</label>
+                        <label class="form-label">@Localizer["Start"]</label>
                         <input class="form-control" type="time" @bind="_formStartTime" @bind:after="CalculateGroupEndTime" />
-                        <div class="form-text">Localized: @FormatLocalizedTime(_formStartTime)</div>
+                        <div class="form-text">@Localizer["Localized"]: @FormatLocalizedTime(_formStartTime)</div>
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Duration (minutes)</label>
+                        <label class="form-label">@Localizer["DurationMinutes"]</label>
                         <input class="form-control" type="number" min="1" @bind="FormDurationMinutesValue" />
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">End</label>
+                        <label class="form-label">@Localizer["End"]</label>
                         <input class="form-control" type="time" value="@_formEndTime" readonly />
-                        <div class="form-text">Localized: @FormatLocalizedEndTime()</div>
+                        <div class="form-text">@Localizer["Localized"]: @FormatLocalizedEndTime()</div>
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Country</label>
+                        <label class="form-label">@Localizer["Country"]</label>
                         <select class="form-select" @bind="_formCountryId">
-                            <option value="">Select country</option>
+                            <option value="">@Localizer["SelectCountry"]</option>
                             @foreach (var country in _countries)
                             {
                                 <option value="@country.Id">@country.Code — @country.Name</option>
@@ -96,8 +97,8 @@
                 </div>
 
                 <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveGroup"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
-                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
+                    <button class="btn btn-primary me-2" @onclick="SaveGroup"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Save"]</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Cancel"]</button>
                 </div>
                 @if (_formError != null)
                 {
@@ -113,47 +114,42 @@
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th class="d-none d-md-table-cell">Description</th>
-                        <th>Members</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var group in _groups)
-                    {
-                        <tr>
-                            <td>@group.Name</td>
-                            <td class="text-muted small d-none d-md-table-cell">@group.Description</td>
-                            <td>@group.MemberCount</td>
-                            <td>
-                                @if (group.IsActive)
-                                {
-                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
-                                }
-                                else
-                                {
-                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
-                                }
-                            </td>
-                            <td>
-                                <a href="/groups/@group.Slug/members" class="btn btn-sm btn-outline-primary me-1" title="Members"><i class="@AppIcons.UserGroup" aria-hidden="true"></i></a>
-                                <button class="btn btn-sm btn-outline-secondary me-1" title="Edit" @onclick="() => EditGroup(group)"><i class="@AppIcons.Edit" aria-hidden="true"></i></button>
-                                <button class="btn btn-sm btn-outline-danger" title="Delete" @onclick="() => DeleteGroup(group)"><i class="@AppIcons.Trash" aria-hidden="true"></i></button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="app-overview-grid">
+            @foreach (var group in _groups)
+            {
+                <div class="app-overview-card">
+                    <div class="app-overview-main">
+                        <div class="app-overview-title text-break">@group.Name</div>
+                        <div class="app-overview-meta">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
+                        <div class="app-overview-meta mt-1">
+                            <span class="me-3"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</span>
+                            @if (group.IsActive)
+                            {
+                                <span><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Active"]</span>
+                            }
+                            else
+                            {
+                                <span><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["No"]</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="app-overview-actions">
+                        <a href="/groups/@group.Slug/members" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["View"]' aria-label='@Localizer["View"]'>
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        </a>
+                        <button class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Edit"]' aria-label='@Localizer["Edit"]' @onclick="() => EditGroup(group)">
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-sm btn-app-icon btn-app-outline-danger" title='@Localizer["Delete"]' aria-label='@Localizer["Delete"]' @onclick="() => DeleteGroup(group)">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
         @if (!_groups.Any())
         {
-            <div class="alert alert-info">No groups yet.</div>
+            <div class="alert alert-info">@Localizer["NoGroupsYet"]</div>
         }
     }
 </div>

@@ -1,17 +1,24 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 using Trainings.Application;
 using Trainings.Infrastructure;
 using Trainings.Infrastructure.Data;
 using Trainings.Web.Auth;
 using Trainings.Web.Components;
+using Trainings.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -59,6 +66,25 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthStatePro
 
 var app = builder.Build();
 
+var supportedCultures = new[]
+{
+    new CultureInfo("de"),
+    new CultureInfo("en")
+};
+
+var requestLocalizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("de"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures,
+    RequestCultureProviders =
+    [
+        new CookieRequestCultureProvider(),
+        new QueryStringRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    ]
+};
+
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -80,11 +106,48 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseRequestLocalization(requestLocalizationOptions);
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/theme/set", (HttpContext httpContext, string value, string? returnUrl) =>
+{
+    var normalizedTheme = ThemeService.NormalizeTheme(value);
+    httpContext.Response.Cookies.Append(
+        ThemeService.ThemeCookieName,
+        normalizedTheme,
+        ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
+
+    var target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+    if (!Uri.IsWellFormedUriString(target, UriKind.Relative))
+    {
+        target = "/";
+    }
+
+    return Results.LocalRedirect(target);
+});
+
+app.MapGet("/culture/set", (HttpContext httpContext, string culture, string? returnUrl) =>
+{
+    var normalizedCulture = string.Equals(culture, "en", StringComparison.OrdinalIgnoreCase) ? "en" : "de";
+    var cultureValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(normalizedCulture));
+
+    httpContext.Response.Cookies.Append(
+        CookieRequestCultureProvider.DefaultCookieName,
+        cultureValue,
+        ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
+
+    var target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+    if (!Uri.IsWellFormedUriString(target, UriKind.Relative))
+    {
+        target = "/";
+    }
+
+    return Results.LocalRedirect(target);
+});
 
 app.MapStaticAssets();
 app.MapRazorPages();
