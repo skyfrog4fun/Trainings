@@ -54,7 +54,7 @@
     <value>Trainings</value>
   </data>
   <data name="Welcome back" xml:space="preserve">
-    <value>Willkommen zurueck</value>
+    <value>Willkommen</value>
   </data>
   <data name="Active Members" xml:space="preserve">
     <value>Aktive Mitglieder</value>
@@ -81,13 +81,13 @@
     <value>Bericht exportieren</value>
   </data>
   <data name="Add" xml:space="preserve">
-    <value>Hinzufuegen</value>
+    <value>Hinzufügen</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Bearbeiten</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Loeschen</value>
+    <value>Löschen</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>Ansehen</value>
@@ -126,7 +126,7 @@
     <value>Sind Sie sicher?</value>
   </data>
   <data name="AssignUserToManagedGroup" xml:space="preserve">
-    <value>Bitte weisen Sie den Benutzer mindestens einer verwalteten Gruppe zu.</value>
+    <value>Bitte weise den Benutzer mindestens einer verwalteten Gruppe zu.</value>
   </data>
   <data name="Available" xml:space="preserve">
     <value>Available</value>
@@ -135,7 +135,7 @@
     <value>Bio Or Welcome Message</value>
   </data>
   <data name="Birthday" xml:space="preserve">
-    <value>Birthday</value>
+    <value>Geburtstag</value>
   </data>
   <data name="BrowseTrainings" xml:space="preserve">
     <value>Browse Trainings</value>
@@ -144,79 +144,79 @@
     <value>Cancel</value>
   </data>
   <data name="City" xml:space="preserve">
-    <value>City</value>
+    <value>Stadt</value>
   </data>
   <data name="ClearFilters" xml:space="preserve">
-    <value>Clear Filters</value>
+    <value>Filter löschen</value>
   </data>
   <data name="ConfirmedOn" xml:space="preserve">
-    <value>Bestaetigt {0}</value>
+    <value>Bestätigt {0}</value>
   </data>
   <data name="Country" xml:space="preserve">
-    <value>Country</value>
+    <value>Land</value>
   </data>
   <data name="CreateGroup" xml:space="preserve">
-    <value>Create Group</value>
+    <value>Gruppe erstellen</value>
   </data>
   <data name="CreateLocation" xml:space="preserve">
-    <value>Create Location</value>
+    <value>Ort erstellen</value>
   </data>
   <data name="CreateMailConfiguration" xml:space="preserve">
-    <value>Create Mail Configuration</value>
+    <value>Mail-Konfiguration erstellen</value>
   </data>
   <data name="CreateTraining" xml:space="preserve">
-    <value>Create Training</value>
+    <value>Training erstellen</value>
   </data>
   <data name="CreateUser" xml:space="preserve">
-    <value>Create User</value>
+    <value>Benutzer erstellen</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Date</value>
+    <value>Datum</value>
   </data>
   <data name="DateUtc" xml:space="preserve">
-    <value>Date UTC</value>
+    <value>Datum UTC</value>
   </data>
   <data name="Deactivate" xml:space="preserve">
-    <value>Deactivate</value>
+    <value>Deaktivieren</value>
   </data>
   <data name="DeactivateUser" xml:space="preserve">
-    <value>Deactivate User</value>
+    <value>Benutzer deaktivieren</value>
   </data>
   <data name="DeleteUser" xml:space="preserve">
-    <value>Delete User</value>
+    <value>Benutzer löschen</value>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Description</value>
+    <value>Beschreibung</value>
   </data>
   <data name="DurationInMinutes" xml:space="preserve">
     <value>{0} Min</value>
   </data>
   <data name="DurationMinutes" xml:space="preserve">
-    <value>Duration Minutes</value>
+    <value>Dauer in Minuten</value>
   </data>
   <data name="EditGroup" xml:space="preserve">
-    <value>Edit Group</value>
+    <value>Gruppe bearbeiten</value>
   </data>
   <data name="EditUser" xml:space="preserve">
-    <value>Edit User</value>
+    <value>Benutzer bearbeiten</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>Email</value>
+    <value>E-Mail</value>
   </data>
   <data name="EmailNotVerified" xml:space="preserve">
-    <value>Email Not Verified</value>
+    <value>E-Mail nicht verifiziert</value>
   </data>
   <data name="EmailRequired" xml:space="preserve">
-    <value>Email Required</value>
+    <value>E-Mail erforderlich</value>
   </data>
   <data name="EmailVerified" xml:space="preserve">
-    <value>Email Verified</value>
+    <value>E-Mail verifiziert</value>
   </data>
   <data name="End" xml:space="preserve">
-    <value>End</value>
+    <value>Ende</value>
   </data>
   <data name="EntryDate" xml:space="preserve">
-    <value>Entry Date</value>
+    <value>Eintrittsdatum</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>

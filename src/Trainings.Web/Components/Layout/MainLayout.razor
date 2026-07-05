@@ -8,7 +8,31 @@
 <nav class="navbar app-navbar sticky-top shadow-sm">
     <div class="container-fluid">
         <a class="navbar-brand app-navbar-brand fw-bold" href="/"><i class="@AppIcons.Bolt me-2" aria-hidden="true"></i>@Localizer["Trainings"]</a>
-        <div class="d-flex align-items-center gap-0">            
+        <div class="d-flex align-items-center gap-1 gap-md-2">
+            <div class="dropdown app-language-dropdown">
+                <button id="language-menu-button"
+                        type="button"
+                        class="btn btn-sm app-language-button dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
+                        aria-expanded="false"
+                        aria-label='@Localizer["Language"]'>
+                    <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                    <span>@CurrentLanguageDisplayName</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm app-language-menu">
+                    @foreach (var option in LanguageOptions)
+                    {
+                        <li>
+                            <a class="dropdown-item @(string.Equals(CurrentLanguage, option.Code, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)"
+                               href="@BuildCultureUrl(option.Code)">
+                                @option.DisplayName
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
             <a class="btn app-theme-button"
                href="@BuildThemeToggleUrl()"
                role="switch"
@@ -20,37 +44,7 @@
                 <button class="btn app-menu-button" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label='@Localizer["OpenMenu"]'>
                     <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow app-menu-dropdown">
-                <li class="px-3 py-2">
-                    <div class="d-flex align-items-center justify-content-between gap-3 app-toggle-row">
-                        <label class="d-flex align-items-center gap-2 mb-0 app-toggle-label" for="language-menu-button">
-                            <i class="fa-solid fa-globe" aria-hidden="true"></i>
-                            <span>@Localizer["Language"]</span>
-                        </label>
-                        <div class="dropdown app-language-dropdown">
-                            <button id="language-menu-button"
-                                    type="button"
-                                    class="btn btn-sm app-language-button dropdown-toggle"
-                                    data-bs-toggle="dropdown"
-                                    data-bs-auto-close="outside"
-                                    aria-expanded="false">
-                                @CurrentLanguageDisplayName
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm app-language-menu">
-                                @foreach (var option in LanguageOptions)
-                                {
-                                    <li>
-                                        <a class="dropdown-item @(string.Equals(CurrentLanguage, option.Code, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)"
-                                           href="@BuildCultureUrl(option.Code)">
-                                            @option.DisplayName
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-                </li>
-                <li><hr class="dropdown-divider" /></li>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm app-menu-dropdown">
                 <li>
                     <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="@AppIcons.Home me-2" aria-hidden="true"></i>@Localizer["Dashboard"]</NavLink>
                 </li>
@@ -100,7 +94,7 @@
                     </li>
                 </AuthorizeView>
                 <li>
-                    <a class="dropdown-item text-danger" href="/logout"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Logout"]</a>
+                    <a class="dropdown-item " href="/logout"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Logout"]</a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -153,8 +147,8 @@
 @code {
     private static readonly IReadOnlyList<(string Code, string DisplayName)> LanguageOptions =
     [
-        ("de", "Deutsch"),
-        ("en", "English")
+        ("de", "DE"),
+        ("en", "EN")
     ];
 
     private ErrorBoundary? _errorBoundary;
@@ -172,7 +166,7 @@
 
     private string CurrentLanguageDisplayName =>
         LanguageOptions.FirstOrDefault(x => string.Equals(x.Code, CurrentLanguage, StringComparison.OrdinalIgnoreCase)).DisplayName
-        ?? "Deutsch";
+        ?? "EN";
 
     protected override void OnInitialized()
     {
