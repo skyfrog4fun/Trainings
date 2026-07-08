@@ -1,7 +1,7 @@
 using FluentAssertions;
+
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
-using Xunit;
 
 namespace Trainings.Domain.Tests.Entities;
 

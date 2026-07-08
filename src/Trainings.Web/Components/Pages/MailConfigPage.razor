@@ -154,7 +154,7 @@
 
     @if (_loading)
     {
-        <div class="text-center"><div class="spinner-border" role="status"></div></div>
+        <LoadingSpinner />
     }
     else if (!_configs.Any())
     {
@@ -255,7 +255,7 @@
                         <button class="btn btn-info w-100" @onclick="SendTestEmail" disabled="@_testEmailSending">
                             @if (_testEmailSending)
                             {
-                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" />
                             }
                             Send Test Email
                         </button>

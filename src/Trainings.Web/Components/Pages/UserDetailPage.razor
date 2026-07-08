@@ -1,0 +1,239 @@
+@page "/users/{Id:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = "GroupAdmin")]
+@inject IUserService UserService
+@inject IGroupService GroupService
+@inject IRegistrationService RegistrationService
+@inject ICountryService CountryService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>User Details</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="my-3 d-flex flex-wrap gap-2">
+        <BackButton Href="/users" />
+        @if (_user is not null)
+        {
+            <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
+                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>Edit
+            </a>
+        }
+    </div>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (_user is null)
+    {
+        <div class="alert alert-danger">User not found.</div>
+    }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">You are not allowed to view this user.</div>
+    }
+    else
+    {
+        <PageHeader Title="@_user.DisplayName">
+            <Actions>
+                <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? "Active" : "Inactive")</span>
+            </Actions>
+        </PageHeader>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">Profile</div>
+                    <div class="card-body">
+                        <div><strong>Email:</strong> @_user.Email</div>
+                        <div><strong>Role:</strong> @_user.Role</div>
+                        <div><strong>Gender:</strong> @_user.Gender</div>
+                        <div><strong>Birthday:</strong> @FormatDate(_user.Birthday)</div>
+                        <div><strong>Mobile:</strong> @FormatText(_user.Mobile)</div>
+                        <div><strong>City:</strong> @FormatText(_user.City)</div>
+                        <div><strong>Country:</strong> @GetCountryLabel(_user.CountryId, _user.CountryCode)</div>
+                        <div><strong>Email verified:</strong> @(_user.EmailConfirmedAt.HasValue ? "Yes" : "No")</div>
+                        <div><strong>Entry date:</strong> @FormatDateTime(_user.EntryDate)</div>
+                        <div><strong>Created:</strong> @FormatDateTime(_user.CreationDate)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">Group memberships</div>
+                    <div class="card-body p-0">
+                        @if (_memberships.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Group</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Joined</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var membership in _memberships)
+                                        {
+                                            <tr>
+                                                <td>@GetGroupLabel(membership.GroupId)</td>
+                                                <td>@membership.Role</td>
+                                                <td>@membership.Status</td>
+                                                <td>@FormatDateTime(membership.JoinedAt)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-3 text-muted">No memberships.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header fw-bold">Registration history</div>
+            <div class="card-body p-0">
+                @if (_registrations.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Training</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var registration in _registrations)
+                                {
+                                    <tr>
+                                        <td>@registration.TrainingTitle</td>
+                                        <td>@FormatDateTime(registration.TrainingDateTime)</td>
+                                        <td>@registration.Status</td>
+                                        <td>@FormatDateTime(registration.RegisteredAt)</td>
+                                        <td>
+                                            <a href="/trainings/@registration.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="View training" aria-label="View training">
+                                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 text-muted">No registrations yet.</div>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_user.WelcomeMessage))
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-bold">Bio / Welcome message</div>
+                <div class="card-body">
+                    @_user.WelcomeMessage
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private UserDto? _user;
+    private List<GroupMembershipDto> _memberships = new();
+    private List<RegistrationDto> _registrations = new();
+    private Dictionary<int, string> _groupNameById = new();
+    private Dictionary<int, string> _countryNameById = new();
+    private bool _loading = true;
+    private bool _isAccessDenied;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUser = authState.User;
+        var isSuperAdmin = currentUser.HasClaim("SuperAdmin", "true");
+        var managedGroupIds = currentUser.Claims
+            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin")
+            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+
+        _user = await UserService.GetByIdAsync(Id);
+        if (_user is null)
+        {
+            _loading = false;
+            return;
+        }
+
+        _memberships = (await GroupService.GetAllMembershipsForUserAsync(Id))
+            .OrderBy(m => m.GroupId)
+            .ThenBy(m => m.Status)
+            .ToList();
+
+        if (!isSuperAdmin)
+        {
+            var canAccess = _memberships.Any(m =>
+                m.Status == GroupMembershipStatus.Approved &&
+                m.IsActive &&
+                managedGroupIds.Contains(m.GroupId));
+
+            if (!canAccess)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+        }
+
+        _registrations = (await RegistrationService.GetByUserIdAsync(Id))
+            .OrderByDescending(r => r.TrainingDateTime)
+            .ToList();
+
+        _groupNameById = (await GroupService.GetAllAsync())
+            .ToDictionary(g => g.Id, g => g.Name);
+
+        _countryNameById = (await CountryService.GetAllAsync())
+            .ToDictionary(c => c.Id, c => c.Name);
+
+        _loading = false;
+    }
+
+    private string GetGroupLabel(int groupId) =>
+        _groupNameById.TryGetValue(groupId, out var groupName) ? groupName : $"Group #{groupId}";
+
+    private string GetCountryLabel(int? countryId, string? countryCode)
+    {
+        if (countryId.HasValue && _countryNameById.TryGetValue(countryId.Value, out var countryName))
+        {
+            return countryName;
+        }
+
+        return string.IsNullOrWhiteSpace(countryCode) ? "-" : countryCode;
+    }
+
+    private static string FormatDate(DateOnly? date) =>
+        date.HasValue ? date.Value.ToString("yyyy-MM-dd") : "-";
+
+    private static string FormatDateTime(DateTime? dateTime) =>
+        dateTime.HasValue ? dateTime.Value.ToString("yyyy-MM-dd HH:mm") : "-";
+
+    private static string FormatText(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "-" : value;
+}

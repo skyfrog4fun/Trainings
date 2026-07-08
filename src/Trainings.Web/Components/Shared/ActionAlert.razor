@@ -1,0 +1,11 @@
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="alert @(IsSuccess == true ? "alert-success" : "alert-danger")">
+        @Message
+    </div>
+}
+
+@code {
+    [Parameter] public bool? IsSuccess { get; set; }
+    [Parameter] public string? Message { get; set; }
+}

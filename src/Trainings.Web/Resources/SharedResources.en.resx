@@ -590,4 +590,28 @@
   <data name="Reload" xml:space="preserve">
     <value>Reload</value>
   </data>
+  <data name="StatisticsActiveUsers" xml:space="preserve">
+    <value>Active Users</value>
+  </data>
+  <data name="StatisticsUsersNotInGroup" xml:space="preserve">
+    <value>Users Not in Group</value>
+  </data>
+  <data name="StatisticsTotalRegistrations" xml:space="preserve">
+    <value>Total Registrations</value>
+  </data>
+  <data name="StatisticsAnnualIndicators" xml:space="preserve">
+    <value>Annual Indicators ({0})</value>
+  </data>
+  <data name="StatisticsAvgUsersPerGroup" xml:space="preserve">
+    <value>Average users per group</value>
+  </data>
+  <data name="StatisticsAvgParticipantsPerTraining" xml:space="preserve">
+    <value>Average participants per training</value>
+  </data>
+  <data name="StatisticsScopeGlobal" xml:space="preserve">
+    <value>Global</value>
+  </data>
+  <data name="StatisticsScopeManagedGroups" xml:space="preserve">
+    <value>Managed Groups</value>
+  </data>
 </root>

@@ -13,12 +13,12 @@
                 <div class="card-body p-4 text-center">
                     @if (_loading)
                     {
-                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <LoadingSpinner ContainerClass="" SpinnerClass="text-primary mb-3" />
                         <p>Confirming your email...</p>
                     }
                     else if (_success)
                     {
-                        <div class="text-success mb-3" style="font-size:3rem;"><i class="@AppIcons.Check" aria-hidden="true"></i></div>
+                        <div class="text-success mb-3 icon-display"><i class="@AppIcons.Check" aria-hidden="true"></i></div>
                         <h5>Registration successful</h5>
                         <p class="text-muted mb-2">Your email address was confirmed successfully.</p>
                         <p class="text-muted">Your registration is now being reviewed by the Super Admin. You will be notified by email as soon as the review is complete.</p>
@@ -26,7 +26,7 @@
                     }
                     else
                     {
-                        <div class="text-danger mb-3" style="font-size:3rem;"><i class="@AppIcons.XMark" aria-hidden="true"></i></div>
+                        <div class="text-danger mb-3 icon-display"><i class="@AppIcons.XMark" aria-hidden="true"></i></div>
                         <h5>Confirmation Failed</h5>
                         <p class="text-muted">@_message</p>
 
@@ -35,7 +35,7 @@
                             <button class="btn btn-primary w-100 mb-2" @onclick="ResendAsync" disabled="@(_resending || _runtimeMode.IsReadOnly)">
                                 @if (_resending)
                                 {
-                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" />
                                 }
                                 Send New Verification Mail
                             </button>

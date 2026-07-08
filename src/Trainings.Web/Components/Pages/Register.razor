@@ -103,7 +103,7 @@
                         }
 
                         <button class="btn btn-primary btn-lg w-100 mt-3" @onclick="Submit" disabled="@(_loading || _runtimeMode.IsReadOnly)">
-                            @if (_loading) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                            @if (_loading) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
                             Register
                         </button>
                         <div class="mt-2 text-center">

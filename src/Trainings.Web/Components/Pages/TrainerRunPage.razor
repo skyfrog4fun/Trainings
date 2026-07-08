@@ -10,7 +10,7 @@
 <div class="container px-2 px-md-3">
     @if (_loading)
     {
-        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+        <LoadingSpinner />
     }
     else if (_training == null)
     {
@@ -19,14 +19,14 @@
     else if (!_blocks.Any())
     {
         <div class="my-3">
-            <a href="/trainings/@Id" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
+            <BackButton Href="@($"/trainings/{Id}")" />
         </div>
         <div class="alert alert-warning mt-3">This training has no blocks. <a href="/trainings/@Id/edit">Add blocks first.</a></div>
     }
     else if (_phase == "complete")
     {
         <div class="my-3">
-            <a href="/trainings/@Id" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
+            <BackButton Href="@($"/trainings/{Id}")" />
         </div>
         <div class="alert alert-success mt-3 text-center">
             <h4>Training Complete!</h4>
@@ -57,20 +57,26 @@
             </div>
         }
         <button class="btn btn-primary w-100" @onclick="SaveFeedback" disabled="@_saving">
-            @if (_saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            @if (_saving) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
             Save Feedback
         </button>
-        @if (_saved) { <div class="alert alert-success mt-2">Saved!</div> }
+        <div class="mt-2">
+            <ActionAlert IsSuccess="true" Message="@(_saved ? "Saved!" : null)" />
+        </div>
     }
     else
     {
         var currentBlock = _blocks[_currentIndex];
-        <div class="d-flex align-items-center justify-content-between mt-3 mb-2">
-            <a href="/trainings/@Id" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
-            <small class="text-muted">Block @(_currentIndex + 1) of @_blocks.Count</small>
-        </div>
+        <PageHeader Title="Run Training">
+            <Actions>
+                <div class="d-flex align-items-center gap-2">
+                    <small class="text-muted">Block @(_currentIndex + 1) of @_blocks.Count</small>
+                    <BackButton Href="@($"/trainings/{Id}")" />
+                </div>
+            </Actions>
+        </PageHeader>
 
-        <div class="progress mb-3" style="height: 6px;">
+        <div class="progress progress-thin mb-3">
             <div class="progress-bar" style="width: @((_currentIndex * 100) / _blocks.Count)%"></div>
         </div>
 

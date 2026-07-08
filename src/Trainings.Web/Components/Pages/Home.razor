@@ -38,15 +38,12 @@
                 <span class="dashboard-status-pill dashboard-status-pill-danger">
                     <i class="@AppIcons.XMark" aria-hidden="true"></i> @Localizer["EmailNotVerified"]
                 </span>
-                <button type="button" class="btn btn-sm dashboard-btn-primary" @onclick="ResendVerificationAsync">@Localizer["ResendVerification"]</button>
+                <button type="button" class="btn btn-sm btn-primary" @onclick="ResendVerificationAsync">@Localizer["ResendVerification"]</button>
             }
         </div>
     </section>
 
-    @if (_verificationActionMessage is not null)
-    {
-        <div class="alert @(_verificationActionSuccess ? "alert-success" : "alert-danger")">@_verificationActionMessage</div>
-    }
+    <ActionAlert IsSuccess="@_verificationActionSuccess" Message="@_verificationActionMessage" />
 
     <section class="row g-3 mb-4">
         <div class="col-6 col-xl-3">
@@ -120,8 +117,8 @@
             <div class="dashboard-quick-access-grid">
                 @if (_isGroupAdmin)
                 {
-                    <DashboardQuickAccessButton Href="/groups?create=true" Text='@Localizer["New Group"]' IconClass="@AppIcons.UserGroup" />
-                    <DashboardQuickAccessButton Href="/users?create=true" Text='@Localizer["New User"]' IconClass="@AppIcons.User" />
+                    <DashboardQuickAccessButton Href="/groups/new" Text='@Localizer["New Group"]' IconClass="@AppIcons.UserGroup" />
+                    <DashboardQuickAccessButton Href="/users/new" Text='@Localizer["New User"]' IconClass="@AppIcons.User" />
                 }
 
                 @if (_isGroupTrainer)
@@ -136,71 +133,12 @@
         @if (_isSuperAdmin)
         {
             <div class="col-12 col-xl-6">
-                <div class="card h-100">
-                    <div class="card-header dashboard-card-header">
-                        <span class="fw-bold">@Localizer["SystemOverview"]</span>
-                        <span class="dashboard-card-counter">
-                            <i class="@AppIcons.Gear" aria-hidden="true"></i> 5
-                        </span>
-                    </div>
-                    <div class="card-body py-2">
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span>@Localizer["MailConfigurationCount", _mailConfigurationCount]</span>
-                            <div class="d-flex gap-1">
-                                <a class="btn btn-primary btn-sm" href="/config/mail" title='@Localizer["OpenMailConfigurationOverview"]'>
-                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
-                                </a>
-                                <a class="btn btn-success btn-sm" href="/config/mail?create=true" title='@Localizer["CreateMailConfiguration"]'>
-                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span>@Localizer["LocationsCount", _locationCount]</span>
-                            <div class="d-flex gap-1">
-                                <a class="btn btn-primary btn-sm" href="/config/locations" title='@Localizer["OpenLocationsOverview"]'>
-                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
-                                </a>
-                                <a class="btn btn-success btn-sm" href="/config/locations?create=true" title='@Localizer["CreateLocation"]'>
-                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span>@Localizer["GroupsCount", _groupCount]</span>
-                            <div class="d-flex gap-1">
-                                <a class="btn btn-primary btn-sm" href="/groups" title='@Localizer["OpenGroupsOverview"]'>
-                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
-                                </a>
-                                <a class="btn btn-success btn-sm" href="/groups?create=true" title='@Localizer["CreateGroup"]'>
-                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span>@Localizer["UsersCount", _userCount]</span>
-                            <div class="d-flex gap-1">
-                                <a class="btn btn-primary btn-sm" href="/users" title='@Localizer["OpenUsersOverview"]'>
-                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
-                                </a>
-                                <a class="btn btn-success btn-sm" href="/users?create=true" title='@Localizer["CreateUser"]'>
-                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2">
-                            <span>@Localizer["TrainingsCount", _trainingCount]</span>
-                            <div class="d-flex gap-1">
-                                <a class="btn btn-primary btn-sm" href="/trainings" title='@Localizer["OpenTrainingsOverview"]'>
-                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
-                                </a>
-                                <a class="btn btn-success btn-sm" href="/trainings/create" title='@Localizer["CreateTraining"]'>
-                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <DashboardSystemOverview
+                    MailConfigurationCount="@_mailConfigurationCount"
+                    LocationCount="@_locationCount"
+                    GroupCount="@_groupCount"
+                    UserCount="@_userCount"
+                    TrainingCount="@_trainingCount" />
             </div>
         }
 
@@ -337,114 +275,23 @@
 
     @if (_isGroupAdmin && _planningOverviewByGroup.Any())
     {
-        @foreach (var (groupName, trainings) in _planningOverviewByGroup)
-        {
-            <div class="card collapsible-card mb-4">
-                <div class="card-header collapsible-card-header dashboard-card-header">
-                    <button type="button" class="collapsible-card-toggle" @onclick="TogglePlanningOverview">
-                        <span class="fw-bold">@Localizer["PlanningOverview", groupName]</span>
-                        <i class="@(_planningOverviewExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
-                    </button>
-                    <div class="collapsible-card-meta small">
-                        <span class="dashboard-card-counter">
-                            <i class="@AppIcons.CalendarCheck" aria-hidden="true"></i> @trainings.Count
-                        </span>
-                    </div>
-                </div>
-                @if (_planningOverviewExpanded)
-                {
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
-                                <thead>
-                                    <tr><th>@Localizer["Date"]</th><th>@Localizer["Location"]</th><th>@Localizer["Trainer"]</th><th>@Localizer["Status"]</th><th class="text-end">@Localizer["Actions"]</th></tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var training in trainings)
-                                    {
-                                        <tr>
-                                            <td class="small">@FormatDashboardDateTime(training)</td>
-                                            <td class="small">@(training.LocationName ?? "-")</td>
-                                            <td class="small">@training.TrainerName</td>
-                                            <td><span class="badge @GetStatusBadgeClass(training.Status)">@training.Status</span></td>
-                                            <td class="text-end">
-                                                <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">
-                                                    <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
+        <DashboardPlanningOverview
+            PlanningByGroup="@_planningOverviewByGroup"
+            IsExpanded="@_planningOverviewExpanded"
+            UserCountry="@_userCountry"
+            OnToggle="TogglePlanningOverview" />
     }
 
     @if (_isSuperAdmin)
     {
-        <div class="card collapsible-card mb-4">
-            <div class="card-header collapsible-card-header dashboard-card-header">
-                <button type="button" class="collapsible-card-toggle" @onclick="ToggleNotifications">
-                    <span class="fw-bold">@Localizer["NotificationActivity"]</span>
-                    <i class="@(_notificationsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
-                </button>
-                <div class="collapsible-card-meta small">
-                    <span class="dashboard-card-counter me-3">
-                        <i class="@AppIcons.Bell" aria-hidden="true"></i> @Math.Min(_recentLogs.Count, NotificationDisplayLimit)/@_recentLogs.Count
-                    </span>
-                    <span class="text-success me-3"><i class="@AppIcons.Check" aria-hidden="true"></i> @_notificationSuccessCount</span>
-                    <span class="text-danger"><i class="@AppIcons.XMark" aria-hidden="true"></i> @_notificationFailureCount</span>
-                </div>
-            </div>
-            @if (_notificationsExpanded)
-            {
-                <div class="card-body">
-                    <div class="d-flex justify-content-end mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ResetNotificationPointerAsync">@Localizer["ResetPointer"]</button>
-                    </div>
-
-                    @if (_recentLogs.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0">
-                                <thead>
-                                    <tr><th>@Localizer["LogId"]</th><th>@Localizer["DateUtc"]</th><th>@Localizer["Action"]</th><th>@Localizer["Recipient"]</th><th>@Localizer["Status"]</th><th>@Localizer["Error"]</th></tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var log in _recentLogs.Take(NotificationDisplayLimit))
-                                    {
-                                        <tr>
-                                            <td class="small">#@log.Id</td>
-                                            <td class="small">@log.CreatedAt.ToString("MMM d, HH:mm") UTC</td>
-                                            <td class="small">@log.Action</td>
-                                            <td class="small text-muted">@log.RecipientEmail</td>
-                                            <td>
-                                                @if (log.IsSuccess)
-                                                {
-                                                    <i class="@AppIcons.Check text-success" aria-hidden="true"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
-                                                }
-                                            </td>
-                                            <td class="small text-danger">@log.ErrorMessage</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-muted">@Localizer["NoNotificationActivitySinceReset"]</div>
-                    }
-                </div>
-            }
-        </div>
+        <DashboardNotificationActivity
+            Logs="@_recentLogs"
+            SuccessCount="@_notificationSuccessCount"
+            FailureCount="@_notificationFailureCount"
+            IsExpanded="@_notificationsExpanded"
+            DisplayLimit="@NotificationDisplayLimit"
+            OnToggle="ToggleNotifications"
+            OnReset="ResetNotificationPointerAsync" />
     }
 </div>
 
@@ -710,13 +557,6 @@
     private string GetPendingStatSubtitle() => _isGroupTrainer
         ? Localizer["MyTrainingsToPlan"]
         : Localizer["NextTrainingsAvailableToAttend"];
-
-    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
-    {
-        TrainingStatus.Planned => "bg-success",
-        TrainingStatus.Planning => "bg-warning text-dark",
-        _ => "bg-secondary"
-    };
 
     private async Task ResetNotificationPointerAsync()
     {

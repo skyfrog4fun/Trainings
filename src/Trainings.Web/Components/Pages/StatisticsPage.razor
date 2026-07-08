@@ -4,82 +4,69 @@
 @using Trainings.Web.Auth
 @inject IStatisticsService StatisticsService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>Statistics</PageTitle>
+<PageTitle>@Localizer["Statistics"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <div class="d-flex justify-content-between align-items-center my-3">
-        <h2>Statistics</h2>
-        <span class="badge bg-secondary">@_scopeLabel</span>
-    </div>
+    <PageHeader Title='@Localizer["Statistics"]'>
+        <Actions>
+            <span class="badge bg-secondary">@_scopeLabel</span>
+        </Actions>
+    </PageHeader>
 
     @if (_loading)
     {
-        <div class="text-center my-5"><div class="spinner-border" role="status"></div></div>
+        <LoadingSpinner />
     }
     else
     {
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="text-primary fs-3"><i class="@AppIcons.Group" aria-hidden="true"></i></div>
-                        <div class="display-6">@_stats.TotalGroups</div>
-                        <div class="text-muted">Total Groups</div>
-                    </div>
-                </div>
+                <DashboardStatCard Title='@Localizer["Groups"]'
+                                   Value="@_stats.TotalGroups.ToString()"
+                                   IconClass="@AppIcons.Group"
+                                   BadgeToneClass="dashboard-icon-badge-secondary" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="text-success fs-3"><i class="@AppIcons.Users" aria-hidden="true"></i></div>
-                        <div class="display-6">@_stats.ActiveUsers</div>
-                        <div class="text-muted">Active Users</div>
-                    </div>
-                </div>
+                <DashboardStatCard Title='@Localizer["StatisticsActiveUsers"]'
+                                   Value="@_stats.ActiveUsers.ToString()"
+                                   IconClass="@AppIcons.Users"
+                                   BadgeToneClass="dashboard-icon-badge-primary" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="text-warning fs-3"><i class="@AppIcons.UserMinus" aria-hidden="true"></i></div>
-                        <div class="display-6">@_stats.UsersNotInGroup</div>
-                        <div class="text-muted">Users Not in Group</div>
-                    </div>
-                </div>
+                <DashboardStatCard Title='@Localizer["StatisticsUsersNotInGroup"]'
+                                   Value="@_stats.UsersNotInGroup.ToString()"
+                                   IconClass="@AppIcons.UserMinus"
+                                   BadgeToneClass="dashboard-icon-badge-secondary" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="text-danger fs-3"><i class="@AppIcons.Fire" aria-hidden="true"></i></div>
-                        <div class="display-6">@_stats.TotalTrainings</div>
-                        <div class="text-muted">Total Trainings</div>
-                    </div>
-                </div>
+                <DashboardStatCard Title='@Localizer["Trainings"]'
+                                   Value="@_stats.TotalTrainings.ToString()"
+                                   IconClass="@AppIcons.Fire"
+                                   BadgeToneClass="dashboard-icon-badge-highlight" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="text-info fs-3"><i class="@AppIcons.ClipboardList" aria-hidden="true"></i></div>
-                        <div class="display-6">@_stats.TotalRegistrations</div>
-                        <div class="text-muted">Total Registrations</div>
-                    </div>
-                </div>
+                <DashboardStatCard Title='@Localizer["StatisticsTotalRegistrations"]'
+                                   Value="@_stats.TotalRegistrations.ToString()"
+                                   IconClass="@AppIcons.ClipboardList"
+                                   BadgeToneClass="dashboard-icon-badge-secondary" />
             </div>
         </div>
 
         <div class="card shadow-sm">
-            <div class="card-header fw-bold">Annual Indicators (@DateTime.UtcNow.Year)</div>
+            <div class="card-header fw-bold">@Localizer["StatisticsAnnualIndicators", DateTime.UtcNow.Year]</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
                         <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Average users per group</div>
+                            <div class="text-muted small">@Localizer["StatisticsAvgUsersPerGroup"]</div>
                             <div class="fs-3">@_stats.AverageUsersPerGroup.ToString("0.##")</div>
                         </div>
                     </div>
                     <div class="col-12 col-md-6">
                         <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Average participants per training</div>
+                            <div class="text-muted small">@Localizer["StatisticsAvgParticipantsPerTraining"]</div>
                             <div class="fs-3">@_stats.AverageParticipantsPerTraining.ToString("0.##")</div>
                         </div>
                     </div>
@@ -92,7 +79,7 @@
 @code {
     private StatisticsDto _stats = new();
     private bool _loading = true;
-    private string _scopeLabel = "Scope";
+    private string _scopeLabel = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,7 +95,7 @@
             .ToList();
 
         _stats = await StatisticsService.GetStatisticsAsync(isSuperAdmin, managedGroupIds);
-        _scopeLabel = isSuperAdmin ? "Global" : "Managed groups";
+        _scopeLabel = isSuperAdmin ? Localizer["StatisticsScopeGlobal"] : Localizer["StatisticsScopeManagedGroups"];
         _loading = false;
     }
 }

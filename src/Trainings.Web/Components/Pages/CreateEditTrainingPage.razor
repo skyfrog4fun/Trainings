@@ -4,7 +4,6 @@
 @attribute [Authorize(Policy = "GroupTrainer")]
 @using System.Globalization
 @inject ITrainingService TrainingService
-@inject ITagService TagService
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject IAppRuntimeModeService AppRuntimeModeService
@@ -16,7 +15,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/plan-training" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
+        <BackButton Href="/plan-training" />
     </div>
 
     <h2>@(_isEdit ? "Edit Training" : "New Training")</h2>
@@ -154,10 +153,9 @@
                     </div>
                 </div>
 
-                @if (_error != null)
-                {
-                    <div class="alert alert-danger mt-3">@_error</div>
-                }
+                <div class="mt-3">
+                    <ActionAlert IsSuccess="false" Message="@_error" />
+                </div>
 
                 <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
                     @(_isEdit ? "Update Training" : "Create Training")
@@ -166,198 +164,12 @@
         </div>
     }
 
-    @if (_actionResult is not null)
-    {
-        <div class="alert @(_actionSuccess ? "alert-success" : "alert-danger")">@_actionResult</div>
-    }
+    <ActionAlert IsSuccess="@_actionSuccess" Message="@_actionResult" />
 
     @if (_persistedTrainingId.HasValue)
     {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Training Blocks</h4>
-        <div>
-            <button type="button" class="btn btn-success btn-sm me-2" @onclick="ToggleNewBlockPanel" disabled="@IsWriteBlocked"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="ToggleLibraryPanel" disabled="@IsWriteBlocked">
-                <i class="@AppIcons.BookOpen me-1" aria-hidden="true"></i>Add
-            </button>
-        </div>
-    </div>
-
-    @if (_showLibrary)
-    {
-        <div class="card mb-3 border-info">
-            <div class="card-header bg-info bg-opacity-10">Block Library</div>
-            <div class="card-body p-2">
-                <div class="row g-2 mb-2">
-                    <div class="col-12 col-md-5">
-                        <input class="form-control form-control-sm" @bind="_librarySearch" @bind:event="oninput" placeholder="Search blocks..." />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <select class="form-select form-select-sm" @bind="_libraryTagFilter">
-                            <option value="">All tags</option>
-                            @foreach (var tag in _allTags)
-                            {
-                                <option value="@tag.Id">@tag.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <select class="form-select form-select-sm" @bind="_libraryCreatorFilter">
-                            <option value="">All creators</option>
-                            @foreach (var creator in LibraryCreators)
-                            {
-                                <option value="@creator.Id">@creator.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div style="max-height:340px;overflow-y:auto;">
-                    @foreach (var block in FilteredLibraryBlocks)
-                    {
-                        <div class="d-flex align-items-stretch p-2 border-bottom gap-2">
-                            <div class="flex-grow-1 min-w-0">
-                                <div class="d-flex justify-content-between align-items-center gap-2">
-                                    <span class="fw-bold small text-truncate">@block.Title</span>
-                                    <span class="text-muted small text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</span>
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(block.Description))
-                                {
-                                    <div class="text-muted small text-truncate">@block.Description</div>
-                                }
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => CopyFromLibrary(block)" disabled="@IsWriteBlocked">Add</button>
-                            </div>
-                        </div>
-                    }
-                    @if (!FilteredLibraryBlocks.Any())
-                    {
-                        <p class="text-muted small text-center py-2">No blocks found.</p>
-                    }
-                </div>
-                @if (_hasOlderLibraryBlocks && !_libraryLoadedAll)
-                {
-                    <div class="text-center mt-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadMoreLibraryBlocks">Load more</button>
-                    </div>
-                }
-            </div>
-        </div>
+        <TrainingBlockEditor TrainingId="@_persistedTrainingId.Value" IsWriteBlocked="@IsWriteBlocked" />
     }
-
-    @* New-block editor: visible when New button was clicked (index == _blocks.Count) *@
-    @if (_editingBlockIndex >= 0 && _editingBlockIndex >= _blocks.Count)
-    {
-        <div class="list-group mb-3">
-            <div class="list-group-item">
-                <div class="row g-2">
-                    <div class="col-12">
-                        <input class="form-control" @bind="_blockTitle" placeholder="Block title" />
-                    </div>
-                    <div class="col-12">
-                        <textarea class="form-control" rows="2" @bind="_blockDescription" placeholder="Description"></textarea>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <label class="form-label small">Planned Duration (min)</label>
-                        <input class="form-control" type="number" @bind="_blockPlannedMinutes" min="1" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label small">Tag</label>
-                        <select class="form-select form-select-sm" @bind="_blockTagId">
-                            <option value="">— none —</option>
-                            @foreach (var tag in _allTags)
-                            {
-                                <option value="@tag.Id">@tag.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(_editingBlockIndex)" disabled="@IsWriteBlocked"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
-                        <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    @if (_blocks.Any())
-    {
-        <div class="list-group mb-3">
-            @for (var i = 0; i < _blocks.Count; i++)
-            {
-                var block = _blocks[i];
-                var idx = i;
-                <div class="list-group-item">
-                    @if (_editingBlockIndex == idx)
-                    {
-                        <div class="row g-2">
-                            <div class="col-12">
-                                <input class="form-control" @bind="_blockTitle" placeholder="Block title" />
-                            </div>
-                            <div class="col-12">
-                                <textarea class="form-control" rows="2" @bind="_blockDescription" placeholder="Description"></textarea>
-                            </div>
-                            <div class="col-6 col-md-4">
-                                <label class="form-label small">Planned Duration (min)</label>
-                                <input class="form-control" type="number" @bind="_blockPlannedMinutes" min="1" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label small">Tag</label>
-                                <select class="form-select form-select-sm" @bind="_blockTagId">
-                                    <option value="">— none —</option>
-                                    @foreach (var tag in _allTags)
-                                    {
-                                        <option value="@tag.Id">@tag.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
-                                <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="fw-bold">@((idx + 1)). @block.Title</div>
-                                <small class="text-muted"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</small>
-                                @if (block.Tags.Any())
-                                {
-                                    <div class="mt-1">
-                                        @foreach (var tag in block.Tags)
-                                        {
-                                            <span class="badge bg-info text-dark me-1">@tag.Name</span>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                            <div class="btn-group btn-group-sm ms-2">
-                                <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0 || IsWriteBlocked)">↑</button>
-                                <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1 || IsWriteBlocked)">↓</button>
-                                <button type="button" class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.Edit" aria-hidden="true"></i></button>
-                                <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.Trash" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-        </div>
-        <div class="d-flex justify-content-between align-items-center text-muted small">
-            <span>Total planned: @_blocks.Sum(b => b.PlannedDurationMinutes) min</span>
-            @{ var remaining = _durationMinutes - _blocks.Sum(b => b.PlannedDurationMinutes); }
-            @if (remaining >= 0)
-            {
-                <span>Remaining: @remaining min</span>
-            }
-            else
-            {
-                <span class="text-danger fw-bold">Overbooked: @(-remaining) min</span>
-            }
-        </div>
-    }
-    } @* end @if (_persistedTrainingId.HasValue) *@
 </div>
 
 @code {
@@ -387,34 +199,10 @@
     private string _specialLocationDescription = string.Empty;
     private string _meetingPoint = string.Empty;
 
-    private List<TrainingBlockDto> _blocks = new();
-    private List<TagDto> _allTags = new();
-    private List<TrainingBlockDto> _libraryBlocks = new();
-    private List<TrainingBlockDto> _allLibraryBlocks = new();
-    private bool _showLibrary;
-    private bool _libraryLoadedAll;
-    private bool _hasOlderLibraryBlocks;
-    private string _librarySearch = string.Empty;
-    private int? _libraryTagFilter;
-    private int? _libraryCreatorFilter;
-    private int _editingBlockIndex = -1;
-    private string _blockTitle = string.Empty;
-    private string _blockDescription = string.Empty;
-    private int _blockPlannedMinutes = 30;
-    private int? _blockTagId;
     private bool _actionSuccess;
     private string? _actionResult;
     private bool _detailsCollapsed;
     private CultureInfo _groupCulture = CultureInfo.InvariantCulture;
-
-    private sealed record CreatorOption(int Id, string Name);
-
-    private IEnumerable<CreatorOption> LibraryCreators =>
-        _allLibraryBlocks
-            .Where(b => b.TrainerId > 0)
-            .DistinctBy(b => b.TrainerId)
-            .Select(b => new CreatorOption(b.TrainerId, b.TrainerName))
-            .OrderBy(c => c.Name);
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
     private bool _isSpecialLocationSelected =>
@@ -434,34 +222,6 @@
         {
             _durationMinutes = value;
             CalculateEndTime();
-        }
-    }
-
-    private IEnumerable<TrainingBlockDto> FilteredLibraryBlocks
-    {
-        get
-        {
-            var query = _libraryBlocks.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(_librarySearch))
-            {
-                query = query.Where(b =>
-                    b.Title.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase) ||
-                    (b.Description?.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    b.Tags.Any(t => t.Name.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase)));
-            }
-
-            if (_libraryTagFilter.HasValue)
-            {
-                query = query.Where(b => b.Tags.Any(t => t.Id == _libraryTagFilter.Value));
-            }
-
-            if (_libraryCreatorFilter.HasValue)
-            {
-                query = query.Where(b => b.TrainerId == _libraryCreatorFilter.Value);
-            }
-
-            return query;
         }
     }
 
@@ -485,8 +245,6 @@
         _availableGroups = _isSuperAdmin
             ? groups.Where(g => g.IsActive).OrderBy(g => g.Name).ToList()
             : groups.Where(g => g.IsActive && managedGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
-
-        _allTags = (await TagService.GetAllAsync()).ToList();
 
         if (_isEdit && Id.HasValue)
         {
@@ -528,8 +286,6 @@
         _durationMinutes = training.DurationMinutes ?? selectedGroup?.DurationMinutes ?? 90;
         CalculateEndTime();
 
-        _blocks = (await TrainingService.GetBlocksAsync(id)).ToList();
-        await LoadLibraryBlocksAsync(id);
     }
 
     private async Task OnGroupChangedAsync()
@@ -704,15 +460,7 @@
                 _detailsCollapsed = true;
                 _actionSuccess = true;
                 _actionResult = "Training created successfully.";
-
-                _blocks = new List<TrainingBlockDto>();
-                await LoadLibraryBlocksAsync(created.Id);
                 return;
-            }
-
-            if (Id.HasValue)
-            {
-                _blocks = (await TrainingService.GetBlocksAsync(Id.Value)).ToList();
             }
         }
         catch (Exception ex)
@@ -763,202 +511,4 @@
         }
     }
 
-    private async Task LoadLibraryBlocksAsync(int currentTrainingId)
-    {
-        var all = (await TrainingService.GetAllBlocksLibraryAsync())
-            .Where(b => b.TrainingId != currentTrainingId)
-            .ToList();
-        _allLibraryBlocks = all;
-        var cutoff = DateTime.UtcNow.AddMonths(-12);
-        var recent = all.Where(b => b.CreatedAt >= cutoff).ToList();
-        _hasOlderLibraryBlocks = all.Count > recent.Count;
-        _libraryLoadedAll = false;
-        _libraryBlocks = recent;
-    }
-
-    private void LoadMoreLibraryBlocks()
-    {
-        _libraryBlocks = _allLibraryBlocks;
-        _libraryLoadedAll = true;
-    }
-
-    private void ToggleNewBlockPanel()
-    {
-        if (_editingBlockIndex >= _blocks.Count && _editingBlockIndex >= 0)
-        {
-            _editingBlockIndex = -1;
-        }
-        else
-        {
-            _showLibrary = false;
-            _editingBlockIndex = _blocks.Count;
-            _blockTitle = string.Empty;
-            _blockDescription = string.Empty;
-            _blockPlannedMinutes = 30;
-            _blockTagId = null;
-        }
-    }
-
-    private void ToggleLibraryPanel()
-    {
-        _showLibrary = !_showLibrary;
-        if (_showLibrary && _editingBlockIndex >= _blocks.Count && _editingBlockIndex >= 0)
-        {
-            _editingBlockIndex = -1;
-        }
-    }
-
-    private void StartEditBlock(int idx)
-    {
-        _showLibrary = false;
-        _editingBlockIndex = idx;
-        var block = _blocks[idx];
-        _blockTitle = block.Title;
-        _blockDescription = block.Description ?? string.Empty;
-        _blockPlannedMinutes = block.PlannedDurationMinutes;
-        _blockTagId = block.Tags.FirstOrDefault()?.Id;
-    }
-
-    private async Task SaveBlock(int idx)
-    {
-        if (!_persistedTrainingId.HasValue || string.IsNullOrWhiteSpace(_blockTitle))
-        {
-            return;
-        }
-
-        try
-        {
-            if (idx >= _blocks.Count)
-            {
-                var dto = new CreateTrainingBlockDto
-                {
-                    TrainingId = _persistedTrainingId.Value,
-                    OrderIndex = _blocks.Count + 1,
-                    Title = _blockTitle,
-                    Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
-                    PlannedDurationMinutes = _blockPlannedMinutes,
-                    TagIds = _blockTagId.HasValue ? [_blockTagId.Value] : []
-                };
-                var newBlock = await TrainingService.AddBlockAsync(dto);
-                _blocks.Add(newBlock);
-            }
-            else
-            {
-                var block = _blocks[idx];
-                var dto = new UpdateTrainingBlockDto
-                {
-                    Id = block.Id,
-                    OrderIndex = idx + 1,
-                    Title = _blockTitle,
-                    Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
-                    PlannedDurationMinutes = _blockPlannedMinutes,
-                    EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                    TrainerComment = block.TrainerComment,
-                    TagIds = _blockTagId.HasValue ? [_blockTagId.Value] : []
-                };
-                await TrainingService.UpdateBlockAsync(dto);
-                _blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
-            }
-
-            _editingBlockIndex = -1;
-        }
-        catch (Exception ex)
-        {
-            _error = $"Failed to save block: {ex.Message}";
-        }
-    }
-
-    private void CancelBlockEdit() => _editingBlockIndex = -1;
-
-    private async Task DeleteBlock(int idx)
-    {
-        if (!_persistedTrainingId.HasValue)
-        {
-            return;
-        }
-
-        try
-        {
-            await TrainingService.DeleteBlockAsync(_blocks[idx].Id);
-            _blocks.RemoveAt(idx);
-            await ReorderBlocks();
-        }
-        catch (Exception ex)
-        {
-            _error = $"Failed to delete block: {ex.Message}";
-        }
-    }
-
-    private async Task MoveBlock(int idx, int direction)
-    {
-        if (!_persistedTrainingId.HasValue)
-        {
-            return;
-        }
-
-        var newIdx = idx + direction;
-        if (newIdx < 0 || newIdx >= _blocks.Count)
-        {
-            return;
-        }
-
-        try
-        {
-            (_blocks[idx], _blocks[newIdx]) = (_blocks[newIdx], _blocks[idx]);
-            await ReorderBlocks();
-        }
-        catch (Exception ex)
-        {
-            _error = $"Failed to move block: {ex.Message}";
-        }
-    }
-
-    private async Task ReorderBlocks()
-    {
-        if (!_persistedTrainingId.HasValue)
-        {
-            return;
-        }
-
-        for (var i = 0; i < _blocks.Count; i++)
-        {
-            var block = _blocks[i];
-            if (block.OrderIndex == i + 1)
-            {
-                continue;
-            }
-
-            await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
-            {
-                Id = block.Id,
-                OrderIndex = i + 1,
-                Title = block.Title,
-                Description = block.Description,
-                PlannedDurationMinutes = block.PlannedDurationMinutes,
-                EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                TrainerComment = block.TrainerComment,
-                TagIds = block.Tags.Select(t => t.Id).ToList()
-            });
-            block.OrderIndex = i + 1;
-        }
-    }
-
-    private async Task CopyFromLibrary(TrainingBlockDto block)
-    {
-        if (!_persistedTrainingId.HasValue)
-        {
-            return;
-        }
-
-        try
-        {
-            await TrainingService.CopyBlockAsync(block.Id, _persistedTrainingId.Value);
-            _blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
-            _showLibrary = false;
-        }
-        catch (Exception ex)
-        {
-            _error = $"Failed to copy block from library: {ex.Message}";
-        }
-    }
 }
