@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "SuperAdmin")]
 @using System.Globalization
-@using Microsoft.JSInterop
 @using Trainings.Application.DTOs
 @using Trainings.Domain.Entities
 @using Trainings.Domain.Enums
@@ -12,7 +11,6 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
-@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
 <PageTitle>Configuration</PageTitle>
@@ -58,27 +56,6 @@
             @if (_modeActionResult is not null)
             {
                 <div class="alert @(_modeActionSuccess ? "alert-success" : "alert-danger") mt-3 mb-0">@_modeActionResult</div>
-            }
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center fw-bold">
-            <span>Server/Client Time</span>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="RefreshDateTimesAsync">Refresh</button>
-        </div>
-        <div class="card-body">
-            <div class="row g-2 small">
-                <div class="col-12 col-md-6">
-                    <strong>Server date/time:</strong> @_serverDateTime
-                </div>
-                <div class="col-12 col-md-6">
-                    <strong>Client date/time:</strong> @_clientDateTime
-                </div>
-            </div>
-            @if (_timeError is not null)
-            {
-                <div class="alert alert-warning mt-3 mb-0">@_timeError</div>
             }
         </div>
     </div>
@@ -312,9 +289,6 @@
     private string _selectedTestTarget = AllConfigurationsValue;
     private EmailSendResult? _testEmailResult;
 
-    private string _serverDateTime = "Loading...";
-    private string _clientDateTime = "Loading...";
-    private string? _timeError;
     private CultureInfo _userCulture = CultureInfo.CurrentCulture;
 
     private bool _modeReadOnly;
@@ -342,15 +316,6 @@
         var current = AppRuntimeModeService.GetCurrent();
         _modeReadOnly = current.IsReadOnly;
         _modeNoEmail = current.IsNoEmail;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await RefreshDateTimesAsync();
-            StateHasChanged();
-        }
     }
 
     private async Task LoadConfigs()
@@ -554,24 +519,6 @@
         finally
         {
             _testEmailSending = false;
-        }
-    }
-
-    private async Task RefreshDateTimesAsync()
-    {
-        _timeError = null;
-
-        try
-        {
-            _serverDateTime = DateTimeOffset.Now.ToString("f", _userCulture);
-            var clientIsoDateTime = await JSRuntime.InvokeAsync<string>("trainings.mailConfig.getClientLocalDateTime");
-            _clientDateTime = DateTimeOffset.TryParse(clientIsoDateTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsed)
-                ? parsed.ToString("f", _userCulture)
-                : DateTimeOffset.Now.ToString("f", _userCulture);
-        }
-        catch (Exception ex)
-        {
-            _timeError = $"Unable to refresh server/client date and time: {ex.Message}";
         }
     }
 

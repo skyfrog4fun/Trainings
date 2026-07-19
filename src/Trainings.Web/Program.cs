@@ -115,10 +115,9 @@ app.UseAuthorization();
 
 app.MapGet("/theme/set", (HttpContext httpContext, string value, string? returnUrl) =>
 {
-    var normalizedTheme = ThemeService.NormalizeTheme(value);
     httpContext.Response.Cookies.Append(
         ThemeService.ThemeCookieName,
-        normalizedTheme,
+        ThemeService.NormalizeTheme(value),
         ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
 
     var target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
@@ -133,11 +132,10 @@ app.MapGet("/theme/set", (HttpContext httpContext, string value, string? returnU
 app.MapGet("/culture/set", (HttpContext httpContext, string culture, string? returnUrl) =>
 {
     var normalizedCulture = string.Equals(culture, "en", StringComparison.OrdinalIgnoreCase) ? "en" : "de";
-    var cultureValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(normalizedCulture));
 
     httpContext.Response.Cookies.Append(
         CookieRequestCultureProvider.DefaultCookieName,
-        cultureValue,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(normalizedCulture)),
         ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
 
     var target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;

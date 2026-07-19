@@ -7,7 +7,7 @@ public class Country
     public string Name { get; set; } = string.Empty;
     public bool IsRealCountry { get; set; } = true;
 
-    public ICollection<Location> Locations { get; set; } = new List<Location>();
-    public ICollection<Group> Groups { get; set; } = new List<Group>();
-    public ICollection<User> Users { get; set; } = new List<User>();
+    public ICollection<Location> Locations { get; set; } = [];
+    public ICollection<Group> Groups { get; set; } = [];
+    public ICollection<User> Users { get; set; } = [];
 }
