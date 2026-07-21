@@ -342,12 +342,19 @@ main {
     border-bottom: 1px solid var(--bs-border-color);
 }
 
-.icon-logo {
+.icon-login {
     height: 0.78em;
     width: auto;
     position: relative;
     top: -3px;
     left: 7px;
+}
+.icon-logo {
+  height: 0.78em;
+  width: auto;
+  position: relative;
+  top: -2.9px;
+  left: 5px;
 }
 
 .dashboard-page {
