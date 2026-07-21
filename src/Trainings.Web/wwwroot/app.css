@@ -342,6 +342,14 @@ main {
     border-bottom: 1px solid var(--bs-border-color);
 }
 
+.icon-logo {
+    height: 0.78em;
+    width: auto;
+    position: relative;
+    top: -3px;
+    left: 7px;
+}
+
 .dashboard-page {
     color: var(--color-text);
 }
