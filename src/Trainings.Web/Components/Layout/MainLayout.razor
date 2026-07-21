@@ -25,9 +25,10 @@
                     {
                         <li>
                             <a class="dropdown-item @(string.Equals(CurrentLanguage, option.Code, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)"
-                               href="@BuildCultureUrl(option.Code)">
-                                @option.DisplayName
-                            </a>
+                               href="@BuildCultureUrl(option.Code)"
+                               data-enhance-nav="false">
+                                 @option.DisplayName
+                             </a>
                         </li>
                     }
                 </ul>

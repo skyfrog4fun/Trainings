@@ -120,6 +120,19 @@ public class UserService : IUserService
         await _userRepository.UpdateAsync(user);
     }
 
+    public async Task UpdatePreferencesAsync(int userId, string? language, string? theme)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var user = await _userRepository.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException($"User {userId} not found.");
+
+        user.Language = language;
+        user.Theme = theme;
+
+        await _userRepository.UpdateAsync(user);
+    }
+
     public async Task DeleteAsync(int id)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
@@ -160,6 +173,8 @@ public class UserService : IUserService
         CreationDate = user.CreationDate,
         EntryDate = user.EntryDate,
         WelcomeMessage = user.WelcomeMessage,
+        Language = user.Language,
+        Theme = user.Theme,
         CreatedAt = user.CreatedAt
     };
 }

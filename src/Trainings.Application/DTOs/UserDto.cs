@@ -21,6 +21,8 @@ public class UserDto
     public DateTime CreationDate { get; set; }
     public DateTime? EntryDate { get; set; }
     public string? WelcomeMessage { get; set; }
+    public string? Language { get; set; }
+    public string? Theme { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

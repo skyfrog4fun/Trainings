@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Enums;
 using Trainings.Web.Auth;
+using Trainings.Web.Services;
 
 namespace Trainings.Web.Pages;
 
@@ -96,6 +97,40 @@ public class LoginModel : PageModel
         var principal = new ClaimsPrincipal(identity);
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        var preferredTheme = ThemeService.NormalizeTheme(user.Theme);
+        if (string.IsNullOrWhiteSpace(user.Theme))
+        {
+            var requestTheme = HttpContext.Request.Cookies[ThemeService.ThemeCookieName];
+            preferredTheme = ThemeService.NormalizeTheme(requestTheme);
+        }
+
+        var preferredLanguage = CulturePreferenceService.NormalizeCulture(user.Language);
+        if (string.IsNullOrWhiteSpace(user.Language))
+        {
+            var requestCulture = HttpContext.Request.Cookies[".AspNetCore.Culture"];
+            if (!string.IsNullOrWhiteSpace(requestCulture))
+            {
+                var segments = requestCulture.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                var uiCultureSegment = segments.FirstOrDefault(s => s.StartsWith("uic=", StringComparison.OrdinalIgnoreCase));
+                var cookieCulture = uiCultureSegment?.Substring(4);
+                preferredLanguage = CulturePreferenceService.NormalizeCulture(cookieCulture);
+            }
+            else
+            {
+                var acceptLanguage = HttpContext.Request.Headers["Accept-Language"].ToString();
+                var rawLanguage = acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                var normalizedHeaderLanguage = rawLanguage?.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                preferredLanguage = CulturePreferenceService.NormalizeCulture(normalizedHeaderLanguage);
+            }
+        }
+
+        HttpContext.Response.Cookies.Append(
+            ThemeService.ThemeCookieName,
+            preferredTheme,
+            ThemeService.CreateCookieOptions(HttpContext.Request.IsHttps));
+
+        CulturePreferenceService.AppendCultureCookie(HttpContext.Response, HttpContext.Request, preferredLanguage);
 
         return Redirect("/");
     }

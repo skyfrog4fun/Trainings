@@ -50,6 +50,8 @@ public class ApplicationDbContext : DbContext
             entity.Property(u => u.Mobile).HasMaxLength(50);
             entity.Property(u => u.City).HasMaxLength(100);
             entity.Property(u => u.WelcomeMessage).HasMaxLength(500);
+            entity.Property(u => u.Language).HasMaxLength(10);
+            entity.Property(u => u.Theme).HasMaxLength(10);
             entity.Ignore(u => u.DisplayName);
             entity.HasOne(u => u.Country)
                 .WithMany(c => c.Users)

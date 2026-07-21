@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using System.Security.Claims;
 using Trainings.Application;
+using Trainings.Application.Interfaces;
 using Trainings.Infrastructure;
 using Trainings.Infrastructure.Data;
 using Trainings.Web.Auth;
@@ -113,14 +115,23 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/theme/set", (HttpContext httpContext, string value, string? returnUrl) =>
+app.MapGet("/theme/set", async (HttpContext httpContext, IUserService userService, string value, string? returnUrl) =>
 {
+    string normalizedTheme = ThemeService.NormalizeTheme(value);
+
     httpContext.Response.Cookies.Append(
         ThemeService.ThemeCookieName,
-        ThemeService.NormalizeTheme(value),
+        normalizedTheme,
         ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
 
-    var target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+    if (httpContext.User.Identity?.IsAuthenticated == true
+        && int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+    {
+        var user = await userService.GetByIdAsync(userId);
+        await userService.UpdatePreferencesAsync(userId, user?.Language, normalizedTheme);
+    }
+
+    string target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
     if (!Uri.IsWellFormedUriString(target, UriKind.Relative))
     {
         target = "/";
@@ -129,16 +140,20 @@ app.MapGet("/theme/set", (HttpContext httpContext, string value, string? returnU
     return Results.LocalRedirect(target);
 });
 
-app.MapGet("/culture/set", (HttpContext httpContext, string culture, string? returnUrl) =>
+app.MapGet("/culture/set", async (HttpContext httpContext, IUserService userService, string culture, string? returnUrl) =>
 {
-    var normalizedCulture = string.Equals(culture, "en", StringComparison.OrdinalIgnoreCase) ? "en" : "de";
+    string normalizedCulture = CulturePreferenceService.NormalizeCulture(culture);
 
-    httpContext.Response.Cookies.Append(
-        CookieRequestCultureProvider.DefaultCookieName,
-        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(normalizedCulture)),
-        ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
+    CulturePreferenceService.AppendCultureCookie(httpContext.Response, httpContext.Request, normalizedCulture);
 
-    var target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+    if (httpContext.User.Identity?.IsAuthenticated == true
+        && int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+    {
+        var user = await userService.GetByIdAsync(userId);
+        await userService.UpdatePreferencesAsync(userId, normalizedCulture, user?.Theme);
+    }
+
+    string target = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
     if (!Uri.IsWellFormedUriString(target, UriKind.Relative))
     {
         target = "/";
