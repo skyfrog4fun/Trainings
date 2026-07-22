@@ -690,4 +690,13 @@
   <data name="StatisticsScopeManagedGroups" xml:space="preserve">
     <value>Managed Groups</value>
   </data>
+  <data name="CreateAccount" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
+  <data name="Register_PageTitle" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="Register_Title" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
 </root>

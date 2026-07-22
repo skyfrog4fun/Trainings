@@ -478,7 +478,7 @@
     <value>Recipient</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Registrieren</value>
   </data>
   <data name="RegisterForTraining" xml:space="preserve">
     <value>Register For Training</value>
@@ -689,5 +689,14 @@
   </data>
   <data name="StatisticsScopeManagedGroups" xml:space="preserve">
     <value>Verwaltete Gruppen</value>
+  </data>
+  <data name="CreateAccount" xml:space="preserve">
+    <value>Account erstellen</value>
+  </data>
+  <data name="Register_PageTitle" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="Register_Title" xml:space="preserve">
+    <value>Create Account</value>
   </data>
 </root>
