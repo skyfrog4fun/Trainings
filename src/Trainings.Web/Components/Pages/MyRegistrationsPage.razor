@@ -1,6 +1,9 @@
 @page "/my-registrations"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupMember")]
+
 @inject IRegistrationService RegistrationService
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService

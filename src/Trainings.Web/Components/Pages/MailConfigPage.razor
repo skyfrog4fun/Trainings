@@ -1,17 +1,19 @@
 @page "/config/mail"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "SuperAdmin")]
-@using System.Globalization
+
 @using Trainings.Application.DTOs
 @using Trainings.Domain.Entities
 @using Trainings.Domain.Enums
+
 @inject IMailConfigurationService MailConfigService
 @inject IEmailService EmailService
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
-@inject NavigationManager NavigationManager
 
 <PageTitle>Configuration</PageTitle>
 

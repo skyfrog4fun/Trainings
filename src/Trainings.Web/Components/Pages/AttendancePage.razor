@@ -1,6 +1,8 @@
 @page "/trainings/{TrainingId:int}/attendance"
+
 @rendermode InteractiveServer
 @attribute [Authorize(Policy = "GroupTrainer")]
+
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IAttendanceService AttendanceService

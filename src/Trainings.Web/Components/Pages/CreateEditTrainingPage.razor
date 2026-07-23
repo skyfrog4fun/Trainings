@@ -1,15 +1,16 @@
 @page "/trainings/create"
 @page "/trainings/{Id:int}/edit"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupTrainer")]
-@using System.Globalization
+
 @inject ITrainingService TrainingService
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavigationManager
 
 <PageTitle>@(_isEdit ? "Edit Training" : "Create Training")</PageTitle>
 

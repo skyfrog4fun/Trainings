@@ -1,12 +1,14 @@
 @page "/plan-training"
 @page "/trainer-trainings"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupTrainer")]
+
 @inject ITrainingService TrainingService
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavigationManager
 
 <PageTitle>Training Planning</PageTitle>
 

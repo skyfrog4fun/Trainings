@@ -1,10 +1,12 @@
 @page "/config/locations"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "SuperAdmin")]
+
 @inject ILocationService LocationService
 @inject IGroupService GroupService
 @inject ICountryService CountryService
-@inject NavigationManager NavigationManager
 
 <PageTitle>Locations</PageTitle>
 

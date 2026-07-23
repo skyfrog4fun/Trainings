@@ -1,8 +1,10 @@
 @page "/groups"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupAdmin")]
+
 @inject IGroupService GroupService
-@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["Groups"]</PageTitle>
 

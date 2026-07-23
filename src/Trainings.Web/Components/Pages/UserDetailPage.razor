@@ -1,6 +1,9 @@
 @page "/users/{Id:int}"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupAdmin")]
+
 @inject IUserService UserService
 @inject IGroupService GroupService
 @inject IRegistrationService RegistrationService

@@ -1,7 +1,11 @@
 @page "/"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize]
+
 @using Trainings.Web.Auth
+
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
@@ -12,7 +16,6 @@
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
 @inject IDateTimeFormatService DateTimeFormatService
-@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["Dashboard"]</PageTitle>
 

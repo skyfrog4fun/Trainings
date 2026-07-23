@@ -1,13 +1,16 @@
 @page "/trainings"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupMember")]
+
 @using Trainings.Web.Auth
+
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IUserService UserService
 @inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["Trainings"]</PageTitle>
 

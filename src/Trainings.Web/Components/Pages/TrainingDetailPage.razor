@@ -1,14 +1,17 @@
 @page "/trainings/{Id:int}"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupMember")]
+
 @using Trainings.Web.Auth
+
 @inject ITrainingService TrainingService
 @inject IRegistrationService RegistrationService
 @inject IUserService UserService
 @inject IEmailService EmailService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager Navigation
 
 <PageTitle>@(_training?.Title ?? "Training")</PageTitle>
 
@@ -452,7 +455,7 @@
 
             if (notifyParticipants)
             {
-                var appUrl = Navigation.BaseUri.TrimEnd('/');
+                var appUrl = NavigationManager.BaseUri.TrimEnd('/');
                 var recipientIds = _registrations
                     .Where(registration => registration.Status == RegistrationStatus.Registered)
                     .Select(registration => registration.UserId)
@@ -478,7 +481,7 @@
             }
 
             await TrainingService.DeleteAsync(_training.Id);
-            Navigation.NavigateTo("/trainings");
+            NavigationManager.NavigateTo("/trainings");
         }
         catch (Exception ex)
         {

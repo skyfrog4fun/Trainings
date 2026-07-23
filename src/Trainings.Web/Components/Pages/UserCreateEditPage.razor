@@ -1,14 +1,15 @@
 @page "/users/new"
 @page "/users/{Id:int}/edit"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupAdmin")]
+
 @inject IUserService UserService
 @inject IGroupService GroupService
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
-@inject NavigationManager NavigationManager
-@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@(_isEdit ? Localizer["EditUser"] : Localizer["CreateUser"])</PageTitle>
 

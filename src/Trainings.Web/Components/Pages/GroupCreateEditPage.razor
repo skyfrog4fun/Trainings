@@ -1,14 +1,14 @@
 @page "/groups/new"
 @page "/groups/{Id:int}/edit"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupAdmin")]
-@using System.Globalization
+
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject ICountryService CountryService
 @inject IDateTimeFormatService DateTimeFormatService
-@inject NavigationManager NavigationManager
-@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@(_isEdit ? Localizer["EditGroup"] : Localizer["CreateGroup"])</PageTitle>
 

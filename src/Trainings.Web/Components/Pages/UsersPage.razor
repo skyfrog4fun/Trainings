@@ -1,6 +1,9 @@
 @page "/users"
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Policy = "GroupAdmin")]
+
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
 @inject IRegistrationService RegistrationService
@@ -8,7 +11,6 @@
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
-@inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["Users"]</PageTitle>
 
@@ -70,8 +72,8 @@
                                             <div class="row g-2">
                                                 <div class="col-12 col-md-6"><strong>@Localizer["Email"]:</strong> @user.Email</div>
                                                 <div class="col-12 col-md-6"><strong>@Localizer["Country"]:</strong> @(GetCountryLabel(user.CountryId))</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["City"]:</strong> @(string.IsNullOrWhiteSpace(user.City) ? "—" : user.City)</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["Mobile"]:</strong> @(string.IsNullOrWhiteSpace(user.Mobile) ? "—" : user.Mobile)</div>
+                                                <div class="col-12 col-md-6"><strong>@Localizer["City"]:</strong> @(string.IsNullOrWhiteSpace(user.City) ? "â€”" : user.City)</div>
+                                                <div class="col-12 col-md-6"><strong>@Localizer["Mobile"]:</strong> @(string.IsNullOrWhiteSpace(user.Mobile) ? "â€”" : user.Mobile)</div>
                                                 <div class="col-12 col-md-6"><strong>@Localizer["Gender"]:</strong> @user.Gender</div>
                                                 <div class="col-12 col-md-6"><strong>@Localizer["EmailVerified"]:</strong> @(user.EmailConfirmedAt.HasValue ? Localizer["Yes"] : Localizer["No"])</div>
                                                 <div class="col-12 text-end">
@@ -381,7 +383,7 @@
             .Distinct()
             .ToList();
 
-        return names.Count == 0 ? "—" : string.Join(", ", names);
+        return names.Count == 0 ? "â€”" : string.Join(", ", names);
     }
 
     private string FormatPendingGroups(int userId)
@@ -392,18 +394,18 @@
             .Distinct()
             .ToList();
 
-        return names.Count == 0 ? "—" : string.Join(", ", names);
+        return names.Count == 0 ? "â€”" : string.Join(", ", names);
     }
 
     private string GetCountryLabel(int? countryId)
     {
         if (!countryId.HasValue)
         {
-            return "—";
+            return "â€”";
         }
 
         var country = _countries.FirstOrDefault(c => c.Id == countryId.Value);
-        return country is null ? "—" : $"{country.Code} — {country.Name}";
+        return country is null ? "â€”" : $"{country.Code} â€” {country.Name}";
     }
 
     private string GetDisplayRole(UserDto user)
