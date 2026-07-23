@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using System.Security.Claims;
@@ -164,8 +165,8 @@ app.MapGet("/culture/set", async (HttpContext httpContext, IUserService userServ
 
 app.MapStaticAssets();
 app.MapRazorPages();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+app.MapFallback(() => new RazorComponentResult<App>());
 
 app.Run();
 

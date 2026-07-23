@@ -7,6 +7,8 @@ TODOs
 - [ ] Overview: Create an overview documentation that shows what page links to what other pages. This will help developers understand the navigation flow and dependencies between pages.
 - [ ] Buttons: streamline the button components to reduce redundancy and improve maintainability. Consider creating a base button component that can be reused across different pages.
 - [ ] Icons: Review the icons in AppIcons.cs to ensure a clear association between the icon names and their actual usage in the application. Remove any unused icons to keep the codebase clean.
+    - [ ] Check /config/icons page (linked in navigation)
+    - [ ] Check /style page (hidden page)
 - [ ] 
 
 
