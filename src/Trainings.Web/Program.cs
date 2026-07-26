@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Localization;
@@ -6,6 +8,7 @@ using System.Globalization;
 using System.Security.Claims;
 using Trainings.Application;
 using Trainings.Application.Interfaces;
+using Trainings.Domain.Enums;
 using Trainings.Infrastructure;
 using Trainings.Infrastructure.Data;
 using Trainings.Web.Auth;
@@ -19,7 +22,6 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ThemeService>();
 
@@ -30,7 +32,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/login";
-        options.LogoutPath = "/logout";
+        options.LogoutPath = "/auth/logout";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
@@ -163,8 +165,105 @@ app.MapGet("/culture/set", async (HttpContext httpContext, IUserService userServ
     return Results.LocalRedirect(target);
 });
 
+app.MapPost("/auth/login", async (HttpContext httpContext, IAntiforgery antiforgery, IUserService userService, IGroupService groupService) =>
+{
+    await antiforgery.ValidateRequestAsync(httpContext);
+
+    var form = await httpContext.Request.ReadFormAsync();
+    string email = form["Email"].ToString();
+    string password = form["Password"].ToString();
+    string requestedReturnUrl = form["ReturnUrl"].ToString();
+
+    string target = string.IsNullOrWhiteSpace(requestedReturnUrl) ? "/" : requestedReturnUrl;
+    if (!Uri.IsWellFormedUriString(target, UriKind.Relative) || target.StartsWith("//", StringComparison.Ordinal))
+    {
+        target = "/";
+    }
+
+    if (!target.StartsWith('/'))
+    {
+        target = "/" + target;
+    }
+
+    if (!await userService.ValidatePasswordAsync(email, password))
+    {
+        return Results.LocalRedirect(BuildLoginFailureUrl(target, email));
+    }
+
+    var user = await userService.GetByEmailAsync(email);
+    if (user == null)
+    {
+        return Results.LocalRedirect(BuildLoginFailureUrl(target, email));
+    }
+
+    var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, user.Id.ToString(CultureInfo.InvariantCulture)),
+        new(ClaimTypes.Name, user.DisplayName),
+        new(ClaimTypes.Email, user.Email)
+    };
+
+    if (user.Role == UserRole.SuperAdmin)
+    {
+        claims.Add(new Claim(AppClaimTypes.SuperAdmin, "true"));
+    }
+
+    var memberships = await groupService.GetApprovedMembershipsForUserAsync(user.Id);
+    foreach (var membership in memberships)
+    {
+        claims.Add(new Claim(AppClaimTypes.GroupRole(membership.GroupId), membership.Role.ToString()));
+    }
+
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var principal = new ClaimsPrincipal(identity);
+
+    await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+    var preferredTheme = ThemeService.NormalizeTheme(user.Theme);
+    if (string.IsNullOrWhiteSpace(user.Theme))
+    {
+        var requestTheme = httpContext.Request.Cookies[ThemeService.ThemeCookieName];
+        preferredTheme = ThemeService.NormalizeTheme(requestTheme);
+    }
+
+    var preferredLanguage = CulturePreferenceService.NormalizeCulture(user.Language);
+    if (string.IsNullOrWhiteSpace(user.Language))
+    {
+        var requestCulture = httpContext.Request.Cookies[".AspNetCore.Culture"];
+        if (!string.IsNullOrWhiteSpace(requestCulture))
+        {
+            var segments = requestCulture.Split('|', StringSplitOptions.RemoveEmptyEntries);
+            var uiCultureSegment = segments.FirstOrDefault(s => s.StartsWith("uic=", StringComparison.OrdinalIgnoreCase));
+            var cookieCulture = uiCultureSegment?.Substring(4);
+            preferredLanguage = CulturePreferenceService.NormalizeCulture(cookieCulture);
+        }
+        else
+        {
+            var acceptLanguage = httpContext.Request.Headers["Accept-Language"].ToString();
+            var rawLanguage = acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            var normalizedHeaderLanguage = rawLanguage?.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            preferredLanguage = CulturePreferenceService.NormalizeCulture(normalizedHeaderLanguage);
+        }
+    }
+
+    httpContext.Response.Cookies.Append(
+        ThemeService.ThemeCookieName,
+        preferredTheme,
+        ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
+
+    CulturePreferenceService.AppendCultureCookie(httpContext.Response, httpContext.Request, preferredLanguage);
+
+    return Results.LocalRedirect(target);
+});
+
+app.MapPost("/auth/logout", async (HttpContext httpContext, IAntiforgery antiforgery) =>
+{
+    await antiforgery.ValidateRequestAsync(httpContext);
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.LocalRedirect("/login");
+});
+
 app.MapStaticAssets();
-app.MapRazorPages();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapFallback(() => new RazorComponentResult<App>());
 
@@ -172,6 +271,13 @@ app.Run();
 
 public partial class Program
 {
+    private static string BuildLoginFailureUrl(string returnUrl, string email)
+    {
+        var encodedReturnUrl = Uri.EscapeDataString(returnUrl);
+        var encodedEmail = Uri.EscapeDataString(email);
+        return $"/login?error=invalid&returnUrl={encodedReturnUrl}&email={encodedEmail}";
+    }
+
     private static readonly Action<ILogger, Exception?> LogStartupFailed =
         LoggerMessage.Define(LogLevel.Critical, new EventId(1, nameof(LogStartupFailed)),
             "Application startup failed during database initialization");

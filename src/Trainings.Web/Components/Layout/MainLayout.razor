@@ -93,7 +93,10 @@
                     </li>
                 </AuthorizeView>
                 <li>
-                    <a class="dropdown-item " href="/logout"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Logout"]</a>
+                    <form method="post" action="/auth/logout" data-enhance="false" class="m-0 p-0">
+                        <AntiforgeryToken />
+                        <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Logout"]</button>
+                    </form>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -158,10 +161,7 @@
 
     private bool IsDarkTheme => ThemeService.CurrentTheme == "dark";
 
-    private string CurrentLanguage =>
-        string.Equals(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, "en", StringComparison.OrdinalIgnoreCase)
-            ? "en"
-            : "de";
+    private string CurrentLanguage => PreferenceNavigationService.GetCurrentLanguageCode();
 
     private string CurrentLanguageDisplayName =>
         LanguageOptions.FirstOrDefault(x => string.Equals(x.Code, CurrentLanguage, StringComparison.OrdinalIgnoreCase)).DisplayName
@@ -174,28 +174,18 @@
 
     private string BuildCultureUrl(string culture)
     {
-        var normalizedCulture = string.Equals(culture, "en", StringComparison.OrdinalIgnoreCase)
-            ? "en"
-            : "de";
-
         var relativeUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        var returnUrl = string.IsNullOrWhiteSpace(relativeUri)
-            ? "/"
-            : relativeUri.StartsWith("/", StringComparison.Ordinal) ? relativeUri : "/" + relativeUri;
+        var returnUrl = PreferenceNavigationService.BuildReturnUrlFromRelativePath(relativeUri);
 
-        return $"/culture/set?culture={normalizedCulture}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+        return PreferenceNavigationService.BuildCultureUrl(culture, returnUrl);
     }
 
     private string BuildThemeToggleUrl()
     {
-        var targetTheme = IsDarkTheme ? "light" : "dark";
-
         var relativeUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        var returnUrl = string.IsNullOrWhiteSpace(relativeUri)
-            ? "/"
-            : relativeUri.StartsWith("/", StringComparison.Ordinal) ? relativeUri : "/" + relativeUri;
+        var returnUrl = PreferenceNavigationService.BuildReturnUrlFromRelativePath(relativeUri);
 
-        return $"/theme/set?value={targetTheme}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+        return PreferenceNavigationService.BuildThemeToggleUrl(ThemeService.CurrentTheme, returnUrl);
     }
 
     private void ResetError() => _errorBoundary?.Recover();

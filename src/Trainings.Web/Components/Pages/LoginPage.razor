@@ -1,0 +1,123 @@
+@page "/login"
+@layout AnonymousLayout
+@attribute [AllowAnonymous]
+
+@using System.Reflection
+
+@inject IUserService UserService
+@inject IGroupService GroupService
+@inject IConfiguration Configuration
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Trainings.Web.Services.ThemeService ThemeService
+
+<PageTitle>Login</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="T" />rainings</h2>
+
+                    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                    {
+                        <div class="alert alert-danger">@ErrorMessage</div>
+                    }
+
+                    <form method="post" action="/auth/login" data-enhance="false">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="Email" value="@Email" required autofocus />
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="Password" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
+                    </form>
+
+                    <div class="row mt-2">
+                        <a href="/register" class="col-6 text-start text-decoration-none small">Register</a>
+                        <a href="/forgot-password" class="col-6 text-end text-decoration-none small">Forgot password?</a>
+                    </div>
+
+                    @if (ShowInitialCredentials)
+                    {
+                        <div class="alert alert-info mt-3 small">
+                            <strong>Initial Setup</strong><br />
+                            No users exist yet. Use these default credentials to log in:<br />
+                            <strong>Email:</strong> @SeedEmail<br />
+                            <strong>Password:</strong> Admin123!
+                        </div>
+                    }
+
+                    <div class="text-end mt-2">
+                        <small class="text-muted">v@AppVersion</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string ReturnUrl { get; set; } = "/";
+    private string Email { get; set; } = string.Empty;
+    private string? ErrorMessage { get; set; }
+    private bool ShowInitialCredentials { get; set; }
+    private string SeedEmail { get; set; } = string.Empty;
+
+    private string AppVersion { get; } =
+        System.Reflection.Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion
+            .Split('+')[0]
+        ?? System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+        ?? "1.0.0";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            NavigationManager.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        var users = await UserService.GetAllAsync();
+        if (!users.Any())
+        {
+            ShowInitialCredentials = true;
+            SeedEmail = Configuration["Seed:Email"] ?? "superadmin@trainings.app";
+        }
+
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("returnUrl", out var returnUrlValues))
+        {
+            var candidate = returnUrlValues.ToString();
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && Uri.IsWellFormedUriString(candidate, UriKind.Relative)
+                && !candidate.StartsWith("//", StringComparison.Ordinal))
+            {
+                ReturnUrl = candidate.StartsWith('/') ? candidate : "/" + candidate;
+            }
+        }
+
+        if (query.TryGetValue("email", out var emailValues))
+        {
+            Email = emailValues.ToString();
+        }
+
+        if (query.TryGetValue("error", out var errorValues)
+            && string.Equals(errorValues.ToString(), "invalid", StringComparison.OrdinalIgnoreCase))
+        {
+            ErrorMessage = "Invalid email or password.";
+        }
+    }
+
+}
