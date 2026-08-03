@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 
 @inject Trainings.Web.Services.ThemeService ThemeService
+@inject Trainings.Web.Services.VersionService VersionService
 
 <nav class="navbar app-navbar sticky-top shadow-sm">
     <div class="container-fluid">
@@ -53,6 +54,12 @@
                     </li>
                     <li>
                         <a class="dropdown-item" href="/forgot-password"><i class="fa-solid fa-key me-2" aria-hidden="true"></i>Forgot password?</a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <span class="dropdown-item-text text-muted small d-inline-flex align-items-center">
+                            <i class="@($"{AppIcons.Tag} me-2")" aria-hidden="true"></i>@($"v{VersionService.ApplicationVersion}")
+                        </span>
                     </li>
                 </ul>
             </div>

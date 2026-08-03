@@ -1,8 +1,8 @@
 TODOs
 -----
 
-- [ ] Navigation: When user is not signed in (in /register), the navigation shows "dashboard", "user information" and "logout" links. These should not be visible when the user is not signed in.
-- [ ] Version number: fix the version number on /login page.
+- [X] Navigation: When user is not signed in (in /register), the navigation shows "dashboard", "user information" and "logout" links. These should not be visible when the user is not signed in.
+- [X] Version number: fix the version number on /login page.
 - [ ] Localizer: Localizer is part of _Imports.razor. We should remove it from each page since it is already imported globally.
 - [ ] Ressources: Rework the resources by adding [Page]_[Resource] naming convention to avoid conflicts and improve organization.
 - [ ] Overview: Create an overview documentation that shows what page links to what other pages. This will help developers understand the navigation flow and dependencies between pages.

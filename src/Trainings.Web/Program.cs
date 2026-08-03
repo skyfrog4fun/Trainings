@@ -23,6 +23,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<VersionService>();
 builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
