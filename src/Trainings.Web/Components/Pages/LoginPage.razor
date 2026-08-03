@@ -1,5 +1,7 @@
 @page "/login"
+
 @layout AnonymousLayout
+
 @attribute [AllowAnonymous]
 
 @inject IUserService UserService
@@ -7,7 +9,7 @@
 @inject IConfiguration Configuration
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Login</PageTitle>
+<PageTitle>@Localizer["Login_PageTitle"]</PageTitle>
 
 <div class="container">
     <div class="row justify-content-center mt-5">
@@ -16,29 +18,29 @@
                 <div class="card-body p-4">
                     <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="T" />rainings</h2>
 
-                    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
-                    {
-                        <div class="alert alert-danger">@ErrorMessage</div>
-                    }
-
                     <form method="post" action="/auth/login" data-enhance="false">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label">@Localizer["Login_Email"]</label>
                             <input type="email" class="form-control form-control-lg" id="email" name="Email" value="@Email" required autofocus />
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">@Localizer["Login_Password"]</label>
                             <input type="password" class="form-control form-control-lg" id="password" name="Password" required />
                         </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">@Localizer["Login_Button"]</button>
                     </form>
 
+                    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">@ErrorMessage</div>
+                    }
+
                     <div class="row mt-2">
-                        <a href="/register" class="col-6 text-start text-decoration-none small">Register</a>
-                        <a href="/forgot-password" class="col-6 text-end text-decoration-none small">Forgot password?</a>
+                        <a href="/register" class="col-6 text-start text-decoration-none small">@Localizer["Login_Register"]</a>
+                        <a href="/forgot-password" class="col-6 text-end text-decoration-none small">@Localizer["Login_ForgotPassword"]</a>
                     </div>
 
                     @if (ShowInitialCredentials)
@@ -47,7 +49,7 @@
                             <strong>Initial Setup</strong><br />
                             No users exist yet. Use these default credentials to log in:<br />
                             <strong>Email:</strong> @SeedEmail<br />
-                            <strong>Password:</strong> Admin123!
+                            <strong>Password:</strong> @SeedPassword
                         </div>
                     }
 
@@ -63,6 +65,7 @@
     private string? ErrorMessage { get; set; }
     private bool ShowInitialCredentials { get; set; }
     private string SeedEmail { get; set; } = string.Empty;
+    private string SeedPassword { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,6 +81,7 @@
         {
             ShowInitialCredentials = true;
             SeedEmail = Configuration["Seed:Email"] ?? "superadmin@trainings.app";
+            SeedPassword = Configuration["Seed:Password"] ?? "Admin123!";
         }
 
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
@@ -99,10 +103,9 @@
             Email = emailValues.ToString();
         }
 
-        if (query.TryGetValue("error", out var errorValues)
-            && string.Equals(errorValues.ToString(), "invalid", StringComparison.OrdinalIgnoreCase))
+        if (query.TryGetValue("error", out var errorValues) && string.Equals(errorValues.ToString(), "invalid", StringComparison.OrdinalIgnoreCase))
         {
-            ErrorMessage = "Invalid email or password.";
+            ErrorMessage = Localizer["Login_InvalidLogin"];
         }
     }
 

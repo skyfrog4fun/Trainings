@@ -699,4 +699,34 @@
   <data name="Register_Title" xml:space="preserve">
     <value>Create Account</value>
   </data>
+  <data name="Login_Email" xml:space="preserve">
+    <value>E-Mail</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Login_Button" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Login_Register" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="Login_ForgotPassword" xml:space="preserve">
+    <value>Passwort vergessen?</value>
+  </data>
+  <data name="AnonymousLayout_Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="AnonymousLayout_Register" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="AnonymousLayout_ForgotPassword" xml:space="preserve">
+    <value>Passwort vergessen?</value>
+  </data>
+  <data name="Login_InvalidLogin" xml:space="preserve">
+    <value>Ungültiger Benutzer or Passwort!</value>
+  </data>
+  <data name="Login_PageTitle" xml:space="preserve">
+    <value>Login</value>
+  </data>
 </root>
