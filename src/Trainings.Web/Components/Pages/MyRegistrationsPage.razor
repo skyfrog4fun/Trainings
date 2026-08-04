@@ -9,11 +9,11 @@
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>My Registrations</PageTitle>
+<PageTitle>@Localizer["MyRegistrationsPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
-        <h2 class="mb-0">My Registrations</h2>
+        <h2 class="mb-0">@Localizer["MyRegistrationsPage_Heading"]</h2>
         <button type="button" class="btn btn-app-outline" @onclick="ToggleFilter">
             <i class="@AppIcons.Filter" aria-hidden="true"></i>
         </button>
@@ -24,7 +24,7 @@
         <div class="row g-2 mb-3">
             <div class="col-12 col-md-4">
                 <select class="form-select" @bind="_filterGroupName">
-                    <option value="">All groups</option>
+                    <option value="">@Localizer["MyRegistrationsPage_AllGroups"]</option>
                     @foreach (var group in _filterGroups)
                     {
                         <option value="@group">@group</option>
@@ -33,7 +33,7 @@
             </div>
             <div class="col-12 col-md-3">
                 <select class="form-select" @bind="_filterTrainerName">
-                    <option value="">All trainers</option>
+                    <option value="">@Localizer["MyRegistrationsPage_AllTrainers"]</option>
                     @foreach (var trainer in _filterTrainers)
                     {
                         <option value="@trainer">@trainer</option>
@@ -42,14 +42,14 @@
             </div>
             <div class="col-12 col-md-3">
                 <select class="form-select" @bind="_filterAvailability">
-                    <option value="all">All</option>
-                    <option value="available">Available</option>
-                    <option value="full">Full</option>
+                    <option value="all">@Localizer["MyRegistrationsPage_FilterAll"]</option>
+                    <option value="available">@Localizer["MyRegistrationsPage_FilterAvailable"]</option>
+                    <option value="full">@Localizer["MyRegistrationsPage_FilterFull"]</option>
                 </select>
             </div>
             <div class="col-12 col-md-2 d-grid">
                 <button type="button" class="btn btn-app-outline" @onclick="ClearFilters">
-                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>Clear filters
+                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>@Localizer["MyRegistrationsPage_ClearFilters"]
                 </button>
             </div>
         </div>
@@ -84,7 +84,7 @@
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center gap-2">
                             <span class="badge @(reg.Status == RegistrationStatus.Registered ? "bg-success" : "bg-secondary")">@reg.Status</span>
-                            <a href="/trainings/@reg.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary ms-auto" title="View Details" aria-label="View Details">
+                            <a href="/trainings/@reg.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary ms-auto" title="@Localizer["MyRegistrationsPage_ViewDetails"]" aria-label="@Localizer["MyRegistrationsPage_ViewDetails"]">
                                 <i class="fa-solid fa-eye" aria-hidden="true"></i>
                             </a>
                         </div>
@@ -95,11 +95,11 @@
     }
     else if (_registrations.Any())
     {
-        <div class="alert alert-info">No registrations match the current filters.</div>
+        <div class="alert alert-info">@Localizer["MyRegistrationsPage_NoFilterMatch"]</div>
     }
     else
     {
-        <div class="alert alert-info">You have no registrations yet. <a href="/trainings">Browse trainings</a></div>
+        <div class="alert alert-info">@Localizer["MyRegistrationsPage_NoRegistrations"] <a href="/trainings">@Localizer["MyRegistrationsPage_BrowseTrainings"]</a></div>
     }
 </div>
 

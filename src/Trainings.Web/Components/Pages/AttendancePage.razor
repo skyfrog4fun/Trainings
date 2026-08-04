@@ -11,7 +11,7 @@
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Attendance</PageTitle>
+<PageTitle>@Localizer["AttendancePage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
@@ -20,18 +20,18 @@
 
     @if (_training != null)
     {
-        <h2>Attendance: @(string.IsNullOrWhiteSpace(_training.Title) ? "In planning ..." : _training.Title)</h2>
+        <h2>@Localizer["AttendancePage_HeadingPrefix"] @(string.IsNullOrWhiteSpace(_training.Title) ? (string)Localizer["AttendancePage_InPlanning"] : _training.Title)</h2>
         <p class="text-muted">@FormatTrainingDate(_training) · @(_training.LocationName ?? "-")</p>
         @if (_training.AttendanceLocked && _training.AttendanceLockedAt.HasValue)
         {
             <div class="alert alert-success py-2">
-                <i class="@AppIcons.Check me-1" aria-hidden="true"></i>Attendance finalized on @FormatAttendanceLockedAt(_training)
+                <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@string.Format(Localizer["AttendancePage_FinalizedOn"].Value, FormatAttendanceLockedAt(_training))
             </div>
         }
         else if (_training.DateTime > DateTime.UtcNow)
         {
             <div class="alert alert-info py-2">
-                <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Training hasn't started yet. You can save a draft, but cannot finalize attendance until after start time.
+                <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@Localizer["AttendancePage_NotStartedAlert"]
             </div>
         }
     }
@@ -57,25 +57,25 @@
                         <span class="fw-semibold">@member.UserDisplayName</span>
                         @if (isRegistered)
                         {
-                            <i class="@AppIcons.ClipboardCheck text-success small" title="Pre-registered" aria-label="Pre-registered"></i>
+                            <i class="@AppIcons.ClipboardCheck text-success small" title="@Localizer["AttendancePage_PreRegistered"]" aria-label="@Localizer["AttendancePage_PreRegistered"]"></i>
                         }
                     </div>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Attendance for @member.UserDisplayName">
                         <button type="button"
                                 class="btn @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-secondary")"
-                                title="Present"
+                                title="@Localizer["AttendancePage_Present"]"
                                 @onclick="() => SetAttendance(member.UserId, AttendanceStatus.Present)">
                             <i class="@AppIcons.Check" aria-hidden="true"></i><i class="@AppIcons.Check" aria-hidden="true"></i>
                         </button>
                         <button type="button"
                                 class="btn @(status == AttendanceStatus.PartiallyPresent ? "btn-warning" : "btn-outline-secondary")"
-                                title="Partially present"
+                                title="@Localizer["AttendancePage_PartiallyPresent"]"
                                 @onclick="() => SetAttendance(member.UserId, AttendanceStatus.PartiallyPresent)">
                             <i class="@AppIcons.Check" aria-hidden="true"></i>
                         </button>
                         <button type="button"
                                 class="btn @(status == AttendanceStatus.Absent ? "btn-danger" : "btn-outline-secondary")"
-                                title="Absent"
+                                title="@Localizer["AttendancePage_Absent"]"
                                 @onclick="() => SetAttendance(member.UserId, AttendanceStatus.Absent)">
                             <i class="@AppIcons.XMark" aria-hidden="true"></i>
                         </button>
@@ -86,18 +86,18 @@
 
         @if (!_participants.Any())
         {
-            <div class="alert alert-info mt-3">No group members found for this training.</div>
+            <div class="alert alert-info mt-3">@Localizer["AttendancePage_NoGroupMembers"]</div>
         }
 
         @if (_participants.Any())
         {
             <div class="mt-3 d-flex flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-primary" @onclick="SaveDraftAsync" disabled="@(_saving || (_training?.AttendanceLocked ?? false))">
-                    <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@(_saving ? "Saving…" : "Save Draft")
+                    <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@(_saving ? Localizer["AttendancePage_Saving"] : Localizer["AttendancePage_SaveDraft"])
                 </button>
                 <button type="button" class="btn btn-primary" @onclick="FinalizeAttendanceAsync"
                         disabled="@(_saving || (_training?.AttendanceLocked ?? false) || (_training?.DateTime > DateTime.UtcNow))">
-                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@(_saving ? "Saving…" : "Finalize Attendance")
+                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@(_saving ? Localizer["AttendancePage_Saving"] : Localizer["AttendancePage_FinalizeAttendance"])
                 </button>
             </div>
         }

@@ -15,29 +15,28 @@
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
 
-<PageTitle>Configuration</PageTitle>
+<PageTitle>@Localizer["MailConfigPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3">
-        <h2><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>Configuration</h2>
+        <h2><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>@Localizer["MailConfigPage_Heading"]</h2>
     </div>
 
-    <p class="text-muted">Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</p>
+    <p class="text-muted">@Localizer["MailConfigPage_Description"]</p>
 
     <div class="card mb-4">
-        <div class="card-header fw-bold">Running Mode</div>
+        <div class="card-header fw-bold">@Localizer["MailConfigPage_RunningModeTitle"]</div>
         <div class="card-body">
             <p class="text-muted mb-3">
-                Override the startup configuration defaults for the current session.
-                Changes take effect immediately for all users and are reset to the configured defaults on application restart.
+                @Localizer["MailConfigPage_RunningModeDescription"]
             </p>
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-lg-5">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="chkReadOnly" @bind="_modeReadOnly" />
                         <label class="form-check-label" for="chkReadOnly">
-                            <strong>Read Only</strong>
-                            <span class="text-muted small d-block">Blocks write operations for everyone except SuperAdmins</span>
+                            <strong>@Localizer["MailConfigPage_ReadOnlyLabel"]</strong>
+                            <span class="text-muted small d-block">@Localizer["MailConfigPage_ReadOnlyDescription"]</span>
                         </label>
                     </div>
                 </div>
@@ -45,14 +44,14 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="chkNoEmail" @bind="_modeNoEmail" />
                         <label class="form-check-label" for="chkNoEmail">
-                            <strong>No E-Mail</strong>
-                            <span class="text-muted small d-block">Suppresses outgoing email and shows an in-app preview instead</span>
+                            <strong>@Localizer["MailConfigPage_NoEmailLabel"]</strong>
+                            <span class="text-muted small d-block">@Localizer["MailConfigPage_NoEmailDescription"]</span>
                         </label>
                     </div>
                 </div>
                 <div class="col-12 col-lg-2 d-flex align-items-end justify-content-lg-end">
-                    <button class="btn btn-primary me-2" @onclick="ApplyModes">Apply</button>
-                    <button class="btn btn-outline-secondary" @onclick="ResetModesToDefaults" title="Reset to startup configuration defaults">Reset to Defaults</button>
+                    <button class="btn btn-primary me-2" @onclick="ApplyModes">@Localizer["MailConfigPage_ApplyButton"]</button>
+                    <button class="btn btn-outline-secondary" @onclick="ResetModesToDefaults" title="@Localizer["MailConfigPage_ResetTitle"]">@Localizer["MailConfigPage_ResetButton"]</button>
                 </div>
             </div>
             @if (_modeActionResult is not null)
@@ -64,64 +63,64 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center fw-bold">
-            <span>Mail Configuration</span>
-            <button class="btn btn-success btn-sm" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New Configuration</button>
+            <span>@Localizer["MailConfigPage_MailConfigTitle"]</span>
+            <button class="btn btn-success btn-sm" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["MailConfigPage_NewConfigButton"]</button>
         </div>
         <div class="card-body">
-            <p class="text-muted mb-0">Manage SMTP endpoints used by notification delivery and fallback retry order.</p>
+            <p class="text-muted mb-0">@Localizer["MailConfigPage_ManageDescription"]</p>
         </div>
     </div>
 
     @if (_showForm)
     {
         <div class="card mb-4">
-            <div class="card-header fw-bold">@(_editId == 0 ? "New Mail Configuration" : "Edit Mail Configuration")</div>
+            <div class="card-header fw-bold">@(_editId == 0 ? Localizer["MailConfigPage_FormTitleNew"] : Localizer["MailConfigPage_FormTitleEdit"])</div>
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Name *</label>
-                        <input class="form-control" placeholder="e.g. Primary SMTP" @bind="_formName" />
+                        <label class="form-label">@Localizer["MailConfigPage_NameLabel"]</label>
+                        <input class="form-control" placeholder="@Localizer["MailConfigPage_NamePlaceholder"]" @bind="_formName" />
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Priority *</label>
+                        <label class="form-label">@Localizer["MailConfigPage_PriorityLabel"]</label>
                         <input class="form-control" type="number" min="1" @bind="_formPriority" />
-                        <div class="form-text">1 = highest priority</div>
+                        <div class="form-text">@Localizer["MailConfigPage_PriorityHelp"]</div>
                     </div>
                     <div class="col-12 col-md-3">
                         <label class="form-label d-block">&nbsp;</label>
                         <div class="form-check mt-2">
                             <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="chkActive" />
-                            <label class="form-check-label" for="chkActive">Active</label>
+                            <label class="form-check-label" for="chkActive">@Localizer["MailConfigPage_ActiveLabel"]</label>
                         </div>
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">SMTP Host *</label>
-                        <input class="form-control" placeholder="smtp.example.com" @bind="_formHost" />
+                        <label class="form-label">@Localizer["MailConfigPage_SmtpHostLabel"]</label>
+                        <input class="form-control" placeholder="@Localizer["MailConfigPage_SmtpHostPlaceholder"]" @bind="_formHost" />
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Port *</label>
+                        <label class="form-label">@Localizer["MailConfigPage_PortLabel"]</label>
                         <input class="form-control" type="number" @bind="_formPort" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Username</label>
-                        <input class="form-control" placeholder="SMTP username" @bind="_formUsername" />
+                        <label class="form-label">@Localizer["MailConfigPage_UsernameLabel"]</label>
+                        <input class="form-control" placeholder="@Localizer["MailConfigPage_UsernamePlaceholder"]" @bind="_formUsername" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Password</label>
-                        <input class="form-control" type="password" placeholder="SMTP password" @bind="_formPassword" />
+                        <label class="form-label">@Localizer["MailConfigPage_PasswordLabel"]</label>
+                        <input class="form-control" type="password" placeholder="@Localizer["MailConfigPage_PasswordPlaceholder"]" @bind="_formPassword" />
                         @if (_editId != 0)
                         {
-                            <div class="form-text">Leave blank to keep the existing password.</div>
+                            <div class="form-text">@Localizer["MailConfigPage_PasswordHelp"]</div>
                         }
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">From Address *</label>
-                        <input class="form-control" type="email" placeholder="noreply@example.com" @bind="_formFromAddress" />
+                        <label class="form-label">@Localizer["MailConfigPage_FromAddressLabel"]</label>
+                        <input class="form-control" type="email" placeholder="@Localizer["MailConfigPage_FromAddressPlaceholder"]" @bind="_formFromAddress" />
                     </div>
                 </div>
                 <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveConfig">Save</button>
-                    <button class="btn btn-secondary" @onclick="CancelForm">Cancel</button>
+                    <button class="btn btn-primary me-2" @onclick="SaveConfig">@Localizer["MailConfigPage_SaveButton"]</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm">@Localizer["MailConfigPage_CancelButton"]</button>
                 </div>
                 @if (_formError != null)
                 {
@@ -138,7 +137,7 @@
     else if (!_configs.Any())
     {
         <div class="alert alert-info">
-            No mail configurations defined yet. Add at least one SMTP configuration to enable email notifications.
+            @Localizer["MailConfigPage_NoConfigsAlert"]
         </div>
     }
     else
@@ -151,49 +150,49 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span class="fw-bold">
                                 @config.Name
-                                <span class="badge bg-secondary ms-2">Priority @config.Priority</span>
+                                <span class="badge bg-secondary ms-2">@string.Format(Localizer["MailConfigPage_PriorityBadge"].Value, config.Priority)</span>
                                 @if (config.IsActive)
                                 {
-                                    <span class="badge bg-success ms-1">Active</span>
+                                    <span class="badge bg-success ms-1">@Localizer["MailConfigPage_ActiveBadge"]</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary ms-1">Inactive</span>
+                                    <span class="badge bg-secondary ms-1">@Localizer["MailConfigPage_InactiveBadge"]</span>
                                 }
                             </span>
                             <div>
-                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditConfig(config)">Edit</button>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditConfig(config)">@Localizer["MailConfigPage_EditButton"]</button>
                                 <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ToggleActive(config)">
-                                    @(config.IsActive ? "Deactivate" : "Activate")
+                                    @(config.IsActive ? Localizer["MailConfigPage_DeactivateButton"] : Localizer["MailConfigPage_ActivateButton"])
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteConfig(config)">Delete</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteConfig(config)">@Localizer["MailConfigPage_DeleteButton"]</button>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="row g-2 small">
                                 <div class="col-12 col-md-4">
-                                    <strong>Host:</strong> @config.Host:@config.Port
+                                    <strong>@Localizer["MailConfigPage_DetailHost"]</strong> @config.Host:@config.Port
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>Username:</strong> @config.Username
+                                    <strong>@Localizer["MailConfigPage_DetailUsername"]</strong> @config.Username
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>From:</strong> @config.FromAddress
+                                    <strong>@Localizer["MailConfigPage_DetailFrom"]</strong> @config.FromAddress
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>Created:</strong> @FormatServerDateTime(config.CreatedAt)
+                                    <strong>@Localizer["MailConfigPage_DetailCreated"]</strong> @FormatServerDateTime(config.CreatedAt)
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>Last Success Sent:</strong> @FormatServerDateTime(config.LastSuccessSentAt)
+                                    <strong>@Localizer["MailConfigPage_DetailLastSuccess"]</strong> @FormatServerDateTime(config.LastSuccessSentAt)
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <strong>Status:</strong>
+                                    <strong>@Localizer["MailConfigPage_DetailStatus"]</strong>
                                     <span class="badge @GetStatusBadgeClass(config.Status) ms-1">@FormatStatus(config.Status)</span>
                                 </div>
                                 @if (config.Status != MailConfigurationStatus.Successful && !string.IsNullOrWhiteSpace(config.LastError))
                                 {
                                     <div class="col-12 text-danger">
-                                        <strong>Latest Error:</strong> @config.LastError
+                                        <strong>@Localizer["MailConfigPage_DetailLatestError"]</strong> @config.LastError
                                     </div>
                                 }
                             </div>
@@ -210,24 +209,24 @@
     }
 
     <div class="card mt-4">
-        <div class="card-header fw-bold"><i class="@AppIcons.Envelope me-2" aria-hidden="true"></i>Test Email</div>
+        <div class="card-header fw-bold"><i class="@AppIcons.Envelope me-2" aria-hidden="true"></i>@Localizer["MailConfigPage_TestEmailTitle"]</div>
         <div class="card-body">
-            <p class="text-muted mb-2">Send a test email against all configurations in priority order or against a single selected configuration.</p>
+            <p class="text-muted mb-2">@Localizer["MailConfigPage_TestEmailDescription"]</p>
             <div class="row g-2 align-items-start">
                 <div class="col-12 col-md-4">
-                    <label class="form-label">Recipient Email</label>
-                    <input class="form-control" type="email" @bind="_testEmail" placeholder="you@example.com" />
+                    <label class="form-label">@Localizer["MailConfigPage_RecipientEmailLabel"]</label>
+                    <input class="form-control" type="email" @bind="_testEmail" placeholder="@Localizer["MailConfigPage_RecipientEmailPlaceholder"]" />
                 </div>
                 <div class="col-12 col-md-5">
-                    <label class="form-label">Mail Configuration</label>
+                    <label class="form-label">@Localizer["MailConfigPage_MailConfigLabel"]</label>
                     <select class="form-select" @bind="_selectedTestTarget">
-                        <option value="@AllConfigurationsValue">All configurations</option>
+                        <option value="@AllConfigurationsValue">@Localizer["MailConfigPage_AllConfigurations"]</option>
                         @foreach (var config in _configs)
                         {
                             <option value="@config.Id">@GetConfigOptionLabel(config)</option>
                         }
                     </select>
-                    <div class="form-text">Inactive configurations remain selectable for targeted testing.</div>
+                    <div class="form-text">@Localizer["MailConfigPage_InactiveConfigHelp"]</div>
                 </div>
                 <div class="col-12 col-md-3 d-flex">
                     <div class="w-100 d-flex align-items-end">
@@ -236,7 +235,7 @@
                             {
                                 <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" />
                             }
-                            Send Test Email
+                            @Localizer["MailConfigPage_SendTestButton"]
                         </button>
                     </div>
                 </div>
@@ -256,7 +255,7 @@
                                 <span class="@(attempt.IsSuccess ? "text-success" : "text-danger")">@attempt.Message</span>
                                 @if (!attempt.IsActive)
                                 {
-                                    <span class="badge text-bg-secondary">Inactive</span>
+                                    <span class="badge text-bg-secondary">@Localizer["MailConfigPage_InactiveBadge"]</span>
                                 }
                             </li>
                         }

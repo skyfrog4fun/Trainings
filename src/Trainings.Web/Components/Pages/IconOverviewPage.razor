@@ -4,20 +4,20 @@
 
 @attribute [Authorize(Policy = "SuperAdmin")]
 
-<PageTitle>Icon Overview</PageTitle>
+<PageTitle>@Localizer["IconOverviewPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
-        <h2 class="mb-0">Icon Overview</h2>
+        <h2 class="mb-0">@Localizer["IconOverviewPage_PageTitle"]</h2>
     </div>
 
     <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle">
             <thead>
                 <tr>
-                    <th>Icon</th>
-                    <th>Friendly Name</th>
-                    <th>FontAwesome Class</th>
+                    <th>@Localizer["IconOverviewPage_ColIcon"]</th>
+                    <th>@Localizer["IconOverviewPage_ColFriendlyName"]</th>
+                    <th>@Localizer["IconOverviewPage_ColClass"]</th>
                 </tr>
             </thead>
             <tbody>

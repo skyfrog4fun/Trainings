@@ -9,11 +9,11 @@
 
 @using Trainings.Domain.Enums
 
-<PageTitle>Group Members</PageTitle>
+<PageTitle>@Localizer["GroupMembersPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <a href="/groups" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
+        <a href="/groups" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_Back"]</a>
     </div>
 
     @if (_group != null)
@@ -26,11 +26,11 @@
     {
         <div class="card mb-4">
             <div class="card-body">
-                <h6>Add Member</h6>
+                <h6>@Localizer["GroupMembersPage_AddMemberTitle"]</h6>
                 <div class="row g-2">
                     <div class="col-12 col-md-6">
                         <select class="form-select" @bind="_addUserId">
-                            <option value="0">-- Select User --</option>
+                            <option value="0">@Localizer["GroupMembersPage_SelectUser"]</option>
                             @foreach (var user in _allUsers)
                             {
                                 <option value="@user.Id">@user.DisplayName (@user.Email)</option>
@@ -39,15 +39,15 @@
                     </div>
                     <div class="col-12 col-md-4">
                         <select class="form-select" @bind="_addRole">
-                            <option value="Participant">Participant</option>
-                            <option value="Trainer">Trainer</option>
-                            <option value="Admin">Admin</option>
+                            <option value="Participant">@Localizer["GroupMembersPage_RoleParticipant"]</option>
+                            <option value="Trainer">@Localizer["GroupMembersPage_RoleTrainer"]</option>
+                            <option value="Admin">@Localizer["GroupMembersPage_RoleAdmin"]</option>
                         </select>
                     </div>
                 </div>
                 <div class="mt-2">
-                    <button class="btn btn-primary btn-sm me-2" @onclick="AddMember">Add</button>
-                    <button class="btn btn-secondary btn-sm" @onclick="() => _showAddForm = false">Cancel</button>
+                    <button class="btn btn-primary btn-sm me-2" @onclick="AddMember">@Localizer["GroupMembersPage_AddButton"]</button>
+                    <button class="btn btn-secondary btn-sm" @onclick="() => _showAddForm = false">@Localizer["GroupMembersPage_CancelButton"]</button>
                 </div>
                 @if (_addError != null) { <div class="alert alert-danger mt-2 small">@_addError</div> }
             </div>
@@ -55,8 +55,8 @@
     }
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5>Members (@_approvedMembers.Count approved)</h5>
-        <button class="btn btn-success btn-sm" @onclick="() => _showAddForm = true"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>Add Member</button>
+        <h5>@string.Format(Localizer["GroupMembersPage_MembersHeading"].Value, _approvedMembers.Count)</h5>
+        <button class="btn btn-success btn-sm" @onclick="() => _showAddForm = true"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_AddMemberTitle"]</button>
     </div>
 
     @if (_loading)
@@ -68,11 +68,11 @@
         @if (_pendingMembers.Any())
         {
             <div class="card mb-4 border-warning">
-                <div class="card-header bg-warning text-dark fw-bold"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>Pending Requests (@_pendingMembers.Count)</div>
+                <div class="card-header bg-warning text-dark fw-bold"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>@string.Format(Localizer["GroupMembersPage_PendingRequests"].Value, _pendingMembers.Count)</div>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
-                            <tr><th>Name</th><th>Email</th><th>Role</th><th>Requested</th><th>Actions</th></tr>
+                            <tr><th>@Localizer["GroupMembersPage_ColName"]</th><th>@Localizer["GroupMembersPage_ColEmail"]</th><th>@Localizer["GroupMembersPage_ColRole"]</th><th>@Localizer["GroupMembersPage_ColRequested"]</th><th>@Localizer["GroupMembersPage_ColActions"]</th></tr>
                         </thead>
                         <tbody>
                             @foreach (var m in _pendingMembers)
@@ -83,8 +83,8 @@
                                     <td><span class="badge bg-secondary">@m.Role</span></td>
                                     <td class="small">@m.RequestedAt.ToString("MMM d, yyyy")</td>
                                     <td>
-                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveMember(m)"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Approve</button>
-                                        <button class="btn btn-sm btn-danger" @onclick="() => DeclineMember(m)"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Decline</button>
+                                        <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveMember(m)"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_ApproveButton"]</button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeclineMember(m)"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_DeclineButton"]</button>
                                     </td>
                                 </tr>
                             }
@@ -97,7 +97,7 @@
         @if (_adminMembers.Any())
         {
             <div class="card mb-3 border-primary">
-                <div class="card-header bg-primary text-white fw-bold"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>Admins (@_adminMembers.Count)</div>
+                <div class="card-header bg-primary text-white fw-bold"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>@string.Format(Localizer["GroupMembersPage_Admins"].Value, _adminMembers.Count)</div>
                 @RenderMemberTable(_adminMembers)
             </div>
         }
@@ -105,7 +105,7 @@
         @if (_trainerMembers.Any())
         {
             <div class="card mb-3 border-info">
-                <div class="card-header bg-info text-dark fw-bold"><i class="@AppIcons.UserCheck me-2" aria-hidden="true"></i>Trainers (@_trainerMembers.Count)</div>
+                <div class="card-header bg-info text-dark fw-bold"><i class="@AppIcons.UserCheck me-2" aria-hidden="true"></i>@string.Format(Localizer["GroupMembersPage_Trainers"].Value, _trainerMembers.Count)</div>
                 @RenderMemberTable(_trainerMembers)
             </div>
         }
@@ -113,14 +113,14 @@
         @if (_participantMembers.Any())
         {
             <div class="card mb-3">
-                <div class="card-header fw-bold"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>Participants (@_participantMembers.Count)</div>
+                <div class="card-header fw-bold"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>@string.Format(Localizer["GroupMembersPage_Participants"].Value, _participantMembers.Count)</div>
                 @RenderMemberTable(_participantMembers)
             </div>
         }
 
         @if (!_approvedMembers.Any() && !_pendingMembers.Any())
         {
-            <div class="alert alert-info">No members yet.</div>
+            <div class="alert alert-info">@Localizer["GroupMembersPage_NoMembers"]</div>
         }
     }
 
@@ -177,7 +177,7 @@
         <div class="table-responsive">
             <table class="table table-sm mb-0">
                 <thead>
-                    <tr><th>Name</th><th>Email</th><th>Active</th><th>Joined</th><th>Actions</th></tr>
+                    <tr><th>@Localizer["GroupMembersPage_ColName"]</th><th>@Localizer["GroupMembersPage_ColEmail"]</th><th>@Localizer["GroupMembersPage_ColActive"]</th><th>@Localizer["GroupMembersPage_ColJoined"]</th><th>@Localizer["GroupMembersPage_ColActions"]</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var m in members)
@@ -197,7 +197,7 @@
                             </td>
                             <td class="small">@m.JoinedAt.ToString("MMM d, yyyy")</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(m)"><i class="@AppIcons.UserMinus me-1" aria-hidden="true"></i>Remove</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(m)"><i class="@AppIcons.UserMinus me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_RemoveButton"]</button>
                             </td>
                         </tr>
                     }

@@ -7,7 +7,7 @@
 @inject IUserRegistrationService UserRegistrationService
 @inject IAppRuntimeModeService AppRuntimeModeService
 
-<PageTitle>Confirm Email</PageTitle>
+<PageTitle>@Localizer["ConfirmEmail_PageTitle"]</PageTitle>
 
 <div class="container">
     <div class="row justify-content-center mt-5">
@@ -17,20 +17,20 @@
                     @if (_loading)
                     {
                         <LoadingSpinner ContainerClass="" SpinnerClass="text-primary mb-3" />
-                        <p>Confirming your email...</p>
+                        <p>@Localizer["ConfirmEmail_Confirming"]</p>
                     }
                     else if (_success)
                     {
                         <div class="text-success mb-3 icon-display"><i class="@AppIcons.Check" aria-hidden="true"></i></div>
-                        <h5>Registration successful</h5>
-                        <p class="text-muted mb-2">Your email address was confirmed successfully.</p>
-                        <p class="text-muted">Your registration is now being reviewed by the Super Admin. You will be notified by email as soon as the review is complete.</p>
-                        <a href="/login" class="btn btn-primary w-100">Back to Login</a>
+                        <h5>@Localizer["ConfirmEmail_SuccessTitle"]</h5>
+                        <p class="text-muted mb-2">@Localizer["ConfirmEmail_SuccessMessage"]</p>
+                        <p class="text-muted">@Localizer["ConfirmEmail_ReviewPending"]</p>
+                        <a href="/login" class="btn btn-primary w-100">@Localizer["ConfirmEmail_BackToLogin"]</a>
                     }
                     else
                     {
                         <div class="text-danger mb-3 icon-display"><i class="@AppIcons.XMark" aria-hidden="true"></i></div>
-                        <h5>Confirmation Failed</h5>
+                        <h5>@Localizer["ConfirmEmail_FailedTitle"]</h5>
                         <p class="text-muted">@_message</p>
 
                         @if (_canResend)
@@ -40,15 +40,15 @@
                                 {
                                     <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" />
                                 }
-                                Send New Verification Mail
+                                @Localizer["ConfirmEmail_SendNewVerificationMail"]
                             </button>
                             @if (_runtimeMode.IsReadOnly)
                             {
-                                <div class="small text-muted mb-2">Read Only mode is active, so a replacement verification mail cannot be created right now.</div>
+                                <div class="small text-muted mb-2">@Localizer["ConfirmEmail_ReadOnlyModeMessage"]</div>
                             }
                         }
 
-                        <a href="/login" class="btn btn-outline-primary w-100">Back to Login</a>
+                        <a href="/login" class="btn btn-outline-primary w-100">@Localizer["ConfirmEmail_BackToLogin"]</a>
                     }
                 </div>
             </div>

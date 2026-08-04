@@ -12,19 +12,19 @@
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>@(_isEdit ? "Edit Training" : "Create Training")</PageTitle>
+<PageTitle>@(_isEdit ? Localizer["CreateEditTraining_PageTitleEdit"] : Localizer["CreateEditTraining_PageTitleNew"])</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
         <BackButton Href="/plan-training" />
     </div>
 
-    <h2>@(_isEdit ? "Edit Training" : "New Training")</h2>
+    <h2>@(_isEdit ? Localizer["CreateEditTraining_PageTitleEdit"] : Localizer["CreateEditTraining_HeadingNew"])</h2>
 
     @if (IsWriteBlocked)
     {
         <div class="alert alert-warning">
-            Read Only mode is active. Only SuperAdmins can create or edit trainings.
+            @Localizer["CreateEditTraining_ReadOnlyAlert"]
         </div>
     }
 
@@ -40,7 +40,7 @@
                         <span><i class="@AppIcons.Stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes min</span>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _detailsCollapsed = false">
-                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>Edit Details
+                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["CreateEditTraining_EditDetails"]
                     </button>
                 </div>
             </div>
@@ -52,9 +52,9 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Group *</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_GroupLabel"]</label>
                         <select class="form-select" @bind="_groupId" @bind:after="OnGroupChangedAsync">
-                            <option value="">Select a group</option>
+                            <option value="">@Localizer["CreateEditTraining_SelectGroup"]</option>
                             @foreach (var group in _availableGroups)
                             {
                                 <option value="@group.Id">@group.Name</option>
@@ -63,9 +63,9 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Trainer *</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_TrainerLabel"]</label>
                         <select class="form-select" @bind="_trainerId">
-                            <option value="0">Select a trainer</option>
+                            <option value="0">@Localizer["CreateEditTraining_SelectTrainer"]</option>
                             @foreach (var trainer in _groupTrainers)
                             {
                                 <option value="@trainer.UserId">@trainer.UserDisplayName</option>
@@ -74,19 +74,19 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Title</label>
-                        <input class="form-control" @bind="_title" placeholder="Training title" />
+                        <label class="form-label">@Localizer["CreateEditTraining_TitleLabel"]</label>
+                        <input class="form-control" @bind="_title" placeholder="@Localizer["CreateEditTraining_TitlePlaceholder"]" />
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Date *</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_DateLabel"]</label>
                         <input class="form-control" type="date" @bind="_date" />
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Location</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_LocationLabel"]</label>
                         <select class="form-select" @bind="_locationId" @bind:after="OnLocationChanged">
-                            <option value="">Select location</option>
+                            <option value="">@Localizer["CreateEditTraining_SelectLocation"]</option>
                             @foreach (var location in _availableLocations)
                             {
                                 <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
@@ -95,41 +95,41 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Max Participant</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_MaxParticipantLabel"]</label>
                         <input class="form-control" type="number" min="1" @bind="_capacity" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Start</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_StartLabel"]</label>
                         <input class="form-control" type="time" @bind="_startTime" @bind:after="CalculateEndTime" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">Duration (minutes)</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_DurationLabel"]</label>
                         <input class="form-control" type="number" min="1" @bind="DurationMinutesValue" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">End</label>
+                        <label class="form-label">@Localizer["CreateEditTraining_EndLabel"]</label>
                         <input class="form-control" type="time" value="@_endTime" readonly />
                     </div>
 
                     @if (_isEdit)
                     {
                         <div class="col-12 col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">@Localizer["CreateEditTraining_StatusLabel"]</label>
                             <div class="mt-1">
                                 <span class="badge @GetStatusBadgeClass(_status) me-2">@_status</span>
                                 @if (_status != TrainingStatus.Planned)
                                 {
-                                    <button type="button" class="btn btn-sm btn-success" @onclick="MarkAsPlannedAsync" title="Mark this training as Planned">
-                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>Mark as Planned
+                                    <button type="button" class="btn btn-sm btn-success" @onclick="MarkAsPlannedAsync" title="@Localizer["CreateEditTraining_MarkAsPlannedTitle"]">
+                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTraining_MarkAsPlanned"]
                                     </button>
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="RevertToPlanningAsync" title="Revert to Planning">
-                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>Revert to Planning
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="RevertToPlanningAsync" title="@Localizer["CreateEditTraining_RevertToPlanning"]">
+                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTraining_RevertToPlanning"]
                                     </button>
                                 }
                             </div>
@@ -139,18 +139,18 @@
                     @if (_isSpecialLocationSelected)
                     {
                         <div class="col-12 col-md-6">
-                            <label class="form-label">Special Location Description</label>
+                            <label class="form-label">@Localizer["CreateEditTraining_SpecialLocationLabel"]</label>
                             <input class="form-control" @bind="_specialLocationDescription" />
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label">Meeting Point</label>
+                            <label class="form-label">@Localizer["CreateEditTraining_MeetingPointLabel"]</label>
                             <input class="form-control" @bind="_meetingPoint" />
                         </div>
                     }
 
                     <div class="col-12">
-                        <label class="form-label">Training Description</label>
-                        <textarea class="form-control" rows="3" @bind="_description" placeholder="Description"></textarea>
+                        <label class="form-label">@Localizer["CreateEditTraining_DescriptionLabel"]</label>
+                        <textarea class="form-control" rows="3" @bind="_description" placeholder="@Localizer["CreateEditTraining_DescriptionPlaceholder"]"></textarea>
                     </div>
                 </div>
 
@@ -159,7 +159,7 @@
                 </div>
 
                 <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
-                    @(_isEdit ? "Update Training" : "Create Training")
+                    @(_isEdit ? Localizer["CreateEditTraining_UpdateButton"] : Localizer["CreateEditTraining_CreateButton"])
                 </button>
             </div>
         </div>

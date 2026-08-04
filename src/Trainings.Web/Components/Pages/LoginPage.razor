@@ -16,7 +16,7 @@
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
             <div class="card shadow">
                 <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="T" />rainings</h2>
+                    <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="@Localizer["Login_Logo"]" />rainings</h2>
 
                     <form method="post" action="/auth/login" data-enhance="false">
                         <AntiforgeryToken />
@@ -46,10 +46,10 @@
                     @if (ShowInitialCredentials)
                     {
                         <div class="alert alert-info mt-3 small">
-                            <strong>Initial Setup</strong><br />
-                            No users exist yet. Use these default credentials to log in:<br />
-                            <strong>Email:</strong> @SeedEmail<br />
-                            <strong>Password:</strong> @SeedPassword
+                            <strong>@Localizer["Login_InitialSetupTitle"]</strong><br />
+                            @Localizer["Login_InitialSetupDescription"]<br />
+                            <strong>@Localizer["Login_InitialSetupEmailLabel"]:</strong> @SeedEmail<br />
+                            <strong>@Localizer["Login_InitialSetupPasswordLabel"]:</strong> @SeedPassword
                         </div>
                     }
 
