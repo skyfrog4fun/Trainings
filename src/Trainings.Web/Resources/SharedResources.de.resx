@@ -805,7 +805,7 @@
     <value>E-Mail-Adresse</value>
   </data>
   <data name="ForgotPassword_EmailPlaceholder" xml:space="preserve">
-    <value>du@beispiel.de</value>
+    <value>you@example.com</value>
   </data>
   <data name="ForgotPassword_SendResetLink" xml:space="preserve">
     <value>Link senden</value>
@@ -882,7 +882,7 @@
   <data name="Register_WelcomeMessagePlaceholder" xml:space="preserve">
     <value>Erzähl uns ein bisschen über dich...</value>
   </data>
-  <data name="Register_Button" xml:space="preserve">
+  <data name="Register_ButtonRegister" xml:space="preserve">
     <value>Registrieren</value>
   </data>
   <data name="Register_AlreadyHaveAccount" xml:space="preserve">
@@ -1403,5 +1403,410 @@
   </data>
   <data name="NotFound_Message" xml:space="preserve">
     <value>Der gesuchte Inhalt existiert leider nicht.</value>
+  </data>
+  <data name="AttendancePage_DraftSaved" xml:space="preserve">
+    <value>Anwesenheitsentwurf gespeichert.</value>
+  </data>
+  <data name="AttendancePage_FinalizeBeforeStartError" xml:space="preserve">
+    <value>Die Anwesenheit kann erst nach Beginn des Trainings finalisiert werden.</value>
+  </data>
+  <data name="AttendancePage_FinalizedSuccess" xml:space="preserve">
+    <value>Anwesenheit erfolgreich finalisiert.</value>
+  </data>
+  <data name="AttendancePage_AttendanceForAriaLabel" xml:space="preserve">
+    <value>Anwesenheit für {0}</value>
+  </data>
+  <data name="ConfirmEmail_InvalidToken" xml:space="preserve">
+    <value>Ungültiges oder fehlendes Bestätigungstoken.</value>
+  </data>
+  <data name="ConfirmEmail_NewMailSent" xml:space="preserve">
+    <value>Eine neue Bestätigungs-E-Mail wurde gesendet.</value>
+  </data>
+  <data name="ConfirmEmail_NoEmailModePreview" xml:space="preserve">
+    <value>Der Kein-E-Mail-Modus ist aktiv. Prüfe die Vorschau unten und verwende den neuen Bestätigungslink.</value>
+  </data>
+  <data name="ForgotPassword_EmailRequired" xml:space="preserve">
+    <value>Bitte gib deine E-Mail-Adresse ein.</value>
+  </data>
+  <data name="Register_NameRequired" xml:space="preserve">
+    <value>Vor- und Nachname sind erforderlich.</value>
+  </data>
+  <data name="Register_EmailRequired" xml:space="preserve">
+    <value>E-Mail ist erforderlich.</value>
+  </data>
+  <data name="Register_PasswordTooShort" xml:space="preserve">
+    <value>Das Passwort muss mindestens 6 Zeichen lang sein.</value>
+  </data>
+  <data name="ResetPassword_NewPasswordRequired" xml:space="preserve">
+    <value>Bitte gib ein neues Passwort ein.</value>
+  </data>
+  <data name="ResetPassword_PasswordsDoNotMatch" xml:space="preserve">
+    <value>Die Passwörter stimmen nicht überein.</value>
+  </data>
+  <data name="ResetPassword_PasswordTooShort" xml:space="preserve">
+    <value>Das Passwort muss mindestens 6 Zeichen lang sein.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>Gruppe nicht gefunden.</value>
+  </data>
+  <data name="GroupMembersPage_MembersOfGroup" xml:space="preserve">
+    <value>{0} – Mitglieder</value>
+  </data>
+  <data name="GroupMembersPage_SelectUserError" xml:space="preserve">
+    <value>Bitte wähle einen Benutzer aus.</value>
+  </data>
+  <data name="GroupMembersPage_ApprovedMessage" xml:space="preserve">
+    <value>{0} genehmigt.</value>
+  </data>
+  <data name="GroupMembersPage_DeclinedMessage" xml:space="preserve">
+    <value>{0} abgelehnt.</value>
+  </data>
+  <data name="GroupMembersPage_FailedMessage" xml:space="preserve">
+    <value>Fehlgeschlagen: {0}</value>
+  </data>
+  <data name="Common_MinutesUnit" xml:space="preserve">
+    <value>Min.</value>
+  </data>
+  <data name="CreateEditTraining_GroupRequired" xml:space="preserve">
+    <value>Bitte wähle eine Gruppe aus.</value>
+  </data>
+  <data name="CreateEditTraining_TrainerRequired" xml:space="preserve">
+    <value>Bitte wähle einen Trainer aus.</value>
+  </data>
+  <data name="CreateEditTraining_UpdatedSuccess" xml:space="preserve">
+    <value>Training erfolgreich aktualisiert.</value>
+  </data>
+  <data name="CreateEditTraining_CreatedSuccess" xml:space="preserve">
+    <value>Training erfolgreich erstellt.</value>
+  </data>
+  <data name="CreateEditTraining_SaveFailed" xml:space="preserve">
+    <value>Speichern des Trainings fehlgeschlagen: {0}</value>
+  </data>
+  <data name="CreateEditTraining_MarkedAsPlannedSuccess" xml:space="preserve">
+    <value>Training als Geplant markiert.</value>
+  </data>
+  <data name="CreateEditTraining_RevertedToPlanningSuccess" xml:space="preserve">
+    <value>Training zurück zu In Planung gesetzt.</value>
+  </data>
+  <data name="MailConfigPage_RequiredFieldsError" xml:space="preserve">
+    <value>Name, Host und Absenderadresse sind erforderlich.</value>
+  </data>
+  <data name="MailConfigPage_PasswordRequiredForNew" xml:space="preserve">
+    <value>Für eine neue Konfiguration ist ein Passwort erforderlich.</value>
+  </data>
+  <data name="MailConfigPage_ConfigNotFound" xml:space="preserve">
+    <value>Konfiguration nicht gefunden.</value>
+  </data>
+  <data name="MailConfigPage_SavedSuccess" xml:space="preserve">
+    <value>Konfiguration erfolgreich gespeichert.</value>
+  </data>
+  <data name="MailConfigPage_ActivatedMessage" xml:space="preserve">
+    <value>Konfiguration '{0}' aktiviert.</value>
+  </data>
+  <data name="MailConfigPage_DeactivatedMessage" xml:space="preserve">
+    <value>Konfiguration '{0}' deaktiviert.</value>
+  </data>
+  <data name="MailConfigPage_FailedMessage" xml:space="preserve">
+    <value>Fehlgeschlagen: {0}</value>
+  </data>
+  <data name="MailConfigPage_DeletedMessage" xml:space="preserve">
+    <value>Konfiguration '{0}' gelöscht.</value>
+  </data>
+  <data name="MailConfigPage_TestNamePlaceholder" xml:space="preserve">
+    <value>Mail-Test</value>
+  </data>
+  <data name="MailConfigPage_RecipientEmailRequired" xml:space="preserve">
+    <value>Bitte gib eine Empfänger-E-Mail-Adresse ein.</value>
+  </data>
+  <data name="MailConfigPage_SelectedConfigurationLabel" xml:space="preserve">
+    <value>ausgewählte Konfiguration</value>
+  </data>
+  <data name="MailConfigPage_ConfiguredFallbackOrderLabel" xml:space="preserve">
+    <value>konfigurierte Fallback-Reihenfolge</value>
+  </data>
+  <data name="MailConfigPage_TestEmailSentSuccess" xml:space="preserve">
+    <value>Test-E-Mail erfolgreich über {0} gesendet.</value>
+  </data>
+  <data name="MailConfigPage_TestEmailFailed" xml:space="preserve">
+    <value>Test-E-Mail über {0} fehlgeschlagen.</value>
+  </data>
+  <data name="MailConfigPage_InactiveSuffix" xml:space="preserve">
+    <value>(inaktiv)</value>
+  </data>
+  <data name="MailConfigPage_Never" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="MailConfigPage_StatusSuccessful" xml:space="preserve">
+    <value>Erfolgreich</value>
+  </data>
+  <data name="MailConfigPage_StatusFailed" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="MailConfigPage_StatusUnknown" xml:space="preserve">
+    <value>Unbekannt</value>
+  </data>
+  <data name="MailConfigPage_ModesUpdatedSuccess" xml:space="preserve">
+    <value>Modi erfolgreich aktualisiert.</value>
+  </data>
+  <data name="MailConfigPage_ModesUpdateFailed" xml:space="preserve">
+    <value>Aktualisierung der Modi fehlgeschlagen: {0}</value>
+  </data>
+  <data name="MailConfigPage_ModesResetSuccess" xml:space="preserve">
+    <value>Modi auf Standardwerte beim Start zurückgesetzt.</value>
+  </data>
+  <data name="MailConfigPage_ModesResetFailed" xml:space="preserve">
+    <value>Zurücksetzen der Modi fehlgeschlagen: {0}</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>Benutzer nicht gefunden.</value>
+  </data>
+  <data name="Common_GroupNumberFallback" xml:space="preserve">
+    <value>Gruppe #{0}</value>
+  </data>
+  <data name="UserInformationPage_PageTitle" xml:space="preserve">
+    <value>Benutzerinformationen</value>
+  </data>
+  <data name="UserInformationPage_UnableToLoadProfile" xml:space="preserve">
+    <value>Dein Profil konnte nicht geladen werden.</value>
+  </data>
+  <data name="UserInformationPage_ProfileTitle" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="UserInformationPage_GroupMembershipsTitle" xml:space="preserve">
+    <value>Gruppenmitgliedschaften</value>
+  </data>
+  <data name="UserInformationPage_ColRequested" xml:space="preserve">
+    <value>Angefragt</value>
+  </data>
+  <data name="UserInformationPage_NoMemberships" xml:space="preserve">
+    <value>Noch keine Gruppenmitgliedschaften. Gruppenzuweisungen müssen von einem Gruppen-Admin oder SuperAdmin genehmigt werden.</value>
+  </data>
+  <data name="UserInformationPage_UpdatedSuccess" xml:space="preserve">
+    <value>Profil erfolgreich aktualisiert.</value>
+  </data>
+  <data name="UserInformationPage_UpdateFailed" xml:space="preserve">
+    <value>Aktualisierung des Profils fehlgeschlagen: {0}</value>
+  </data>
+  <data name="UserDetailPage_PageTitle" xml:space="preserve">
+    <value>Benutzerdetails</value>
+  </data>
+  <data name="UserDetailPage_AccessDenied" xml:space="preserve">
+    <value>Du darfst diesen Benutzer nicht ansehen.</value>
+  </data>
+  <data name="UserDetailPage_Inactive" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+  <data name="UserDetailPage_ProfileTitle" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="UserDetailPage_EmailLabel" xml:space="preserve">
+    <value>E-Mail:</value>
+  </data>
+  <data name="UserDetailPage_RoleLabel" xml:space="preserve">
+    <value>Rolle:</value>
+  </data>
+  <data name="UserDetailPage_GenderLabel" xml:space="preserve">
+    <value>Geschlecht:</value>
+  </data>
+  <data name="UserDetailPage_BirthdayLabel" xml:space="preserve">
+    <value>Geburtstag:</value>
+  </data>
+  <data name="UserDetailPage_MobileLabel" xml:space="preserve">
+    <value>Mobil:</value>
+  </data>
+  <data name="UserDetailPage_CityLabel" xml:space="preserve">
+    <value>Stadt:</value>
+  </data>
+  <data name="UserDetailPage_CountryLabel" xml:space="preserve">
+    <value>Land:</value>
+  </data>
+  <data name="UserDetailPage_EmailVerifiedLabel" xml:space="preserve">
+    <value>E-Mail bestätigt:</value>
+  </data>
+  <data name="UserDetailPage_EntryDateLabel" xml:space="preserve">
+    <value>Eintrittsdatum:</value>
+  </data>
+  <data name="UserDetailPage_CreatedLabel" xml:space="preserve">
+    <value>Erstellt:</value>
+  </data>
+  <data name="UserDetailPage_GroupMembershipsTitle" xml:space="preserve">
+    <value>Gruppenmitgliedschaften</value>
+  </data>
+  <data name="UserDetailPage_ColJoined" xml:space="preserve">
+    <value>Beigetreten</value>
+  </data>
+  <data name="UserDetailPage_NoMemberships" xml:space="preserve">
+    <value>Keine Mitgliedschaften.</value>
+  </data>
+  <data name="UserDetailPage_RegistrationHistoryTitle" xml:space="preserve">
+    <value>Anmeldeverlauf</value>
+  </data>
+  <data name="UserDetailPage_ColTraining" xml:space="preserve">
+    <value>Training</value>
+  </data>
+  <data name="UserDetailPage_ColRegistered" xml:space="preserve">
+    <value>Angemeldet</value>
+  </data>
+  <data name="UserDetailPage_ViewTraining" xml:space="preserve">
+    <value>Training ansehen</value>
+  </data>
+  <data name="UserDetailPage_NoRegistrations" xml:space="preserve">
+    <value>Noch keine Anmeldungen.</value>
+  </data>
+  <data name="UserDetailPage_BioWelcomeMessageTitle" xml:space="preserve">
+    <value>Bio / Willkommensnachricht</value>
+  </data>
+  <data name="ErrorPage_PageTitle" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="ErrorPage_Heading" xml:space="preserve">
+    <value>Fehler.</value>
+  </data>
+  <data name="ErrorPage_Subheading" xml:space="preserve">
+    <value>Bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten.</value>
+  </data>
+  <data name="ErrorPage_RequestIdLabel" xml:space="preserve">
+    <value>Anfrage-ID:</value>
+  </data>
+  <data name="ErrorPage_DevelopmentModeHeading" xml:space="preserve">
+    <value>Entwicklungsmodus</value>
+  </data>
+  <data name="ErrorPage_DevelopmentModeInfo" xml:space="preserve">
+    <value>Der Wechsel zur Umgebung {0} zeigt detailliertere Informationen zum aufgetretenen Fehler an.</value>
+  </data>
+  <data name="ErrorPage_DevelopmentModeWarning" xml:space="preserve">
+    <value>Die Umgebung {0} sollte für bereitgestellte Anwendungen nicht aktiviert werden. Dies kann dazu führen, dass vertrauliche Informationen aus Ausnahmen an Endbenutzer angezeigt werden. Für lokales Debugging aktiviere die Umgebung {0}, indem du die Umgebungsvariable {1} auf {0} setzt und die App neu startest.</value>
+  </data>
+  <data name="TrainerTrainingsPage_PageTitle" xml:space="preserve">
+    <value>Trainingsplanung</value>
+  </data>
+  <data name="TrainerTrainingsPage_New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="TrainerTrainingsPage_Attendance" xml:space="preserve">
+    <value>Anwesenheit</value>
+  </data>
+  <data name="TrainerTrainingsPage_NoTrainingsYet" xml:space="preserve">
+    <value>Noch keine Trainings.</value>
+  </data>
+  <data name="TrainerTrainingsPage_CreateOne" xml:space="preserve">
+    <value>Erstelle eines!</value>
+  </data>
+  <data name="TrainerRunPage_PageTitle" xml:space="preserve">
+    <value>Training durchführen</value>
+  </data>
+  <data name="TrainerRunPage_TrainingNotFound" xml:space="preserve">
+    <value>Training nicht gefunden.</value>
+  </data>
+  <data name="TrainerRunPage_NoBlocksWarning" xml:space="preserve">
+    <value>Dieses Training hat keine Blöcke.</value>
+  </data>
+  <data name="TrainerRunPage_AddBlocksFirst" xml:space="preserve">
+    <value>Füge zuerst Blöcke hinzu.</value>
+  </data>
+  <data name="TrainerRunPage_TrainingComplete" xml:space="preserve">
+    <value>Training abgeschlossen!</value>
+  </data>
+  <data name="TrainerRunPage_AllBlocksFinished" xml:space="preserve">
+    <value>Alle {0} Blöcke abgeschlossen.</value>
+  </data>
+  <data name="TrainerRunPage_EnterDurationsAndComments" xml:space="preserve">
+    <value>Tatsächliche Dauer und Kommentare eingeben</value>
+  </data>
+  <data name="TrainerRunPage_ActualDurationMinutes" xml:space="preserve">
+    <value>Tatsächliche Dauer (Min.)</value>
+  </data>
+  <data name="TrainerRunPage_TrainerComment" xml:space="preserve">
+    <value>Trainerkommentar</value>
+  </data>
+  <data name="TrainerRunPage_SaveFeedback" xml:space="preserve">
+    <value>Feedback speichern</value>
+  </data>
+  <data name="TrainerRunPage_Saved" xml:space="preserve">
+    <value>Gespeichert!</value>
+  </data>
+  <data name="TrainerRunPage_BlockLabel" xml:space="preserve">
+    <value>BLOCK {0}</value>
+  </data>
+  <data name="TrainerRunPage_DurationMinutesSuffix" xml:space="preserve">
+    <value>{0} Min.</value>
+  </data>
+  <data name="TrainerRunPage_NextBlock" xml:space="preserve">
+    <value>Nächster Block</value>
+  </data>
+  <data name="TrainerRunPage_FinishTraining" xml:space="preserve">
+    <value>Training beenden</value>
+  </data>
+  <data name="TrainerRunPage_BlockOfCount" xml:space="preserve">
+    <value>Block {0} von {1}</value>
+  </data>
+  <data name="TrainingDetailPage_PageTitleFallback" xml:space="preserve">
+    <value>Training</value>
+  </data>
+  <data name="TrainingDetailPage_NotFound" xml:space="preserve">
+    <value>Training nicht gefunden.</value>
+  </data>
+  <data name="TrainingDetailPage_Back" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="TrainingDetailPage_AreYouSure" xml:space="preserve">
+    <value>Bist du sicher?</value>
+  </data>
+  <data name="TrainingDetailPage_NotifyAndDelete" xml:space="preserve">
+    <value>Benachrichtigen &amp; Löschen</value>
+  </data>
+  <data name="TrainingDetailPage_TrainerLabel" xml:space="preserve">
+    <value>Trainer: {0}</value>
+  </data>
+  <data name="TrainingDetailPage_RegisteredCount" xml:space="preserve">
+    <value>{0} / {1} angemeldet</value>
+  </data>
+  <data name="TrainingDetailPage_RunTraining" xml:space="preserve">
+    <value>Training durchführen</value>
+  </data>
+  <data name="TrainingDetailPage_RecordAttendance" xml:space="preserve">
+    <value>Anwesenheit erfassen</value>
+  </data>
+  <data name="TrainingDetailPage_Confirm" xml:space="preserve">
+    <value>Bestätigen</value>
+  </data>
+  <data name="TrainingDetailPage_SuccessfullyRegistered" xml:space="preserve">
+    <value>Erfolgreich angemeldet</value>
+  </data>
+  <data name="TrainingDetailPage_RegistrationCancelled" xml:space="preserve">
+    <value>Anmeldung storniert</value>
+  </data>
+  <data name="TrainingDetailPage_Unregister" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="TrainingDetailPage_TrainingFull" xml:space="preserve">
+    <value>Training ausgebucht</value>
+  </data>
+  <data name="TrainingDetailPage_TrainingBlocksHeading" xml:space="preserve">
+    <value>Trainingsblöcke ({0})</value>
+  </data>
+  <data name="TrainingDetailPage_PlannedMinutes" xml:space="preserve">
+    <value>Geplant: {0} Min.</value>
+  </data>
+  <data name="TrainingDetailPage_ActualMinutes" xml:space="preserve">
+    <value>Tatsächlich: {0} Min.</value>
+  </data>
+  <data name="TrainingDetailPage_RegisteredParticipants" xml:space="preserve">
+    <value>Angemeldete Teilnehmer</value>
+  </data>
+  <data name="TrainingDetailPage_NoOneSignedUpYet" xml:space="preserve">
+    <value>Noch niemand hat sich angemeldet — dieses Training gewinnt gerade die Verstecken-Meisterschaft.</value>
+  </data>
+  <data name="TrainingDetailPage_FailedToNotify" xml:space="preserve">
+    <value>Benachrichtigung an {0} fehlgeschlagen.</value>
+  </data>
+  <data name="Common_Edit" xml:space="preserve">
+    <value>Editieren</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>Löschen</value>
   </data>
 </root>

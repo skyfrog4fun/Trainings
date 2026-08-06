@@ -373,7 +373,7 @@
         _formError = null;
         if (string.IsNullOrWhiteSpace(_formName) || string.IsNullOrWhiteSpace(_formHost) || string.IsNullOrWhiteSpace(_formFromAddress))
         {
-            _formError = "Name, Host, and From Address are required.";
+            _formError = Localizer["MailConfigPage_RequiredFieldsError"];
             return;
         }
 
@@ -383,7 +383,7 @@
             {
                 if (string.IsNullOrWhiteSpace(_formPassword))
                 {
-                    _formError = "Password is required for a new configuration.";
+                    _formError = Localizer["MailConfigPage_PasswordRequiredForNew"];
                     return;
                 }
 
@@ -402,7 +402,7 @@
             else
             {
                 var existing = await MailConfigService.GetByIdAsync(_editId)
-                    ?? throw new InvalidOperationException("Configuration not found.");
+                    ?? throw new InvalidOperationException(Localizer["MailConfigPage_ConfigNotFound"]);
 
                 existing.Name = _formName;
                 existing.Host = _formHost;
@@ -423,7 +423,7 @@
             _showForm = false;
             await LoadConfigs();
             _actionSuccess = true;
-            _actionResult = "Configuration saved successfully.";
+            _actionResult = Localizer["MailConfigPage_SavedSuccess"];
         }
         catch (Exception ex)
         {
@@ -440,12 +440,14 @@
             await MailConfigService.UpdateAsync(config);
             await LoadConfigs();
             _actionSuccess = true;
-            _actionResult = $"Configuration '{config.Name}' {(config.IsActive ? "activated" : "deactivated")}.";
+            _actionResult = config.IsActive
+                ? string.Format(Localizer["MailConfigPage_ActivatedMessage"].Value, config.Name)
+                : string.Format(Localizer["MailConfigPage_DeactivatedMessage"].Value, config.Name);
         }
         catch (Exception ex)
         {
             _actionSuccess = false;
-            _actionResult = $"Failed: {ex.Message}";
+            _actionResult = string.Format(Localizer["MailConfigPage_FailedMessage"].Value, ex.Message);
         }
     }
 
@@ -457,12 +459,12 @@
             await MailConfigService.DeleteAsync(config.Id);
             await LoadConfigs();
             _actionSuccess = true;
-            _actionResult = $"Configuration '{config.Name}' deleted.";
+            _actionResult = string.Format(Localizer["MailConfigPage_DeletedMessage"].Value, config.Name);
         }
         catch (Exception ex)
         {
             _actionSuccess = false;
-            _actionResult = $"Failed: {ex.Message}";
+            _actionResult = string.Format(Localizer["MailConfigPage_FailedMessage"].Value, ex.Message);
         }
     }
 
@@ -481,10 +483,10 @@
                     new EmailSendAttemptResult
                     {
                         MailConfigurationId = 0,
-                        ConfigurationName = "Mail Test",
+                        ConfigurationName = Localizer["MailConfigPage_TestNamePlaceholder"],
                         IsActive = true,
                         IsSuccess = false,
-                        Message = "Please enter a recipient email address."
+                        Message = Localizer["MailConfigPage_RecipientEmailRequired"]
                     }
                 ]
             };
@@ -509,7 +511,7 @@
                     new EmailSendAttemptResult
                     {
                         MailConfigurationId = 0,
-                        ConfigurationName = "Mail Test",
+                        ConfigurationName = Localizer["MailConfigPage_TestNamePlaceholder"],
                         IsActive = true,
                         IsSuccess = false,
                         Message = ex.Message
@@ -528,29 +530,29 @@
 
     private string GetTestResultSummary()
     {
-        var targetLabel = GetSelectedTestConfigurationId().HasValue ? "selected configuration" : "configured fallback order";
+        var targetLabel = GetSelectedTestConfigurationId().HasValue ? Localizer["MailConfigPage_SelectedConfigurationLabel"].Value : Localizer["MailConfigPage_ConfiguredFallbackOrderLabel"].Value;
 
         return _testEmailResult?.IsSuccess == true
-            ? $"Test email sent successfully using the {targetLabel}."
-            : $"Test email failed using the {targetLabel}.";
+            ? string.Format(Localizer["MailConfigPage_TestEmailSentSuccess"].Value, targetLabel)
+            : string.Format(Localizer["MailConfigPage_TestEmailFailed"].Value, targetLabel);
     }
 
-    private static string GetConfigOptionLabel(MailConfiguration config)
+    private string GetConfigOptionLabel(MailConfiguration config)
         => config.IsActive
             ? $"{config.Priority}. {config.Name}"
-            : $"{config.Priority}. {config.Name} (inactive)";
+            : $"{config.Priority}. {config.Name} {Localizer["MailConfigPage_InactiveSuffix"]}";
 
     private string FormatServerDateTime(DateTime? value)
         => value.HasValue
             ? value.Value.ToLocalTime().ToString("f", _userCulture)
-            : "Never";
+            : Localizer["MailConfigPage_Never"];
 
-    private static string FormatStatus(MailConfigurationStatus status)
+    private string FormatStatus(MailConfigurationStatus status)
         => status switch
         {
-            MailConfigurationStatus.Successful => "Successful",
-            MailConfigurationStatus.Failed => "Failed",
-            _ => "Unknown"
+            MailConfigurationStatus.Successful => Localizer["MailConfigPage_StatusSuccessful"],
+            MailConfigurationStatus.Failed => Localizer["MailConfigPage_StatusFailed"],
+            _ => Localizer["MailConfigPage_StatusUnknown"]
         };
 
     private static string GetStatusBadgeClass(MailConfigurationStatus status)
@@ -568,12 +570,12 @@
         {
             AppRuntimeModeService.SetModes(_modeReadOnly, _modeNoEmail);
             _modeActionSuccess = true;
-            _modeActionResult = "Running modes updated successfully.";
+            _modeActionResult = Localizer["MailConfigPage_ModesUpdatedSuccess"];
         }
         catch (Exception ex)
         {
             _modeActionSuccess = false;
-            _modeActionResult = $"Failed to update modes: {ex.Message}";
+            _modeActionResult = string.Format(Localizer["MailConfigPage_ModesUpdateFailed"].Value, ex.Message);
         }
     }
 
@@ -587,12 +589,12 @@
             _modeReadOnly = defaults.IsReadOnly;
             _modeNoEmail = defaults.IsNoEmail;
             _modeActionSuccess = true;
-            _modeActionResult = "Running modes reset to startup configuration defaults.";
+            _modeActionResult = Localizer["MailConfigPage_ModesResetSuccess"];
         }
         catch (Exception ex)
         {
             _modeActionSuccess = false;
-            _modeActionResult = $"Failed to reset modes: {ex.Message}";
+            _modeActionResult = string.Format(Localizer["MailConfigPage_ModesResetFailed"].Value, ex.Message);
         }
     }
 }

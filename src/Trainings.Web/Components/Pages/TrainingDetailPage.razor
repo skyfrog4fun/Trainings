@@ -13,7 +13,7 @@
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>@(_training?.Title ?? "Training")</PageTitle>
+<PageTitle>@(_training?.Title ?? Localizer["TrainingDetailPage_PageTitleFallback"].Value)</PageTitle>
 
 <div class="container px-2 px-md-4">
     @if (_loading)
@@ -22,35 +22,35 @@
     }
     else if (_training == null)
     {
-        <div class="alert @(_isError ? "alert-danger" : "alert-info")">@(_message ?? "Training not found.")</div>
+        <div class="alert @(_isError ? "alert-danger" : "alert-info")">@(_message ?? Localizer["TrainingDetailPage_NotFound"].Value)</div>
     }
     else
     {
         <div class="my-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
-            <a href="/trainings" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>Back</a>
+            <a href="/trainings" class="btn btn-sm btn-outline-secondary"><i class="@AppIcons.Back me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Back"]</a>
             @if (_isAdmin)
             {
                 <button type="button"
                         class="btn btn-sm btn-outline-danger"
                         @onclick="PromptDeleteTraining"
                         disabled="@_deleteInProgress">
-                    <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                    <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Common_Delete"]
                 </button>
             }
         </div>
         @if (_showDeleteConfirm)
         {
             <div class="confirmation-panel confirmation-panel-danger mb-3">
-                <div class="fw-semibold mb-2">Are you sure?</div>
+                <div class="fw-semibold mb-2">@Localizer["TrainingDetailPage_AreYouSure"]</div>
                 <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelDeleteTraining" disabled="@_deleteInProgress">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelDeleteTraining" disabled="@_deleteInProgress">@Localizer["Common_Cancel"]</button>
                     <button type="button" class="btn btn-sm btn-danger" @onclick="DeleteTraining" disabled="@_deleteInProgress">
-                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>Delete
+                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Common_Delete"]
                     </button>
                     @if (HasRegisteredParticipants)
                     {
                         <button type="button" class="btn btn-sm btn-danger" @onclick="NotifyAndDeleteTraining" disabled="@_deleteInProgress">
-                            <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>Notify & Delete
+                            <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_NotifyAndDelete"]
                         </button>
                     }
                 </div>
@@ -84,8 +84,8 @@
                     {
                         <div class="mb-2"><i class="@AppIcons.MapPin me-1" aria-hidden="true"></i>@_training.MeetingPoint</div>
                     }
-                    <div class="mb-2"><i class="@AppIcons.User me-1" aria-hidden="true"></i>Trainer: @_training.TrainerName</div>
-                    <div><i class="@AppIcons.Users me-1" aria-hidden="true"></i>@_training.RegisteredCount / @_training.Capacity registered</div>
+                    <div class="mb-2"><i class="@AppIcons.User me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainingDetailPage_TrainerLabel"].Value, _training.TrainerName)</div>
+                    <div><i class="@AppIcons.Users me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainingDetailPage_RegisteredCount"].Value, _training.RegisteredCount, _training.Capacity)</div>
                 </div>
 
                 <p class="mb-4">@_training.Description</p>
@@ -93,9 +93,9 @@
                 @if (_isTrainer && _training.TrainerId == _userId)
                 {
                     <div class="d-flex flex-wrap gap-2 align-items-center">
-                        <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>Run Training</a>
-                        <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">Record Attendance</a>
-                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">Edit</a>
+                        <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_RunTraining"]</a>
+                        <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">@Localizer["TrainingDetailPage_RecordAttendance"]</a>
+                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">@Localizer["Common_Edit"]</a>
                     </div>
                 }
             </div>
@@ -105,29 +105,29 @@
                     <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end training-detail-footer-content">
                         @if (_registrationFooterState == RegistrationFooterState.ConfirmUnregister)
                         {
-                            <span class="fw-semibold">Are you sure?</span>
-                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmSelfUnregister">Confirm</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelSelfUnregister">Cancel</button>
+                            <span class="fw-semibold">@Localizer["TrainingDetailPage_AreYouSure"]</span>
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmSelfUnregister">@Localizer["TrainingDetailPage_Confirm"]</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelSelfUnregister">@Localizer["Common_Cancel"]</button>
                         }
                         else if (_registrationFooterState == RegistrationFooterState.RegisteredSuccess)
                         {
-                            <span class="fw-semibold">Successfully registered</span>
+                            <span class="fw-semibold">@Localizer["TrainingDetailPage_SuccessfullyRegistered"]</span>
                         }
                         else if (_registrationFooterState == RegistrationFooterState.UnregisteredSuccess)
                         {
-                            <span class="fw-semibold">Registration cancelled</span>
+                            <span class="fw-semibold">@Localizer["TrainingDetailPage_RegistrationCancelled"]</span>
                         }
                         else if (_isRegistered)
                         {
-                            <button class="btn btn-danger" @onclick="PromptSelfUnregister"><i class="@AppIcons.Unregister me-1" aria-hidden="true"></i>Unregister</button>
+                            <button class="btn btn-danger" @onclick="PromptSelfUnregister"><i class="@AppIcons.Unregister me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Unregister"]</button>
                         }
                         else if (_training.RegisteredCount < _training.Capacity)
                         {
-                            <button class="btn btn-primary" @onclick="Register"><i class="@AppIcons.Register me-1" aria-hidden="true"></i>Register</button>
+                            <button class="btn btn-primary" @onclick="Register"><i class="@AppIcons.Register me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Register"]</button>
                         }
                         else
                         {
-                            <span class="badge bg-warning text-dark">Training Full</span>
+                            <span class="badge bg-warning text-dark">@Localizer["TrainingDetailPage_TrainingFull"]</span>
                         }
                     </div>
                 </div>
@@ -141,7 +141,7 @@
 
         @if (_training.Blocks.Any())
         {
-            <h4>Training Blocks (@_training.Blocks.Count)</h4>
+            <h4>@string.Format(Localizer["TrainingDetailPage_TrainingBlocksHeading"].Value, _training.Blocks.Count)</h4>
             <div class="row g-3 mb-4">
                 @for (var i = 0; i < _training.Blocks.Count; i++)
                 {
@@ -156,10 +156,10 @@
                                     <p class="card-text text-muted small">@block.Description</p>
                                 }
                                 <div class="small text-muted">
-                                    <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>Planned: @block.PlannedDurationMinutes min
+                                    <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainingDetailPage_PlannedMinutes"].Value, block.PlannedDurationMinutes)
                                     @if (block.EffectiveDurationMinutes.HasValue)
                                     {
-                                        <text> · Actual: @block.EffectiveDurationMinutes min</text>
+                                        <text> · @string.Format(Localizer["TrainingDetailPage_ActualMinutes"].Value, block.EffectiveDurationMinutes)</text>
                                     }
                                 </div>
                                 @if (block.Tags.Any())
@@ -181,7 +181,7 @@
         <div class="card shadow mb-4">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center gap-2">
-                    <span class="fw-semibold participants-card-title text-truncate">Registered Participants</span>
+                    <span class="fw-semibold participants-card-title text-truncate">@Localizer["TrainingDetailPage_RegisteredParticipants"]</span>
                     <span class="text-nowrap text-muted small">
                         <i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@RegisteredParticipants.Count / @_training.Capacity
                     </span>
@@ -204,20 +204,20 @@
                                         <div class="d-inline-flex gap-2 ms-auto">
                                             @if (_pendingUnregisterUserId == reg.UserId)
                                             {
-                                                <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmParticipantUnregister" title="Confirm">
+                                                <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmParticipantUnregister" title="@Localizer["TrainingDetailPage_Confirm"]">
                                                     <i class="@AppIcons.Check" aria-hidden="true"></i>
-                                                    <span class="participant-action-text ms-1">Confirm</span>
+                                                    <span class="participant-action-text ms-1">@Localizer["TrainingDetailPage_Confirm"]</span>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelParticipantUnregister" title="Cancel">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelParticipantUnregister" title="@Localizer["Common_Cancel"]">
                                                     <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                                                    <span class="participant-action-text ms-1">Cancel</span>
+                                                    <span class="participant-action-text ms-1">@Localizer["Common_Cancel"]</span>
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => PromptParticipantUnregister(reg)" title="Unregister">
+                                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => PromptParticipantUnregister(reg)" title="@Localizer["TrainingDetailPage_Unregister"]">
                                                     <i class="@AppIcons.Unregister" aria-hidden="true"></i>
-                                                    <span class="participant-action-text ms-1">Unregister</span>
+                                                    <span class="participant-action-text ms-1">@Localizer["TrainingDetailPage_Unregister"]</span>
                                                 </button>
                                             }
                                         </div>
@@ -229,7 +229,7 @@
                 }
                 else
                 {
-                    <div class="p-3 text-muted">No one has signed up yet — this training is currently winning the hide-and-seek championship.</div>
+                    <div class="p-3 text-muted">@Localizer["TrainingDetailPage_NoOneSignedUpYet"]</div>
                 }
             </div>
         </div>
@@ -475,7 +475,7 @@
 
                     if (!sendResult.IsSuccess)
                     {
-                        throw new InvalidOperationException($"Failed to notify {user.Email}.");
+                        throw new InvalidOperationException(string.Format(Localizer["TrainingDetailPage_FailedToNotify"].Value, user.Email));
                     }
                 }
             }
@@ -500,8 +500,8 @@
         return training.DateTime.ToString("f", culture);
     }
 
-    private static string FormatDuration(int? durationMinutes) =>
-        durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
+    private string FormatDuration(int? durationMinutes) =>
+        durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Common_MinutesUnit"]}" : "-";
 
     private bool CanActOnParticipant(RegistrationDto registration) =>
         _isTrainer || _isAdmin || registration.UserId == _userId;

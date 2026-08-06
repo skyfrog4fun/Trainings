@@ -26,8 +26,8 @@ public class NotificationLogServiceTests
         using var context = CreateInMemoryContext();
         var service = new NotificationLogService(context);
 
-        await service.SetResetPointerLogIdAsync(42);
-        var pointer = await service.GetResetPointerLogIdAsync();
+        await service.SetResetPointerLogIdAsync(42, TestContext.Current.CancellationToken);
+        var pointer = await service.GetResetPointerLogIdAsync(TestContext.Current.CancellationToken);
 
         pointer.Should().Be(42);
     }
@@ -40,10 +40,10 @@ public class NotificationLogServiceTests
             new NotificationLog { Id = 1, Action = NotificationAction.TestEmail, RecipientEmail = "a@example.com", IsSuccess = true, CreatedAt = DateTime.UtcNow.AddMinutes(-10) },
             new NotificationLog { Id = 2, Action = NotificationAction.TestEmail, RecipientEmail = "b@example.com", IsSuccess = false, CreatedAt = DateTime.UtcNow.AddMinutes(-5) },
             new NotificationLog { Id = 3, Action = NotificationAction.TestEmail, RecipientEmail = "c@example.com", IsSuccess = true, CreatedAt = DateTime.UtcNow });
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var service = new NotificationLogService(context);
-        var logs = await service.GetRecentLogsAsync(10, 1);
+        var logs = await service.GetRecentLogsAsync(10, 1, TestContext.Current.CancellationToken);
 
         logs.Select(l => l.Id).Should().BeEquivalentTo([3, 2]);
     }

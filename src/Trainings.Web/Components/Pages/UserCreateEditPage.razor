@@ -11,7 +11,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
 
-<PageTitle>@(_isEdit ? Localizer["EditUser"] : Localizer["CreateUser"])</PageTitle>
+<PageTitle>@(_isEdit ? Localizer["UserCreateEdit_EditUser"] : Localizer["UserCreateEdit_CreateUser"])</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
@@ -24,16 +24,16 @@
     }
     else if (_isAccessDenied)
     {
-        <div class="alert alert-danger">@Localizer["AccessDenied"]</div>
+        <div class="alert alert-danger">@Localizer["UserCreateEdit_AccessDenied"]</div>
     }
     else
     {
-        <h2>@(_isEdit ? Localizer["EditUser"] : Localizer["CreateUser"])</h2>
+        <h2>@(_isEdit ? Localizer["UserCreateEdit_EditUser"] : Localizer["UserCreateEdit_CreateUser"])</h2>
 
         @if (IsWriteBlocked)
         {
             <div class="alert alert-warning">
-                @Localizer["ReadOnlyModeSuperAdminOnly"]
+                @Localizer["UserCreateEdit_ReadOnlyModeSuperAdminOnly"]
             </div>
         }
 
@@ -41,64 +41,64 @@
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["FirstNameRequired"]</label>
-                        <input class="form-control" placeholder='@Localizer["FirstName"]' @bind="_formFirstName" />
+                        <label class="form-label">@Localizer["UserCreateEdit_FirstName"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_FirstNamePlaceholder"]' @bind="_formFirstName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["LastNameRequired"]</label>
-                        <input class="form-control" placeholder='@Localizer["LastName"]' @bind="_formLastName" />
+                        <label class="form-label">@Localizer["UserCreateEdit_LastName"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_LastNamePlaceholder"]' @bind="_formLastName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["EmailRequired"]</label>
-                        <input class="form-control" type="email" placeholder='@Localizer["Email"]' @bind="_formEmail" />
+                        <label class="form-label">@Localizer["UserCreateEdit_Email"]</label>
+                        <input class="form-control" type="email" placeholder='@Localizer["UserCreateEdit_EmailPlaceholder"]' @bind="_formEmail" />
                     </div>
                     @if (!_isEdit)
                     {
                         <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["PasswordRequired"]</label>
-                            <input class="form-control" type="password" placeholder='@Localizer["Password"]' @bind="_formPassword" />
+                            <label class="form-label">@Localizer["UserCreateEdit_Password"]</label>
+                            <input class="form-control" type="password" placeholder='@Localizer["UserCreateEdit_PasswordPlaceholder"]' @bind="_formPassword" />
                         </div>
                     }
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["Role"]</label>
+                        <label class="form-label">@Localizer["UserCreateEdit_Role"]</label>
                         @if (_isSuperAdmin)
                         {
                             <select class="form-select" @bind="_formRole">
-                                <option value="User">@Localizer["User"]</option>
-                                <option value="SuperAdmin">@Localizer["SuperAdmin"]</option>
+                                <option value="User">@Localizer["UserCreateEdit_User"]</option>
+                                <option value="SuperAdmin">@Localizer["UserCreateEdit_SuperAdmin"]</option>
                             </select>
                         }
                         else
                         {
                             <select class="form-select" @bind="_formRole">
-                                <option value="User">@Localizer["User"]</option>
+                                <option value="User">@Localizer["UserCreateEdit_User"]</option>
                             </select>
                         }
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["Gender"]</label>
+                        <label class="form-label">@Localizer["UserCreateEdit_Gender"]</label>
                         <select class="form-select" @bind="_formGender">
-                            <option value="Male">@Localizer["Male"]</option>
-                            <option value="Female">@Localizer["Female"]</option>
-                            <option value="Other">@Localizer["Other"]</option>
+                            <option value="Male">@Localizer["Common_Gender_Male"]</option>
+                            <option value="Female">@Localizer["Common_Gender_Female"]</option>
+                            <option value="Other">@Localizer["Common_Gender_Other"]</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["Birthday"]</label>
+                        <label class="form-label">@Localizer["UserCreateEdit_Birthday"]</label>
                         <input class="form-control" type="date" @bind="_formBirthday" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Mobile"]</label>
-                        <input class="form-control" placeholder="+41 79 000 0000" @bind="_formMobile" />
+                        <label class="form-label">@Localizer["UserCreateEdit_Mobile"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_MobilePlaceholder"]' @bind="_formMobile" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["City"]</label>
-                        <input class="form-control" placeholder='@Localizer["City"]' @bind="_formCity" />
+                        <label class="form-label">@Localizer["UserCreateEdit_City"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_CityPlaceholder"]' @bind="_formCity" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Country"]</label>
+                        <label class="form-label">@Localizer["UserCreateEdit_Country"]</label>
                         <select class="form-select" @bind="_formCountryId">
-                            <option value="">@Localizer["SelectCountry"]</option>
+                            <option value="">@Localizer["UserCreateEdit_SelectCountry"]</option>
                             @foreach (var country in _countries)
                             {
                                 <option value="@country.Id">@country.Code — @country.Name</option>
@@ -106,7 +106,7 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">@(_isSuperAdmin ? Localizer["Groups"] : Localizer["ManagedGroupsRequired"])</label>
+                        <label class="form-label">@(_isSuperAdmin ? Localizer["UserCreateEdit_Groups"] : Localizer["UserCreateEdit_ManagedGroups"])</label>
                         @if (_availableGroups.Any())
                         {
                             <div class="border rounded p-2 scroll-container-sm">
@@ -125,24 +125,24 @@
                         }
                         else
                         {
-                            <div class="form-text text-muted">@Localizer["NoGroupsAvailableForAssignment"]</div>
+                            <div class="form-text text-muted">@Localizer["UserCreateEdit_NoGroupsAvailableForAssignment"]</div>
                         }
                     </div>
                     @if (_isEdit)
                     {
                         <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["EntryDate"]</label>
+                            <label class="form-label">@Localizer["UserCreateEdit_EntryDate"]</label>
                             <input class="form-control" type="date" @bind="_formEntryDate" />
                         </div>
                         <div class="col-12">
-                            <label class="form-label">@Localizer["WelcomeMessageBio"]</label>
-                            <textarea class="form-control" rows="2" @bind="_formWelcomeMessage" placeholder='@Localizer["BioOrWelcomeMessage"]'></textarea>
+                            <label class="form-label">@Localizer["UserCreateEdit_WelcomeMessage"]</label>
+                            <textarea class="form-control" rows="2" @bind="_formWelcomeMessage" placeholder='@Localizer["UserCreateEdit_WelcomeMessagePlaceholder"]'></textarea>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">@Localizer["SetNewPasswordLeaveBlank"]</label>
+                            <label class="form-label">@Localizer["UserCreateEdit_SetNewPasswordLeaveBlank"]</label>
                             <div class="input-group">
-                                <input class="form-control" type="password" placeholder='@Localizer["NewPasswordMinChars"]' @bind="_formNewPassword" />
-                                <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["GeneratePassword"]'>
+                                <input class="form-control" type="password" placeholder='@Localizer["UserCreateEdit_NewPasswordMinCharsPlaceholder"]' @bind="_formNewPassword" />
+                                <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserCreateEdit_GeneratePassword"]'>
                                     <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -155,8 +155,8 @@
                 </div>
 
                 <div class="mt-3 d-flex gap-2">
-                    <button class="btn btn-primary" @onclick="SaveUserAsync" disabled="@(_saving || IsWriteBlocked)">@Localizer["Save"]</button>
-                    <a href="/users" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Cancel"]</a>
+                    <button class="btn btn-primary" @onclick="SaveUserAsync" disabled="@(_saving || IsWriteBlocked)">@Localizer["Common_Save"]</button>
+                    <a href="/users" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Common_Cancel"]</a>
                 </div>
 
                 <div class="mt-2">
@@ -237,7 +237,7 @@
         var user = await UserService.GetByIdAsync(Id.Value);
         if (user is null)
         {
-            _formError = "User not found.";
+            _formError = Localizer["UserCreateEdit_UserNotFound"];
             return;
         }
 

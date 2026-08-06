@@ -108,7 +108,7 @@
 
                         <button class="btn btn-primary btn-lg w-100 mt-3" @onclick="Submit" disabled="@(_loading || _runtimeMode.IsReadOnly)">
                             @if (_loading) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
-                            @Localizer["Register_Button"]
+                            @Localizer["Register_ButtonRegister"]
                         </button>
                         <div class="mt-2 text-center">
                             <a href="/login" class="text-decoration-none small">@Localizer["Register_AlreadyHaveAccount"]</a>
@@ -156,17 +156,17 @@
         _error = null;
         if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName))
         {
-            _error = "First name and last name are required.";
+            _error = Localizer["Register_NameRequired"];
             return;
         }
         if (string.IsNullOrWhiteSpace(_email))
         {
-            _error = "Email is required.";
+            _error = Localizer["Register_EmailRequired"];
             return;
         }
         if (string.IsNullOrWhiteSpace(_password) || _password.Length < 6)
         {
-            _error = "Password must be at least 6 characters.";
+            _error = Localizer["Register_PasswordTooShort"];
             return;
         }
 

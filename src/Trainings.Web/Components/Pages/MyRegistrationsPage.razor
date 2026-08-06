@@ -195,8 +195,8 @@
             : "training-card-status-future";
     }
 
-    private static string FormatDuration(int? durationMinutes) =>
-        durationMinutes.HasValue ? $"{durationMinutes.Value} min" : "-";
+    private string FormatDuration(int? durationMinutes) =>
+        durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Common_MinutesUnit"]}" : "-";
 
     private void ToggleFilter()
     {

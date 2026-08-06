@@ -10,7 +10,7 @@
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>User Details</PageTitle>
+<PageTitle>@Localizer["UserDetailPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3 d-flex flex-wrap gap-2">
@@ -18,7 +18,7 @@
         @if (_user is not null)
         {
             <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
-                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>Edit
+                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["UserDetailPage_Edit"]
             </a>
         }
     </div>
@@ -29,41 +29,41 @@
     }
     else if (_user is null)
     {
-        <div class="alert alert-danger">User not found.</div>
+        <div class="alert alert-danger">@Localizer["UserDetailPage_UserNotFound"]</div>
     }
     else if (_isAccessDenied)
     {
-        <div class="alert alert-danger">You are not allowed to view this user.</div>
+        <div class="alert alert-danger">@Localizer["UserDetailPage_AccessDenied"]</div>
     }
     else
     {
         <PageHeader Title="@_user.DisplayName">
             <Actions>
-                <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? "Active" : "Inactive")</span>
+                <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? Localizer["UserDetailPage_Active"] : Localizer["UserDetailPage_Inactive"])</span>
             </Actions>
         </PageHeader>
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">
                 <div class="card h-100">
-                    <div class="card-header fw-bold">Profile</div>
+                    <div class="card-header fw-bold">@Localizer["UserDetailPage_ProfileTitle"]</div>
                     <div class="card-body">
-                        <div><strong>Email:</strong> @_user.Email</div>
-                        <div><strong>Role:</strong> @_user.Role</div>
-                        <div><strong>Gender:</strong> @_user.Gender</div>
-                        <div><strong>Birthday:</strong> @FormatDate(_user.Birthday)</div>
-                        <div><strong>Mobile:</strong> @FormatText(_user.Mobile)</div>
-                        <div><strong>City:</strong> @FormatText(_user.City)</div>
-                        <div><strong>Country:</strong> @GetCountryLabel(_user.CountryId, _user.CountryCode)</div>
-                        <div><strong>Email verified:</strong> @(_user.EmailConfirmedAt.HasValue ? "Yes" : "No")</div>
-                        <div><strong>Entry date:</strong> @FormatDateTime(_user.EntryDate)</div>
-                        <div><strong>Created:</strong> @FormatDateTime(_user.CreationDate)</div>
+                        <div><strong>@Localizer["UserDetailPage_EmailLabel"]</strong> @_user.Email</div>
+                        <div><strong>@Localizer["UserDetailPage_RoleLabel"]</strong> @_user.Role</div>
+                        <div><strong>@Localizer["UserDetailPage_GenderLabel"]</strong> @_user.Gender</div>
+                        <div><strong>@Localizer["UserDetailPage_BirthdayLabel"]</strong> @FormatDate(_user.Birthday)</div>
+                        <div><strong>@Localizer["UserDetailPage_MobileLabel"]</strong> @FormatText(_user.Mobile)</div>
+                        <div><strong>@Localizer["UserDetailPage_CityLabel"]</strong> @FormatText(_user.City)</div>
+                        <div><strong>@Localizer["UserDetailPage_CountryLabel"]</strong> @GetCountryLabel(_user.CountryId, _user.CountryCode)</div>
+                        <div><strong>@Localizer["UserDetailPage_EmailVerifiedLabel"]</strong> @(_user.EmailConfirmedAt.HasValue ? Localizer["Yes"] : Localizer["No"])</div>
+                        <div><strong>@Localizer["UserDetailPage_EntryDateLabel"]</strong> @FormatDateTime(_user.EntryDate)</div>
+                        <div><strong>@Localizer["UserDetailPage_CreatedLabel"]</strong> @FormatDateTime(_user.CreationDate)</div>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-lg-6">
                 <div class="card h-100">
-                    <div class="card-header fw-bold">Group memberships</div>
+                    <div class="card-header fw-bold">@Localizer["UserDetailPage_GroupMembershipsTitle"]</div>
                     <div class="card-body p-0">
                         @if (_memberships.Any())
                         {
@@ -71,10 +71,10 @@
                                 <table class="table table-sm mb-0">
                                     <thead>
                                         <tr>
-                                            <th>Group</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Joined</th>
+                                            <th>@Localizer["UserDetailPage_Group"]</th>
+                                            <th>@Localizer["UserDetailPage_Role"]</th>
+                                            <th>@Localizer["UserDetailPage_Status"]</th>
+                                            <th>@Localizer["UserDetailPage_Joined"]</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -93,7 +93,7 @@
                         }
                         else
                         {
-                            <div class="p-3 text-muted">No memberships.</div>
+                            <div class="p-3 text-muted">@Localizer["UserDetailPage_NoMemberships"]</div>
                         }
                     </div>
                 </div>
@@ -101,7 +101,7 @@
         </div>
 
         <div class="card mb-4">
-            <div class="card-header fw-bold">Registration history</div>
+            <div class="card-header fw-bold">@Localizer["UserDetailPage_RegistrationHistoryTitle"]</div>
             <div class="card-body p-0">
                 @if (_registrations.Any())
                 {
@@ -109,10 +109,10 @@
                         <table class="table table-sm mb-0">
                             <thead>
                                 <tr>
-                                    <th>Training</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Registered</th>
+                                    <th>@Localizer["UserDetailPage_ColTraining"]</th>
+                                    <th>@Localizer["UserDetailPage_Date"]</th>
+                                    <th>@Localizer["UserDetailPage_Status"]</th>
+                                    <th>@Localizer["UserDetailPage_Registered"]</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -125,7 +125,7 @@
                                         <td>@registration.Status</td>
                                         <td>@FormatDateTime(registration.RegisteredAt)</td>
                                         <td>
-                                            <a href="/trainings/@registration.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="View training" aria-label="View training">
+                                            <a href="/trainings/@registration.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="@Localizer["UserDetailPage_ViewTraining"]" aria-label="@Localizer["UserDetailPage_ViewTraining"]">
                                                 <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                             </a>
                                         </td>
@@ -137,7 +137,7 @@
                 }
                 else
                 {
-                    <div class="p-3 text-muted">No registrations yet.</div>
+                    <div class="p-3 text-muted">@Localizer["UserDetailPage_NoRegistrations"]</div>
                 }
             </div>
         </div>
@@ -145,7 +145,7 @@
         @if (!string.IsNullOrWhiteSpace(_user.WelcomeMessage))
         {
             <div class="card mb-4">
-                <div class="card-header fw-bold">Bio / Welcome message</div>
+                <div class="card-header fw-bold">@Localizer["UserDetailPage_BioWelcomeMessageTitle"]</div>
                 <div class="card-body">
                     @_user.WelcomeMessage
                 </div>
@@ -219,7 +219,7 @@
     }
 
     private string GetGroupLabel(int groupId) =>
-        _groupNameById.TryGetValue(groupId, out var groupName) ? groupName : $"Group #{groupId}";
+        _groupNameById.TryGetValue(groupId, out var groupName) ? groupName : string.Format(Localizer["UserDetailPage_GroupNumberFallback"].Value, groupId);
 
     private string GetCountryLabel(int? countryId, string? countryCode)
     {

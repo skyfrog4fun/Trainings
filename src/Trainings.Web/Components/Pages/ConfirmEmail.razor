@@ -78,7 +78,7 @@
 
         if (string.IsNullOrEmpty(token))
         {
-            _message = "Invalid or missing confirmation token.";
+            _message = Localizer["ConfirmEmail_InvalidToken"];
             _loading = false;
             return;
         }
@@ -113,8 +113,8 @@
         {
             var result = await UserRegistrationService.ResendEmailConfirmationAsync(_userId.Value);
             _message = result.Preview is null
-                ? "A new verification mail has been sent."
-                : "No E-Mail mode is active. Review the preview below and use the new verification link.";
+                ? Localizer["ConfirmEmail_NewMailSent"]
+                : Localizer["ConfirmEmail_NoEmailModePreview"];
             _emailPreview = result.Preview;
             _canResend = false;
         }

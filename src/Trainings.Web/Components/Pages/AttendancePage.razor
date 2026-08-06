@@ -60,7 +60,7 @@
                             <i class="@AppIcons.ClipboardCheck text-success small" title="@Localizer["AttendancePage_PreRegistered"]" aria-label="@Localizer["AttendancePage_PreRegistered"]"></i>
                         }
                     </div>
-                    <div class="btn-group btn-group-sm" role="group" aria-label="Attendance for @member.UserDisplayName">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="@string.Format(Localizer["AttendancePage_AttendanceForAriaLabel"].Value, member.UserDisplayName)">
                         <button type="button"
                                 class="btn @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-secondary")"
                                 title="@Localizer["AttendancePage_Present"]"
@@ -166,7 +166,7 @@
         try
         {
             await AttendanceService.BulkSaveAsync(TrainingId, _attendanceMap, _trainerId);
-            _message = "Attendance draft saved.";
+            _message = Localizer["AttendancePage_DraftSaved"];
             _messageIsError = false;
         }
         catch (Exception ex)
@@ -184,7 +184,7 @@
     {
         if (_training?.DateTime > DateTime.UtcNow)
         {
-            _message = "Cannot finalize attendance before the training has started.";
+            _message = Localizer["AttendancePage_FinalizeBeforeStartError"];
             _messageIsError = true;
             return;
         }
@@ -196,7 +196,7 @@
             await AttendanceService.BulkSaveAsync(TrainingId, _attendanceMap, _trainerId);
             await TrainingService.LockAttendanceAsync(TrainingId);
             _training = await TrainingService.GetByIdAsync(TrainingId);
-            _message = "Attendance finalized successfully.";
+            _message = Localizer["AttendancePage_FinalizedSuccess"];
             _messageIsError = false;
         }
         catch (Exception ex)

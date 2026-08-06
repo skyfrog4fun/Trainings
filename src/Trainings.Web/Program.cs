@@ -1,11 +1,11 @@
+using System.Globalization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Localization;
-using System.Globalization;
-using System.Security.Claims;
 using Trainings.Application;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Enums;

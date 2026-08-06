@@ -57,7 +57,7 @@ public static class AppIcons
         new("Calendar", Calendar),
         new("Trash/Delete", Trash),
         new("Back", Back),
-        new("Notifications", Bell),        
+        new("Notifications", Bell),
         new("Blocks", BookOpen),
         new("Calendar Check", CalendarCheck),
         new("Statistics", ChartSimple),

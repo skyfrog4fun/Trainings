@@ -57,7 +57,7 @@ public class DbSeederTagSeedingTests
 
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync();
+        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync(TestContext.Current.CancellationToken);
         globalTags.Should().HaveCount(10);
     }
 
@@ -68,7 +68,7 @@ public class DbSeederTagSeedingTests
 
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var names = await ctx.Tags.Where(t => t.GroupId == null).Select(t => t.Name).ToListAsync();
+        var names = await ctx.Tags.Where(t => t.GroupId == null).Select(t => t.Name).ToListAsync(TestContext.Current.CancellationToken);
         names.Should().BeEquivalentTo(ExpectedGlobalTags);
     }
 
@@ -80,7 +80,7 @@ public class DbSeederTagSeedingTests
         await SeedGlobalTagsDirectlyAsync(ctx);
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync();
+        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync(TestContext.Current.CancellationToken);
         globalTags.Should().HaveCount(10);
     }
 
@@ -91,11 +91,11 @@ public class DbSeederTagSeedingTests
 
         // Insert a group-scoped tag first
         ctx.Tags.Add(new Tag { Name = "Custom", GroupId = 1 });
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var groupTags = await ctx.Tags.Where(t => t.GroupId != null).ToListAsync();
+        var groupTags = await ctx.Tags.Where(t => t.GroupId != null).ToListAsync(TestContext.Current.CancellationToken);
         groupTags.Should().HaveCount(1);
         groupTags[0].Name.Should().Be("Custom");
     }

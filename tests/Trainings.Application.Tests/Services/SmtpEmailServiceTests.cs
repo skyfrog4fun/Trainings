@@ -26,7 +26,7 @@ public class SmtpEmailServiceTests
                 [configs[1].Id] = SendOutcome.Success()
             });
 
-        var result = await service.SendTestEmailAsync("user@example.com");
+        var result = await service.SendTestEmailAsync("user@example.com", ct: TestContext.Current.CancellationToken);
 
         result.IsSuccess.Should().BeTrue();
         result.Attempts.Should().HaveCount(2);
@@ -36,17 +36,17 @@ public class SmtpEmailServiceTests
         result.Attempts[1].ConfigurationName.Should().Be("Secondary");
         result.Attempts[1].IsSuccess.Should().BeTrue();
 
-        var updatedPrimary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[0].Id);
+        var updatedPrimary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[0].Id, TestContext.Current.CancellationToken);
         updatedPrimary.Status.Should().Be(MailConfigurationStatus.Failed);
         updatedPrimary.LastError.Should().Be("Primary failed");
         updatedPrimary.LastSuccessSentAt.Should().BeNull();
 
-        var updatedSecondary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[1].Id);
+        var updatedSecondary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[1].Id, TestContext.Current.CancellationToken);
         updatedSecondary.Status.Should().Be(MailConfigurationStatus.Successful);
         updatedSecondary.LastError.Should().BeNull();
         updatedSecondary.LastSuccessSentAt.Should().NotBeNull();
 
-        var untouchedTertiary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[2].Id);
+        var untouchedTertiary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[2].Id, TestContext.Current.CancellationToken);
         untouchedTertiary.Status.Should().Be(MailConfigurationStatus.Unknown);
     }
 
@@ -56,7 +56,7 @@ public class SmtpEmailServiceTests
         using var context = CreateInMemoryContext();
         var configs = await SeedMailConfigurationsAsync(context);
         configs[2].IsActive = false;
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var service = CreateService(
             context,
@@ -65,18 +65,18 @@ public class SmtpEmailServiceTests
                 [configs[2].Id] = SendOutcome.Success()
             });
 
-        var result = await service.SendTestEmailAsync("user@example.com", configs[2].Id);
+        var result = await service.SendTestEmailAsync("user@example.com", configs[2].Id, TestContext.Current.CancellationToken);
 
         result.IsSuccess.Should().BeTrue();
         result.Attempts.Should().HaveCount(1);
         result.Attempts[0].MailConfigurationId.Should().Be(configs[2].Id);
         result.Attempts[0].IsActive.Should().BeFalse();
 
-        var inactiveConfig = await context.MailConfigurations.SingleAsync(c => c.Id == configs[2].Id);
+        var inactiveConfig = await context.MailConfigurations.SingleAsync(c => c.Id == configs[2].Id, TestContext.Current.CancellationToken);
         inactiveConfig.Status.Should().Be(MailConfigurationStatus.Successful);
         inactiveConfig.LastSuccessSentAt.Should().NotBeNull();
 
-        var untouchedPrimary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[0].Id);
+        var untouchedPrimary = await context.MailConfigurations.SingleAsync(c => c.Id == configs[0].Id, TestContext.Current.CancellationToken);
         untouchedPrimary.Status.Should().Be(MailConfigurationStatus.Unknown);
     }
 

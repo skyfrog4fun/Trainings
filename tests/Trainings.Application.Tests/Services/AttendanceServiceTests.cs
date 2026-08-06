@@ -31,7 +31,7 @@ public class AttendanceServiceTests
             { 3, AttendanceStatus.PartiallyPresent }
         };
 
-        await service.BulkSaveAsync(trainingId: 10, map, savedByTrainerId: 99);
+        await service.BulkSaveAsync(trainingId: 10, map, savedByTrainerId: 99, TestContext.Current.CancellationToken);
 
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Attendance>()), Times.Exactly(3));
     }
@@ -54,7 +54,7 @@ public class AttendanceServiceTests
         var service = CreateService();
         var map = new Dictionary<int, AttendanceStatus> { { 1, AttendanceStatus.Present } };
 
-        await service.BulkSaveAsync(trainingId: 10, map, savedByTrainerId: 99);
+        await service.BulkSaveAsync(trainingId: 10, map, savedByTrainerId: 99, TestContext.Current.CancellationToken);
 
         _repoMock.Verify(r => r.UpdateAsync(It.Is<Attendance>(a => a.Status == AttendanceStatus.Present)), Times.Once);
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Attendance>()), Times.Never);
@@ -66,7 +66,7 @@ public class AttendanceServiceTests
         var service = CreateService();
         var map = new Dictionary<int, AttendanceStatus>();
 
-        await service.BulkSaveAsync(trainingId: 10, map, savedByTrainerId: 99);
+        await service.BulkSaveAsync(trainingId: 10, map, savedByTrainerId: 99, TestContext.Current.CancellationToken);
 
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Attendance>()), Times.Never);
         _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Attendance>()), Times.Never);

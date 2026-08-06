@@ -9,10 +9,10 @@
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>User Information</PageTitle>
+<PageTitle>@Localizer["UserInformationPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <h2 class="my-3">User Information</h2>
+    <h2 class="my-3">@Localizer["UserInformationPage_PageTitle"]</h2>
 
     @if (_loading)
     {
@@ -20,38 +20,38 @@
     }
     else if (_user is null)
     {
-        <div class="alert alert-danger">Unable to load your profile.</div>
+        <div class="alert alert-danger">@Localizer["UserInformationPage_UnableToLoadProfile"]</div>
     }
     else
     {
         <div class="card mb-4">
-            <div class="card-header fw-bold">Profile</div>
+            <div class="card-header fw-bold">@Localizer["UserInformationPage_ProfileTitle"]</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">First Name</label>
+                        <label class="form-label">@Localizer["FirstName"]</label>
                         <input class="form-control" @bind="_firstName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Last Name</label>
+                        <label class="form-label">@Localizer["LastName"]</label>
                         <input class="form-control" @bind="_lastName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Email</label>
+                        <label class="form-label">@Localizer["Email"]</label>
                         <input class="form-control" type="email" @bind="_email" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Mobile</label>
+                        <label class="form-label">@Localizer["Mobile"]</label>
                         <input class="form-control" @bind="_mobile" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">City</label>
+                        <label class="form-label">@Localizer["City"]</label>
                         <input class="form-control" @bind="_city" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">Country</label>
+                        <label class="form-label">@Localizer["Country"]</label>
                         <select class="form-select" @bind="_countryId">
-                            <option value="">Select country</option>
+                            <option value="">@Localizer["SelectCountry"]</option>
                             @foreach (var country in _countries)
                             {
                                 <option value="@country.Id">@country.Code — @country.Name</option>
@@ -59,13 +59,13 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Welcome Message / Bio</label>
+                        <label class="form-label">@Localizer["WelcomeMessageBio"]</label>
                         <textarea class="form-control" rows="2" @bind="_welcomeMessage"></textarea>
                     </div>
                 </div>
 
                 <div class="mt-3">
-                    <button type="button" class="btn btn-primary" @onclick="SaveProfile">Save</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveProfile">@Localizer["Save"]</button>
                 </div>
 
                 @if (_resultMessage is not null)
@@ -76,14 +76,14 @@
         </div>
 
         <div class="card">
-            <div class="card-header fw-bold">Group Memberships</div>
+            <div class="card-header fw-bold">@Localizer["UserInformationPage_GroupMembershipsTitle"]</div>
             <div class="card-body">
                 @if (_memberships.Any())
                 {
                     <div class="table-responsive">
                         <table class="table table-sm mb-0">
                             <thead>
-                                <tr><th>Group</th><th>Role</th><th>Status</th><th>Requested</th></tr>
+                                <tr><th>@Localizer["Group"]</th><th>@Localizer["Role"]</th><th>@Localizer["Status"]</th><th>@Localizer["UserInformationPage_ColRequested"]</th></tr>
                             </thead>
                             <tbody>
                                 @foreach (var membership in _memberships)
@@ -101,7 +101,7 @@
                 }
                 else
                 {
-                    <div class="text-muted">No group memberships yet. Group assignment requests must be approved by Group Admin or SuperAdmin.</div>
+                    <div class="text-muted">@Localizer["UserInformationPage_NoMemberships"]</div>
                 }
             </div>
         </div>
@@ -154,7 +154,7 @@
             _memberships = memberships
                 .Select(m => new MembershipRow
                 {
-                    GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : $"Group #{m.GroupId}",
+                    GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : string.Format(Localizer["Common_GroupNumberFallback"].Value, m.GroupId),
                     Role = m.Role,
                     Status = m.Status,
                     RequestedAt = m.RequestedAt
@@ -190,13 +190,13 @@
             });
 
             _resultSuccess = true;
-            _resultMessage = "Profile updated successfully.";
+            _resultMessage = Localizer["UserInformationPage_UpdatedSuccess"];
             _user = await UserService.GetByIdAsync(_userId);
         }
         catch (Exception ex)
         {
             _resultSuccess = false;
-            _resultMessage = $"Failed to update profile: {ex.Message}";
+            _resultMessage = string.Format(Localizer["UserInformationPage_UpdateFailed"].Value, ex.Message);
         }
     }
 }

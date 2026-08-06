@@ -18,7 +18,7 @@
 
     @if (_group != null)
     {
-        <h2>@_group.Name – Members</h2>
+        <h2>@string.Format(Localizer["GroupMembersPage_MembersOfGroup"].Value, _group.Name)</h2>
         <p class="text-muted">@_group.Description</p>
     }
 
@@ -211,7 +211,7 @@
         _addError = null;
         if (_addUserId == 0)
         {
-            _addError = "Please select a user.";
+            _addError = Localizer["GroupMembersPage_SelectUserError"];
             return;
         }
         try
@@ -239,13 +239,13 @@
         {
             await GroupService.ApproveMemberAsync(m.Id);
             _actionAlertClass = "alert-success";
-            _actionResult = $"{m.UserDisplayName} approved.";
+            _actionResult = string.Format(Localizer["GroupMembersPage_ApprovedMessage"].Value, m.UserDisplayName);
             await LoadMembers();
         }
         catch (Exception ex)
         {
             _actionAlertClass = "alert-danger";
-            _actionResult = $"Failed: {ex.Message}";
+            _actionResult = string.Format(Localizer["GroupMembersPage_FailedMessage"].Value, ex.Message);
         }
     }
 
@@ -256,13 +256,13 @@
         {
             await GroupService.DeclineMemberAsync(m.Id);
             _actionAlertClass = "alert-info";
-            _actionResult = $"{m.UserDisplayName} declined.";
+            _actionResult = string.Format(Localizer["GroupMembersPage_DeclinedMessage"].Value, m.UserDisplayName);
             await LoadMembers();
         }
         catch (Exception ex)
         {
             _actionAlertClass = "alert-danger";
-            _actionResult = $"Failed: {ex.Message}";
+            _actionResult = string.Format(Localizer["GroupMembersPage_FailedMessage"].Value, ex.Message);
         }
     }
 

@@ -27,7 +27,7 @@ public class StatisticsServiceTests
         await SeedAsync(context);
         var service = new StatisticsService(context);
 
-        var result = await service.GetStatisticsAsync(true, []);
+        var result = await service.GetStatisticsAsync(true, [], TestContext.Current.CancellationToken);
 
         result.TotalGroups.Should().Be(2);
         result.ActiveUsers.Should().Be(3);
@@ -43,7 +43,7 @@ public class StatisticsServiceTests
         await SeedAsync(context);
         var service = new StatisticsService(context);
 
-        var result = await service.GetStatisticsAsync(false, [1]);
+        var result = await service.GetStatisticsAsync(false, [1], TestContext.Current.CancellationToken);
 
         result.TotalGroups.Should().Be(1);
         result.ActiveUsers.Should().Be(1);
