@@ -15,6 +15,10 @@ Localization
 - [ ] Remove all text on RESX files that not not match the pattern [Page]_[Resource] and/or are not used on any page.
 - [ ] Properly translate all the text on the RESX files from EN to DE.
 
+Mail
+---
+- [ ] Mails are sent in English only. There's no localization for mails. Add localization for mails (EN/DE). Check if the mail templates are used in the code and if they are available in the resx files. If not, add them to the resx files.
+
 Registration
 ---
 - [ ] Validate all fields in the UI (validate what is missing). Compare pages 'Register', 'UserInformation', 'UserDetail' and 'CreateEditUser'.
