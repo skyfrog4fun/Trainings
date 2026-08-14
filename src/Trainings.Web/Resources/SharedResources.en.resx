@@ -819,6 +819,66 @@
   <data name="CreateEditTraining_CreateButton" xml:space="preserve">
     <value>Create Training</value>
   </data>
+  <data name="GroupCreateEditPage_EditGroup" xml:space="preserve">
+    <value>Edit Group</value>
+  </data>
+  <data name="GroupCreateEditPage_CreateGroup" xml:space="preserve">
+    <value>Create Group</value>
+  </data>
+  <data name="GroupCreateEditPage_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="GroupCreateEditPage_GroupNamePlaceholder" xml:space="preserve">
+    <value>Enter group name</value>
+  </data>
+  <data name="GroupCreateEditPage_Slug" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="GroupCreateEditPage_SlugPlaceholder" xml:space="preserve">
+    <value>group-slug</value>
+  </data>
+  <data name="GroupCreateEditPage_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="GroupCreateEditPage_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="GroupCreateEditPage_Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="GroupCreateEditPage_SelectLocation" xml:space="preserve">
+    <value>Select location</value>
+  </data>
+  <data name="GroupCreateEditPage_MaxParticipants" xml:space="preserve">
+    <value>Max Participants</value>
+  </data>
+  <data name="GroupCreateEditPage_Weekday" xml:space="preserve">
+    <value>Weekday</value>
+  </data>
+  <data name="GroupCreateEditPage_SelectDay" xml:space="preserve">
+    <value>Select day</value>
+  </data>
+  <data name="GroupCreateEditPage_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="GroupCreateEditPage_DurationMinutes" xml:space="preserve">
+    <value>Duration (minutes)</value>
+  </data>
+  <data name="GroupCreateEditPage_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="GroupCreateEditPage_Localized" xml:space="preserve">
+    <value>Localized</value>
+  </data>
+  <data name="GroupCreateEditPage_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="GroupCreateEditPage_SelectCountry" xml:space="preserve">
+    <value>Select country</value>
+  </data>
+  <data name="GroupCreateEditPage_GroupNotFound" xml:space="preserve">
+    <value>Group not found.</value>
+  </data>
   <data name="GroupMembersPage_PageTitle" xml:space="preserve">
     <value>Group Members</value>
   </data>
