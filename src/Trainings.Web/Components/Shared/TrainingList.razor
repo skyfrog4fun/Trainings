@@ -9,7 +9,7 @@
                     <button type="button" class="btn btn-link collapsible-card-toggle training-card-toggle" @onclick="() => ToggleCollapsed(training.Id)">
                             @if (string.IsNullOrWhiteSpace(training.Title))
                             {
-                                <span class="training-card-header-title text-muted fst-italic text-truncate">@Localizer["InPlanning"]</span>
+                                <span class="training-card-header-title text-muted fst-italic text-truncate">@Localizer["TrainingList_InPlanning"]</span>
                             }
                             else
                             {

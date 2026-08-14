@@ -412,7 +412,7 @@
     {
         if (user.Role == UserRole.SuperAdmin)
         {
-            return Localizer["SuperAdmin"];
+            return Localizer["Enum_Role_SuperAdmin"];
         }
 
         var memberships = GetMemberships(user.Id)
@@ -421,14 +421,14 @@
 
         if (memberships.Any(m => m.Role == GroupMemberRole.Admin))
         {
-            return Localizer["GroupAdmin"];
+            return Localizer["Enum_Role_GroupAdmin"];
         }
 
         if (memberships.Any(m => m.Role == GroupMemberRole.Trainer))
         {
-            return Localizer["Trainer"];
+            return Localizer["Enum_Role_Trainer"];
         }
 
-        return Localizer["User"];
+        return Localizer["Enum_Role_User"];
     }
 }
