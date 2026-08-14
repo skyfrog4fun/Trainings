@@ -180,6 +180,30 @@
   <data name="TrainingsPage_All" xml:space="preserve">
     <value>All</value>
   </data>
+  <data name="TrainingsPage_OlderThanTwoWeeks" xml:space="preserve">
+    <value>Älter als 2 Wochen</value>
+  </data>
+  <data name="TrainingsPage_NoRecentTrainingsMatchCurrentFilters" xml:space="preserve">
+    <value>Keine aktuellen Trainings entsprechen den Filtern.</value>
+  </data>
+  <data name="TrainingsPage_NoTrainingsMatchCurrentFilters" xml:space="preserve">
+    <value>Keine Trainings entsprechen den aktuellen Filtern.</value>
+  </data>
+  <data name="TrainingsPage_NoTrainingsAvailable" xml:space="preserve">
+    <value>Keine Trainings verfügbar.</value>
+  </data>
+  <data name="TrainingsPage_NoTrainingsFromLastTwoWeeksAvailable" xml:space="preserve">
+    <value>Keine Trainings der letzten zwei Wochen verfügbar.</value>
+  </data>
+  <data name="TrainingsPage_RegistrationCancelled" xml:space="preserve">
+    <value>Anmeldung storniert.</value>
+  </data>
+  <data name="TrainingsPage_SuccessfullyRegistered" xml:space="preserve">
+    <value>Erfolgreich angemeldet.</value>
+  </data>
+  <data name="TrainingsPage_TrainingDeleted" xml:space="preserve">
+    <value>Training gelöscht.</value>
+  </data>
   <data name="HomePage_AllGroups" xml:space="preserve">
     <value>All Groups</value>
   </data>
@@ -188,6 +212,12 @@
   </data>
   <data name="TrainingsPage_AllTrainers" xml:space="preserve">
     <value>All Trainers</value>
+  </data>
+  <data name="TrainingsPage_Available" xml:space="preserve">
+    <value>Verfügbar</value>
+  </data>
+  <data name="TrainingsPage_Full" xml:space="preserve">
+    <value>Ausgebucht</value>
   </data>
   <data name="HomePage_AllTrainings" xml:space="preserve">
     <value>All Trainings</value>
@@ -203,6 +233,12 @@
   </data>
   <data name="Shared_ClearFilters" xml:space="preserve">
     <value>Filter löschen</value>
+  </data>
+  <data name="Shared_Register" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Shared_Unregister" xml:space="preserve">
+    <value>Abmelden</value>
   </data>
   <data name="Shared_Country" xml:space="preserve">
     <value>Land</value>
@@ -705,88 +741,88 @@
   <data name="AttendancePage_FinalizeAttendance" xml:space="preserve">
     <value>Anwesenheit finalisieren</value>
   </data>
-  <data name="CreateEditTraining_PageTitleEdit" xml:space="preserve">
+  <data name="CreateEditTrainingPage_PageTitleEdit" xml:space="preserve">
     <value>Training bearbeiten</value>
   </data>
-  <data name="CreateEditTraining_PageTitleNew" xml:space="preserve">
+  <data name="CreateEditTrainingPage_PageTitleNew" xml:space="preserve">
     <value>Training erstellen</value>
   </data>
-  <data name="CreateEditTraining_HeadingNew" xml:space="preserve">
+  <data name="CreateEditTrainingPage_HeadingNew" xml:space="preserve">
     <value>Neues Training</value>
   </data>
-  <data name="CreateEditTraining_ReadOnlyAlert" xml:space="preserve">
+  <data name="CreateEditTrainingPage_ReadOnlyAlert" xml:space="preserve">
     <value>Nur-Lesen-Modus aktiv. Nur SuperAdmins können Trainings erstellen oder bearbeiten.</value>
   </data>
-  <data name="CreateEditTraining_EditDetails" xml:space="preserve">
+  <data name="CreateEditTrainingPage_EditDetails" xml:space="preserve">
     <value>Details bearbeiten</value>
   </data>
-  <data name="CreateEditTraining_GroupLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_GroupLabel" xml:space="preserve">
     <value>Gruppe *</value>
   </data>
-  <data name="CreateEditTraining_SelectGroup" xml:space="preserve">
+  <data name="CreateEditTrainingPage_SelectGroup" xml:space="preserve">
     <value>Gruppe auswählen</value>
   </data>
-  <data name="CreateEditTraining_TrainerLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_TrainerLabel" xml:space="preserve">
     <value>Trainer *</value>
   </data>
-  <data name="CreateEditTraining_SelectTrainer" xml:space="preserve">
+  <data name="CreateEditTrainingPage_SelectTrainer" xml:space="preserve">
     <value>Trainer auswählen</value>
   </data>
-  <data name="CreateEditTraining_TitleLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_TitleLabel" xml:space="preserve">
     <value>Titel</value>
   </data>
-  <data name="CreateEditTraining_TitlePlaceholder" xml:space="preserve">
+  <data name="CreateEditTrainingPage_TitlePlaceholder" xml:space="preserve">
     <value>Trainingstitel</value>
   </data>
-  <data name="CreateEditTraining_DateLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_DateLabel" xml:space="preserve">
     <value>Datum *</value>
   </data>
-  <data name="CreateEditTraining_LocationLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_LocationLabel" xml:space="preserve">
     <value>Ort</value>
   </data>
-  <data name="CreateEditTraining_SelectLocation" xml:space="preserve">
+  <data name="CreateEditTrainingPage_SelectLocation" xml:space="preserve">
     <value>Ort auswählen</value>
   </data>
-  <data name="CreateEditTraining_MaxParticipantLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_MaxParticipantLabel" xml:space="preserve">
     <value>Max. Teilnehmer</value>
   </data>
-  <data name="CreateEditTraining_StartLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_StartLabel" xml:space="preserve">
     <value>Start</value>
   </data>
-  <data name="CreateEditTraining_DurationLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_DurationLabel" xml:space="preserve">
     <value>Dauer (Minuten)</value>
   </data>
-  <data name="CreateEditTraining_EndLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_EndLabel" xml:space="preserve">
     <value>Ende</value>
   </data>
-  <data name="CreateEditTraining_StatusLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_StatusLabel" xml:space="preserve">
     <value>Status</value>
   </data>
-  <data name="CreateEditTraining_MarkAsPlannedTitle" xml:space="preserve">
+  <data name="CreateEditTrainingPage_MarkAsPlannedTitle" xml:space="preserve">
     <value>Training als geplant markieren</value>
   </data>
-  <data name="CreateEditTraining_MarkAsPlanned" xml:space="preserve">
+  <data name="CreateEditTrainingPage_MarkAsPlanned" xml:space="preserve">
     <value>Als geplant markieren</value>
   </data>
-  <data name="CreateEditTraining_RevertToPlanning" xml:space="preserve">
+  <data name="CreateEditTrainingPage_RevertToPlanning" xml:space="preserve">
     <value>Zurück zur Planung</value>
   </data>
-  <data name="CreateEditTraining_SpecialLocationLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_SpecialLocationLabel" xml:space="preserve">
     <value>Beschreibung Sonderort</value>
   </data>
-  <data name="CreateEditTraining_MeetingPointLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_MeetingPointLabel" xml:space="preserve">
     <value>Treffpunkt</value>
   </data>
-  <data name="CreateEditTraining_DescriptionLabel" xml:space="preserve">
+  <data name="CreateEditTrainingPage_DescriptionLabel" xml:space="preserve">
     <value>Trainingsbeschreibung</value>
   </data>
-  <data name="CreateEditTraining_DescriptionPlaceholder" xml:space="preserve">
+  <data name="CreateEditTrainingPage_DescriptionPlaceholder" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
-  <data name="CreateEditTraining_UpdateButton" xml:space="preserve">
+  <data name="CreateEditTrainingPage_UpdateButton" xml:space="preserve">
     <value>Training aktualisieren</value>
   </data>
-  <data name="CreateEditTraining_CreateButton" xml:space="preserve">
+  <data name="CreateEditTrainingPage_CreateButton" xml:space="preserve">
     <value>Training erstellen</value>
   </data>
   <data name="GroupCreateEditPage_EditGroup" xml:space="preserve">
@@ -1239,25 +1275,25 @@
   <data name="Shared_MinutesUnit" xml:space="preserve">
     <value>Min.</value>
   </data>
-  <data name="CreateEditTraining_GroupRequired" xml:space="preserve">
+  <data name="CreateEditTrainingPage_GroupRequired" xml:space="preserve">
     <value>Bitte wähle eine Gruppe aus.</value>
   </data>
-  <data name="CreateEditTraining_TrainerRequired" xml:space="preserve">
+  <data name="CreateEditTrainingPage_TrainerRequired" xml:space="preserve">
     <value>Bitte wähle einen Trainer aus.</value>
   </data>
-  <data name="CreateEditTraining_UpdatedSuccess" xml:space="preserve">
+  <data name="CreateEditTrainingPage_UpdatedSuccess" xml:space="preserve">
     <value>Training erfolgreich aktualisiert.</value>
   </data>
-  <data name="CreateEditTraining_CreatedSuccess" xml:space="preserve">
+  <data name="CreateEditTrainingPage_CreatedSuccess" xml:space="preserve">
     <value>Training erfolgreich erstellt.</value>
   </data>
-  <data name="CreateEditTraining_SaveFailed" xml:space="preserve">
+  <data name="CreateEditTrainingPage_SaveFailed" xml:space="preserve">
     <value>Speichern des Trainings fehlgeschlagen: {0}</value>
   </data>
-  <data name="CreateEditTraining_MarkedAsPlannedSuccess" xml:space="preserve">
+  <data name="CreateEditTrainingPage_MarkedAsPlannedSuccess" xml:space="preserve">
     <value>Training als Geplant markiert.</value>
   </data>
-  <data name="CreateEditTraining_RevertedToPlanningSuccess" xml:space="preserve">
+  <data name="CreateEditTrainingPage_RevertedToPlanningSuccess" xml:space="preserve">
     <value>Training zurück zu In Planung gesetzt.</value>
   </data>
   <data name="MailConfigPage_RequiredFieldsError" xml:space="preserve">
@@ -1452,6 +1488,12 @@
   <data name="TrainerTrainingsPage_New" xml:space="preserve">
     <value>Neu</value>
   </data>
+  <data name="TrainerTrainingsPage_View" xml:space="preserve">
+    <value>Anzeigen</value>
+  </data>
+  <data name="TrainerTrainingsPage_Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
   <data name="TrainerTrainingsPage_Attendance" xml:space="preserve">
     <value>Anwesenheit</value>
   </data>
@@ -1535,6 +1577,9 @@
   </data>
   <data name="TrainingDetailPage_RecordAttendance" xml:space="preserve">
     <value>Anwesenheit erfassen</value>
+  </data>
+  <data name="TrainingDetailPage_Register" xml:space="preserve">
+    <value>Anmelden</value>
   </data>
   <data name="TrainingDetailPage_Confirm" xml:space="preserve">
     <value>Bestätigen</value>
