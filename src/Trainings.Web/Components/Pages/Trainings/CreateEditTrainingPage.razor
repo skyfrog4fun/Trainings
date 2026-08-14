@@ -1,4 +1,4 @@
-@page "/trainings/create"
+﻿@page "/trainings/create"
 @page "/trainings/{Id:int}/edit"
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
@@ -13,19 +13,19 @@
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>@(_isEdit ? Localizer["CreateEditTraining_PageTitleEdit"] : Localizer["CreateEditTraining_PageTitleNew"])</PageTitle>
+<PageTitle>@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_PageTitleNew"])</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
         <BackButton Href="/plan-training" />
     </div>
 
-    <h2>@(_isEdit ? Localizer["CreateEditTraining_PageTitleEdit"] : Localizer["CreateEditTraining_HeadingNew"])</h2>
+    <h2>@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_HeadingNew"])</h2>
 
     @if (IsWriteBlocked)
     {
         <div class="alert alert-warning">
-            @Localizer["CreateEditTraining_ReadOnlyAlert"]
+            @Localizer["CreateEditTrainingPage_ReadOnlyAlert"]
         </div>
     }
 
@@ -38,10 +38,10 @@
                         <span><i class="@AppIcons.Users me-1 text-secondary" aria-hidden="true"></i><strong>@SelectedGroupName</strong></span>
                         <span><i class="@AppIcons.User me-1 text-secondary" aria-hidden="true"></i>@SelectedTrainerName</span>
                         <span><i class="@AppIcons.Calendar me-1 text-secondary" aria-hidden="true"></i>@FormatLocalizedDate(_date)</span>
-                        <span><i class="@AppIcons.Stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes @Localizer["Common_MinutesUnit"]</span>
+                        <span><i class="@AppIcons.Stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes @Localizer["Shared_MinutesUnit"]</span>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _detailsCollapsed = false">
-                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["CreateEditTraining_EditDetails"]
+                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_EditDetails"]
                     </button>
                 </div>
             </div>
@@ -53,9 +53,9 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTraining_GroupLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_GroupLabel"]</label>
                         <select class="form-select" @bind="_groupId" @bind:after="OnGroupChangedAsync">
-                            <option value="">@Localizer["CreateEditTraining_SelectGroup"]</option>
+                            <option value="">@Localizer["CreateEditTrainingPage_SelectGroup"]</option>
                             @foreach (var group in _availableGroups)
                             {
                                 <option value="@group.Id">@group.Name</option>
@@ -64,9 +64,9 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTraining_TrainerLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_TrainerLabel"]</label>
                         <select class="form-select" @bind="_trainerId">
-                            <option value="0">@Localizer["CreateEditTraining_SelectTrainer"]</option>
+                            <option value="0">@Localizer["CreateEditTrainingPage_SelectTrainer"]</option>
                             @foreach (var trainer in _groupTrainers)
                             {
                                 <option value="@trainer.UserId">@trainer.UserDisplayName</option>
@@ -75,62 +75,62 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTraining_TitleLabel"]</label>
-                        <input class="form-control" @bind="_title" placeholder="@Localizer["CreateEditTraining_TitlePlaceholder"]" />
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_TitleLabel"]</label>
+                        <input class="form-control" @bind="_title" placeholder="@Localizer["CreateEditTrainingPage_TitlePlaceholder"]" />
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTraining_DateLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_DateLabel"]</label>
                         <input class="form-control" type="date" @bind="_date" />
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTraining_LocationLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_LocationLabel"]</label>
                         <select class="form-select" @bind="_locationId" @bind:after="OnLocationChanged">
-                            <option value="">@Localizer["CreateEditTraining_SelectLocation"]</option>
+                            <option value="">@Localizer["CreateEditTrainingPage_SelectLocation"]</option>
                             @foreach (var location in _availableLocations)
                             {
-                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
+                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} â€“ {location.CityName}")</option>
                             }
                         </select>
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTraining_MaxParticipantLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_MaxParticipantLabel"]</label>
                         <input class="form-control" type="number" min="1" @bind="_capacity" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["CreateEditTraining_StartLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_StartLabel"]</label>
                         <input class="form-control" type="time" @bind="_startTime" @bind:after="CalculateEndTime" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["CreateEditTraining_DurationLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_DurationLabel"]</label>
                         <input class="form-control" type="number" min="1" @bind="DurationMinutesValue" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["CreateEditTraining_EndLabel"]</label>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_EndLabel"]</label>
                         <input class="form-control" type="time" value="@_endTime" readonly />
                     </div>
 
                     @if (_isEdit)
                     {
                         <div class="col-12 col-md-3">
-                            <label class="form-label">@Localizer["CreateEditTraining_StatusLabel"]</label>
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_StatusLabel"]</label>
                             <div class="mt-1">
                                 <span class="badge @GetStatusBadgeClass(_status) me-2">@_status</span>
                                 @if (_status != TrainingStatus.Planned)
                                 {
-                                    <button type="button" class="btn btn-sm btn-success" @onclick="MarkAsPlannedAsync" title="@Localizer["CreateEditTraining_MarkAsPlannedTitle"]">
-                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTraining_MarkAsPlanned"]
+                                    <button type="button" class="btn btn-sm btn-success" @onclick="MarkAsPlannedAsync" title="@Localizer["CreateEditTrainingPage_MarkAsPlannedTitle"]">
+                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_MarkAsPlanned"]
                                     </button>
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="RevertToPlanningAsync" title="@Localizer["CreateEditTraining_RevertToPlanning"]">
-                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTraining_RevertToPlanning"]
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="RevertToPlanningAsync" title="@Localizer["CreateEditTrainingPage_RevertToPlanning"]">
+                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_RevertToPlanning"]
                                     </button>
                                 }
                             </div>
@@ -140,18 +140,18 @@
                     @if (_isSpecialLocationSelected)
                     {
                         <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["CreateEditTraining_SpecialLocationLabel"]</label>
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_SpecialLocationLabel"]</label>
                             <input class="form-control" @bind="_specialLocationDescription" />
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["CreateEditTraining_MeetingPointLabel"]</label>
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_MeetingPointLabel"]</label>
                             <input class="form-control" @bind="_meetingPoint" />
                         </div>
                     }
 
                     <div class="col-12">
-                        <label class="form-label">@Localizer["CreateEditTraining_DescriptionLabel"]</label>
-                        <textarea class="form-control" rows="3" @bind="_description" placeholder="@Localizer["CreateEditTraining_DescriptionPlaceholder"]"></textarea>
+                        <label class="form-label">@Localizer["CreateEditTrainingPage_DescriptionLabel"]</label>
+                        <textarea class="form-control" rows="3" @bind="_description" placeholder="@Localizer["CreateEditTrainingPage_DescriptionPlaceholder"]"></textarea>
                     </div>
                 </div>
 
@@ -160,7 +160,7 @@
                 </div>
 
                 <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
-                    @(_isEdit ? Localizer["CreateEditTraining_UpdateButton"] : Localizer["CreateEditTraining_CreateButton"])
+                    @(_isEdit ? Localizer["CreateEditTrainingPage_UpdateButton"] : Localizer["CreateEditTrainingPage_CreateButton"])
                 </button>
             </div>
         </div>
@@ -406,13 +406,13 @@
 
         if (!_groupId.HasValue)
         {
-            _error = Localizer["CreateEditTraining_GroupRequired"];
+            _error = Localizer["CreateEditTrainingPage_GroupRequired"];
             return;
         }
 
         if (_trainerId <= 0)
         {
-            _error = Localizer["CreateEditTraining_TrainerRequired"];
+            _error = Localizer["CreateEditTrainingPage_TrainerRequired"];
             return;
         }
 
@@ -440,7 +440,7 @@
                     GroupId = _groupId
                 });
                 _actionSuccess = true;
-                _actionResult = Localizer["CreateEditTraining_UpdatedSuccess"];
+                _actionResult = Localizer["CreateEditTrainingPage_UpdatedSuccess"];
             }
             else
             {
@@ -461,7 +461,7 @@
                 _persistedTrainingId = created.Id;
                 _detailsCollapsed = true;
                 _actionSuccess = true;
-                _actionResult = Localizer["CreateEditTraining_CreatedSuccess"];
+                _actionResult = Localizer["CreateEditTrainingPage_CreatedSuccess"];
                 return;
             }
         }
@@ -469,7 +469,7 @@
         {
             _error = ex.Message;
             _actionSuccess = false;
-            _actionResult = string.Format(Localizer["CreateEditTraining_SaveFailed"].Value, ex.Message);
+            _actionResult = string.Format(Localizer["CreateEditTrainingPage_SaveFailed"].Value, ex.Message);
         }
     }
 
@@ -485,7 +485,7 @@
             await TrainingService.SetStatusAsync(_persistedTrainingId.Value, TrainingStatus.Planned);
             _status = TrainingStatus.Planned;
             _actionSuccess = true;
-            _actionResult = Localizer["CreateEditTraining_MarkedAsPlannedSuccess"];
+            _actionResult = Localizer["CreateEditTrainingPage_MarkedAsPlannedSuccess"];
         }
         catch (Exception ex)
         {
@@ -505,7 +505,7 @@
             await TrainingService.SetStatusAsync(_persistedTrainingId.Value, TrainingStatus.Planning);
             _status = TrainingStatus.Planning;
             _actionSuccess = true;
-            _actionResult = Localizer["CreateEditTraining_RevertedToPlanningSuccess"];
+            _actionResult = Localizer["CreateEditTrainingPage_RevertedToPlanningSuccess"];
         }
         catch (Exception ex)
         {
@@ -514,3 +514,4 @@
     }
 
 }
+

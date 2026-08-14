@@ -7,7 +7,7 @@
         <div class="card collapsible-card mb-4">
             <div class="card-header collapsible-card-header dashboard-card-header">
                 <button type="button" class="collapsible-card-toggle" @onclick="HandleToggleAsync">
-                    <span class="fw-bold">@Localizer["PlanningOverview", groupName]</span>
+                    <span class="fw-bold">@Localizer["DashboardPlanningPanel_PlanningOverview", groupName]</span>
                     <i class="@(IsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
                 </button>
                 <div class="collapsible-card-meta small">
@@ -22,7 +22,7 @@
                     <div class="table-responsive">
                         <table class="table table-sm align-middle mb-0">
                             <thead>
-                                <tr><th>@Localizer["Date"]</th><th>@Localizer["Location"]</th><th>@Localizer["Trainer"]</th><th>@Localizer["Status"]</th><th class="text-end">@Localizer["Actions"]</th></tr>
+                                <tr><th>@Localizer["Shared_Date"]</th><th>@Localizer["Shared_Location"]</th><th>@Localizer["Shared_Trainer"]</th><th>@Localizer["Shared_Status"]</th><th class="text-end">@Localizer["Shared_Actions"]</th></tr>
                             </thead>
                             <tbody>
                                 @foreach (var training in trainings)

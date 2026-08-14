@@ -17,13 +17,13 @@
 @inject IUserRegistrationService UserRegistrationService
 @inject IDateTimeFormatService DateTimeFormatService
 
-<PageTitle>@Localizer["Dashboard"]</PageTitle>
+<PageTitle>@Localizer["Shared_Dashboard"]</PageTitle>
 
 <div class="container-fluid px-2 px-md-4 dashboard-page">
     <section class="dashboard-hero-card my-3">
         <div>
-            <p class="dashboard-hero-kicker mb-1">@Localizer["Dashboard"]</p>
-            <h2 class="mb-1">@Localizer["Welcome back"], @_userFirstName!</h2>
+            <p class="dashboard-hero-kicker mb-1">@Localizer["Shared_Dashboard"]</p>
+            <h2 class="mb-1">@Localizer["HomePage_WelcomeBack"], @_userFirstName!</h2>
             @if (!string.IsNullOrWhiteSpace(_highestRoleLabel))
             {
                 <span class="dashboard-highlight-pill">@_highestRoleLabel</span>
@@ -33,15 +33,15 @@
             @if (_emailConfirmed)
             {
                 <span class="dashboard-status-pill dashboard-status-pill-success">
-                    <i class="@AppIcons.Check" aria-hidden="true"></i> @Localizer["EmailVerified"]
+                    <i class="@AppIcons.Check" aria-hidden="true"></i> @Localizer["HomePage_EmailVerified"]
                 </span>
             }
             else
             {
                 <span class="dashboard-status-pill dashboard-status-pill-danger">
-                    <i class="@AppIcons.XMark" aria-hidden="true"></i> @Localizer["EmailNotVerified"]
+                    <i class="@AppIcons.XMark" aria-hidden="true"></i> @Localizer["HomePage_EmailNotVerified"]
                 </span>
-                <button type="button" class="btn btn-sm btn-primary" @onclick="ResendVerificationAsync">@Localizer["ResendVerification"]</button>
+                <button type="button" class="btn btn-sm btn-primary" @onclick="ResendVerificationAsync">@Localizer["HomePage_ResendVerification"]</button>
             }
         </div>
     </section>
@@ -51,7 +51,7 @@
     <section class="row g-3 mb-4">
         <div class="col-6 col-xl-3">
             <DashboardStatCard
-                Title='@Localizer["Groups"]'
+                Title='@Localizer["Shared_Groups"]'
                 Value="@GetGroupsStatValue()"
                 Subtitle='@GetGroupsStatSubtitle()'
                 IconClass="@AppIcons.UserGroup"
@@ -59,7 +59,7 @@
         </div>
         <div class="col-6 col-xl-3">
             <DashboardStatCard
-                Title='@Localizer["Users"]'
+                Title='@Localizer["Shared_Users"]'
                 Value="@GetUsersStatValue()"
                 Subtitle='@GetUsersStatSubtitle()'
                 IconClass="@AppIcons.Users"
@@ -67,15 +67,15 @@
         </div>
         <div class="col-6 col-xl-3">
             <DashboardStatCard
-                Title='@Localizer["Trainings"]'
+                Title='@Localizer["Shared_Trainings"]'
                 Value="@_myNextTrainings.Count.ToString()"
-                Subtitle='@Localizer["MyNextTrainingsEnrolledAssigned"]'
+                Subtitle='@Localizer["HomePage_MyNextTrainingsEnrolledAssigned"]'
                 IconClass="@AppIcons.CalendarCheck"
                 BadgeToneClass="dashboard-icon-badge-highlight" />
         </div>
         <div class="col-6 col-xl-3">
             <DashboardStatCard
-                Title='@Localizer["PendingApprovals"]'
+                Title='@Localizer["HomePage_PendingApprovals"]'
                 Value="@GetPendingStatValue()"
                 Subtitle='@GetPendingStatSubtitle()'
                 IconClass="@AppIcons.UserClock"
@@ -85,8 +85,8 @@
 
     <section class="dashboard-surface-card mb-4">
         <div class="dashboard-section-header">
-            <h3 class="h5 mb-0">@Localizer["Upcoming Trainings"]</h3>
-            <a class="dashboard-link" href="/trainings">@Localizer["View All"]</a>
+            <h3 class="h5 mb-0">@Localizer["HomePage_UpcomingTrainings"]</h3>
+            <a class="dashboard-link" href="/trainings">@Localizer["HomePage_ViewAll"]</a>
         </div>
         @if (_myNextTrainings.Any())
         {
@@ -98,7 +98,7 @@
                             <p class="dashboard-upcoming-title mb-0">@training.Title</p>
                             <p class="dashboard-upcoming-meta mb-0">@FormatDashboardDateTime(training) - @(training.GroupName ?? "-")</p>
                         </div>
-                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id" title='@Localizer["OpenTrainingDetails"]'>
+                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id" title='@Localizer["HomePage_OpenTrainingDetails"]'>
                             <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                         </a>
                     </article>
@@ -107,7 +107,7 @@
         }
         else
         {
-            <p class="dashboard-empty-state mb-0">@Localizer["NoUpcomingTrainings"]</p>
+            <p class="dashboard-empty-state mb-0">@Localizer["HomePage_NoUpcomingTrainings"]</p>
         }
     </section>
 
@@ -115,18 +115,18 @@
     {
         <section class="dashboard-surface-card-alt mb-4">
             <div class="dashboard-section-header">
-                <h3 class="h5 mb-0">@Localizer["Quick Access"]</h3>
+                <h3 class="h5 mb-0">@Localizer["HomePage_QuickAccess"]</h3>
             </div>
             <div class="dashboard-quick-access-grid">
                 @if (_isGroupAdmin)
                 {
-                    <DashboardQuickAccessButton Href="/groups/new" Text='@Localizer["New Group"]' IconClass="@AppIcons.UserGroup" />
-                    <DashboardQuickAccessButton Href="/users/new" Text='@Localizer["New User"]' IconClass="@AppIcons.User" />
+                    <DashboardQuickAccessButton Href="/groups/new" Text='@Localizer["HomePage_NewGroup"]' IconClass="@AppIcons.UserGroup" />
+                    <DashboardQuickAccessButton Href="/users/new" Text='@Localizer["HomePage_NewUser"]' IconClass="@AppIcons.User" />
                 }
 
                 @if (_isGroupTrainer)
                 {
-                    <DashboardQuickAccessButton Href="/trainings/create" Text='@Localizer["New Training"]' IconClass="@AppIcons.Plus" />
+                    <DashboardQuickAccessButton Href="/trainings/create" Text='@Localizer["HomePage_NewTraining"]' IconClass="@AppIcons.Plus" />
                 }
             </div>
         </section>
@@ -165,10 +165,10 @@
                             <table class="table table-sm align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>@Localizer["Date"]</th>
-                                        <th>@Localizer["Group"]</th>
-                                        <th>@Localizer["Name"]</th>
-                                        <th class="text-end">@Localizer["Actions"]</th>
+                                        <th>@Localizer["Shared_Date"]</th>
+                                        <th>@Localizer["Shared_Group"]</th>
+                                        <th>@Localizer["HomePage_Name"]</th>
+                                        <th class="text-end">@Localizer["Shared_Actions"]</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,12 +179,12 @@
                                             <td class="small">@(training.GroupName ?? "-")</td>
                                             <td>@training.Title</td>
                                             <td class="text-end">
-                                                <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.Id" title='@Localizer["OpenTrainingDetails"]'>
+                                                <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.Id" title='@Localizer["HomePage_OpenTrainingDetails"]'>
                                                     <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                                                 </a>
                                                 <button type="button"
                                                         class="btn btn-sm btn-primary"
-                                                        title='@(training.RegisteredCount >= training.Capacity ? Localizer["TrainingFull"] : Localizer["RegisterForTraining"])'
+                                                        title='@(training.RegisteredCount >= training.Capacity ? Localizer["HomePage_TrainingFull"] : Localizer["HomePage_RegisterForTraining"])'
                                                         @onclick="() => RegisterForTrainingAsync(training.Id)"
                                                         disabled="@(training.RegisteredCount >= training.Capacity)">
                                                     <i class="@AppIcons.ClipboardList" aria-hidden="true"></i>
@@ -195,11 +195,11 @@
                                 </tbody>
                             </table>
                         </div>
-                        <a href="/trainings" class="btn btn-sm btn-outline-primary mt-3">@Localizer["BrowseTrainings"]</a>
+                        <a href="/trainings" class="btn btn-sm btn-outline-primary mt-3">@Localizer["HomePage_BrowseTrainings"]</a>
                     }
                     else
                     {
-                        <div class="text-muted">@Localizer["NoAvailableUpcomingTrainings"]</div>
+                        <div class="text-muted">@Localizer["HomePage_NoAvailableUpcomingTrainings"]</div>
                     }
                 </div>
             </div>
@@ -210,7 +210,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card h-100">
                     <div class="card-header dashboard-card-header">
-                        <span class="fw-bold">@Localizer["MyTrainingsToPlan"]</span>
+                        <span class="fw-bold">@Localizer["HomePage_MyTrainingsToPlan"]</span>
                         <span class="dashboard-card-counter">
                             <i class="@AppIcons.Trainer" aria-hidden="true"></i> @Math.Min(_planLeadTrainings.Count, DashboardDisplayLimit)/@_planLeadTrainings.Count
                         </span>
@@ -227,16 +227,16 @@
                                             <span class="text-muted small">@(training.LocationName ?? "-")</span>
                                         </div>
                                         <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id/edit">
-                                            <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Plan"]
+                                            <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["HomePage_Plan"]
                                         </a>
                                     </li>
                                 }
                             </ul>
-                            <a href="/plan-training" class="btn btn-sm btn-primary mt-3">@Localizer["AllTrainings"]</a>
+                            <a href="/plan-training" class="btn btn-sm btn-primary mt-3">@Localizer["HomePage_AllTrainings"]</a>
                         }
                         else
                         {
-                            <div class="text-muted">@Localizer["NoTrainingsToPlan"]</div>
+                            <div class="text-muted">@Localizer["HomePage_NoTrainingsToPlan"]</div>
                         }
                     </div>
                 </div>
@@ -248,7 +248,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card h-100">
                     <div class="card-header dashboard-card-header">
-                        <span class="fw-bold">@Localizer["OutstandingUsersToApprove"]</span>
+                        <span class="fw-bold">@Localizer["HomePage_OutstandingUsersToApprove"]</span>
                         <span class="dashboard-card-counter">
                             <i class="@AppIcons.UserClock" aria-hidden="true"></i> @Math.Min(_outstandingApprovals.Count, DashboardDisplayLimit)/@_outstandingApprovals.Count
                         </span>
@@ -261,14 +261,14 @@
                                 {
                                     <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                                         <span>@user.DisplayName <span class="text-muted small">(@user.RequestedGroup)</span></span>
-                                        <a class="btn btn-sm btn-outline-primary" href="/users">@Localizer["Review"]</a>
+                                        <a class="btn btn-sm btn-outline-primary" href="/users">@Localizer["HomePage_Review"]</a>
                                     </li>
                                 }
                             </ul>
                         }
                         else
                         {
-                            <div class="text-muted">@Localizer["NoOutstandingApprovals"]</div>
+                            <div class="text-muted">@Localizer["HomePage_NoOutstandingApprovals"]</div>
                         }
                     </div>
                 </div>
@@ -346,7 +346,7 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        var fullName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? Localizer["User"];
+        var fullName = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? Localizer["HomePage_User"];
         _userFirstName = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? fullName;
         _userId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
 
@@ -356,11 +356,11 @@
         _isGroupMember = _isGroupTrainer || user.Claims.Any(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Participant");
 
         _highestRoleLabel = _isSuperAdmin
-            ? Localizer["SuperAdmin"]
+            ? Localizer["Enum_Role_SuperAdmin"]
             : _isGroupAdmin
-                ? Localizer["GroupAdmin"]
+                ? Localizer["Enum_Role_GroupAdmin"]
                 : _isGroupTrainer
-                    ? Localizer["Trainer"]
+                    ? Localizer["Enum_Role_Trainer"]
                     : string.Empty;
 
         var userDto = _userId > 0 ? await UserService.GetByIdAsync(_userId) : null;
@@ -440,7 +440,7 @@
                             t.GroupId.HasValue &&
                             (_isSuperAdmin || accessibleGroupIds.Contains(t.GroupId.Value)))
                 .OrderBy(t => t.DateTime)
-                .GroupBy(t => t.GroupName ?? Localizer["UnknownGroup"])
+                .GroupBy(t => t.GroupName ?? Localizer["HomePage_UnknownGroup"])
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
@@ -452,7 +452,7 @@
                 var membership = (await GroupService.GetAllMembershipsForUserAsync(pendingUser.Id))
                     .FirstOrDefault(m => m.Status == GroupMembershipStatus.Pending);
                 var requestedGroup = membership is null
-                    ? Localizer["Unknown"]
+                    ? Localizer["HomePage_Unknown"]
                     : allGroups.TryGetValue(membership.GroupId, out var groupName) ? groupName : $"Group #{membership.GroupId}";
 
                 _outstandingApprovals.Add(new OutstandingApprovalViewModel(pendingUser.DisplayName, requestedGroup));
@@ -494,12 +494,12 @@
         {
             await UserRegistrationService.ResendEmailConfirmationAsync(_userId);
             _verificationActionSuccess = true;
-            _verificationActionMessage = Localizer["VerificationEmailSent"];
+            _verificationActionMessage = Localizer["HomePage_VerificationEmailSent"];
         }
         catch (Exception ex)
         {
             _verificationActionSuccess = false;
-            _verificationActionMessage = Localizer["FailedToResendVerificationEmail", ex.Message];
+            _verificationActionMessage = Localizer["HomePage_FailedToResendVerificationEmail", ex.Message];
         }
     }
 
@@ -522,7 +522,7 @@
             await RegistrationService.RegisterAsync(_userId, trainingId);
             await LoadAsync();
             _availableTrainingActionError = false;
-            _availableTrainingActionMessage = Localizer["SuccessfullyRegistered"];
+            _availableTrainingActionMessage = Localizer["HomePage_SuccessfullyRegistered"];
         }
         catch (Exception ex)
         {
@@ -546,20 +546,20 @@
     private string GetGroupsStatValue() => (_isSuperAdmin ? _groupCount : _managedGroupCount).ToString();
 
     private string GetGroupsStatSubtitle() => _isSuperAdmin
-        ? Localizer["GroupsCount", _groupCount]
-        : Localizer["AllGroups"];
+        ? Localizer["HomePage_GroupsCount", _groupCount]
+        : Localizer["HomePage_AllGroups"];
 
     private string GetUsersStatValue() => (_isSuperAdmin ? _userCount : _outstandingApprovals.Count).ToString();
 
     private string GetUsersStatSubtitle() => _isSuperAdmin
-        ? Localizer["UsersCount", _userCount]
-        : Localizer["OutstandingUsersToApprove"];
+        ? Localizer["HomePage_UsersCount", _userCount]
+        : Localizer["HomePage_OutstandingUsersToApprove"];
 
     private string GetPendingStatValue() => (_isGroupTrainer ? _planLeadTrainings.Count : _availableNextTrainings.Count).ToString();
 
     private string GetPendingStatSubtitle() => _isGroupTrainer
-        ? Localizer["MyTrainingsToPlan"]
-        : Localizer["NextTrainingsAvailableToAttend"];
+        ? Localizer["HomePage_MyTrainingsToPlan"]
+        : Localizer["HomePage_NextTrainingsAvailableToAttend"];
 
     private async Task ResetNotificationPointerAsync()
     {

@@ -35,7 +35,7 @@
                         class="btn btn-sm btn-outline-danger"
                         @onclick="PromptDeleteTraining"
                         disabled="@_deleteInProgress">
-                    <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Common_Delete"]
+                    <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
                 </button>
             }
         </div>
@@ -44,9 +44,9 @@
             <div class="confirmation-panel confirmation-panel-danger mb-3">
                 <div class="fw-semibold mb-2">@Localizer["TrainingDetailPage_AreYouSure"]</div>
                 <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelDeleteTraining" disabled="@_deleteInProgress">@Localizer["Common_Cancel"]</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelDeleteTraining" disabled="@_deleteInProgress">@Localizer["Shared_Cancel"]</button>
                     <button type="button" class="btn btn-sm btn-danger" @onclick="DeleteTraining" disabled="@_deleteInProgress">
-                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Common_Delete"]
+                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
                     </button>
                     @if (HasRegisteredParticipants)
                     {
@@ -96,7 +96,7 @@
                     <div class="d-flex flex-wrap gap-2 align-items-center">
                         <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_RunTraining"]</a>
                         <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">@Localizer["TrainingDetailPage_RecordAttendance"]</a>
-                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">@Localizer["Common_Edit"]</a>
+                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">@Localizer["Shared_Edit"]</a>
                     </div>
                 }
             </div>
@@ -108,7 +108,7 @@
                         {
                             <span class="fw-semibold">@Localizer["TrainingDetailPage_AreYouSure"]</span>
                             <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmSelfUnregister">@Localizer["TrainingDetailPage_Confirm"]</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelSelfUnregister">@Localizer["Common_Cancel"]</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelSelfUnregister">@Localizer["Shared_Cancel"]</button>
                         }
                         else if (_registrationFooterState == RegistrationFooterState.RegisteredSuccess)
                         {
@@ -209,9 +209,9 @@
                                                     <i class="@AppIcons.Check" aria-hidden="true"></i>
                                                     <span class="participant-action-text ms-1">@Localizer["TrainingDetailPage_Confirm"]</span>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelParticipantUnregister" title="@Localizer["Common_Cancel"]">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelParticipantUnregister" title="@Localizer["Shared_Cancel"]">
                                                     <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                                                    <span class="participant-action-text ms-1">@Localizer["Common_Cancel"]</span>
+                                                    <span class="participant-action-text ms-1">@Localizer["Shared_Cancel"]</span>
                                                 </button>
                                             }
                                             else
@@ -502,7 +502,7 @@
     }
 
     private string FormatDuration(int? durationMinutes) =>
-        durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Common_MinutesUnit"]}" : "-";
+        durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Shared_MinutesUnit"]}" : "-";
 
     private bool CanActOnParticipant(RegistrationDto registration) =>
         _isTrainer || _isAdmin || registration.UserId == _userId;

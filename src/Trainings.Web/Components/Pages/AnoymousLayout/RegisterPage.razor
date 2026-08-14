@@ -1,4 +1,4 @@
-@page "/register"
+﻿@page "/register"
 @layout AnonymousLayout
 @attribute [AllowAnonymous]
 
@@ -8,80 +8,80 @@
 @inject IGroupService GroupService
 @inject IAppRuntimeModeService AppRuntimeModeService
 
-<PageTitle>@Localizer["Register_PageTitle"]</PageTitle>
+<PageTitle>@Localizer["RegisterPage_PageTitle"]</PageTitle>
 
 <div class="container">
     <div class="row justify-content-center mt-4 mb-5">
         <div class="col-12 col-md-8 col-lg-6">
             <div class="card shadow">
                 <div class="card-body p-4">
-                    <h4 class="card-title mb-3">@Localizer["Register_Title"]</h4>
+                    <h4 class="card-title mb-3">@Localizer["RegisterPage_Title"]</h4>
 
                     @if (_registered)
                     {
                         <div class="alert alert-success">
-                            <strong>@Localizer["Register_SuccessTitle"]</strong><br/>
+                            <strong>@Localizer["RegisterPage_SuccessTitle"]</strong><br/>
                             @if (_emailPreview is null)
                             {
-                                <span>@Localizer["Register_SuccessMessage"]</span>
+                                <span>@Localizer["RegisterPage_SuccessMessage"]</span>
                             }
                             else
                             {
-                                <span>@Localizer["Register_NoEmailModeMessage"]</span>
+                                <span>@Localizer["RegisterPage_NoEmailModeMessage"]</span>
                             }
                         </div>
-                        <a href="/login" class="btn btn-primary w-100">@Localizer["Register_BackToLogin"]</a>
+                        <a href="/login" class="btn btn-primary w-100">@Localizer["RegisterPage_BackToLogin"]</a>
                     }
                     else
                     {
                         @if (_runtimeMode.IsReadOnly)
                         {
                             <div class="alert alert-warning">
-                                @Localizer["Register_ReadOnlyModeMessage"]
+                                @Localizer["RegisterPage_ReadOnlyModeMessage"]
                             </div>
                         }
 
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["Register_FirstNameLabel"]</label>
-                                <input class="form-control" @bind="_firstName" placeholder="@Localizer["Register_FirstNamePlaceholder"]" />
+                                <label class="form-label">@Localizer["RegisterPage_FirstNameLabel"]</label>
+                                <input class="form-control" @bind="_firstName" placeholder="@Localizer["RegisterPage_FirstNamePlaceholder"]" />
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["Register_LastNameLabel"]</label>
-                                <input class="form-control" @bind="_lastName" placeholder="@Localizer["Register_LastNamePlaceholder"]" />
+                                <label class="form-label">@Localizer["RegisterPage_LastNameLabel"]</label>
+                                <input class="form-control" @bind="_lastName" placeholder="@Localizer["RegisterPage_LastNamePlaceholder"]" />
                             </div>
                             <div class="col-12">
-                                <label class="form-label">@Localizer["Register_EmailLabel"]</label>
-                                <input type="email" class="form-control" @bind="_email" placeholder="@Localizer["Register_EmailPlaceholder"]" />
+                                <label class="form-label">@Localizer["RegisterPage_EmailLabel"]</label>
+                                <input type="email" class="form-control" @bind="_email" placeholder="@Localizer["RegisterPage_EmailPlaceholder"]" />
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["Register_PasswordLabel"]</label>
+                                <label class="form-label">@Localizer["RegisterPage_PasswordLabel"]</label>
                                 <input type="password" class="form-control" @bind="_password" />
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["Register_GenderLabel"]</label>
+                                <label class="form-label">@Localizer["RegisterPage_GenderLabel"]</label>
                                 <select class="form-select" @bind="_gender">
-                                    <option value="Male">@Localizer["Register_GenderMale"]</option>
-                                    <option value="Female">@Localizer["Register_GenderFemale"]</option>
-                                    <option value="Other">@Localizer["Register_GenderOther"]</option>
+                                    <option value="Male">@Localizer["RegisterPage_GenderMale"]</option>
+                                    <option value="Female">@Localizer["RegisterPage_GenderFemale"]</option>
+                                    <option value="Other">@Localizer["RegisterPage_GenderOther"]</option>
                                 </select>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["Register_BirthdayLabel"]</label>
+                                <label class="form-label">@Localizer["RegisterPage_BirthdayLabel"]</label>
                                 <input type="date" class="form-control" @bind="_birthday" />
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["Register_MobileLabel"]</label>
-                                <input class="form-control" @bind="_mobile" placeholder="@Localizer["Register_MobilePlaceholder"]" />
+                                <label class="form-label">@Localizer["RegisterPage_MobileLabel"]</label>
+                                <input class="form-control" @bind="_mobile" placeholder="@Localizer["RegisterPage_MobilePlaceholder"]" />
                             </div>
                             <div class="col-12">
-                                <label class="form-label">@Localizer["Register_CityLabel"]</label>
-                                <input class="form-control" @bind="_city" placeholder="@Localizer["Register_CityPlaceholder"]" />
+                                <label class="form-label">@Localizer["RegisterPage_CityLabel"]</label>
+                                <input class="form-control" @bind="_city" placeholder="@Localizer["RegisterPage_CityPlaceholder"]" />
                             </div>
                             @if (_groups.Any())
                             {
                                 <div class="col-12">
-                                    <label class="form-label">@Localizer["Register_GroupMembershipLabel"]</label>
+                                    <label class="form-label">@Localizer["RegisterPage_GroupMembershipLabel"]</label>
                                     <div class="border rounded p-2" style="max-height:160px;overflow-y:auto;">
                                         @foreach (var group in _groups)
                                         {
@@ -96,8 +96,8 @@
                                 </div>
                             }
                             <div class="col-12">
-                                <label class="form-label">@Localizer["Register_WelcomeMessageLabel"]</label>
-                                <textarea class="form-control" rows="3" @bind="_welcomeMessage" placeholder="@Localizer["Register_WelcomeMessagePlaceholder"]"></textarea>
+                                <label class="form-label">@Localizer["RegisterPage_WelcomeMessageLabel"]</label>
+                                <textarea class="form-control" rows="3" @bind="_welcomeMessage" placeholder="@Localizer["RegisterPage_WelcomeMessagePlaceholder"]"></textarea>
                             </div>
                         </div>
 
@@ -108,10 +108,10 @@
 
                         <button class="btn btn-primary btn-lg w-100 mt-3" @onclick="Submit" disabled="@(_loading || _runtimeMode.IsReadOnly)">
                             @if (_loading) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
-                            @Localizer["Register_ButtonRegister"]
+                            @Localizer["RegisterPage_ButtonRegister"]
                         </button>
                         <div class="mt-2 text-center">
-                            <a href="/login" class="text-decoration-none small">@Localizer["Register_AlreadyHaveAccount"]</a>
+                            <a href="/login" class="text-decoration-none small">@Localizer["RegisterPage_AlreadyHaveAccount"]</a>
                         </div>
                     }
                 </div>
@@ -156,17 +156,17 @@
         _error = null;
         if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName))
         {
-            _error = Localizer["Register_NameRequired"];
+            _error = Localizer["RegisterPage_NameRequired"];
             return;
         }
         if (string.IsNullOrWhiteSpace(_email))
         {
-            _error = Localizer["Register_EmailRequired"];
+            _error = Localizer["RegisterPage_EmailRequired"];
             return;
         }
         if (string.IsNullOrWhiteSpace(_password) || _password.Length < 6)
         {
-            _error = Localizer["Register_PasswordTooShort"];
+            _error = Localizer["RegisterPage_PasswordTooShort"];
             return;
         }
 
@@ -209,3 +209,4 @@
         return Task.CompletedTask;
     }
 }
+

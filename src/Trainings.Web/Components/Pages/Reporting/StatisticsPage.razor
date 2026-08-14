@@ -9,10 +9,10 @@
 @inject IStatisticsService StatisticsService
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>@Localizer["Statistics"]</PageTitle>
+<PageTitle>@Localizer["StatisticsPage_Statistics"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <PageHeader Title='@Localizer["Statistics"]'>
+    <PageHeader Title='@Localizer["StatisticsPage_Statistics"]'>
         <Actions>
             <span class="badge bg-secondary">@_scopeLabel</span>
         </Actions>
@@ -26,31 +26,31 @@
     {
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["Groups"]'
+                <DashboardStatCard Title='@Localizer["Shared_Groups"]'
                                    Value="@_stats.TotalGroups.ToString()"
                                    IconClass="@AppIcons.Group"
                                    BadgeToneClass="dashboard-icon-badge-secondary" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["StatisticsActiveUsers"]'
+                <DashboardStatCard Title='@Localizer["StatisticsPage_ActiveUsers"]'
                                    Value="@_stats.ActiveUsers.ToString()"
                                    IconClass="@AppIcons.Users"
                                    BadgeToneClass="dashboard-icon-badge-primary" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["StatisticsUsersNotInGroup"]'
+                <DashboardStatCard Title='@Localizer["StatisticsPage_UsersNotInGroup"]'
                                    Value="@_stats.UsersNotInGroup.ToString()"
                                    IconClass="@AppIcons.UserMinus"
                                    BadgeToneClass="dashboard-icon-badge-secondary" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["Trainings"]'
+                <DashboardStatCard Title='@Localizer["Shared_Trainings"]'
                                    Value="@_stats.TotalTrainings.ToString()"
                                    IconClass="@AppIcons.Fire"
                                    BadgeToneClass="dashboard-icon-badge-highlight" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["StatisticsTotalRegistrations"]'
+                <DashboardStatCard Title='@Localizer["StatisticsPage_TotalRegistrations"]'
                                    Value="@_stats.TotalRegistrations.ToString()"
                                    IconClass="@AppIcons.ClipboardList"
                                    BadgeToneClass="dashboard-icon-badge-secondary" />
@@ -58,18 +58,18 @@
         </div>
 
         <div class="card shadow-sm">
-            <div class="card-header fw-bold">@Localizer["StatisticsAnnualIndicators", DateTime.UtcNow.Year]</div>
+            <div class="card-header fw-bold">@Localizer["StatisticsPage_AnnualIndicators", DateTime.UtcNow.Year]</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
                         <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">@Localizer["StatisticsAvgUsersPerGroup"]</div>
+                            <div class="text-muted small">@Localizer["StatisticsPage_AvgUsersPerGroup"]</div>
                             <div class="fs-3">@_stats.AverageUsersPerGroup.ToString("0.##")</div>
                         </div>
                     </div>
                     <div class="col-12 col-md-6">
                         <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">@Localizer["StatisticsAvgParticipantsPerTraining"]</div>
+                            <div class="text-muted small">@Localizer["StatisticsPage_AvgParticipantsPerTraining"]</div>
                             <div class="fs-3">@_stats.AverageParticipantsPerTraining.ToString("0.##")</div>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
             .ToList();
 
         _stats = await StatisticsService.GetStatisticsAsync(isSuperAdmin, managedGroupIds);
-        _scopeLabel = isSuperAdmin ? Localizer["StatisticsScopeGlobal"] : Localizer["StatisticsScopeManagedGroups"];
+        _scopeLabel = isSuperAdmin ? Localizer["StatisticsPage_ScopeGlobal"] : Localizer["StatisticsPage_ScopeManagedGroups"];
         _loading = false;
     }
 }

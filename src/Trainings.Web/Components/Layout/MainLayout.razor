@@ -14,7 +14,7 @@
                         data-bs-toggle="dropdown"
                         data-bs-auto-close="outside"
                         aria-expanded="false"
-                        aria-label='@Localizer["Language"]'>
+                        aria-label='@Localizer["Shared_Language"]'>
                     <i class="fa-solid fa-globe" aria-hidden="true"></i>
                     <span>@CurrentLanguageDisplayName</span>
                 </button>
@@ -36,66 +36,66 @@
                href="@BuildThemeToggleUrl()"
                role="switch"
                aria-checked="@IsDarkTheme"
-               aria-label='@Localizer["DarkMode"]'>
+               aria-label='@Localizer["Shared_DarkMode"]'>
                 <i class="fa-solid @(IsDarkTheme ? "fa-moon" : "fa-sun")" aria-hidden="true"></i>
             </a>
             <div class="dropdown">
-                <button class="btn app-menu-button" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label='@Localizer["OpenMenu"]'>
+                <button class="btn app-menu-button" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label='@Localizer["Shared_OpenMenu"]'>
                     <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm app-menu-dropdown">
                     <li>
-                        <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="@AppIcons.Home me-2" aria-hidden="true"></i>@Localizer["Dashboard"]</NavLink>
+                        <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="@AppIcons.Home me-2" aria-hidden="true"></i>@Localizer["Shared_Dashboard"]</NavLink>
                     </li>
                     <AuthorizeView Policy="GroupAdmin">
                         <li>
-                            <NavLink class="dropdown-item" href="groups"><i class="@AppIcons.Group me-2" aria-hidden="true"></i>@Localizer["Groups"]</NavLink>
+                            <NavLink class="dropdown-item" href="groups"><i class="@AppIcons.Group me-2" aria-hidden="true"></i>@Localizer["Shared_Groups"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <AuthorizeView Policy="GroupAdmin">
                         <li>
-                            <NavLink class="dropdown-item" href="users"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>@Localizer["Users"]</NavLink>
+                            <NavLink class="dropdown-item" href="users"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>@Localizer["Shared_Users"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <AuthorizeView Policy="GroupMember">
                         <li>
-                            <NavLink class="dropdown-item" href="trainings"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Trainings"]</NavLink>
+                            <NavLink class="dropdown-item" href="trainings"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Shared_Trainings"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <AuthorizeView Policy="GroupMember">
                         <li>
-                            <NavLink class="dropdown-item" href="my-registrations"><i class="@AppIcons.ClipboardList me-2" aria-hidden="true"></i>@Localizer["MyRegistrations"]</NavLink>
+                            <NavLink class="dropdown-item" href="my-registrations"><i class="@AppIcons.ClipboardList me-2" aria-hidden="true"></i>@Localizer["Shared_MyRegistrations"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <AuthorizeView Policy="GroupTrainer">
                         <li>
-                            <NavLink class="dropdown-item" href="plan-training"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["PlanTraining"]</NavLink>
+                            <NavLink class="dropdown-item" href="plan-training"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Shared_PlanTraining"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <li><hr class="dropdown-divider" /></li>
                     <AuthorizeView Policy="SuperAdmin">
                         <li>
-                            <NavLink class="dropdown-item" href="statistics"><i class="@AppIcons.ChartSimple me-2" aria-hidden="true"></i>@Localizer["Statistics"]</NavLink>
+                            <NavLink class="dropdown-item" href="statistics"><i class="@AppIcons.ChartSimple me-2" aria-hidden="true"></i>@Localizer["Shared_Statistics"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <li>
-                        <NavLink class="dropdown-item" href="user-information"><i class="@AppIcons.User me-2" aria-hidden="true"></i>@Localizer["UserInformation"]</NavLink>
+                        <NavLink class="dropdown-item" href="user-information"><i class="@AppIcons.User me-2" aria-hidden="true"></i>@Localizer["Shared_UserInformation"]</NavLink>
                     </li>
                     <AuthorizeView Policy="SuperAdmin">
                         <li>
-                            <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>@Localizer["Config"]</NavLink>
+                            <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>@Localizer["Shared_Config"]</NavLink>
                         </li>
                         <li>
-                            <NavLink class="dropdown-item" href="config/locations"><i class="@AppIcons.Location me-2" aria-hidden="true"></i>@Localizer["Locations"]</NavLink>
+                            <NavLink class="dropdown-item" href="config/locations"><i class="@AppIcons.Location me-2" aria-hidden="true"></i>@Localizer["Shared_Locations"]</NavLink>
                         </li>
                         <li>
-                            <NavLink class="dropdown-item" href="config/icons"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>@Localizer["Icons"]</NavLink>
+                            <NavLink class="dropdown-item" href="config/icons"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>@Localizer["Shared_Icons"]</NavLink>
                         </li>
                     </AuthorizeView>
                     <li>
                         <form method="post" action="/auth/logout" data-enhance="false" class="m-0 p-0">
                             <AntiforgeryToken />
-                            <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Logout"]</button>
+                            <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Shared_Logout"]</button>
                         </form>
                     </li>
                     <li><hr class="dropdown-divider" /></li>
@@ -114,7 +114,7 @@
 {
     <div class="alert alert-warning rounded-0 mb-0 border-0">
         <div class="container-fluid px-2 px-md-4">
-            <strong>Running mode:</strong> @string.Join(" · ", _runtimeMode.ActiveModes)
+            <strong>@Localizer["Shared_RunningMode"]:</strong> @string.Join(" · ", _runtimeMode.ActiveModes)
         </div>
     </div>
 }
@@ -128,12 +128,12 @@
             <ErrorContent Context="ex">
                 <div class="container px-2 px-md-4 py-5">
                     <div class="alert alert-danger shadow-sm" role="alert">
-                        <h4 class="alert-heading">@Localizer["SomethingWentWrong"]</h4>
-                        <p>@Localizer["UnexpectedErrorLoadingPage"]</p>
+                        <h4 class="alert-heading">@Localizer["Shared_SomethingWentWrong"]</h4>
+                        <p>@Localizer["Shared_UnexpectedErrorLoadingPage"]</p>
                         <hr />
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError"><i class="@AppIcons.Refresh me-1" aria-hidden="true"></i>@Localizer["TryAgain"]</button>
-                            <a href="/" class="btn btn-outline-secondary btn-sm"><i class="@AppIcons.Home me-1" aria-hidden="true"></i>@Localizer["GoToDashboard"]</a>
+                            <button class="btn btn-outline-danger btn-sm" @onclick="ResetError"><i class="@AppIcons.Refresh me-1" aria-hidden="true"></i>@Localizer["Shared_TryAgain"]</button>
+                            <a href="/" class="btn btn-outline-secondary btn-sm"><i class="@AppIcons.Home me-1" aria-hidden="true"></i>@Localizer["Shared_GoToDashboard"]</a>
                         </div>
                     </div>
                 </div>
@@ -143,8 +143,8 @@
 </main>
 
 <div id="blazor-error-ui" data-nosnippet>
-    @Localizer["UnhandledErrorOccurred"]
-    <a href="." class="reload"><i class="@AppIcons.Refresh me-1" aria-hidden="true"></i>@Localizer["Reload"]</a>
+    @Localizer["Shared_UnhandledErrorOccurred"]
+    <a href="." class="reload"><i class="@AppIcons.Refresh me-1" aria-hidden="true"></i>@Localizer["Shared_Reload"]</a>
     <span class="dismiss"><i class="@AppIcons.XMark" aria-hidden="true"></i></span>
 </div>
 

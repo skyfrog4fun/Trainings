@@ -1,7 +1,7 @@
 <div class="card collapsible-card mb-4">
     <div class="card-header collapsible-card-header dashboard-card-header">
         <button type="button" class="collapsible-card-toggle" @onclick="HandleToggleAsync">
-            <span class="fw-bold">@Localizer["NotificationActivity"]</span>
+            <span class="fw-bold">@Localizer["DashboardNotificationPanel_NotificationActivity"]</span>
             <i class="@(IsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
         </button>
         <div class="collapsible-card-meta small">
@@ -16,7 +16,7 @@
     {
         <div class="card-body">
             <div class="d-flex justify-content-end mb-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="OnReset">@Localizer["ResetPointer"]</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="OnReset">@Localizer["DashboardNotificationPanel_ResetPointer"]</button>
             </div>
 
             @if (Logs.Any())
@@ -24,7 +24,7 @@
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
-                            <tr><th>@Localizer["LogId"]</th><th>@Localizer["DateUtc"]</th><th>@Localizer["Action"]</th><th>@Localizer["Recipient"]</th><th>@Localizer["Status"]</th><th>@Localizer["Error"]</th></tr>
+                            <tr><th>@Localizer["DashboardNotificationPanel_LogId"]</th><th>@Localizer["DashboardNotificationPanel_DateUtc"]</th><th>@Localizer["DashboardNotificationPanel_Action"]</th><th>@Localizer["DashboardNotificationPanel_Recipient"]</th><th>@Localizer["Shared_Status"]</th><th>@Localizer["DashboardNotificationPanel_Error"]</th></tr>
                         </thead>
                         <tbody>
                             @foreach (var log in Logs.Take(DisplayLimit))
@@ -53,7 +53,7 @@
             }
             else
             {
-                <div class="text-muted">@Localizer["NoNotificationActivitySinceReset"]</div>
+                <div class="text-muted">@Localizer["DashboardNotificationPanel_NoNotificationActivitySinceReset"]</div>
             }
         </div>
     }

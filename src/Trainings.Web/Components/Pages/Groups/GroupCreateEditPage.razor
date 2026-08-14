@@ -10,7 +10,7 @@
 @inject ICountryService CountryService
 @inject IDateTimeFormatService DateTimeFormatService
 
-<PageTitle>@(_isEdit ? Localizer["GroupCreateEdit_EditGroup"] : Localizer["GroupCreateEdit_CreateGroup"])</PageTitle>
+<PageTitle>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
@@ -23,51 +23,51 @@
     }
     else
     {
-        <h2>@(_isEdit ? Localizer["GroupCreateEdit_EditGroup"] : Localizer["GroupCreateEdit_CreateGroup"])</h2>
+        <h2>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</h2>
 
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Name"]</label>
-                        <input class="form-control" @bind="_formName" placeholder='@Localizer["GroupCreateEdit_GroupNamePlaceholder"]' />
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
+                        <input class="form-control" @bind="_formName" placeholder='@Localizer["GroupCreateEditPage_GroupNamePlaceholder"]' />
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Slug"]</label>
-                        <input class="form-control" @bind="_formSlug" placeholder='@Localizer["GroupCreateEdit_SlugPlaceholder"]' />
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
+                        <input class="form-control" @bind="_formSlug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">&nbsp;</label>
                         <div class="form-check mt-2">
                             <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="grpActive" />
-                            <label class="form-check-label" for="grpActive">@Localizer["GroupCreateEdit_Active"]</label>
+                            <label class="form-check-label" for="grpActive">@Localizer["GroupCreateEditPage_Active"]</label>
                         </div>
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Description"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Description"]</label>
                         <textarea class="form-control" rows="2" @bind="_formDescription"></textarea>
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Location"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Location"]</label>
                         <select class="form-select" @bind="_formLocationId">
-                            <option value="">@Localizer["GroupCreateEdit_SelectLocation"]</option>
+                            <option value="">@Localizer["GroupCreateEditPage_SelectLocation"]</option>
                             @foreach (var location in _formLocations)
                             {
-                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} – {location.CityName}")</option>
+                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} â€“ {location.CityName}")</option>
                             }
                         </select>
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["GroupCreateEdit_MaxParticipants"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_MaxParticipants"]</label>
                         <input class="form-control" type="number" min="1" @bind="_formMaxParticipants" />
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Weekday"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Weekday"]</label>
                         <select class="form-select" @bind="_formWeekday" @bind:after="CalculateGroupEndTime">
-                            <option value="">@Localizer["GroupCreateEdit_SelectDay"]</option>
+                            <option value="">@Localizer["GroupCreateEditPage_SelectDay"]</option>
                             @foreach (var day in Enum.GetValues<DayOfWeek>())
                             {
                                 <option value="@day">@day</option>
@@ -75,35 +75,35 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Start"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Start"]</label>
                         <input class="form-control" type="time" @bind="_formStartTime" @bind:after="CalculateGroupEndTime" />
-                        <div class="form-text">@Localizer["GroupCreateEdit_Localized"]: @FormatLocalizedTime(_formStartTime)</div>
+                        <div class="form-text">@Localizer["GroupCreateEditPage_Localized"]: @FormatLocalizedTime(_formStartTime)</div>
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEdit_DurationMinutes"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_DurationMinutes"]</label>
                         <input class="form-control" type="number" min="1" @bind="FormDurationMinutesValue" />
                     </div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEdit_End"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_End"]</label>
                         <input class="form-control" type="time" value="@_formEndTime" readonly />
-                        <div class="form-text">@Localizer["GroupCreateEdit_Localized"]: @FormatLocalizedEndTime()</div>
+                        <div class="form-text">@Localizer["GroupCreateEditPage_Localized"]: @FormatLocalizedEndTime()</div>
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["GroupCreateEdit_Country"]</label>
+                        <label class="form-label">@Localizer["GroupCreateEditPage_Country"]</label>
                         <select class="form-select" @bind="_formCountryId">
-                            <option value="">@Localizer["GroupCreateEdit_SelectCountry"]</option>
+                            <option value="">@Localizer["GroupCreateEditPage_SelectCountry"]</option>
                             @foreach (var country in _countries)
                             {
-                                <option value="@country.Id">@country.Code — @country.Name</option>
+                                <option value="@country.Id">@country.Code - @country.Name</option>
                             }
                         </select>
                     </div>
                 </div>
 
                 <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveGroupAsync" disabled="@_saving"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Common_Save"]</button>
-                    <a href="/groups" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Common_Cancel"]</a>
+                    <button class="btn btn-primary me-2" @onclick="SaveGroupAsync" disabled="@_saving"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
+                    <a href="/groups" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</a>
                 </div>
                 <div class="mt-2">
                     <ActionAlert IsSuccess="false" Message="@_formError" />
@@ -178,7 +178,7 @@
         var group = await GroupService.GetByIdAsync(Id.Value);
         if (group is null)
         {
-            _formError = Localizer["GroupCreateEdit_GroupNotFound"];
+            _formError = Localizer["GroupCreateEditPage_GroupNotFound"];
             return;
         }
 

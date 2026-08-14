@@ -10,8 +10,8 @@ Localization
 - [X] Ressources: Rework the resources by adding [Page]_[Resource] naming convention to avoid conflicts and improve organization.
 - [X] Replace all text on all pages with a created from the resx file.
 - [X] Structure the pages into subfolders for better organization. For example, group related pages together based on their functionality or feature set.
-- [ ] Harmonize naming of Razor pages. Do all pages need to end with 'Pages.razor' or can we remove this suffix?
-- [ ] Search on all pages for Localizer[".."] and check if pattern [Page]_[Resource] is used. If not, change it to the new pattern.
+- [X] Harmonize naming of Razor pages. Do all pages need to end with 'Pages.razor' or can we remove this suffix?
+- [X] Search on all pages for Localizer[".."] and check if pattern [Page]_[Resource] is used. If not, change it to the new pattern. See [LocalizationAudit.md](LocalizationAudit.md) for the full audit report (violations and shared-key candidates still need to be renamed as a follow-up).
 - [ ] Check if all found pattern [Page]_[Resource] on pages are available on RESX files. If not, add them to the RESX file.
 - [ ] Remove all text on RESX files that not not match the pattern [Page]_[Resource] and/or are not used on any page.
 - [ ] Properly translate all the text on the RESX files from EN to DE.

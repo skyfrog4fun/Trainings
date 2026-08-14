@@ -1,4 +1,4 @@
-@page "/users/new"
+﻿@page "/users/new"
 @page "/users/{Id:int}/edit"
 
 @rendermode InteractiveServer
@@ -11,7 +11,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
 
-<PageTitle>@(_isEdit ? Localizer["UserCreateEdit_EditUser"] : Localizer["UserCreateEdit_CreateUser"])</PageTitle>
+<PageTitle>@(_isEdit ? Localizer["UserCreateEditPage_EditUser"] : Localizer["UserCreateEditPage_CreateUser"])</PageTitle>
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
@@ -24,16 +24,16 @@
     }
     else if (_isAccessDenied)
     {
-        <div class="alert alert-danger">@Localizer["UserCreateEdit_AccessDenied"]</div>
+        <div class="alert alert-danger">@Localizer["UserCreateEditPage_AccessDenied"]</div>
     }
     else
     {
-        <h2>@(_isEdit ? Localizer["UserCreateEdit_EditUser"] : Localizer["UserCreateEdit_CreateUser"])</h2>
+        <h2>@(_isEdit ? Localizer["UserCreateEditPage_EditUser"] : Localizer["UserCreateEditPage_CreateUser"])</h2>
 
         @if (IsWriteBlocked)
         {
             <div class="alert alert-warning">
-                @Localizer["UserCreateEdit_ReadOnlyModeSuperAdminOnly"]
+                @Localizer["UserCreateEditPage_ReadOnlyModeSuperAdminOnly"]
             </div>
         }
 
@@ -41,72 +41,72 @@
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserCreateEdit_FirstName"]</label>
-                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_FirstNamePlaceholder"]' @bind="_formFirstName" />
+                        <label class="form-label">@Localizer["UserCreateEditPage_FirstName"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_FirstNamePlaceholder"]' @bind="_formFirstName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserCreateEdit_LastName"]</label>
-                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_LastNamePlaceholder"]' @bind="_formLastName" />
+                        <label class="form-label">@Localizer["UserCreateEditPage_LastName"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_LastNamePlaceholder"]' @bind="_formLastName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserCreateEdit_Email"]</label>
-                        <input class="form-control" type="email" placeholder='@Localizer["UserCreateEdit_EmailPlaceholder"]' @bind="_formEmail" />
+                        <label class="form-label">@Localizer["UserCreateEditPage_Email"]</label>
+                        <input class="form-control" type="email" placeholder='@Localizer["UserCreateEditPage_EmailPlaceholder"]' @bind="_formEmail" />
                     </div>
                     @if (!_isEdit)
                     {
                         <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["UserCreateEdit_Password"]</label>
-                            <input class="form-control" type="password" placeholder='@Localizer["UserCreateEdit_PasswordPlaceholder"]' @bind="_formPassword" />
+                            <label class="form-label">@Localizer["UserCreateEditPage_Password"]</label>
+                            <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_PasswordPlaceholder"]' @bind="_formPassword" />
                         </div>
                     }
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["UserCreateEdit_Role"]</label>
+                        <label class="form-label">@Localizer["UserCreateEditPage_Role"]</label>
                         @if (_isSuperAdmin)
                         {
                             <select class="form-select" @bind="_formRole">
-                                <option value="User">@Localizer["UserCreateEdit_User"]</option>
-                                <option value="SuperAdmin">@Localizer["UserCreateEdit_SuperAdmin"]</option>
+                                <option value="User">@Localizer["UserCreateEditPage_User"]</option>
+                                <option value="SuperAdmin">@Localizer["UserCreateEditPage_SuperAdmin"]</option>
                             </select>
                         }
                         else
                         {
                             <select class="form-select" @bind="_formRole">
-                                <option value="User">@Localizer["UserCreateEdit_User"]</option>
+                                <option value="User">@Localizer["UserCreateEditPage_User"]</option>
                             </select>
                         }
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["UserCreateEdit_Gender"]</label>
+                        <label class="form-label">@Localizer["UserCreateEditPage_Gender"]</label>
                         <select class="form-select" @bind="_formGender">
-                            <option value="Male">@Localizer["Common_Gender_Male"]</option>
-                            <option value="Female">@Localizer["Common_Gender_Female"]</option>
-                            <option value="Other">@Localizer["Common_Gender_Other"]</option>
+                            <option value="Male">@Localizer["Enum_Gender_Male"]</option>
+                            <option value="Female">@Localizer["Enum_Gender_Female"]</option>
+                            <option value="Other">@Localizer["Enum_Gender_Other"]</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["UserCreateEdit_Birthday"]</label>
+                        <label class="form-label">@Localizer["UserCreateEditPage_Birthday"]</label>
                         <input class="form-control" type="date" @bind="_formBirthday" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserCreateEdit_Mobile"]</label>
-                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_MobilePlaceholder"]' @bind="_formMobile" />
+                        <label class="form-label">@Localizer["UserCreateEditPage_Mobile"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_MobilePlaceholder"]' @bind="_formMobile" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserCreateEdit_City"]</label>
-                        <input class="form-control" placeholder='@Localizer["UserCreateEdit_CityPlaceholder"]' @bind="_formCity" />
+                        <label class="form-label">@Localizer["UserCreateEditPage_City"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_CityPlaceholder"]' @bind="_formCity" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserCreateEdit_Country"]</label>
+                        <label class="form-label">@Localizer["UserCreateEditPage_Country"]</label>
                         <select class="form-select" @bind="_formCountryId">
-                            <option value="">@Localizer["UserCreateEdit_SelectCountry"]</option>
+                            <option value="">@Localizer["UserCreateEditPage_SelectCountry"]</option>
                             @foreach (var country in _countries)
                             {
-                                <option value="@country.Id">@country.Code — @country.Name</option>
+                                <option value="@country.Id">@country.Code â€” @country.Name</option>
                             }
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">@(_isSuperAdmin ? Localizer["UserCreateEdit_Groups"] : Localizer["UserCreateEdit_ManagedGroups"])</label>
+                        <label class="form-label">@(_isSuperAdmin ? Localizer["UserCreateEditPage_Groups"] : Localizer["UserCreateEditPage_ManagedGroups"])</label>
                         @if (_availableGroups.Any())
                         {
                             <div class="border rounded p-2 scroll-container-sm">
@@ -125,24 +125,24 @@
                         }
                         else
                         {
-                            <div class="form-text text-muted">@Localizer["UserCreateEdit_NoGroupsAvailableForAssignment"]</div>
+                            <div class="form-text text-muted">@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]</div>
                         }
                     </div>
                     @if (_isEdit)
                     {
                         <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["UserCreateEdit_EntryDate"]</label>
+                            <label class="form-label">@Localizer["UserCreateEditPage_EntryDate"]</label>
                             <input class="form-control" type="date" @bind="_formEntryDate" />
                         </div>
                         <div class="col-12">
-                            <label class="form-label">@Localizer["UserCreateEdit_WelcomeMessage"]</label>
-                            <textarea class="form-control" rows="2" @bind="_formWelcomeMessage" placeholder='@Localizer["UserCreateEdit_WelcomeMessagePlaceholder"]'></textarea>
+                            <label class="form-label">@Localizer["UserCreateEditPage_WelcomeMessage"]</label>
+                            <textarea class="form-control" rows="2" @bind="_formWelcomeMessage" placeholder='@Localizer["UserCreateEditPage_WelcomeMessagePlaceholder"]'></textarea>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">@Localizer["UserCreateEdit_SetNewPasswordLeaveBlank"]</label>
+                            <label class="form-label">@Localizer["UserCreateEditPage_SetNewPasswordLeaveBlank"]</label>
                             <div class="input-group">
-                                <input class="form-control" type="password" placeholder='@Localizer["UserCreateEdit_NewPasswordMinCharsPlaceholder"]' @bind="_formNewPassword" />
-                                <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserCreateEdit_GeneratePassword"]'>
+                                <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_NewPasswordMinCharsPlaceholder"]' @bind="_formNewPassword" />
+                                <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserCreateEditPage_GeneratePassword"]'>
                                     <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -155,8 +155,8 @@
                 </div>
 
                 <div class="mt-3 d-flex gap-2">
-                    <button class="btn btn-primary" @onclick="SaveUserAsync" disabled="@(_saving || IsWriteBlocked)">@Localizer["Common_Save"]</button>
-                    <a href="/users" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Common_Cancel"]</a>
+                    <button class="btn btn-primary" @onclick="SaveUserAsync" disabled="@(_saving || IsWriteBlocked)">@Localizer["Shared_Save"]</button>
+                    <a href="/users" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</a>
                 </div>
 
                 <div class="mt-2">
@@ -237,7 +237,7 @@
         var user = await UserService.GetByIdAsync(Id.Value);
         if (user is null)
         {
-            _formError = Localizer["UserCreateEdit_UserNotFound"];
+            _formError = Localizer["UserCreateEditPage_UserNotFound"];
             return;
         }
 
@@ -288,7 +288,7 @@
 
         if (!_isSuperAdmin && _selectedGroupIds.Count == 0)
         {
-            _formError = Localizer["AssignUserToManagedGroup"];
+            _formError = Localizer["UserCreateEditPage_AssignUserToManagedGroup"];
             _saving = false;
             return;
         }
@@ -443,11 +443,12 @@
     private static bool ValidatePassword(string password, out string error)
     {
         error = string.Empty;
-        if (password.Length < 8) { error = "PasswordValidationMinLength"; return false; }
-        if (!password.Any(char.IsUpper)) { error = "PasswordValidationUppercase"; return false; }
-        if (!password.Any(char.IsLower)) { error = "PasswordValidationLowercase"; return false; }
-        if (!password.Any(char.IsDigit)) { error = "PasswordValidationDigit"; return false; }
-        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { error = "PasswordValidationSpecialCharacter"; return false; }
+        if (password.Length < 8) { error = "UserCreateEditPage_PasswordValidationMinLength"; return false; }
+        if (!password.Any(char.IsUpper)) { error = "UserCreateEditPage_PasswordValidationUppercase"; return false; }
+        if (!password.Any(char.IsLower)) { error = "UserCreateEditPage_PasswordValidationLowercase"; return false; }
+        if (!password.Any(char.IsDigit)) { error = "UserCreateEditPage_PasswordValidationDigit"; return false; }
+        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { error = "UserCreateEditPage_PasswordValidationSpecialCharacter"; return false; }
         return true;
     }
 }
+

@@ -1,138 +1,150 @@
-# SKILL: Localize Razor Pages
+---
+name: localize-razor-pages
+description: "Use when asked to check, verify, or add localization/multilanguage support for a named Razor page/component file under Components/Pages or Components/Shared."
+argument-hint: "target Razor file path"
+user-invocable: true
+---
+
+# SKILL: Razor Localization Check
 
 ## Purpose
 
-Audit Blazor razor pages for hardcoded strings, add `Page_Action`-scoped resource keys to both
-`SharedResources.en.resx` and `SharedResources.de.resx`, and wire up `@Localizer[...]` calls in the
-razor files. Use this skill whenever you are asked to localize pages or remove hardcoded UI text.
+Validate and improve localization quality for one named `.razor` file with a strict, approval-first workflow.
+Use this skill whenever the user asks to check, verify, or add localization/multilanguage support for a page, component, or Razor file.
 
----
+## Allowed Target Scope
 
-## Key Naming Convention
+The named file must satisfy all rules below:
 
-- Format: `Page_Action` — always page-scoped, even when a shared key with the same value already exists.
-- Page prefix = the razor file name without extension (e.g. `LoginPage`, `ForgotPassword`, `Register`, `AnonymousLayout`).
-- Action suffix = a short PascalCase description of the element role (e.g. `Title`, `SuccessMessage`, `EmailLabel`, `EmailPlaceholder`, `BackToLogin`, `ButtonLogin`).
+1. File extension is exactly `.razor`.
+2. File is under one of these paths:
+  - `src/Trainings.Web/Components/Pages/**`
+  - `src/Trainings.Web/Components/Shared/**`
+3. Exclude framework shell and similar root component files:
+  - `src/Trainings.Web/Components/App.razor`
+  - `src/Trainings.Web/Components/Routes.razor`
+  - `src/Trainings.Web/Components/RedirectToLogin.razor`
+  - `src/Trainings.Web/Components/_Imports.razor`
+  - any other file directly under `src/Trainings.Web/Components/*.razor`
 
-Examples:
-```
-Login_LogoAlt
-Login_InitialSetupTitle
-ForgotPassword_EmailPlaceholder
-Register_Gender
-ResetPassword_ConfirmPasswordLabel
-AnonymousLayout_OpenMenuAriaLabel
-```
+If the target is out of scope, warn and ask whether to stop or continue.
 
----
+## Preflight Validation
 
-## What to Extract
+Before page analysis, verify this exists in `src/Trainings.Web/Components/_Imports.razor`:
 
-Extract **all** hardcoded strings in razor files:
-
-| Source                          | Example                                      |
-|---------------------------------|----------------------------------------------|
-| Element text content            | `<h4>Forgot Password</h4>`                   |
-| `<PageTitle>` text              | `<PageTitle>Reset Password</PageTitle>`      |
-| `aria-label="..."` attributes   | `aria-label="Open menu"`                     |
-| `alt="..."` attributes          | `alt="Logo"`                                 |
-| `placeholder="..."` attributes  | `placeholder="you@example.com"`              |
-| `title="..."` attributes        | `title="Mark as Planned"`                    |
-| Text inside `@if` / `@foreach`  | dev-only banners, conditional alerts         |
-| `<strong>`, `<span>` inline     | `<strong>Initial Setup</strong>`             |
-
----
-
-## What to Skip
-
-- **StylePage.razor** — internal dev style guide with intentional demo content.
-- **Error.razor** — ASP.NET scaffold error page; not part of the main user flow.
-- Inline C# string literals inside `@code { }` blocks (e.g. validation messages set in code — those belong in a separate localization pass).
-- Content that is already using `@Localizer[...]`.
-
----
-
-## Localizer Usage Patterns
-
-### Markup text
 ```razor
-<h4 class="card-title">@Localizer["ForgotPassword_Title"]</h4>
-<p>@Localizer["ConfirmEmail_ReviewPending"]</p>
+@inject IStringLocalizer<SharedResources> Localizer
 ```
 
-### HTML attributes
-```razor
-<input placeholder="@Localizer["Register_EmailPlaceholder"]" />
-<button aria-label="@Localizer["AnonymousLayout_OpenMenuAriaLabel"]">
-<img alt="@Localizer["Login_LogoAlt"]" />
+If missing, add it first.
+
+## Allowed Localizer Key Patterns
+
+Only these key patterns are allowed:
+
+1. `[Page]_[Resource]`
+2. `Enum_[List]_[Value]`
+3. `Shared_[Resource]`
+
+Rules:
+
+1. `[Page]` is the exact Razor filename without `.razor`.
+2. For components in `Components/Shared`, still use the exact filename as `[Page]` for page/component-scoped keys.
+3. Key fragments should be PascalCase.
+
+## Localization Check Workflow
+
+Run checks in this order.
+
+### 1. Scan existing `Localizer["..."]` keys in target file
+
+1. List every key used in the target file.
+2. Flag keys that do not match one of the three allowed patterns.
+3. Propose corrected key names.
+
+### 2. Verify key presence in all language RESX files
+
+1. Discover all `SharedResources.*.resx` files under `src/Trainings.Web/Resources/`.
+2. For each in-file key that matches an allowed pattern, verify it exists in every language RESX file.
+3. If missing anywhere:
+  - prefer reuse of an existing equivalent key/value first,
+  - otherwise propose creating the key.
+
+### 3. Scan for hardcoded plain text in markup and attributes
+
+Scan for user-visible literals in:
+
+1. element text nodes,
+2. `<PageTitle>` content,
+3. attributes: `title`, `alt`, `placeholder`, `aria-label`.
+
+For each found literal:
+
+1. try to match an existing suitable key first,
+2. if no suitable key exists, propose a new `[Page]_[Resource]` key,
+3. ensure proposed key name does not already exist with different meaning.
+
+Skip:
+
+1. text already localized via `Localizer[...]`,
+2. inline C# literals in `@code` blocks,
+3. non-UI values like URLs, CSS classes, pure numbers, icon glyphs.
+
+### 4. RESX/page consistency check for page-scoped keys
+
+1. Read all keys in RESX matching `[Page]_*` for the current target page prefix.
+2. Verify each appears in the target Razor file.
+3. List unused keys as cleanup candidates.
+4. Ask for explicit per-key confirmation before removing any key.
+5. Apply approved removals across all language RESX files in one synchronized update.
+
+## Proposal-First Behavior
+
+Do not mutate RESX files automatically.
+
+For each missing or new key, ask the developer with:
+
+1. source context (file, element/attribute, current literal),
+2. suggested key name,
+3. suggested English value,
+4. suggested translations for every detected language RESX file.
+
+If key exists in Razor but missing in RESX, ask the developer to confirm the English term and provide proposed translations.
+
+## RESX Update Rules (After Approval)
+
+When approved to edit:
+
+1. update all language `SharedResources.*.resx` files together,
+2. keep keys alphabetically ordered within prefix groups,
+3. avoid duplicates,
+4. preserve XML structure and encoding.
+
+## Output Contract
+
+Return results in this structure:
+
+1. Target scope validation result.
+2. `_Imports.razor` Localizer injection status and action taken.
+3. Invalid key-pattern findings with proposed corrections.
+4. Missing RESX key findings grouped by language.
+5. Hardcoded text findings with reuse-or-new-key recommendations.
+6. Unused `[Page]_*` RESX keys with per-key deletion checklist.
+7. Explicit questions requiring developer confirmation.
+
+## Examples of Good Key Shapes
+
+```text
+HomePage_WelcomeBack
+UsersPage_ApproveButton
+DashboardSystemPanel_SystemOverview
+Enum_Gender_Female
+Shared_Save
 ```
 
-### Inside `@if` / mixed content
-```razor
-<strong>@Localizer["Login_InitialSetupTitle"]</strong><br />
-@Localizer["Login_InitialSetupDescription"]<br />
-<strong>@Localizer["Login_InitialSetupEmailLabel"]</strong> @SeedEmail
-```
+## Notes
 
----
-
-## Resource File Pattern
-
-Add new entries to **both** `src/Trainings.Web/Resources/SharedResources.en.resx` and
-`src/Trainings.Web/Resources/SharedResources.de.resx` before the closing `</root>` tag.
-
-```xml
-<data name="Page_Action" xml:space="preserve">
-  <value>English text here</value>
-</data>
-```
-
-- EN values: exact original text from the razor file.
-- DE values: casual, short German translation. Use `du` (informal). Keep it concise.
-
----
-
-## Step-by-Step Process
-
-1. **Audit** — read the target razor file(s) and list every hardcoded string with its element type.
-2. **Plan keys** — derive `Page_Action` names for each string.
-3. **Add to .resx** — insert all new keys into both EN and DE files. Group by page prefix for readability.
-4. **Update razor** — replace each hardcoded string with `@Localizer["Key"]` (or attribute form).
-5. **Verify** — run `dotnet build` (0 errors), check for duplicate keys in both `.resx` files, run `dotnet format`.
-
-### Duplicate key check (PowerShell)
-```powershell
-$path = "src/Trainings.Web/Resources/SharedResources.en.resx"
-Select-String -Path $path -Pattern '<data name="([^"]+)"' |
-  ForEach-Object { $_.Matches[0].Groups[1].Value } |
-  Group-Object | Where-Object { $_.Count -gt 1 }
-```
-Repeat for the DE file. No output = no duplicates.
-
----
-
-## Reference Examples
-
-The following files are complete, correct examples of this pattern:
-
-- `src/Trainings.Web/Components/Layout/AnonymousLayout.razor` — aria-labels and logo alt
-- `src/Trainings.Web/Components/Pages/LoginPage.razor` — conditional dev-only block
-- `src/Trainings.Web/Components/Pages/Register.razor` — labels, placeholders, select options
-- `src/Trainings.Web/Components/Pages/ResetPassword.razor` — full end-to-end example
-
----
-
-## Remaining Pages (Known Hardcoded Text)
-
-These pages still contain hardcoded strings and should be localized in future sprints using this skill:
-
-| Page                          | Notes                                              |
-|-------------------------------|----------------------------------------------------|
-| `AttendancePage.razor`        | Status labels, button text, alert messages         |
-| `CreateEditTrainingPage.razor`| Form labels, placeholders, button text             |
-| `GroupMembersPage.razor`      | Table headers, role options, action buttons        |
-| `IconOverviewPage.razor`      | Page title, table headers                          |
-| `LocationsPage.razor`         | Form labels, section titles, table headers         |
-| `MailConfigPage.razor`        | Large number of labels, descriptions, badge text   |
-| `MyRegistrationsPage.razor`   | Filter options, empty state messages               |
-| `NotFound.razor`              | Two short strings                                  |
+1. Prefer minimal, meaning-based key names over duplicative near-synonyms.
+2. Prefer reusing established `Shared_` or `Enum_` keys where semantics are identical.
+3. If unsure whether two strings are semantically equal, ask before introducing a new key.

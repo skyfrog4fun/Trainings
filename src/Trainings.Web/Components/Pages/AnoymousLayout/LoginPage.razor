@@ -1,4 +1,4 @@
-@page "/login"
+﻿@page "/login"
 
 @layout AnonymousLayout
 
@@ -9,28 +9,28 @@
 @inject IConfiguration Configuration
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>@Localizer["Login_PageTitle"]</PageTitle>
+<PageTitle>@Localizer["LoginPage_PageTitle"]</PageTitle>
 
 <div class="container">
     <div class="row justify-content-center mt-5">
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
             <div class="card shadow">
                 <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="@Localizer["Login_Logo"]" />rainings</h2>
+                    <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="@Localizer["LoginPage_Logo"]" />rainings</h2>
 
                     <form method="post" action="/auth/login" data-enhance="false">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">@Localizer["Login_Email"]</label>
+                            <label for="email" class="form-label">@Localizer["LoginPage_Email"]</label>
                             <input type="email" class="form-control form-control-lg" id="email" name="Email" value="@Email" required autofocus />
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">@Localizer["Login_Password"]</label>
+                            <label for="password" class="form-label">@Localizer["LoginPage_Password"]</label>
                             <input type="password" class="form-control form-control-lg" id="password" name="Password" required />
                         </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100">@Localizer["Login_Button"]</button>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">@Localizer["LoginPage_Button"]</button>
                     </form>
 
                     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
@@ -39,17 +39,17 @@
                     }
 
                     <div class="row mt-2">
-                        <a href="/register" class="col-6 text-start text-decoration-none small">@Localizer["Login_Register"]</a>
-                        <a href="/forgot-password" class="col-6 text-end text-decoration-none small">@Localizer["Login_ForgotPassword"]</a>
+                        <a href="/register" class="col-6 text-start text-decoration-none small">@Localizer["LoginPage_Register"]</a>
+                        <a href="/forgot-password" class="col-6 text-end text-decoration-none small">@Localizer["LoginPage_ForgotPassword"]</a>
                     </div>
 
                     @if (ShowInitialCredentials)
                     {
                         <div class="alert alert-info mt-3 small">
-                            <strong>@Localizer["Login_InitialSetupTitle"]</strong><br />
-                            @Localizer["Login_InitialSetupDescription"]<br />
-                            <strong>@Localizer["Login_InitialSetupEmailLabel"]:</strong> @SeedEmail<br />
-                            <strong>@Localizer["Login_InitialSetupPasswordLabel"]:</strong> @SeedPassword
+                            <strong>@Localizer["LoginPage_InitialSetupTitle"]</strong><br />
+                            @Localizer["LoginPage_InitialSetupDescription"]<br />
+                            <strong>@Localizer["LoginPage_InitialSetupEmailLabel"]:</strong> @SeedEmail<br />
+                            <strong>@Localizer["LoginPage_InitialSetupPasswordLabel"]:</strong> @SeedPassword
                         </div>
                     }
 
@@ -105,8 +105,9 @@
 
         if (query.TryGetValue("error", out var errorValues) && string.Equals(errorValues.ToString(), "invalid", StringComparison.OrdinalIgnoreCase))
         {
-            ErrorMessage = Localizer["Login_InvalidLogin"];
+            ErrorMessage = Localizer["LoginPage_InvalidLogin"];
         }
     }
 
 }
+

@@ -6,12 +6,12 @@
 
 @inject IGroupService GroupService
 
-<PageTitle>@Localizer["Groups"]</PageTitle>
+<PageTitle>@Localizer["Shared_Groups"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <PageHeader Title='@Localizer["Groups"]'>
+    <PageHeader Title='@Localizer["Shared_Groups"]'>
         <Actions>
-            <a href="/groups/new" class="btn btn-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Add"]</a>
+            <a href="/groups/new" class="btn btn-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Shared_Add"]</a>
         </Actions>
     </PageHeader>
 
@@ -32,22 +32,22 @@
                             <span class="me-3"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</span>
                             @if (group.IsActive)
                             {
-                                <span><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Active"]</span>
+                                <span><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Active"]</span>
                             }
                             else
                             {
-                                <span><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["No"]</span>
+                                <span><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Enum_Decision_No"]</span>
                             }
                         </div>
                     </div>
                     <div class="app-overview-actions">
-                        <a href="/groups/@group.Slug/members" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["View"]' aria-label='@Localizer["View"]'>
+                        <a href="/groups/@group.Slug/members" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
                             <i class="fa-solid fa-eye" aria-hidden="true"></i>
                         </a>
-                        <a href="/groups/@group.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Edit"]' aria-label='@Localizer["Edit"]'>
+                        <a href="/groups/@group.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
                             <i class="fa-solid fa-pen" aria-hidden="true"></i>
                         </a>
-                        <button class="btn btn-sm btn-app-icon btn-app-outline-danger" title='@Localizer["Delete"]' aria-label='@Localizer["Delete"]' @onclick="() => DeleteGroup(group)">
+                        <button class="btn btn-sm btn-app-icon btn-app-outline-danger" title='@Localizer["Shared_Delete"]' aria-label='@Localizer["Shared_Delete"]' @onclick="() => DeleteGroup(group)">
                             <i class="fa-solid fa-trash" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -56,7 +56,7 @@
         </div>
         @if (!_groups.Any())
         {
-            <div class="alert alert-info">@Localizer["NoGroupsYet"]</div>
+            <div class="alert alert-info">@Localizer["GroupsPage_NoGroupsYet"]</div>
         }
     }
 </div>

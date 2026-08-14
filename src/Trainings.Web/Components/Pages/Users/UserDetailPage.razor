@@ -55,7 +55,7 @@
                         <div><strong>@Localizer["UserDetailPage_MobileLabel"]</strong> @FormatText(_user.Mobile)</div>
                         <div><strong>@Localizer["UserDetailPage_CityLabel"]</strong> @FormatText(_user.City)</div>
                         <div><strong>@Localizer["UserDetailPage_CountryLabel"]</strong> @GetCountryLabel(_user.CountryId, _user.CountryCode)</div>
-                        <div><strong>@Localizer["UserDetailPage_EmailVerifiedLabel"]</strong> @(_user.EmailConfirmedAt.HasValue ? Localizer["Yes"] : Localizer["No"])</div>
+                        <div><strong>@Localizer["UserDetailPage_EmailVerifiedLabel"]</strong> @(_user.EmailConfirmedAt.HasValue ? Localizer["Enum_Decision_Yes"] : Localizer["Enum_Decision_No"])</div>
                         <div><strong>@Localizer["UserDetailPage_EntryDateLabel"]</strong> @FormatDateTime(_user.EntryDate)</div>
                         <div><strong>@Localizer["UserDetailPage_CreatedLabel"]</strong> @FormatDateTime(_user.CreationDate)</div>
                     </div>
@@ -109,7 +109,7 @@
                         <table class="table table-sm mb-0">
                             <thead>
                                 <tr>
-                                    <th>@Localizer["UserDetailPage_ColTraining"]</th>
+                                    <th>@Localizer["UserDetailPage_Training"]</th>
                                     <th>@Localizer["UserDetailPage_Date"]</th>
                                     <th>@Localizer["UserDetailPage_Status"]</th>
                                     <th>@Localizer["UserDetailPage_Registered"]</th>

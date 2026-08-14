@@ -33,7 +33,7 @@
         <div class="row g-2 mb-3">
             <div class="col-12 col-md-4">
                 <select class="form-select" @bind="_filterGroupId">
-                    <option value="">@Localizer["AllGroups"]</option>
+                    <option value="">@Localizer["TrainingsPage_AllGroups"]</option>
                     @foreach (var group in _filterGroups)
                     {
                         <option value="@group.Id">@group.Name</option>
@@ -42,7 +42,7 @@
             </div>
             <div class="col-12 col-md-3">
                 <select class="form-select" @bind="_filterTrainerId">
-                    <option value="">@Localizer["AllTrainers"]</option>
+                    <option value="">@Localizer["TrainingsPage_AllTrainers"]</option>
                     @foreach (var trainer in _filterTrainers)
                     {
                         <option value="@trainer.Id">@trainer.Name</option>
@@ -51,14 +51,14 @@
             </div>
             <div class="col-12 col-md-3">
                 <select class="form-select" @bind="_filterAvailability">
-                    <option value="all">@Localizer["All"]</option>
-                    <option value="available">@Localizer["Available"]</option>
-                    <option value="full">@Localizer["Full"]</option>
+                    <option value="all">@Localizer["TrainingsPage_All"]</option>
+                    <option value="available">@Localizer["TrainingsPage_Available"]</option>
+                    <option value="full">@Localizer["TrainingsPage_Full"]</option>
                 </select>
             </div>
             <div class="col-12 col-md-2 d-grid">
                 <button type="button" class="btn btn-app-outline" @onclick="ClearFilters">
-                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>@Localizer["ClearFilters"]
+                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>@Localizer["Shared_ClearFilters"]
                 </button>
             </div>
         </div>
@@ -79,12 +79,12 @@
         {
             <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry">
                 <Actions Context="training">
-                    <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["View"]' aria-label='@Localizer["View"]'>
+                    <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                     </a>
                     @if (CanDeleteTraining(training))
                     {
-                        <a href="/trainings/@training.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Edit"]' aria-label='@Localizer["Edit"]'>
+                        <a href="/trainings/@training.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
                             <i class="fa-solid fa-pen" aria-hidden="true"></i>
                         </a>
                     }
@@ -96,16 +96,16 @@
                                     class="btn btn-sm btn-app-icon btn-app-outline"
                                     @onclick="CancelDeleteTraining"
                                     disabled="@_deleteInProgress"
-                                    title='@Localizer["Cancel"]'
-                                    aria-label='@Localizer["Cancel"]'>
+                                    title='@Localizer["Shared_Cancel"]'
+                                    aria-label='@Localizer["Shared_Cancel"]'>
                                 <i class="@AppIcons.XMark" aria-hidden="true"></i>
                             </button>
                             <button type="button"
                                     class="btn btn-sm btn-app-icon btn-app-outline-danger"
                                     @onclick="() => ConfirmDeleteTrainingAsync(training)"
                                     disabled="@_deleteInProgress"
-                                    title='@Localizer["Delete"]'
-                                    aria-label='@Localizer["Delete"]'>
+                                    title='@Localizer["Shared_Delete"]'
+                                    aria-label='@Localizer["Shared_Delete"]'>
                                 <i class="fa-solid fa-trash" aria-hidden="true"></i>
                             </button>
                         }
@@ -115,8 +115,8 @@
                                     class="btn btn-sm btn-app-icon btn-app-outline-danger"
                                     @onclick="() => PromptDeleteTraining(training)"
                                     disabled="@_deleteInProgress"
-                                    title='@Localizer["Delete"]'
-                                    aria-label='@Localizer["Delete"]'>
+                                    title='@Localizer["Shared_Delete"]'
+                                    aria-label='@Localizer["Shared_Delete"]'>
                                 <i class="fa-solid fa-trash" aria-hidden="true"></i>
                             </button>
                         }
@@ -127,7 +127,7 @@
                                 class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-outline-danger" : "btn-app-primary") ms-auto"
                                 @onclick="() => ToggleRegistrationAsync(training)"
                                 disabled="@IsRegistrationDisabled(training)">
-                            <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? Localizer["Unregister"] : Localizer["Register"])
+                            <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? Localizer["Shared_Unregister"] : Localizer["Shared_Register"])
                         </button>
                     }
                 </Actions>

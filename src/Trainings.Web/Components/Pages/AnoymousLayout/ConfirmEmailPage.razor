@@ -1,4 +1,4 @@
-@page "/confirm-email"
+﻿@page "/confirm-email"
 @layout AnonymousLayout
 @attribute [AllowAnonymous]
 
@@ -7,7 +7,7 @@
 @inject IUserRegistrationService UserRegistrationService
 @inject IAppRuntimeModeService AppRuntimeModeService
 
-<PageTitle>@Localizer["ConfirmEmail_PageTitle"]</PageTitle>
+<PageTitle>@Localizer["ConfirmEmailPage_PageTitle"]</PageTitle>
 
 <div class="container">
     <div class="row justify-content-center mt-5">
@@ -17,20 +17,20 @@
                     @if (_loading)
                     {
                         <LoadingSpinner ContainerClass="" SpinnerClass="text-primary mb-3" />
-                        <p>@Localizer["ConfirmEmail_Confirming"]</p>
+                        <p>@Localizer["ConfirmEmailPage_Confirming"]</p>
                     }
                     else if (_success)
                     {
                         <div class="text-success mb-3 icon-display"><i class="@AppIcons.Check" aria-hidden="true"></i></div>
-                        <h5>@Localizer["ConfirmEmail_SuccessTitle"]</h5>
-                        <p class="text-muted mb-2">@Localizer["ConfirmEmail_SuccessMessage"]</p>
-                        <p class="text-muted">@Localizer["ConfirmEmail_ReviewPending"]</p>
-                        <a href="/login" class="btn btn-primary w-100">@Localizer["ConfirmEmail_BackToLogin"]</a>
+                        <h5>@Localizer["ConfirmEmailPage_SuccessTitle"]</h5>
+                        <p class="text-muted mb-2">@Localizer["ConfirmEmailPage_SuccessMessage"]</p>
+                        <p class="text-muted">@Localizer["ConfirmEmailPage_ReviewPending"]</p>
+                        <a href="/login" class="btn btn-primary w-100">@Localizer["ConfirmEmailPage_BackToLogin"]</a>
                     }
                     else
                     {
                         <div class="text-danger mb-3 icon-display"><i class="@AppIcons.XMark" aria-hidden="true"></i></div>
-                        <h5>@Localizer["ConfirmEmail_FailedTitle"]</h5>
+                        <h5>@Localizer["ConfirmEmailPage_FailedTitle"]</h5>
                         <p class="text-muted">@_message</p>
 
                         @if (_canResend)
@@ -40,15 +40,15 @@
                                 {
                                     <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" />
                                 }
-                                @Localizer["ConfirmEmail_SendNewVerificationMail"]
+                                @Localizer["ConfirmEmailPage_SendNewVerificationMail"]
                             </button>
                             @if (_runtimeMode.IsReadOnly)
                             {
-                                <div class="small text-muted mb-2">@Localizer["ConfirmEmail_ReadOnlyModeMessage"]</div>
+                                <div class="small text-muted mb-2">@Localizer["ConfirmEmailPage_ReadOnlyModeMessage"]</div>
                             }
                         }
 
-                        <a href="/login" class="btn btn-outline-primary w-100">@Localizer["ConfirmEmail_BackToLogin"]</a>
+                        <a href="/login" class="btn btn-outline-primary w-100">@Localizer["ConfirmEmailPage_BackToLogin"]</a>
                     }
                 </div>
             </div>
@@ -78,7 +78,7 @@
 
         if (string.IsNullOrEmpty(token))
         {
-            _message = Localizer["ConfirmEmail_InvalidToken"];
+            _message = Localizer["ConfirmEmailPage_InvalidToken"];
             _loading = false;
             return;
         }
@@ -113,8 +113,8 @@
         {
             var result = await UserRegistrationService.ResendEmailConfirmationAsync(_userId.Value);
             _message = result.Preview is null
-                ? Localizer["ConfirmEmail_NewMailSent"]
-                : Localizer["ConfirmEmail_NoEmailModePreview"];
+                ? Localizer["ConfirmEmailPage_NewMailSent"]
+                : Localizer["ConfirmEmailPage_NoEmailModePreview"];
             _emailPreview = result.Preview;
             _canResend = false;
         }
@@ -134,3 +134,4 @@
         return Task.CompletedTask;
     }
 }
+

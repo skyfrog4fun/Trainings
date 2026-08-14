@@ -29,29 +29,29 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["FirstName"]</label>
+                        <label class="form-label">@Localizer["UserInformationPage_FirstName"]</label>
                         <input class="form-control" @bind="_firstName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["LastName"]</label>
+                        <label class="form-label">@Localizer["UserInformationPage_LastName"]</label>
                         <input class="form-control" @bind="_lastName" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Email"]</label>
+                        <label class="form-label">@Localizer["Shared_Email"]</label>
                         <input class="form-control" type="email" @bind="_email" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Mobile"]</label>
+                        <label class="form-label">@Localizer["Shared_Mobile"]</label>
                         <input class="form-control" @bind="_mobile" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["City"]</label>
+                        <label class="form-label">@Localizer["Shared_City"]</label>
                         <input class="form-control" @bind="_city" />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Country"]</label>
+                        <label class="form-label">@Localizer["Shared_Country"]</label>
                         <select class="form-select" @bind="_countryId">
-                            <option value="">@Localizer["SelectCountry"]</option>
+                            <option value="">@Localizer["Shared_SelectCountry"]</option>
                             @foreach (var country in _countries)
                             {
                                 <option value="@country.Id">@country.Code — @country.Name</option>
@@ -59,13 +59,13 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">@Localizer["WelcomeMessageBio"]</label>
+                        <label class="form-label">@Localizer["UserInformationPage_WelcomeMessageBio"]</label>
                         <textarea class="form-control" rows="2" @bind="_welcomeMessage"></textarea>
                     </div>
                 </div>
 
                 <div class="mt-3">
-                    <button type="button" class="btn btn-primary" @onclick="SaveProfile">@Localizer["Save"]</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveProfile">@Localizer["Shared_Save"]</button>
                 </div>
 
                 @if (_resultMessage is not null)
@@ -83,7 +83,7 @@
                     <div class="table-responsive">
                         <table class="table table-sm mb-0">
                             <thead>
-                                <tr><th>@Localizer["Group"]</th><th>@Localizer["Role"]</th><th>@Localizer["Status"]</th><th>@Localizer["UserInformationPage_ColRequested"]</th></tr>
+                                <tr><th>@Localizer["Shared_Group"]</th><th>@Localizer["Shared_Role"]</th><th>@Localizer["Shared_Status"]</th><th>@Localizer["UserInformationPage_ColRequested"]</th></tr>
                             </thead>
                             <tbody>
                                 @foreach (var membership in _memberships)
@@ -154,7 +154,7 @@
             _memberships = memberships
                 .Select(m => new MembershipRow
                 {
-                    GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : string.Format(Localizer["Common_GroupNumberFallback"].Value, m.GroupId),
+                    GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : string.Format(Localizer["UserInformationPage_GroupNumberFallback"].Value, m.GroupId),
                     Role = m.Role,
                     Status = m.Status,
                     RequestedAt = m.RequestedAt
