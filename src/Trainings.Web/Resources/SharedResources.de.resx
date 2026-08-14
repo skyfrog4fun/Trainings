@@ -474,26 +474,41 @@
   <data name="StatisticsPage_ScopeManagedGroups" xml:space="preserve">
     <value>Verwaltete Gruppen</value>
   </data>
-  <data name="Register_PageTitle" xml:space="preserve">
-    <value>Registrieren</value>
+  <data name="LoginPage_PageTitle" xml:space="preserve">
+    <value>Anmelden</value>
   </data>
-  <data name="Register_Title" xml:space="preserve">
-    <value>Create Account</value>
+  <data name="LoginPage_Logo" xml:space="preserve">
+    <value>Trainings-Logo</value>
   </data>
-  <data name="Login_Email" xml:space="preserve">
+  <data name="LoginPage_Email" xml:space="preserve">
     <value>E-Mail</value>
   </data>
-  <data name="Login_Password" xml:space="preserve">
+  <data name="LoginPage_Password" xml:space="preserve">
     <value>Passwort</value>
   </data>
-  <data name="Login_Button" xml:space="preserve">
-    <value>Login</value>
+  <data name="LoginPage_Button" xml:space="preserve">
+    <value>Anmelden</value>
   </data>
-  <data name="Login_Register" xml:space="preserve">
+  <data name="LoginPage_Register" xml:space="preserve">
     <value>Registrieren</value>
   </data>
-  <data name="Login_ForgotPassword" xml:space="preserve">
+  <data name="LoginPage_ForgotPassword" xml:space="preserve">
     <value>Passwort vergessen?</value>
+  </data>
+  <data name="LoginPage_InitialSetupTitle" xml:space="preserve">
+    <value>Ersteinrichtung</value>
+  </data>
+  <data name="LoginPage_InitialSetupDescription" xml:space="preserve">
+    <value>Noch keine Benutzer vorhanden. Nutze diese Zugangsdaten zum Anmelden:</value>
+  </data>
+  <data name="LoginPage_InitialSetupEmailLabel" xml:space="preserve">
+    <value>E-Mail</value>
+  </data>
+  <data name="LoginPage_InitialSetupPasswordLabel" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="LoginPage_InvalidLogin" xml:space="preserve">
+    <value>Ungültige E-Mail oder Passwort!</value>
   </data>
   <data name="AnonymousLayout_Login" xml:space="preserve">
     <value>Login</value>
@@ -504,194 +519,152 @@
   <data name="AnonymousLayout_ForgotPassword" xml:space="preserve">
     <value>Passwort vergessen?</value>
   </data>
-  <data name="Login_InvalidLogin" xml:space="preserve">
-    <value>Ungültiger Benutzer or Passwort!</value>
-  </data>
-  <data name="Login_PageTitle" xml:space="preserve">
-    <value>Login</value>
-  </data>
   <data name="Shared_DarkMode" xml:space="preserve">
     <value>Dunkelmodus</value>
   </data>
   <data name="Shared_AppName" xml:space="preserve">
     <value>Trainings</value>
   </data>
-  <data name="Login_InitialSetupTitle" xml:space="preserve">
-    <value>Ersteinrichtung</value>
-  </data>
-  <data name="Login_InitialSetupDescription" xml:space="preserve">
-    <value>Noch keine Benutzer vorhanden. Nutze diese Zugangsdaten zum Anmelden:</value>
-  </data>
-  <data name="Login_InitialSetupEmailLabel" xml:space="preserve">
-    <value>E-Mail</value>
-  </data>
-  <data name="Login_InitialSetupPasswordLabel" xml:space="preserve">
-    <value>Passwort</value>
-  </data>
-  <data name="ConfirmEmail_PageTitle" xml:space="preserve">
+  <data name="ConfirmEmailPage_PageTitle" xml:space="preserve">
     <value>E-Mail bestätigen</value>
   </data>
-  <data name="ConfirmEmail_Confirming" xml:space="preserve">
+  <data name="ConfirmEmailPage_Confirming" xml:space="preserve">
     <value>E-Mail wird bestätigt...</value>
   </data>
-  <data name="ConfirmEmail_SuccessTitle" xml:space="preserve">
+  <data name="ConfirmEmailPage_SuccessTitle" xml:space="preserve">
     <value>Registrierung erfolgreich</value>
   </data>
-  <data name="ConfirmEmail_SuccessMessage" xml:space="preserve">
+  <data name="ConfirmEmailPage_SuccessMessage" xml:space="preserve">
     <value>Deine E-Mail-Adresse wurde erfolgreich bestätigt.</value>
   </data>
-  <data name="ConfirmEmail_ReviewPending" xml:space="preserve">
+  <data name="ConfirmEmailPage_ReviewPending" xml:space="preserve">
     <value>Deine Registrierung wird vom Super-Admin geprüft. Du wirst per E-Mail benachrichtigt, sobald die Prüfung abgeschlossen ist.</value>
   </data>
-  <data name="ConfirmEmail_BackToLogin" xml:space="preserve">
+  <data name="ConfirmEmailPage_BackToLogin" xml:space="preserve">
     <value>Zurück zum Login</value>
   </data>
-  <data name="ConfirmEmail_FailedTitle" xml:space="preserve">
+  <data name="ConfirmEmailPage_FailedTitle" xml:space="preserve">
     <value>Bestätigung fehlgeschlagen</value>
   </data>
-  <data name="ConfirmEmail_SendNewVerificationMail" xml:space="preserve">
+  <data name="ConfirmEmailPage_SendNewVerificationMail" xml:space="preserve">
     <value>Neue Bestätigungs-E-Mail senden</value>
   </data>
-  <data name="ConfirmEmail_ReadOnlyModeMessage" xml:space="preserve">
+  <data name="ConfirmEmailPage_ReadOnlyModeMessage" xml:space="preserve">
     <value>Der Nur-Lesen-Modus ist aktiv. Eine neue Bestätigungs-E-Mail kann gerade nicht erstellt werden.</value>
   </data>
-  <data name="ForgotPassword_PageTitle" xml:space="preserve">
+  <data name="ForgotPasswordPage_PageTitle" xml:space="preserve">
     <value>Passwort vergessen</value>
   </data>
-  <data name="ForgotPassword_Title" xml:space="preserve">
+  <data name="ForgotPasswordPage_Title" xml:space="preserve">
     <value>Passwort vergessen</value>
   </data>
-  <data name="ForgotPassword_SuccessMessage" xml:space="preserve">
+  <data name="ForgotPasswordPage_SuccessMessage" xml:space="preserve">
     <value>Falls ein Konto mit dieser E-Mail existiert, wurde ein Link gesendet. Bitte prüfe deine E-Mails.</value>
   </data>
-  <data name="ForgotPassword_BackToLogin" xml:space="preserve">
+  <data name="ForgotPasswordPage_BackToLogin" xml:space="preserve">
     <value>Zurück zum Login</value>
   </data>
-  <data name="ForgotPassword_ReadOnlyModeMessage" xml:space="preserve">
+  <data name="ForgotPasswordPage_ReadOnlyModeMessage" xml:space="preserve">
     <value>Der Nur-Lesen-Modus ist aktiv. Passwort-Zurücksetzen ist vorübergehend nicht verfügbar.</value>
   </data>
-  <data name="ForgotPassword_Description" xml:space="preserve">
+  <data name="ForgotPasswordPage_Description" xml:space="preserve">
     <value>Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.</value>
   </data>
-  <data name="ForgotPassword_EmailLabel" xml:space="preserve">
+  <data name="ForgotPasswordPage_EmailLabel" xml:space="preserve">
     <value>E-Mail-Adresse</value>
   </data>
-  <data name="ForgotPassword_EmailPlaceholder" xml:space="preserve">
+  <data name="ForgotPasswordPage_EmailPlaceholder" xml:space="preserve">
     <value>you@example.com</value>
   </data>
-  <data name="ForgotPassword_SendResetLink" xml:space="preserve">
+  <data name="ForgotPasswordPage_SendResetLink" xml:space="preserve">
     <value>Link senden</value>
   </data>
-  <data name="Register_SuccessTitle" xml:space="preserve">
-    <value>Registrierung erfolgreich!</value>
-  </data>
-  <data name="Register_SuccessMessage" xml:space="preserve">
-    <value>Bitte prüfe deine E-Mails zur Bestätigung. Dein Konto wird von einem Administrator geprüft und aktiviert.</value>
-  </data>
-  <data name="Register_NoEmailModeMessage" xml:space="preserve">
-    <value>Der Kein-E-Mail-Modus ist aktiv. Sieh dir die E-Mail-Vorschau unten an und nutze den enthaltenen Bestätigungslink.</value>
-  </data>
-  <data name="Register_BackToLogin" xml:space="preserve">
-    <value>Zurück zum Login</value>
-  </data>
-  <data name="Register_ReadOnlyModeMessage" xml:space="preserve">
-    <value>Der Nur-Lesen-Modus ist aktiv. Die Registrierung ist vorübergehend nicht verfügbar.</value>
-  </data>
-  <data name="Register_FirstNameLabel" xml:space="preserve">
-    <value>Vorname *</value>
-  </data>
-  <data name="Register_FirstNamePlaceholder" xml:space="preserve">
-    <value>Vorname</value>
-  </data>
-  <data name="Register_LastNameLabel" xml:space="preserve">
-    <value>Nachname *</value>
-  </data>
-  <data name="Register_LastNamePlaceholder" xml:space="preserve">
-    <value>Nachname</value>
-  </data>
-  <data name="Register_EmailLabel" xml:space="preserve">
-    <value>E-Mail *</value>
-  </data>
-  <data name="Register_EmailPlaceholder" xml:space="preserve">
-    <value>du@beispiel.de</value>
-  </data>
-  <data name="Register_PasswordLabel" xml:space="preserve">
-    <value>Passwort *</value>
-  </data>
-  <data name="Register_GenderLabel" xml:space="preserve">
-    <value>Geschlecht *</value>
-  </data>
-  <data name="Register_GenderMale" xml:space="preserve">
-    <value>Männlich</value>
-  </data>
-  <data name="Register_GenderFemale" xml:space="preserve">
-    <value>Weiblich</value>
-  </data>
-  <data name="Register_GenderOther" xml:space="preserve">
-    <value>Andere / Keine Angabe</value>
-  </data>
-  <data name="Register_BirthdayLabel" xml:space="preserve">
-    <value>Geburtstag</value>
-  </data>
-  <data name="Register_MobileLabel" xml:space="preserve">
-    <value>Mobil</value>
-  </data>
-  <data name="Register_MobilePlaceholder" xml:space="preserve">
-    <value>+41 79 000 0000</value>
-  </data>
-  <data name="Register_CityLabel" xml:space="preserve">
-    <value>Stadt</value>
-  </data>
-  <data name="Register_CityPlaceholder" xml:space="preserve">
-    <value>Deine Stadt</value>
-  </data>
-  <data name="Register_GroupMembershipLabel" xml:space="preserve">
-    <value>Gruppenmitgliedschaft anfragen</value>
-  </data>
-  <data name="Register_WelcomeMessageLabel" xml:space="preserve">
-    <value>Willkommensnachricht / Bio</value>
-  </data>
-  <data name="Register_WelcomeMessagePlaceholder" xml:space="preserve">
-    <value>Erzähl uns ein bisschen über dich...</value>
-  </data>
-  <data name="Register_ButtonRegister" xml:space="preserve">
+  <data name="RegisterPage_PageTitle" xml:space="preserve">
     <value>Registrieren</value>
   </data>
-  <data name="Register_AlreadyHaveAccount" xml:space="preserve">
+  <data name="RegisterPage_Title" xml:space="preserve">
+    <value>Konto erstellen</value>
+  </data>
+  <data name="RegisterPage_SuccessTitle" xml:space="preserve">
+    <value>Registrierung erfolgreich!</value>
+  </data>
+  <data name="RegisterPage_SuccessMessage" xml:space="preserve">
+    <value>Bitte prüfe deine E-Mails zur Bestätigung. Dein Konto wird von einem Administrator geprüft und aktiviert.</value>
+  </data>
+  <data name="RegisterPage_NoEmailModeMessage" xml:space="preserve">
+    <value>Der Kein-E-Mail-Modus ist aktiv. Sieh dir die E-Mail-Vorschau unten an und nutze den enthaltenen Bestätigungslink.</value>
+  </data>
+  <data name="RegisterPage_BackToLogin" xml:space="preserve">
+    <value>Zurück zum Login</value>
+  </data>
+  <data name="RegisterPage_ReadOnlyModeMessage" xml:space="preserve">
+    <value>Der Nur-Lesen-Modus ist aktiv. Die Registrierung ist vorübergehend nicht verfügbar.</value>
+  </data>
+  <data name="RegisterPage_FirstNameLabel" xml:space="preserve">
+    <value>Vorname *</value>
+  </data>
+  <data name="RegisterPage_FirstNamePlaceholder" xml:space="preserve">
+    <value>Vorname</value>
+  </data>
+  <data name="RegisterPage_LastNameLabel" xml:space="preserve">
+    <value>Nachname *</value>
+  </data>
+  <data name="RegisterPage_LastNamePlaceholder" xml:space="preserve">
+    <value>Nachname</value>
+  </data>
+  <data name="RegisterPage_EmailLabel" xml:space="preserve">
+    <value>E-Mail *</value>
+  </data>
+  <data name="RegisterPage_EmailPlaceholder" xml:space="preserve">
+    <value>du@beispiel.de</value>
+  </data>
+  <data name="RegisterPage_PasswordLabel" xml:space="preserve">
+    <value>Passwort *</value>
+  </data>
+  <data name="RegisterPage_GenderLabel" xml:space="preserve">
+    <value>Geschlecht *</value>
+  </data>
+  <data name="RegisterPage_GenderMale" xml:space="preserve">
+    <value>Männlich</value>
+  </data>
+  <data name="RegisterPage_GenderFemale" xml:space="preserve">
+    <value>Weiblich</value>
+  </data>
+  <data name="RegisterPage_GenderOther" xml:space="preserve">
+    <value>Andere / Keine Angabe</value>
+  </data>
+  <data name="RegisterPage_BirthdayLabel" xml:space="preserve">
+    <value>Geburtstag</value>
+  </data>
+  <data name="RegisterPage_MobileLabel" xml:space="preserve">
+    <value>Mobil</value>
+  </data>
+  <data name="RegisterPage_MobilePlaceholder" xml:space="preserve">
+    <value>+41 79 000 0000</value>
+  </data>
+  <data name="RegisterPage_CityLabel" xml:space="preserve">
+    <value>Stadt</value>
+  </data>
+  <data name="RegisterPage_CityPlaceholder" xml:space="preserve">
+    <value>Deine Stadt</value>
+  </data>
+  <data name="RegisterPage_GroupMembershipLabel" xml:space="preserve">
+    <value>Gruppenmitgliedschaft anfragen</value>
+  </data>
+  <data name="RegisterPage_WelcomeMessageLabel" xml:space="preserve">
+    <value>Willkommensnachricht / Bio</value>
+  </data>
+  <data name="RegisterPage_WelcomeMessagePlaceholder" xml:space="preserve">
+    <value>Erzähl uns ein bisschen über dich...</value>
+  </data>
+  <data name="RegisterPage_ButtonRegister" xml:space="preserve">
+    <value>Registrieren</value>
+  </data>
+  <data name="RegisterPage_AlreadyHaveAccount" xml:space="preserve">
     <value>Bereits registriert? Anmelden</value>
   </data>
-  <data name="ResetPassword_PageTitle" xml:space="preserve">
+  <data name="ResetPasswordPage_PageTitle" xml:space="preserve">
     <value>Passwort zurücksetzen</value>
-  </data>
-  <data name="ResetPassword_Title" xml:space="preserve">
-    <value>Passwort zurücksetzen</value>
-  </data>
-  <data name="ResetPassword_Button" xml:space="preserve">
-    <value>Passwort zurücksetzen</value>
-  </data>
-  <data name="ResetPassword_SuccessMessage" xml:space="preserve">
-    <value>Dein Passwort wurde erfolgreich zurückgesetzt.</value>
-  </data>
-  <data name="ResetPassword_LoginLink" xml:space="preserve">
-    <value>Anmelden</value>
-  </data>
-  <data name="ResetPassword_InvalidToken" xml:space="preserve">
-    <value>Ungültiger oder fehlender Zurücksetzen-Token.</value>
-  </data>
-  <data name="ResetPassword_RequestNewLink" xml:space="preserve">
-    <value>Neuen Link anfordern</value>
-  </data>
-  <data name="ResetPassword_NewPasswordLabel" xml:space="preserve">
-    <value>Neues Passwort</value>
-  </data>
-  <data name="ResetPassword_NewPasswordPlaceholder" xml:space="preserve">
-    <value>Neues Passwort</value>
-  </data>
-  <data name="ResetPassword_ConfirmPasswordLabel" xml:space="preserve">
-    <value>Passwort bestätigen</value>
-  </data>
-  <data name="ResetPassword_ConfirmPasswordPlaceholder" xml:space="preserve">
-    <value>Passwort bestätigen</value>
   </data>
   <data name="AttendancePage_PageTitle" xml:space="preserve">
     <value>Anwesenheit</value>
@@ -1176,35 +1149,17 @@
   <data name="AttendancePage_AttendanceForAriaLabel" xml:space="preserve">
     <value>Anwesenheit für {0}</value>
   </data>
-  <data name="ConfirmEmail_InvalidToken" xml:space="preserve">
+  <data name="ConfirmEmailPage_InvalidToken" xml:space="preserve">
     <value>Ungültiges oder fehlendes Bestätigungstoken.</value>
   </data>
-  <data name="ConfirmEmail_NewMailSent" xml:space="preserve">
+  <data name="ConfirmEmailPage_NewMailSent" xml:space="preserve">
     <value>Eine neue Bestätigungs-E-Mail wurde gesendet.</value>
   </data>
-  <data name="ConfirmEmail_NoEmailModePreview" xml:space="preserve">
+  <data name="ConfirmEmailPage_NoEmailModePreview" xml:space="preserve">
     <value>Der Kein-E-Mail-Modus ist aktiv. Prüfe die Vorschau unten und verwende den neuen Bestätigungslink.</value>
   </data>
-  <data name="ForgotPassword_EmailRequired" xml:space="preserve">
+  <data name="ForgotPasswordPage_EmailRequired" xml:space="preserve">
     <value>Bitte gib deine E-Mail-Adresse ein.</value>
-  </data>
-  <data name="Register_NameRequired" xml:space="preserve">
-    <value>Vor- und Nachname sind erforderlich.</value>
-  </data>
-  <data name="Register_EmailRequired" xml:space="preserve">
-    <value>E-Mail ist erforderlich.</value>
-  </data>
-  <data name="Register_PasswordTooShort" xml:space="preserve">
-    <value>Das Passwort muss mindestens 6 Zeichen lang sein.</value>
-  </data>
-  <data name="ResetPassword_NewPasswordRequired" xml:space="preserve">
-    <value>Bitte gib ein neues Passwort ein.</value>
-  </data>
-  <data name="ResetPassword_PasswordsDoNotMatch" xml:space="preserve">
-    <value>Die Passwörter stimmen nicht überein.</value>
-  </data>
-  <data name="ResetPassword_PasswordTooShort" xml:space="preserve">
-    <value>Das Passwort muss mindestens 6 Zeichen lang sein.</value>
   </data>
   <data name="GroupMembersPage_MembersOfGroup" xml:space="preserve">
     <value>{0} – Mitglieder</value>

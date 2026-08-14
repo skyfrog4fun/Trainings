@@ -474,26 +474,41 @@
   <data name="StatisticsPage_ScopeManagedGroups" xml:space="preserve">
     <value>Managed Groups</value>
   </data>
-  <data name="Register_PageTitle" xml:space="preserve">
-    <value>Register</value>
-  </data>
-  <data name="Register_Title" xml:space="preserve">
-    <value>Create Account</value>
-  </data>
-  <data name="Login_Email" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="Login_Password" xml:space="preserve">
-    <value>Password</value>
-  </data>
-  <data name="Login_Button" xml:space="preserve">
+  <data name="LoginPage_PageTitle" xml:space="preserve">
     <value>Login</value>
   </data>
-  <data name="Login_Register" xml:space="preserve">
+  <data name="LoginPage_Logo" xml:space="preserve">
+    <value>Trainings logo</value>
+  </data>
+  <data name="LoginPage_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="LoginPage_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LoginPage_Button" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="LoginPage_Register" xml:space="preserve">
     <value>Register</value>
   </data>
-  <data name="Login_ForgotPassword" xml:space="preserve">
+  <data name="LoginPage_ForgotPassword" xml:space="preserve">
     <value>Forgot password?</value>
+  </data>
+  <data name="LoginPage_InitialSetupTitle" xml:space="preserve">
+    <value>Initial Setup</value>
+  </data>
+  <data name="LoginPage_InitialSetupDescription" xml:space="preserve">
+    <value>No users exist yet. Use these default credentials to log in:</value>
+  </data>
+  <data name="LoginPage_InitialSetupEmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="LoginPage_InitialSetupPasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LoginPage_InvalidLogin" xml:space="preserve">
+    <value>Invalid email or password!</value>
   </data>
   <data name="AnonymousLayout_Login" xml:space="preserve">
     <value>Login</value>
@@ -504,193 +519,181 @@
   <data name="AnonymousLayout_ForgotPassword" xml:space="preserve">
     <value>Forgot password?</value>
   </data>
-  <data name="Login_InvalidLogin" xml:space="preserve">
-    <value>Invalid email or password!</value>
-  </data>
-  <data name="Login_PageTitle" xml:space="preserve">
-    <value>Login</value>
-  </data>
   <data name="Shared_DarkMode" xml:space="preserve">
     <value>Dark mode</value>
   </data>
   <data name="Shared_AppName" xml:space="preserve">
     <value>Trainings</value>
   </data>
-  <data name="Login_InitialSetupTitle" xml:space="preserve">
-    <value>Initial Setup</value>
-  </data>
-  <data name="Login_InitialSetupDescription" xml:space="preserve">
-    <value>No users exist yet. Use these default credentials to log in:</value>
-  </data>
-  <data name="Login_InitialSetupEmailLabel" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="Login_InitialSetupPasswordLabel" xml:space="preserve">
-    <value>Password</value>
-  </data>
-  <data name="ConfirmEmail_PageTitle" xml:space="preserve">
+  <data name="ConfirmEmailPage_PageTitle" xml:space="preserve">
     <value>Confirm Email</value>
   </data>
-  <data name="ConfirmEmail_Confirming" xml:space="preserve">
+  <data name="ConfirmEmailPage_Confirming" xml:space="preserve">
     <value>Confirming your email...</value>
   </data>
-  <data name="ConfirmEmail_SuccessTitle" xml:space="preserve">
+  <data name="ConfirmEmailPage_SuccessTitle" xml:space="preserve">
     <value>Registration successful</value>
   </data>
-  <data name="ConfirmEmail_SuccessMessage" xml:space="preserve">
+  <data name="ConfirmEmailPage_SuccessMessage" xml:space="preserve">
     <value>Your email address was confirmed successfully.</value>
   </data>
-  <data name="ConfirmEmail_ReviewPending" xml:space="preserve">
+  <data name="ConfirmEmailPage_ReviewPending" xml:space="preserve">
     <value>Your registration is now being reviewed by the Super Admin. You will be notified by email as soon as the review is complete.</value>
   </data>
-  <data name="ConfirmEmail_BackToLogin" xml:space="preserve">
+  <data name="ConfirmEmailPage_BackToLogin" xml:space="preserve">
     <value>Back to Login</value>
   </data>
-  <data name="ConfirmEmail_FailedTitle" xml:space="preserve">
+  <data name="ConfirmEmailPage_FailedTitle" xml:space="preserve">
     <value>Confirmation Failed</value>
   </data>
-  <data name="ConfirmEmail_SendNewVerificationMail" xml:space="preserve">
+  <data name="ConfirmEmailPage_SendNewVerificationMail" xml:space="preserve">
     <value>Send New Verification Mail</value>
   </data>
-  <data name="ConfirmEmail_ReadOnlyModeMessage" xml:space="preserve">
+  <data name="ConfirmEmailPage_ReadOnlyModeMessage" xml:space="preserve">
     <value>Read Only mode is active, so a replacement verification mail cannot be created right now.</value>
   </data>
-  <data name="ForgotPassword_PageTitle" xml:space="preserve">
+  <data name="ForgotPasswordPage_PageTitle" xml:space="preserve">
     <value>Forgot Password</value>
   </data>
-  <data name="ForgotPassword_Title" xml:space="preserve">
+  <data name="ForgotPasswordPage_Title" xml:space="preserve">
     <value>Forgot Password</value>
   </data>
-  <data name="ForgotPassword_SuccessMessage" xml:space="preserve">
+  <data name="ForgotPasswordPage_SuccessMessage" xml:space="preserve">
     <value>If an account with that email exists, a password reset link has been sent. Please check your email.</value>
   </data>
-  <data name="ForgotPassword_BackToLogin" xml:space="preserve">
+  <data name="ForgotPasswordPage_BackToLogin" xml:space="preserve">
     <value>Back to Login</value>
   </data>
-  <data name="ForgotPassword_ReadOnlyModeMessage" xml:space="preserve">
+  <data name="ForgotPasswordPage_ReadOnlyModeMessage" xml:space="preserve">
     <value>Read Only mode is active. Password reset requests are temporarily unavailable.</value>
   </data>
-  <data name="ForgotPassword_Description" xml:space="preserve">
+  <data name="ForgotPasswordPage_Description" xml:space="preserve">
     <value>Enter your email address and we'll send you a link to reset your password.</value>
   </data>
-  <data name="ForgotPassword_EmailLabel" xml:space="preserve">
+  <data name="ForgotPasswordPage_EmailLabel" xml:space="preserve">
     <value>Email address</value>
   </data>
-  <data name="ForgotPassword_EmailPlaceholder" xml:space="preserve">
+  <data name="ForgotPasswordPage_EmailPlaceholder" xml:space="preserve">
     <value>you@example.com</value>
   </data>
-  <data name="ForgotPassword_SendResetLink" xml:space="preserve">
+  <data name="ForgotPasswordPage_SendResetLink" xml:space="preserve">
     <value>Send Reset Link</value>
   </data>
-  <data name="Register_SuccessTitle" xml:space="preserve">
-    <value>Registration successful!</value>
-  </data>
-  <data name="Register_SuccessMessage" xml:space="preserve">
-    <value>Please check your email to confirm your address. Your account will be reviewed and activated by an administrator.</value>
-  </data>
-  <data name="Register_NoEmailModeMessage" xml:space="preserve">
-    <value>No E-Mail mode is active. Review the email preview below and use the included verification link.</value>
-  </data>
-  <data name="Register_BackToLogin" xml:space="preserve">
-    <value>Back to Login</value>
-  </data>
-  <data name="Register_ReadOnlyModeMessage" xml:space="preserve">
-    <value>Read Only mode is active. Registration is temporarily unavailable.</value>
-  </data>
-  <data name="Register_FirstNameLabel" xml:space="preserve">
-    <value>First Name *</value>
-  </data>
-  <data name="Register_FirstNamePlaceholder" xml:space="preserve">
-    <value>First name</value>
-  </data>
-  <data name="Register_LastNameLabel" xml:space="preserve">
-    <value>Last Name *</value>
-  </data>
-  <data name="Register_LastNamePlaceholder" xml:space="preserve">
-    <value>Last name</value>
-  </data>
-  <data name="Register_EmailLabel" xml:space="preserve">
-    <value>Email *</value>
-  </data>
-  <data name="Register_EmailPlaceholder" xml:space="preserve">
-    <value>you@example.com</value>
-  </data>
-  <data name="Register_PasswordLabel" xml:space="preserve">
-    <value>Password *</value>
-  </data>
-  <data name="Register_GenderLabel" xml:space="preserve">
-    <value>Gender *</value>
-  </data>
-  <data name="Register_GenderMale" xml:space="preserve">
-    <value>Male</value>
-  </data>
-  <data name="Register_GenderFemale" xml:space="preserve">
-    <value>Female</value>
-  </data>
-  <data name="Register_GenderOther" xml:space="preserve">
-    <value>Other / Prefer not to say</value>
-  </data>
-  <data name="Register_BirthdayLabel" xml:space="preserve">
-    <value>Birthday</value>
-  </data>
-  <data name="Register_MobileLabel" xml:space="preserve">
-    <value>Mobile</value>
-  </data>
-  <data name="Register_MobilePlaceholder" xml:space="preserve">
-    <value>+41 79 000 0000</value>
-  </data>
-  <data name="Register_CityLabel" xml:space="preserve">
-    <value>City</value>
-  </data>
-  <data name="Register_CityPlaceholder" xml:space="preserve">
-    <value>Your city</value>
-  </data>
-  <data name="Register_GroupMembershipLabel" xml:space="preserve">
-    <value>Request Group Membership</value>
-  </data>
-  <data name="Register_WelcomeMessageLabel" xml:space="preserve">
-    <value>Welcome Message / Bio</value>
-  </data>
-  <data name="Register_WelcomeMessagePlaceholder" xml:space="preserve">
-    <value>Tell us a little about yourself...</value>
-  </data>
-  <data name="Register_ButtonRegister" xml:space="preserve">
+  <data name="RegisterPage_PageTitle" xml:space="preserve">
     <value>Register</value>
   </data>
-  <data name="Register_AlreadyHaveAccount" xml:space="preserve">
+  <data name="RegisterPage_Title" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
+  <data name="RegisterPage_SuccessTitle" xml:space="preserve">
+    <value>Registration successful!</value>
+  </data>
+  <data name="RegisterPage_SuccessMessage" xml:space="preserve">
+    <value>Please check your email to confirm your address. Your account will be reviewed and activated by an administrator.</value>
+  </data>
+  <data name="RegisterPage_NoEmailModeMessage" xml:space="preserve">
+    <value>No E-Mail mode is active. Review the email preview below and use the included verification link.</value>
+  </data>
+  <data name="RegisterPage_BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+  <data name="RegisterPage_ReadOnlyModeMessage" xml:space="preserve">
+    <value>Read Only mode is active. Registration is temporarily unavailable.</value>
+  </data>
+  <data name="RegisterPage_FirstNameLabel" xml:space="preserve">
+    <value>First Name *</value>
+  </data>
+  <data name="RegisterPage_FirstNamePlaceholder" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="RegisterPage_LastNameLabel" xml:space="preserve">
+    <value>Last Name *</value>
+  </data>
+  <data name="RegisterPage_LastNamePlaceholder" xml:space="preserve">
+    <value>Last name</value>
+  </data>
+  <data name="RegisterPage_EmailLabel" xml:space="preserve">
+    <value>Email *</value>
+  </data>
+  <data name="RegisterPage_EmailPlaceholder" xml:space="preserve">
+    <value>you@example.com</value>
+  </data>
+  <data name="RegisterPage_PasswordLabel" xml:space="preserve">
+    <value>Password *</value>
+  </data>
+  <data name="RegisterPage_GenderLabel" xml:space="preserve">
+    <value>Gender *</value>
+  </data>
+  <data name="RegisterPage_GenderMale" xml:space="preserve">
+    <value>Male</value>
+  </data>
+  <data name="RegisterPage_GenderFemale" xml:space="preserve">
+    <value>Female</value>
+  </data>
+  <data name="RegisterPage_GenderOther" xml:space="preserve">
+    <value>Other / Prefer not to say</value>
+  </data>
+  <data name="RegisterPage_BirthdayLabel" xml:space="preserve">
+    <value>Birthday</value>
+  </data>
+  <data name="RegisterPage_MobileLabel" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="RegisterPage_MobilePlaceholder" xml:space="preserve">
+    <value>+41 79 000 0000</value>
+  </data>
+  <data name="RegisterPage_CityLabel" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="RegisterPage_CityPlaceholder" xml:space="preserve">
+    <value>Your city</value>
+  </data>
+  <data name="RegisterPage_GroupMembershipLabel" xml:space="preserve">
+    <value>Request Group Membership</value>
+  </data>
+  <data name="RegisterPage_WelcomeMessageLabel" xml:space="preserve">
+    <value>Welcome Message / Bio</value>
+  </data>
+  <data name="RegisterPage_WelcomeMessagePlaceholder" xml:space="preserve">
+    <value>Tell us a little about yourself...</value>
+  </data>
+  <data name="RegisterPage_ButtonRegister" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="RegisterPage_AlreadyHaveAccount" xml:space="preserve">
     <value>Already have an account? Login</value>
   </data>
-  <data name="ResetPassword_PageTitle" xml:space="preserve">
+  <data name="ResetPasswordPage_PageTitle" xml:space="preserve">
     <value>Reset Password</value>
   </data>
-  <data name="ResetPassword_Title" xml:space="preserve">
+  <data name="ResetPasswordPage_Title" xml:space="preserve">
     <value>Reset Password</value>
   </data>
-  <data name="ResetPassword_Button" xml:space="preserve">
+  <data name="ResetPasswordPage_Button" xml:space="preserve">
     <value>Reset Password</value>
   </data>
-  <data name="ResetPassword_SuccessMessage" xml:space="preserve">
+  <data name="ResetPasswordPage_SuccessMessage" xml:space="preserve">
     <value>Your password has been reset successfully.</value>
   </data>
-  <data name="ResetPassword_LoginLink" xml:space="preserve">
+  <data name="ResetPasswordPage_LoginLink" xml:space="preserve">
     <value>Login</value>
   </data>
-  <data name="ResetPassword_InvalidToken" xml:space="preserve">
+  <data name="ResetPasswordPage_InvalidToken" xml:space="preserve">
     <value>Invalid or missing reset token.</value>
   </data>
-  <data name="ResetPassword_RequestNewLink" xml:space="preserve">
+  <data name="ResetPasswordPage_RequestNewLink" xml:space="preserve">
     <value>Request New Link</value>
   </data>
-  <data name="ResetPassword_NewPasswordLabel" xml:space="preserve">
+  <data name="ResetPasswordPage_NewPasswordLabel" xml:space="preserve">
     <value>New Password</value>
   </data>
-  <data name="ResetPassword_NewPasswordPlaceholder" xml:space="preserve">
+  <data name="ResetPasswordPage_NewPasswordPlaceholder" xml:space="preserve">
     <value>New password</value>
   </data>
-  <data name="ResetPassword_ConfirmPasswordLabel" xml:space="preserve">
+  <data name="ResetPasswordPage_ConfirmPasswordLabel" xml:space="preserve">
     <value>Confirm Password</value>
   </data>
-  <data name="ResetPassword_ConfirmPasswordPlaceholder" xml:space="preserve">
+  <data name="ResetPasswordPage_ConfirmPasswordPlaceholder" xml:space="preserve">
     <value>Confirm password</value>
   </data>
   <data name="AttendancePage_PageTitle" xml:space="preserve">
@@ -1176,34 +1179,43 @@
   <data name="AttendancePage_AttendanceForAriaLabel" xml:space="preserve">
     <value>Attendance for {0}</value>
   </data>
-  <data name="ConfirmEmail_InvalidToken" xml:space="preserve">
+  <data name="ConfirmEmailPage_InvalidToken" xml:space="preserve">
     <value>Invalid or missing confirmation token.</value>
   </data>
-  <data name="ConfirmEmail_NewMailSent" xml:space="preserve">
+  <data name="ConfirmEmailPage_NewMailSent" xml:space="preserve">
     <value>A new verification mail has been sent.</value>
   </data>
-  <data name="ConfirmEmail_NoEmailModePreview" xml:space="preserve">
+  <data name="ConfirmEmailPage_NoEmailModePreview" xml:space="preserve">
     <value>No E-Mail mode is active. Review the preview below and use the new verification link.</value>
   </data>
-  <data name="ForgotPassword_EmailRequired" xml:space="preserve">
+  <data name="ForgotPasswordPage_EmailRequired" xml:space="preserve">
     <value>Please enter your email address.</value>
   </data>
-  <data name="Register_NameRequired" xml:space="preserve">
+  <data name="RegisterPage_NameRequired" xml:space="preserve">
     <value>First name and last name are required.</value>
   </data>
-  <data name="Register_EmailRequired" xml:space="preserve">
+  <data name="RegisterPage_EmailRequired" xml:space="preserve">
     <value>Email is required.</value>
   </data>
-  <data name="Register_PasswordTooShort" xml:space="preserve">
+  <data name="RegisterPage_PasswordTooShort" xml:space="preserve">
     <value>Password must be at least 6 characters.</value>
   </data>
-  <data name="ResetPassword_NewPasswordRequired" xml:space="preserve">
+  <data name="RegisterPage_NameRequired" xml:space="preserve">
+    <value>First name and last name are required.</value>
+  </data>
+  <data name="RegisterPage_EmailRequired" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="RegisterPage_PasswordTooShort" xml:space="preserve">
+    <value>Password must be at least 6 characters.</value>
+  </data>
+  <data name="ResetPasswordPage_NewPasswordRequired" xml:space="preserve">
     <value>Please enter a new password.</value>
   </data>
-  <data name="ResetPassword_PasswordsDoNotMatch" xml:space="preserve">
+  <data name="ResetPasswordPage_PasswordsDoNotMatch" xml:space="preserve">
     <value>Passwords do not match.</value>
   </data>
-  <data name="ResetPassword_PasswordTooShort" xml:space="preserve">
+  <data name="ResetPasswordPage_PasswordTooShort" xml:space="preserve">
     <value>Password must be at least 6 characters.</value>
   </data>
   <data name="GroupMembersPage_MembersOfGroup" xml:space="preserve">
