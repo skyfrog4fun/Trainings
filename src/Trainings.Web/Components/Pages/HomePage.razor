@@ -54,32 +54,28 @@
                 Title='@Localizer["Shared_Groups"]'
                 Value="@GetGroupsStatValue()"
                 Subtitle='@GetGroupsStatSubtitle()'
-                IconClass="@AppIcons.UserGroup"
-                BadgeToneClass="dashboard-icon-badge-secondary" />
+                IconClass="@AppIcons.UserGroup"/>
         </div>
         <div class="col-6 col-xl-3">
             <DashboardStatCard
                 Title='@Localizer["Shared_Users"]'
                 Value="@GetUsersStatValue()"
                 Subtitle='@GetUsersStatSubtitle()'
-                IconClass="@AppIcons.Users"
-                BadgeToneClass="dashboard-icon-badge-primary" />
+                IconClass="@AppIcons.Users"/>
         </div>
         <div class="col-6 col-xl-3">
             <DashboardStatCard
                 Title='@Localizer["Shared_Trainings"]'
                 Value="@_myNextTrainings.Count.ToString()"
                 Subtitle='@Localizer["HomePage_MyNextTrainingsEnrolledAssigned"]'
-                IconClass="@AppIcons.CalendarCheck"
-                BadgeToneClass="dashboard-icon-badge-highlight" />
+                IconClass="@AppIcons.CalendarCheck" />
         </div>
         <div class="col-6 col-xl-3">
             <DashboardStatCard
                 Title='@Localizer["HomePage_PendingApprovals"]'
                 Value="@GetPendingStatValue()"
                 Subtitle='@GetPendingStatSubtitle()'
-                IconClass="@AppIcons.UserClock"
-                BadgeToneClass="dashboard-icon-badge-secondary" />
+                IconClass="@AppIcons.UserClock" />
         </div>
     </section>
 
@@ -110,27 +106,6 @@
             <p class="dashboard-empty-state mb-0">@Localizer["HomePage_NoUpcomingTrainings"]</p>
         }
     </section>
-
-    @if (_isGroupAdmin || _isGroupTrainer)
-    {
-        <section class="dashboard-surface-card-alt mb-4">
-            <div class="dashboard-section-header">
-                <h3 class="h5 mb-0">@Localizer["HomePage_QuickAccess"]</h3>
-            </div>
-            <div class="dashboard-quick-access-grid">
-                @if (_isGroupAdmin)
-                {
-                    <DashboardQuickAccessButton Href="/groups/new" Text='@Localizer["HomePage_NewGroup"]' IconClass="@AppIcons.UserGroup" />
-                    <DashboardQuickAccessButton Href="/users/new" Text='@Localizer["HomePage_NewUser"]' IconClass="@AppIcons.User" />
-                }
-
-                @if (_isGroupTrainer)
-                {
-                    <DashboardQuickAccessButton Href="/trainings/create" Text='@Localizer["HomePage_NewTraining"]' IconClass="@AppIcons.Plus" />
-                }
-            </div>
-        </section>
-    }
 
     <div class="row g-3 mb-4">
         @if (_isSuperAdmin)

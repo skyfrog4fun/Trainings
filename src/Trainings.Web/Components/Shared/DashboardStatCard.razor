@@ -1,7 +1,5 @@
 <article class="dashboard-stat-card h-100">
-    <div class="dashboard-stat-icon @BadgeToneClass" aria-hidden="true">
-        <i class="@IconClass"></i>
-    </div>
+    <div class="dashboard-stat-icon dashboard-icon-badge" aria-hidden="true"><i class="@IconClass"></i></div>
     <p class="dashboard-stat-label mb-1">@Title</p>
     <p class="dashboard-stat-value mb-0">@Value</p>
     @if (!string.IsNullOrWhiteSpace(Subtitle))
@@ -11,18 +9,9 @@
 </article>
 
 @code {
-    [Parameter]
-    public string Title { get; set; } = string.Empty;
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public string? Subtitle { get; set; }
 
-    [Parameter]
-    public string Value { get; set; } = string.Empty;
-
-    [Parameter]
-    public string? Subtitle { get; set; }
-
-    [Parameter]
-    public string IconClass { get; set; } = AppIcons.ChartSimple;
-
-    [Parameter]
-    public string BadgeToneClass { get; set; } = "dashboard-icon-badge-secondary";
+    [Parameter] public string IconClass { get; set; } = AppIcons.ChartSimple;
 }
