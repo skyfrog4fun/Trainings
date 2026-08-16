@@ -5,23 +5,23 @@
   --brand-community: #84b1a4;
   --brand-community-80: #9dc1b6;
   --brand-community-60: #b5d0c8;
-  --brand-community-40: #cee0db;
+  --brand-community-40: #cee0db; /* currently not used */
   --brand-community-20: #e6efed;
   /* colors defined by TSV - Akzentfarbe*/
   --brand-accent: #ff0066;
   --brand-accent-80: #ff3385;
-  --brand-accent-60: #ff66a3;
-  --brand-accent-40: #ff99c2;
-  --brand-accent-20: #ffcce0;
+  --brand-accent-60: #ff66a3; /* currently not used */
+  --brand-accent-40: #ff99c2; /* currently not used */
+  --brand-accent-20: #ffcce0; /* currently not used */
   /* colors defined by TSV - Ergänzungsfarbe / Tradition*/
   --brand-tradition: #202a45;
   --brand-tradition-80: #4d556a;
   --brand-tradition-60: #797f8f;
   --brand-tradition-40: #a6aab4;
-  --brand-tradition-20: #d2d4da;
+  --brand-tradition-20: #d2d4da; /* currently not used */
   /* colors defined by TSV - Ergänzungsfarbe / Wertschätzung*/
   --brand-appreciation: #d8d2cb;
-  --brand-appreciation-80: #dfdbd5;
+  --brand-appreciation-80: #dfdbd5; /* currently not used */
   --brand-appreciation-60: #e7e4e0;
   --brand-appreciation-40: #efedea;
   --brand-appreciation-20: #f7f6f5;
@@ -67,31 +67,17 @@
   --special-text-on-light: var(--brand-tradition);
   /* Bootstrap remapping */
   --bs-primary: var(--color-primary);
-  --bs-primary-rgb: var(--brand-accent);
   --bs-body-bg: var(--color-bg);
   --bs-body-color: var(--color-text);
-  --bs-border-color: var(--color-border);
   --bs-secondary: var(--color-secondary);
   --bs-link-color: var(--color-primary);
   --bs-link-hover-color: var(--color-primary-hover);
-  --bs-body-color-rgb: var(--brand-tradition);
-  --bs-body-bg-rgb: var(--brand-appreciation-20);
-  --bs-secondary-color: var(--color-text-muted);
-  --bs-secondary-rgb: var(--brand-appreciation);
   --bs-success: var(--color-success);
-  --bs-success-rgb: var(--brand-community);
   --bs-info: var(--color-highlight);
-  --bs-info-rgb: var(--brand-innovation);
   --bs-warning: var(--special-warning);
-  --bs-warning-rgb: var(--brand-innovation-60);
   --bs-danger: var(--color-danger);
-  --bs-danger-rgb: var(--brand-tradition);
   --bs-light: var(--brand-appreciation-20);
-  --bs-light-rgb: var(--brand-appreciation-20);
   --bs-dark: var(--brand-tradition);
-  --bs-dark-rgb: var(--brand-traditionb);
-  --bs-link-color-rgb: var(--brand-tradition);
-  --bs-link-hover-color-rgb: var(--brand-accent);
 }
 
 [data-theme="dark"] {
@@ -112,7 +98,6 @@
   --special-secondary-hover: var(--brand-community);
   --bs-body-bg: var(--color-bg);
   --bs-body-color: var(--color-text);
-  --bs-border-color: var(--color-border);
   --bs-secondary: var(--color-secondary);
   --bs-link-color: var(--color-primary);
   --bs-link-hover-color: var(--color-primary-hover);
@@ -250,7 +235,7 @@ h1:focus {
 
 .form-floating > .form-control-plaintext::placeholder,
 .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
+  color: var(--color-text-muted);
   text-align: end;
 }
 
@@ -267,7 +252,9 @@ main {
   padding: 0.75rem 1rem;
 }
 
-.collapsible-card-header {
+.collapsible-card-header,
+.dashboard-card-header,
+.dashboard-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -298,16 +285,9 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--bs-secondary-color);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   white-space: nowrap;
-}
-
-.dashboard-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
 }
 
 .dashboard-card-counter {
@@ -315,7 +295,7 @@ main {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.875rem;
-  color: var(--bs-secondary-color);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 
@@ -324,7 +304,7 @@ main {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .icon-login {
@@ -396,11 +376,23 @@ main {
   color: var(--color-text-on-dark);
 }
 
-.dashboard-stat-card {
-  position: relative;
+.dashboard-stat-card,
+.dashboard-surface-card,
+.app-overview-card,
+.registration-overview-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 0.75rem;
+}
+
+.dashboard-surface-card-alt {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.dashboard-stat-card {
+  position: relative;
   padding: 1rem;
 }
 
@@ -451,24 +443,10 @@ main {
 
 .dashboard-surface-card,
 .dashboard-surface-card-alt {
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
   padding: 1rem;
 }
 
-.dashboard-surface-card {
-  background: var(--color-surface);
-}
-
-.dashboard-surface-card-alt {
-  background: var(--color-surface-alt);
-}
-
 .dashboard-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
   margin-bottom: 0.85rem;
 }
 
@@ -598,7 +576,7 @@ main {
 }
 
 .training-card-header-date {
-  color: var(--bs-secondary-color);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
@@ -618,14 +596,9 @@ main {
   border-left: 4px solid var(--color-secondary);
 }
 
-.registration-overview-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-}
-
 .confirmation-panel {
   padding: 0.75rem 1rem;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-border);
   border-radius: 0.375rem;
 }
 
@@ -674,9 +647,6 @@ main {
 }
 
 .app-overview-card {
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  background: var(--color-surface);
   padding: 0.85rem;
   display: flex;
   justify-content: space-between;
@@ -787,7 +757,7 @@ main {
 }
 
 .modal-overlay-brand {
-  background-color: rgba(var(--brand-tradition), 0.5);
+  background-color: var(--brand-tradition-80);
 }
 
 /* === Navbar & Layout === */
@@ -806,9 +776,9 @@ main {
   }
 
 .app-menu-button {
-  border: none;
+  border: 1px solid var(--color-header-bg);
   color: var(--color-text-on-dark);
-  background: transparent;
+  background: var(--color-header-bg);
 }
 
   .app-menu-button:hover,
@@ -822,8 +792,8 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--color-header-bg);
+  background: var(--color-header-bg);
   color: var(--color-text-on-dark);
   padding: 0.375rem 0.5rem;
   line-height: 1;
@@ -862,14 +832,8 @@ main {
       background: var(--color-surface-alt);
     }
 
-    .app-menu-dropdown .dropdown-item.active:hover,
     .app-menu-dropdown .dropdown-item.active:focus {
-      color: var(--color-header-bg);
-      background: var(--color-secondary);
-    }
-
-    .app-menu-dropdown .dropdown-item.active:focus {
-      box-shadow: 0 0 0 0.2rem rgba(var(--special-focus-ring-rgb), 0.24);
+      box-shadow: 0 0 0 0.2rem var(--special-focus-ring-rgb);
     }
 
 .app-toggle-row {
@@ -895,10 +859,10 @@ main {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.35rem 0.55rem;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-header-bg);
   border-radius: 0.375rem;
   color: var(--color-text-on-dark);
-  background: transparent;
+  background: var(--color-header-bg);
   line-height: 1;
 }
 
@@ -906,12 +870,12 @@ main {
   .app-language-button:focus,
   .app-language-button:active {
     color: var(--color-text-on-dark);
-    border-color: transparent;
+    border-color: var(--color-header-bg);
     background: var(--special-tradition-hover);
   }
 
   .app-language-button:focus {
-    box-shadow: 0 0 0 0.2rem rgba(var(--special-focus-ring-rgb), 0.24);
+    box-shadow: 0 0 0 0.2rem var(--special-focus-ring-rgb);
   }
 
 .app-language-menu {
@@ -940,14 +904,8 @@ main {
       background: var(--color-surface-alt);
     }
 
-    .app-language-menu .dropdown-item.active:hover,
     .app-language-menu .dropdown-item.active:focus {
-      color: var(--color-header-bg);
-      background: var(--color-secondary);
-    }
-
-    .app-language-menu .dropdown-item.active:focus {
-      box-shadow: 0 0 0 0.2rem rgba(var(--special-focus-ring-rgb), 0.24);
+      box-shadow: 0 0 0 0.2rem var(--special-focus-ring-rgb);
     }
 
 #blazor-error-ui {
@@ -955,7 +913,6 @@ main {
   background: var(--special-danger-panel-bg);
   bottom: 0;
   box-shadow: 0 -1px 2px var(--special-tradition-hover);
-  ;
   box-sizing: border-box;
   display: none;
   left: 0;
@@ -1002,7 +959,7 @@ main {
   padding: 2rem;
   border: 0;
   border-radius: 0.5rem;
-  box-shadow: 0 3px 6px 2px rgba(var(--brand-tradition), 0.2);
+  box-shadow: 0 3px 6px 2px var(--brand-tradition-40);
   opacity: 0;
   transition: display 0.5s allow-discrete, overlay 0.5s allow-discrete;
   animation: components-reconnect-modal-fadeOutOpacity 0.5s both;
@@ -1014,7 +971,7 @@ main {
 }
 
   #components-reconnect-modal::backdrop {
-    background-color: rgba(var(--brand-tradition), 0.4);
+    background-color: var(--brand-tradition-80);
     animation: components-reconnect-modal-fadeInOpacity 0.5s ease-in-out;
     opacity: 1;
   }

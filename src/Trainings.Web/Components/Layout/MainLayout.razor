@@ -47,58 +47,65 @@
                     <li>
                         <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="@AppIcons.Home me-2" aria-hidden="true"></i>@Localizer["Shared_Dashboard"]</NavLink>
                     </li>
+
                     <AuthorizeView Policy="GroupAdmin">
                         <li>
                             <NavLink class="dropdown-item" href="groups"><i class="@AppIcons.Group me-2" aria-hidden="true"></i>@Localizer["Shared_Groups"]</NavLink>
                         </li>
-                    </AuthorizeView>
-                    <AuthorizeView Policy="GroupAdmin">
                         <li>
                             <NavLink class="dropdown-item" href="users"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>@Localizer["Shared_Users"]</NavLink>
                         </li>
                     </AuthorizeView>
-                    <AuthorizeView Policy="GroupMember">
-                        <li>
-                            <NavLink class="dropdown-item" href="trainings"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Shared_Trainings"]</NavLink>
-                        </li>
-                    </AuthorizeView>
-                    <AuthorizeView Policy="GroupMember">
-                        <li>
-                            <NavLink class="dropdown-item" href="my-registrations"><i class="@AppIcons.ClipboardList me-2" aria-hidden="true"></i>@Localizer["Shared_MyRegistrations"]</NavLink>
-                        </li>
-                    </AuthorizeView>
+
                     <AuthorizeView Policy="GroupTrainer">
                         <li>
                             <NavLink class="dropdown-item" href="plan-training"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Shared_PlanTraining"]</NavLink>
                         </li>
                     </AuthorizeView>
-                    <li><hr class="dropdown-divider" /></li>
-                    <AuthorizeView Policy="SuperAdmin">
+
+                    <AuthorizeView Policy="GroupMember">
                         <li>
-                            <NavLink class="dropdown-item" href="statistics"><i class="@AppIcons.ChartSimple me-2" aria-hidden="true"></i>@Localizer["Shared_Statistics"]</NavLink>
+                            <NavLink class="dropdown-item" href="trainings"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Shared_Trainings"]</NavLink>
+                        </li>
+                        <li>
+                            <NavLink class="dropdown-item" href="my-registrations"><i class="@AppIcons.ClipboardList me-2" aria-hidden="true"></i>@Localizer["Shared_MyRegistrations"]</NavLink>
                         </li>
                     </AuthorizeView>
+
+                    <li><hr class="dropdown-divider" /></li>
+                                        
                     <li>
                         <NavLink class="dropdown-item" href="user-information"><i class="@AppIcons.User me-2" aria-hidden="true"></i>@Localizer["Shared_UserInformation"]</NavLink>
                     </li>
+
                     <AuthorizeView Policy="SuperAdmin">
+                        <li><hr class="dropdown-divider" /></li>
+
                         <li>
-                            <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>@Localizer["Shared_Config"]</NavLink>
+                            <NavLink class="dropdown-item" href="statistics"><i class="@AppIcons.ChartSimple me-2" aria-hidden="true"></i>@Localizer["Shared_Statistics"]</NavLink>
                         </li>
                         <li>
                             <NavLink class="dropdown-item" href="config/locations"><i class="@AppIcons.Location me-2" aria-hidden="true"></i>@Localizer["Shared_Locations"]</NavLink>
                         </li>
                         <li>
+                            <NavLink class="dropdown-item" href="config/mail"><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>@Localizer["Shared_Config"]</NavLink>
+                        </li>
+                        <li>
                             <NavLink class="dropdown-item" href="config/icons"><i class="@AppIcons.CircleInfo me-2" aria-hidden="true"></i>@Localizer["Shared_Icons"]</NavLink>
                         </li>
                     </AuthorizeView>
+
+                    <li><hr class="dropdown-divider" /></li>
+
                     <li>
                         <form method="post" action="/auth/logout" data-enhance="false" class="m-0 p-0">
                             <AntiforgeryToken />
                             <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Shared_Logout"]</button>
                         </form>
                     </li>
+
                     <li><hr class="dropdown-divider" /></li>
+
                     <li>
                         <span class="dropdown-item-text text-muted small d-inline-flex align-items-center">
                             <i class="@($"{AppIcons.Tag} me-2")" aria-hidden="true"></i>@($"v{VersionService.ApplicationVersion}")
@@ -162,9 +169,7 @@
 
     private string CurrentLanguage => PreferenceNavigationService.GetCurrentLanguageCode();
 
-    private string CurrentLanguageDisplayName =>
-        LanguageOptions.FirstOrDefault(x => string.Equals(x.Code, CurrentLanguage, StringComparison.OrdinalIgnoreCase)).DisplayName
-        ?? "EN";
+    private string CurrentLanguageDisplayName => LanguageOptions.FirstOrDefault(x => string.Equals(x.Code, CurrentLanguage, StringComparison.OrdinalIgnoreCase)).DisplayName ?? "EN";
 
     protected override void OnInitialized()
     {
