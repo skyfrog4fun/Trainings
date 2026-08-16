@@ -20,62 +20,37 @@
 <PageTitle>@Localizer["Shared_Dashboard"]</PageTitle>
 
 <div class="container-fluid px-2 px-md-4 dashboard-page">
-    <section class="dashboard-hero-card my-3">
-        <div>
-            <p class="dashboard-hero-kicker mb-1">@Localizer["Shared_Dashboard"]</p>
-            <h2 class="mb-1">@Localizer["HomePage_WelcomeBack"], @_userFirstName!</h2>
-            @if (!string.IsNullOrWhiteSpace(_highestRoleLabel))
-            {
-                <span class="dashboard-highlight-pill">@_highestRoleLabel</span>
-            }
-        </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-md-end">
-            @if (_emailConfirmed)
-            {
-                <span class="dashboard-status-pill dashboard-status-pill-success">
-                    <i class="@AppIcons.Check" aria-hidden="true"></i> @Localizer["HomePage_EmailVerified"]
-                </span>
-            }
-            else
-            {
-                <span class="dashboard-status-pill dashboard-status-pill-danger">
-                    <i class="@AppIcons.XMark" aria-hidden="true"></i> @Localizer["HomePage_EmailNotVerified"]
-                </span>
-                <button type="button" class="btn btn-sm btn-primary" @onclick="ResendVerificationAsync">@Localizer["HomePage_ResendVerification"]</button>
-            }
-        </div>
-    </section>
+
+    <DashboardWelcomeComponent Name="@_userFirstName" HighestRole="@_highestRoleLabel" />
+
+    @if (_emailConfirmed)
+    {
+        <span class="dashboard-status-pill dashboard-status-pill-success mb-3">
+            <i class="@AppIcons.Check" aria-hidden="true"></i> @Localizer["HomePage_EmailVerified"]
+        </span>
+    }
+    else
+    {
+        <span class="dashboard-status-pill dashboard-status-pill-danger mb-3">
+            <i class="@AppIcons.XMark" aria-hidden="true"></i> @Localizer["HomePage_EmailNotVerified"]
+        </span>
+        <button type="button" class="btn btn-sm btn-primary" @onclick="ResendVerificationAsync">@Localizer["HomePage_ResendVerification"]</button>
+    }
 
     <ActionAlert IsSuccess="@_verificationActionSuccess" Message="@_verificationActionMessage" />
 
     <section class="row g-3 mb-4">
         <div class="col-6 col-xl-3">
-            <DashboardStatCard
-                Title='@Localizer["Shared_Groups"]'
-                Value="@GetGroupsStatValue()"
-                Subtitle='@GetGroupsStatSubtitle()'
-                IconClass="@AppIcons.UserGroup"/>
+            <DashboardFigureComponent Title="@Localizer["Shared_Groups"]" Icon="@AppIcons.UserGroup" Value="@GetGroupsStatValue()" Subtitle="@GetGroupsStatSubtitle()" />
         </div>
         <div class="col-6 col-xl-3">
-            <DashboardStatCard
-                Title='@Localizer["Shared_Users"]'
-                Value="@GetUsersStatValue()"
-                Subtitle='@GetUsersStatSubtitle()'
-                IconClass="@AppIcons.Users"/>
+            <DashboardFigureComponent Title="@Localizer["Shared_Users"]" Icon="@AppIcons.Users" Value="@GetUsersStatValue()" Subtitle="@GetUsersStatSubtitle()" />
         </div>
         <div class="col-6 col-xl-3">
-            <DashboardStatCard
-                Title='@Localizer["Shared_Trainings"]'
-                Value="@_myNextTrainings.Count.ToString()"
-                Subtitle='@Localizer["HomePage_MyNextTrainingsEnrolledAssigned"]'
-                IconClass="@AppIcons.CalendarCheck" />
+            <DashboardFigureComponent Title="@Localizer["Shared_Trainings"]" Icon="@AppIcons.CalendarCheck" Value="@_myNextTrainings.Count.ToString()" Subtitle="@Localizer["HomePage_MyNextTrainingsEnrolledAssigned"]" />
         </div>
         <div class="col-6 col-xl-3">
-            <DashboardStatCard
-                Title='@Localizer["HomePage_PendingApprovals"]'
-                Value="@GetPendingStatValue()"
-                Subtitle='@GetPendingStatSubtitle()'
-                IconClass="@AppIcons.UserClock" />
+            <DashboardFigureComponent Title="@Localizer["HomePage_PendingApprovals"]" Icon="@AppIcons.UserClock" Value="@GetPendingStatValue()" Subtitle='@GetPendingStatSubtitle()' />
         </div>
     </section>
 

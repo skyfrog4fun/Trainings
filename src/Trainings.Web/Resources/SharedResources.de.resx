@@ -129,7 +129,7 @@
   <data name="Shared_Trainings" xml:space="preserve">
     <value>Trainings</value>
   </data>
-  <data name="HomePage_WelcomeBack" xml:space="preserve">
+  <data name="DashboardWelcomeComponent_WelcomeBack" xml:space="preserve">
     <value>Willkommen</value>
   </data>
   <data name="HomePage_UpcomingTrainings" xml:space="preserve">
@@ -166,13 +166,13 @@
     <value>Active</value>
   </data>
   <data name="HomePage_AllGroups" xml:space="preserve">
-    <value>All Groups</value>
+    <value>Alle Gruppen</value>
   </data>
   <data name="HomePage_AllTrainings" xml:space="preserve">
-    <value>All Trainings</value>
+    <value>Alle Trainings</value>
   </data>
   <data name="HomePage_BrowseTrainings" xml:space="preserve">
-    <value>Browse Trainings</value>
+    <value>Trainings anzeigen</value>
   </data>
   <data name="Shared_Cancel" xml:space="preserve">
     <value>Cancel</value>
@@ -244,10 +244,10 @@
     <value>Mobile</value>
   </data>
   <data name="HomePage_MyNextTrainingsEnrolledAssigned" xml:space="preserve">
-    <value>Meine naechsten Trainings (angemeldet/zugewiesen)</value>
+    <value>Meine nächsten Trainings (angemeldet/zugewiesen)</value>
   </data>
   <data name="HomePage_MyTrainingsToPlan" xml:space="preserve">
-    <value>My Trainings To Plan</value>
+    <value>Meine Trainings zum planen</value>
   </data>
   <data name="HomePage_Name" xml:space="preserve">
     <value>Name</value>
@@ -295,7 +295,7 @@
     <value>Outstanding Users To Approve</value>
   </data>
   <data name="HomePage_PendingApprovals" xml:space="preserve">
-    <value>Ausstehende Freigaben ({0})</value>
+    <value>Ausstehende Freigaben</value>
   </data>
   <data name="UsersPage_PendingApprovals" xml:space="preserve">
     <value>Ausstehende Freigaben ({0})</value>
@@ -1820,5 +1820,8 @@
   </data>
   <data name="DashboardSystemPanel_CreateTraining" xml:space="preserve">
     <value>Training erstellen</value>
+  </data>
+  <data name="DashboardWelcomeComponent_UnknownUser" xml:space="preserve">
+    <value>Neuling</value>
   </data>
 </root>

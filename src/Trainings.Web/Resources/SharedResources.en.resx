@@ -138,6 +138,18 @@
   <data name="HomePage_ViewAll" xml:space="preserve">
     <value>View All</value>
   </data>
+  <data name="HomePage_QuickAccess" xml:space="preserve">
+    <value>Quick Access</value>
+  </data>
+  <data name="HomePage_NewGroup" xml:space="preserve">
+    <value>New Group</value>
+  </data>
+  <data name="HomePage_NewUser" xml:space="preserve">
+    <value>New User</value>
+  </data>
+  <data name="HomePage_NewTraining" xml:space="preserve">
+    <value>New Training</value>
+  </data>
   <data name="Shared_Add" xml:space="preserve">
     <value>Add</value>
   </data>

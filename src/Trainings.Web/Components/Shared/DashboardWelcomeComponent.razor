@@ -1,0 +1,14 @@
+<section class="dashboard-hero-card my-3">
+    <div class="d-flex flex-wrap align-items-center gap-2">            
+        <h2 class="mb-0 flex-grow-1" style="word-wrap: break-word; min-width: 0;">@Localizer["DashboardWelcomeComponent_WelcomeBack"]@(string.IsNullOrWhiteSpace(Name) ? Localizer["DashboardWelcomeComponent_UnknownUser"] : $", {Name}")!</h2>
+        @if (!string.IsNullOrWhiteSpace(HighestRole))
+        {
+            <span class="dashboard-highlight-pill flex-shrink-0">@HighestRole</span>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public string HighestRole { get; set; } = string.Empty;
+}

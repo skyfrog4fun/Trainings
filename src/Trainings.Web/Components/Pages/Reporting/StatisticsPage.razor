@@ -26,34 +26,19 @@
     {
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["Shared_Groups"]'
-                                   Value="@_stats.TotalGroups.ToString()"
-                                   IconClass="@AppIcons.Group"
-                                   BadgeToneClass="dashboard-icon-badge-secondary" />
+                <DashboardFigureComponent Title="@Localizer["Shared_Groups"]" Icon="@AppIcons.Group" Value="@_stats.TotalGroups.ToString()" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["StatisticsPage_ActiveUsers"]'
-                                   Value="@_stats.ActiveUsers.ToString()"
-                                   IconClass="@AppIcons.Users"
-                                   BadgeToneClass="dashboard-icon-badge-primary" />
+                <DashboardFigureComponent Title="@Localizer["StatisticsPage_ActiveUsers"]" Icon="@AppIcons.Users" Value="@_stats.ActiveUsers.ToString()" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["StatisticsPage_UsersNotInGroup"]'
-                                   Value="@_stats.UsersNotInGroup.ToString()"
-                                   IconClass="@AppIcons.UserMinus"
-                                   BadgeToneClass="dashboard-icon-badge-secondary" />
+                <DashboardFigureComponent Title="@Localizer["StatisticsPage_UsersNotInGroup"]" Icon="@AppIcons.UserMinus" Value="@_stats.UsersNotInGroup.ToString()" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["Shared_Trainings"]'
-                                   Value="@_stats.TotalTrainings.ToString()"
-                                   IconClass="@AppIcons.Fire"
-                                   BadgeToneClass="dashboard-icon-badge-highlight" />
+                <DashboardFigureComponent Title="@Localizer["Shared_Trainings"]" Icon="@AppIcons.Fire" Value="@_stats.TotalTrainings.ToString()" />
             </div>
             <div class="col-12 col-md-6 col-xl-3">
-                <DashboardStatCard Title='@Localizer["StatisticsPage_TotalRegistrations"]'
-                                   Value="@_stats.TotalRegistrations.ToString()"
-                                   IconClass="@AppIcons.ClipboardList"
-                                   BadgeToneClass="dashboard-icon-badge-secondary" />
+                <DashboardFigureComponent Title="@Localizer["StatisticsPage_TotalRegistrations"]" Icon="@AppIcons.ClipboardList" Value="@_stats.TotalRegistrations.ToString()" />
             </div>
         </div>
 
