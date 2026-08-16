@@ -7,27 +7,18 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class PasswordResetService : IPasswordResetService
+public class PasswordResetService(
+    ApplicationDbContext context,
+    IEmailService emailService,
+    IAppRuntimeModeService appRuntimeModeService,
+    IPasswordHasher passwordHasher,
+    IConfiguration configuration) : IPasswordResetService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IEmailService _emailService;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly string _baseUrl;
-
-    public PasswordResetService(
-        ApplicationDbContext context,
-        IEmailService emailService,
-        IAppRuntimeModeService appRuntimeModeService,
-        IPasswordHasher passwordHasher,
-        IConfiguration configuration)
-    {
-        _context = context;
-        _emailService = emailService;
-        _appRuntimeModeService = appRuntimeModeService;
-        _passwordHasher = passwordHasher;
-        _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly string _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
 
     public async Task<EmailSendResult?> RequestResetAsync(string email, CancellationToken ct = default)
     {
@@ -59,7 +50,7 @@ public class PasswordResetService : IPasswordResetService
         _context.PasswordResetTokens.Add(token);
         await _context.SaveChangesAsync(ct);
 
-        var resetLink = $"{_baseUrl}/reset-password?token={token.Token}";
+        string resetLink = $"{_baseUrl}/reset-password?token={token.Token}";
         return await _emailService.SendPasswordResetAsync(user.Email, resetLink, ct);
     }
 

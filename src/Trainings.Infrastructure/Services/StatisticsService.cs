@@ -6,27 +6,22 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class StatisticsService : IStatisticsService
+public class StatisticsService(ApplicationDbContext context) : IStatisticsService
 {
-    private readonly ApplicationDbContext _context;
-
-    public StatisticsService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<StatisticsDto> GetStatisticsAsync(bool isSuperAdmin, IReadOnlyCollection<int> managedGroupIds, CancellationToken ct = default)
     {
         var scopedGroupIds = isSuperAdmin
             ? await _context.Groups.Select(g => g.Id).ToListAsync(ct)
-            : managedGroupIds.Distinct().ToList();
+            : [.. managedGroupIds.Distinct()];
 
         if (scopedGroupIds.Count == 0)
         {
             return new StatisticsDto();
         }
 
-        var currentYear = DateTime.UtcNow.Year;
+        int currentYear = DateTime.UtcNow.Year;
 
         var approvedMembershipsInScope = await _context.GroupMemberships
             .Where(gm =>
@@ -80,7 +75,7 @@ public class StatisticsService : IStatisticsService
 
         var trainingIdsInScope = trainingsInScope.Select(t => t.Id).ToList();
 
-        var totalRegistrations = await _context.Registrations
+        int totalRegistrations = await _context.Registrations
             .CountAsync(r => trainingIdsInScope.Contains(r.TrainingId), ct);
 
         var trainingIdsThisYear = trainingsInScope
@@ -88,16 +83,16 @@ public class StatisticsService : IStatisticsService
             .Select(t => t.Id)
             .ToList();
 
-        var registeredCountThisYear = await _context.Registrations
+        int registeredCountThisYear = await _context.Registrations
             .CountAsync(r =>
                 trainingIdsThisYear.Contains(r.TrainingId) &&
                 r.Status == RegistrationStatus.Registered, ct);
 
-        var avgUsersPerGroup = scopedGroupIds.Count == 0
+        decimal avgUsersPerGroup = scopedGroupIds.Count == 0
             ? 0m
             : Math.Round((decimal)approvedMembershipsInScope.Count / scopedGroupIds.Count, 2);
 
-        var avgParticipantsPerTraining = trainingIdsThisYear.Count == 0
+        decimal avgParticipantsPerTraining = trainingIdsThisYear.Count == 0
             ? 0m
             : Math.Round((decimal)registeredCountThisYear / trainingIdsThisYear.Count, 2);
 

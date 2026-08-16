@@ -18,6 +18,6 @@ public class MailConfiguration
     public MailConfigurationStatus Status { get; set; } = MailConfigurationStatus.Unknown;
     public string? LastError { get; set; }
 
-    public ICollection<GroupMailConfiguration> GroupMailConfigurations { get; set; } = new List<GroupMailConfiguration>();
-    public ICollection<NotificationLog> NotificationLogs { get; set; } = new List<NotificationLog>();
+    public ICollection<GroupMailConfiguration> GroupMailConfigurations { get; set; } = [];
+    public ICollection<NotificationLog> NotificationLogs { get; set; } = [];
 }

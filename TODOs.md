@@ -3,7 +3,7 @@ TODOs
 
 General
 ---
-
+- [] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
 Mail
 ---

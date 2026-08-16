@@ -27,7 +27,7 @@ public class NotificationLogServiceTests
         var service = new NotificationLogService(context);
 
         await service.SetResetPointerLogIdAsync(42, TestContext.Current.CancellationToken);
-        var pointer = await service.GetResetPointerLogIdAsync(TestContext.Current.CancellationToken);
+        int? pointer = await service.GetResetPointerLogIdAsync(TestContext.Current.CancellationToken);
 
         pointer.Should().Be(42);
     }

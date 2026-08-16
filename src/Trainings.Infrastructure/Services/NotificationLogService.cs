@@ -6,14 +6,9 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class NotificationLogService : INotificationLogService
+public class NotificationLogService(ApplicationDbContext context) : INotificationLogService
 {
-    private readonly ApplicationDbContext _context;
-
-    public NotificationLogService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task LogAsync(NotificationAction action, string recipientEmail, int? userId, int? mailConfigurationId, int? groupId, bool isSuccess, string? errorMessage = null, Guid attemptId = default, CancellationToken ct = default)
     {

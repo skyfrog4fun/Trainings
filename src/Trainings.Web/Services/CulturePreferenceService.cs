@@ -4,10 +4,7 @@ namespace Trainings.Web.Services;
 
 public static class CulturePreferenceService
 {
-    public static string NormalizeCulture(string? culture)
-    {
-        return string.Equals(culture, "de", StringComparison.OrdinalIgnoreCase) ? "de" : "en";
-    }
+    public static string NormalizeCulture(string? culture) => string.Equals(culture, "de", StringComparison.OrdinalIgnoreCase) ? "de" : "en";
 
     public static void AppendCultureCookie(HttpResponse response, HttpRequest request, string? culture)
     {

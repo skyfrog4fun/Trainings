@@ -16,28 +16,28 @@ public class RemainingTimeCalculationTests
     [Fact]
     public void RemainingIsPositiveWhenBlocksDontFillTraining()
     {
-        var remaining = CalculateRemaining(90, [20, 30]);
+        int remaining = CalculateRemaining(90, [20, 30]);
         remaining.Should().Be(40);
     }
 
     [Fact]
     public void RemainingIsZeroWhenBlocksExactlyFillTraining()
     {
-        var remaining = CalculateRemaining(60, [30, 20, 10]);
+        int remaining = CalculateRemaining(60, [30, 20, 10]);
         remaining.Should().Be(0);
     }
 
     [Fact]
     public void RemainingIsNegativeWhenBlocksExceedTraining()
     {
-        var remaining = CalculateRemaining(60, [30, 20, 20]);
+        int remaining = CalculateRemaining(60, [30, 20, 20]);
         remaining.Should().Be(-10);
     }
 
     [Fact]
     public void RemainingEqualsFullDurationWhenNoBlocks()
     {
-        var remaining = CalculateRemaining(90, []);
+        int remaining = CalculateRemaining(90, []);
         remaining.Should().Be(90);
     }
 }

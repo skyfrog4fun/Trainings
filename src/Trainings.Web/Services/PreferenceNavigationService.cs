@@ -4,14 +4,11 @@ namespace Trainings.Web.Services;
 
 public static class PreferenceNavigationService
 {
-    public static string GetCurrentLanguageCode()
-    {
-        return CulturePreferenceService.NormalizeCulture(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
-    }
+    public static string GetCurrentLanguageCode() => CulturePreferenceService.NormalizeCulture(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
 
     public static string BuildReturnUrlFromRequest(HttpRequest request, string fallback = "/")
     {
-        var returnUrl = string.IsNullOrWhiteSpace(request.Path.Value)
+        string returnUrl = string.IsNullOrWhiteSpace(request.Path.Value)
             ? fallback
             : request.Path.Value!;
 
@@ -37,14 +34,14 @@ public static class PreferenceNavigationService
 
     public static string BuildCultureUrl(string culture, string returnUrl)
     {
-        var normalizedCulture = CulturePreferenceService.NormalizeCulture(culture);
+        string normalizedCulture = CulturePreferenceService.NormalizeCulture(culture);
         return $"/culture/set?culture={normalizedCulture}&returnUrl={Uri.EscapeDataString(returnUrl)}";
     }
 
     public static string BuildThemeToggleUrl(string? currentTheme, string returnUrl)
     {
-        var normalizedTheme = ThemeService.NormalizeTheme(currentTheme);
-        var targetTheme = normalizedTheme == "dark" ? "light" : "dark";
+        string normalizedTheme = ThemeService.NormalizeTheme(currentTheme);
+        string targetTheme = normalizedTheme == "dark" ? "light" : "dark";
 
         return $"/theme/set?value={targetTheme}&returnUrl={Uri.EscapeDataString(returnUrl)}";
     }

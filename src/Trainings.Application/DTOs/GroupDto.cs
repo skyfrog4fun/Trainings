@@ -17,7 +17,7 @@ public class GroupDto
     public int? MaxParticipants { get; set; }
     public int? CountryId { get; set; }
     public string? CountryCode { get; set; }
-    public List<int> AllowedLocationIds { get; set; } = new();
+    public List<int> AllowedLocationIds { get; set; } = [];
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public int MemberCount { get; set; }
@@ -35,7 +35,7 @@ public class CreateGroupDto
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }
     public int? CountryId { get; set; }
-    public List<int> AllowedLocationIds { get; set; } = new();
+    public List<int> AllowedLocationIds { get; set; } = [];
 }
 
 public class UpdateGroupDto
@@ -50,7 +50,7 @@ public class UpdateGroupDto
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }
     public int? CountryId { get; set; }
-    public List<int> AllowedLocationIds { get; set; } = new();
+    public List<int> AllowedLocationIds { get; set; } = [];
     public bool IsActive { get; set; }
 }
 

@@ -23,7 +23,7 @@ public class TrainingDto
     public string? GroupCountry { get; set; }
     public bool AttendanceLocked { get; set; }
     public DateTime? AttendanceLockedAt { get; set; }
-    public List<TrainingBlockDto> Blocks { get; set; } = new();
+    public List<TrainingBlockDto> Blocks { get; set; } = [];
 }
 
 public class CreateTrainingDto

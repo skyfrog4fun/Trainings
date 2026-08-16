@@ -6,14 +6,9 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(ApplicationDbContext context) : IUserRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public UserRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<User?> GetByIdAsync(int id) =>
         await _context.Users.Include(u => u.Country).FirstOrDefaultAsync(u => u.Id == id);

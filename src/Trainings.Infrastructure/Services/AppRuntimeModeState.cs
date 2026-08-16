@@ -7,21 +7,13 @@ namespace Trainings.Infrastructure.Services;
 /// Initialized from configuration defaults and can be overridden at runtime by a SuperAdmin.
 /// Overrides are lost on application restart.
 /// </summary>
-public sealed class AppRuntimeModeState
+public sealed class AppRuntimeModeState(AppModeOptions defaults)
 {
-    private readonly object _lock = new();
-    private readonly bool _defaultReadOnly;
-    private readonly bool _defaultNoEmail;
-    private bool _readOnly;
-    private bool _noEmail;
-
-    public AppRuntimeModeState(AppModeOptions defaults)
-    {
-        _defaultReadOnly = defaults.ReadOnly;
-        _defaultNoEmail = defaults.NoEmail;
-        _readOnly = defaults.ReadOnly;
-        _noEmail = defaults.NoEmail;
-    }
+    private readonly Lock _lock = new();
+    private readonly bool _defaultReadOnly = defaults.ReadOnly;
+    private readonly bool _defaultNoEmail = defaults.NoEmail;
+    private bool _readOnly = defaults.ReadOnly;
+    private bool _noEmail = defaults.NoEmail;
 
     public (bool ReadOnly, bool NoEmail) GetEffective()
     {

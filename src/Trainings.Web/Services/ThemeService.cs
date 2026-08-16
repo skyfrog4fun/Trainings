@@ -15,18 +15,15 @@ public sealed class ThemeService(IHttpContextAccessor httpContextAccessor, Navig
 
     public void InitializeFromCookie()
     {
-        var cookieValue = _httpContextAccessor.HttpContext?.Request.Cookies[ThemeCookieName];
+        string? cookieValue = _httpContextAccessor.HttpContext?.Request.Cookies[ThemeCookieName];
         CurrentTheme = NormalizeTheme(cookieValue);
     }
 
-    public void ToggleTheme()
-    {
-        SetTheme(CurrentTheme == "dark" ? "light" : "dark");
-    }
+    public void ToggleTheme() => SetTheme(CurrentTheme == "dark" ? "light" : "dark");
 
     public void SetTheme(string? theme)
     {
-        var normalizedTheme = NormalizeTheme(theme);
+        string normalizedTheme = NormalizeTheme(theme);
         if (normalizedTheme == CurrentTheme)
         {
             return;
@@ -35,7 +32,7 @@ public sealed class ThemeService(IHttpContextAccessor httpContextAccessor, Navig
         CurrentTheme = normalizedTheme;
         ThemeChanged?.Invoke();
 
-        var relativeUri = _navigationManager.ToBaseRelativePath(_navigationManager.Uri);
+        string relativeUri = _navigationManager.ToBaseRelativePath(_navigationManager.Uri);
         if (string.IsNullOrWhiteSpace(relativeUri))
         {
             relativeUri = "/";
@@ -45,7 +42,7 @@ public sealed class ThemeService(IHttpContextAccessor httpContextAccessor, Navig
             relativeUri = "/" + relativeUri;
         }
 
-        var setThemeUri = $"/theme/set?value={normalizedTheme}&returnUrl={Uri.EscapeDataString(relativeUri)}";
+        string setThemeUri = $"/theme/set?value={normalizedTheme}&returnUrl={Uri.EscapeDataString(relativeUri)}";
         _navigationManager.NavigateTo(setThemeUri, forceLoad: true);
     }
 
@@ -62,8 +59,5 @@ public sealed class ThemeService(IHttpContextAccessor httpContextAccessor, Navig
         };
     }
 
-    public static string NormalizeTheme(string? theme)
-    {
-        return string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase) ? "dark" : "light";
-    }
+    public static string NormalizeTheme(string? theme) => string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase) ? "dark" : "light";
 }

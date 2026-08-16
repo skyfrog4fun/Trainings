@@ -8,9 +8,9 @@ namespace Trainings.Infrastructure.Migrations
     /// <inheritdoc />
     public partial class InitialSchema : Migration
     {
-        private static readonly string[] UserIdTrainingIdColumns = ["UserId", "TrainingId"];
-        private static readonly string[] GroupIdPriorityColumns = ["GroupId", "Priority"];
-        private static readonly string[] EntityTypeOldSlugColumns = ["EntityType", "OldSlug"];
+        private static readonly string[] _userIdTrainingIdColumns = ["UserId", "TrainingId"];
+        private static readonly string[] _groupIdPriorityColumns = ["GroupId", "Priority"];
+        private static readonly string[] _entityTypeOldSlugColumns = ["EntityType", "OldSlug"];
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -415,7 +415,7 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Attendances_UserId_TrainingId",
                 table: "Attendances",
-                columns: UserIdTrainingIdColumns,
+                columns: _userIdTrainingIdColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -426,7 +426,7 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_GroupMailConfigurations_GroupId_Priority",
                 table: "GroupMailConfigurations",
-                columns: GroupIdPriorityColumns,
+                columns: _groupIdPriorityColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -490,13 +490,13 @@ namespace Trainings.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Registrations_UserId_TrainingId",
                 table: "Registrations",
-                columns: UserIdTrainingIdColumns,
+                columns: _userIdTrainingIdColumns,
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SlugRedirects_EntityType_OldSlug",
                 table: "SlugRedirects",
-                columns: EntityTypeOldSlugColumns);
+                columns: _entityTypeOldSlugColumns);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_GroupId",

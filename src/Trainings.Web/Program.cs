@@ -37,35 +37,29 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("SuperAdmin", policy =>
-        policy.RequireClaim(AppClaimTypes.SuperAdmin, "true"));
-
-    options.AddPolicy("GroupAdmin", policy =>
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("SuperAdmin", policy =>
+        policy.RequireClaim(AppClaimTypes.SuperAdmin, "true"))
+    .AddPolicy("GroupAdmin", policy =>
         policy.RequireAssertion(context =>
             context.User.HasClaim(AppClaimTypes.SuperAdmin, "true") ||
             context.User.Claims.Any(c =>
                 c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) &&
-                c.Value == "Admin")));
-
-    options.AddPolicy("GroupTrainer", policy =>
+                c.Value == "Admin")))
+    .AddPolicy("GroupTrainer", policy =>
         policy.RequireAssertion(context =>
             context.User.HasClaim(AppClaimTypes.SuperAdmin, "true") ||
             context.User.Claims.Any(c =>
                 c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) &&
-                (c.Value == "Admin" || c.Value == "Trainer"))));
-
-    options.AddPolicy("GroupMember", policy =>
+                (c.Value == "Admin" || c.Value == "Trainer"))))
+    .AddPolicy("GroupMember", policy =>
         policy.RequireAssertion(context =>
             context.User.HasClaim(AppClaimTypes.SuperAdmin, "true") ||
             context.User.Claims.Any(c =>
                 c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) &&
-                (c.Value == "Admin" || c.Value == "Trainer" || c.Value == "Participant"))));
-
-    options.AddPolicy("Authenticated", policy =>
+                (c.Value == "Admin" || c.Value == "Trainer" || c.Value == "Participant"))))
+    .AddPolicy("Authenticated", policy =>
         policy.RequireAuthenticatedUser());
-});
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthStateProvider>();
@@ -101,7 +95,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
-        LogStartupFailed(logger, ex);
+        _logStartupFailed(logger, ex);
         throw;
     }
 }
@@ -129,7 +123,7 @@ app.MapGet("/theme/set", async (HttpContext httpContext, IUserService userServic
         ThemeService.CreateCookieOptions(httpContext.Request.IsHttps));
 
     if (httpContext.User.Identity?.IsAuthenticated == true
-        && int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        && int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
     {
         var user = await userService.GetByIdAsync(userId);
         await userService.UpdatePreferencesAsync(userId, user?.Language, normalizedTheme);
@@ -151,7 +145,7 @@ app.MapGet("/culture/set", async (HttpContext httpContext, IUserService userServ
     CulturePreferenceService.AppendCultureCookie(httpContext.Response, httpContext.Request, normalizedCulture);
 
     if (httpContext.User.Identity?.IsAuthenticated == true
-        && int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        && int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
     {
         var user = await userService.GetByIdAsync(userId);
         await userService.UpdatePreferencesAsync(userId, normalizedCulture, user?.Theme);
@@ -220,29 +214,29 @@ app.MapPost("/auth/login", async (HttpContext httpContext, IAntiforgery antiforg
 
     await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-    var preferredTheme = ThemeService.NormalizeTheme(user.Theme);
+    string preferredTheme = ThemeService.NormalizeTheme(user.Theme);
     if (string.IsNullOrWhiteSpace(user.Theme))
     {
-        var requestTheme = httpContext.Request.Cookies[ThemeService.ThemeCookieName];
+        string? requestTheme = httpContext.Request.Cookies[ThemeService.ThemeCookieName];
         preferredTheme = ThemeService.NormalizeTheme(requestTheme);
     }
 
-    var preferredLanguage = CulturePreferenceService.NormalizeCulture(user.Language);
+    string preferredLanguage = CulturePreferenceService.NormalizeCulture(user.Language);
     if (string.IsNullOrWhiteSpace(user.Language))
     {
-        var requestCulture = httpContext.Request.Cookies[".AspNetCore.Culture"];
+        string? requestCulture = httpContext.Request.Cookies[".AspNetCore.Culture"];
         if (!string.IsNullOrWhiteSpace(requestCulture))
         {
-            var segments = requestCulture.Split('|', StringSplitOptions.RemoveEmptyEntries);
-            var uiCultureSegment = segments.FirstOrDefault(s => s.StartsWith("uic=", StringComparison.OrdinalIgnoreCase));
-            var cookieCulture = uiCultureSegment?.Substring(4);
+            string[] segments = requestCulture.Split('|', StringSplitOptions.RemoveEmptyEntries);
+            string? uiCultureSegment = segments.FirstOrDefault(s => s.StartsWith("uic=", StringComparison.OrdinalIgnoreCase));
+            string? cookieCulture = uiCultureSegment?[4..];
             preferredLanguage = CulturePreferenceService.NormalizeCulture(cookieCulture);
         }
         else
         {
-            var acceptLanguage = httpContext.Request.Headers["Accept-Language"].ToString();
-            var rawLanguage = acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-            var normalizedHeaderLanguage = rawLanguage?.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            string? acceptLanguage = httpContext.Request.Headers.AcceptLanguage.ToString();
+            string? rawLanguage = acceptLanguage.Split(',', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            string? normalizedHeaderLanguage = rawLanguage?.Split('-', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
             preferredLanguage = CulturePreferenceService.NormalizeCulture(normalizedHeaderLanguage);
         }
     }
@@ -274,13 +268,13 @@ public partial class Program
 {
     private static string BuildLoginFailureUrl(string returnUrl, string email)
     {
-        var encodedReturnUrl = Uri.EscapeDataString(returnUrl);
-        var encodedEmail = Uri.EscapeDataString(email);
+        string encodedReturnUrl = Uri.EscapeDataString(returnUrl);
+        string encodedEmail = Uri.EscapeDataString(email);
         return $"/login?error=invalid&returnUrl={encodedReturnUrl}&email={encodedEmail}";
     }
 
-    private static readonly Action<ILogger, Exception?> LogStartupFailed =
-        LoggerMessage.Define(LogLevel.Critical, new EventId(1, nameof(LogStartupFailed)),
+    private static readonly Action<ILogger, Exception?> _logStartupFailed =
+        LoggerMessage.Define(LogLevel.Critical, new EventId(1, nameof(_logStartupFailed)),
             "Application startup failed during database initialization");
 }
 

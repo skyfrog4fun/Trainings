@@ -6,16 +6,10 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class LocationService : ILocationService
+public class LocationService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : ILocationService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-
-    public LocationService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
-    {
-        _context = context;
-        _appRuntimeModeService = appRuntimeModeService;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
 
     public async Task<IEnumerable<LocationDto>> GetAllAsync(CancellationToken ct = default)
     {

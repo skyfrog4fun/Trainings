@@ -108,8 +108,8 @@ public class TrainingServiceTests
             DateTime = DateTime.UtcNow,
             Capacity = 10,
             TrainerId = 1,
-            Blocks = new List<TrainingBlock>
-            {
+            Blocks =
+            [
                 new()
                 {
                     Id = 5,
@@ -117,11 +117,11 @@ public class TrainingServiceTests
                     OrderIndex = 2,
                     Title = "Block B",
                     PlannedDurationMinutes = 20,
-                    TrainingBlockTags = new List<TrainingBlockTag>
-                    {
+                    TrainingBlockTags =
+                    [
                         new() { TrainingBlockId = 5, TagId = 999, Tag = null! },
                         new() { TrainingBlockId = 5, TagId = 2, Tag = validTag }
-                    }
+                    ]
                 },
                 new()
                 {
@@ -131,7 +131,7 @@ public class TrainingServiceTests
                     Title = "Block A",
                     PlannedDurationMinutes = 10
                 }
-            }
+            ]
         };
 
         _trainingRepoMock.Setup(r => r.GetByIdAsync(11)).ReturnsAsync(training);
@@ -189,7 +189,7 @@ public class TrainingServiceTests
 
         var weekday = DayOfWeek.Wednesday;
 
-        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        int offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
         if (offset == 0) offset = 7;
         var firstOccurrence = DateTime.Today.AddDays(offset);
 
@@ -217,11 +217,11 @@ public class TrainingServiceTests
 
         var weekday = DayOfWeek.Friday;
 
-        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        int offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
         if (offset == 0) offset = 7;
         var firstOccurrence = DateTime.Today.AddDays(offset);
 
-        for (var week = 0; week < 3; week++)
+        for (int week = 0; week < 3; week++)
         {
             ctx.Trainings.Add(new Training
             {
@@ -249,7 +249,7 @@ public class TrainingServiceTests
 
         var weekday = DayOfWeek.Tuesday;
 
-        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        int offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
         if (offset == 0) offset = 7;
         var firstOccurrence = DateTime.Today.AddDays(offset);
 

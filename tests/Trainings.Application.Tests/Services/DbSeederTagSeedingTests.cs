@@ -25,7 +25,7 @@ public class DbSeederTagSeedingTests
         return ctx;
     }
 
-    private static readonly string[] ExpectedGlobalTags =
+    private static readonly string[] _expectedGlobalTags =
     [
         "Warm-up", "Stretching", "Strength", "Cardio", "Coordination",
         "Technique", "Mental", "Game", "Cool-down", "Other"
@@ -42,7 +42,7 @@ public class DbSeederTagSeedingTests
             return;
         }
 
-        foreach (var name in ExpectedGlobalTags)
+        foreach (string name in _expectedGlobalTags)
         {
             ctx.Tags.Add(new Tag { Name = name, GroupId = null });
         }
@@ -69,7 +69,7 @@ public class DbSeederTagSeedingTests
         await SeedGlobalTagsDirectlyAsync(ctx);
 
         var names = await ctx.Tags.Where(t => t.GroupId == null).Select(t => t.Name).ToListAsync(TestContext.Current.CancellationToken);
-        names.Should().BeEquivalentTo(ExpectedGlobalTags);
+        names.Should().BeEquivalentTo(_expectedGlobalTags);
     }
 
     [Fact]

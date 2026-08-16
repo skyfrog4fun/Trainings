@@ -11,29 +11,21 @@ using Trainings.Domain.Enums;
 
 namespace Trainings.Infrastructure.Services;
 
-public partial class SmtpEmailService : IEmailService
+public partial class SmtpEmailService(
+    IMailConfigurationService mailConfigService,
+    INotificationLogService notificationLogService,
+    IAppRuntimeModeService appRuntimeModeService,
+    ILogger<SmtpEmailService> logger) : IEmailService
 {
-    private readonly IMailConfigurationService _mailConfigService;
-    private readonly INotificationLogService _notificationLogService;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-    private readonly ILogger<SmtpEmailService> _logger;
-
-    public SmtpEmailService(
-        IMailConfigurationService mailConfigService,
-        INotificationLogService notificationLogService,
-        IAppRuntimeModeService appRuntimeModeService,
-        ILogger<SmtpEmailService> logger)
-    {
-        _mailConfigService = mailConfigService;
-        _notificationLogService = notificationLogService;
-        _appRuntimeModeService = appRuntimeModeService;
-        _logger = logger;
-    }
+    private readonly IMailConfigurationService _mailConfigService = mailConfigService;
+    private readonly INotificationLogService _notificationLogService = notificationLogService;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly ILogger<SmtpEmailService> _logger = logger;
 
     public async Task<EmailSendResult> SendPasswordResetAsync(string toEmail, string resetLink, CancellationToken ct = default)
     {
-        var subject = "Password Reset Request";
-        var body = $"""
+        string subject = "Password Reset Request";
+        string body = $"""
             <p>You requested a password reset. Click the link below to reset your password:</p>
             <p><a href="{resetLink}">{resetLink}</a></p>
             <p>This link expires in 1 hour. If you did not request this, please ignore this email.</p>
@@ -43,8 +35,8 @@ public partial class SmtpEmailService : IEmailService
 
     public async Task<EmailSendResult> SendEmailConfirmationAsync(string toEmail, string confirmLink, CancellationToken ct = default)
     {
-        var subject = "Your Trainings Account";
-        var body = $"""
+        string subject = "Your Trainings Account";
+        string body = $"""
             <p>Your Trainings account is ready.</p>
             <p>Please use the link below to verify your email address and finish the sign-in setup:</p>
             <p><a href="{confirmLink}">{confirmLink}</a></p>
@@ -55,12 +47,12 @@ public partial class SmtpEmailService : IEmailService
 
     public async Task<EmailSendResult> SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, string userEmail, string requestedGroups, string userDetailsLink, CancellationToken ct = default)
     {
-        var encodedUserName = WebUtility.HtmlEncode(userName);
-        var encodedUserEmail = WebUtility.HtmlEncode(userEmail);
-        var encodedRequestedGroups = WebUtility.HtmlEncode(requestedGroups);
-        var encodedUserDetailsLink = WebUtility.HtmlEncode(userDetailsLink);
-        var subject = "New Participant Registration Pending Approval";
-        var body = $"""
+        string encodedUserName = WebUtility.HtmlEncode(userName);
+        string encodedUserEmail = WebUtility.HtmlEncode(userEmail);
+        string encodedRequestedGroups = WebUtility.HtmlEncode(requestedGroups);
+        string encodedUserDetailsLink = WebUtility.HtmlEncode(userDetailsLink);
+        string subject = "New Participant Registration Pending Approval";
+        string body = $"""
             <p>A new participant has registered and is pending approval:</p>
             <ul>
                 <li><strong>Name:</strong> {encodedUserName}</li>
@@ -76,9 +68,9 @@ public partial class SmtpEmailService : IEmailService
 
     public async Task<EmailSendResult> SendRegistrationApprovedAsync(string toEmail, string appLink, CancellationToken ct = default)
     {
-        var encodedLink = WebUtility.HtmlEncode(appLink);
-        var subject = "Your registration was approved";
-        var body = $"""
+        string encodedLink = WebUtility.HtmlEncode(appLink);
+        string subject = "Your registration was approved";
+        string body = $"""
             <p>Your registration has been approved.</p>
             <p>You can now sign in and use the Trainings app:</p>
             <p><a href="{encodedLink}">{encodedLink}</a></p>
@@ -89,9 +81,9 @@ public partial class SmtpEmailService : IEmailService
 
     public async Task<EmailSendResult> SendRegistrationRejectedAsync(string toEmail, string appLink, CancellationToken ct = default)
     {
-        var encodedLink = WebUtility.HtmlEncode(appLink);
-        var subject = "Your registration was reviewed";
-        var body = $"""
+        string encodedLink = WebUtility.HtmlEncode(appLink);
+        string subject = "Your registration was reviewed";
+        string body = $"""
             <p>Your registration request was reviewed and is currently not approved.</p>
             <p>If needed, please contact your administrator for details.</p>
             <p>Application link:</p>
@@ -103,11 +95,11 @@ public partial class SmtpEmailService : IEmailService
 
     public async Task<EmailSendResult> SendTrainingCancellationAsync(string toEmail, string trainingTitle, DateTime trainingDateTime, string appLink, CancellationToken ct = default)
     {
-        var encodedTitle = WebUtility.HtmlEncode(trainingTitle);
-        var encodedDateTime = WebUtility.HtmlEncode(trainingDateTime.ToString("f", CultureInfo.InvariantCulture));
-        var encodedLink = WebUtility.HtmlEncode(appLink);
-        var subject = $"Training Cancelled: {trainingTitle}";
-        var body = $"""
+        string encodedTitle = WebUtility.HtmlEncode(trainingTitle);
+        string encodedDateTime = WebUtility.HtmlEncode(trainingDateTime.ToString("f", CultureInfo.InvariantCulture));
+        string encodedLink = WebUtility.HtmlEncode(appLink);
+        string subject = $"Training Cancelled: {trainingTitle}";
+        string body = $"""
             <p>The following training has been cancelled and removed:</p>
             <ul>
                 <li><strong>Title:</strong> {encodedTitle}</li>
@@ -122,8 +114,8 @@ public partial class SmtpEmailService : IEmailService
 
     public async Task<EmailSendResult> SendTestEmailAsync(string toEmail, int? mailConfigurationId = null, CancellationToken ct = default)
     {
-        var subject = "Test Email – SMTP Configuration Check";
-        var body = """
+        string subject = "Test Email – SMTP Configuration Check";
+        string body = """
             <p>This is a test email sent from the Trainings application.</p>
             <p>If you received this message, your SMTP configuration is working correctly.</p>
             """;
@@ -151,7 +143,7 @@ public partial class SmtpEmailService : IEmailService
         if (runtimeMode.IsEmailSuppressed)
         {
             var previewAttemptId = Guid.NewGuid();
-            var message = runtimeMode.IsReadOnly
+            string message = runtimeMode.IsReadOnly
                 ? "Email delivery skipped because the application is running in Read Only mode."
                 : "Email delivery skipped because the application is running in No E-Mail mode.";
 
@@ -182,7 +174,7 @@ public partial class SmtpEmailService : IEmailService
         if (configs.Count == 0)
         {
             LogSmtpNotConfigured(_logger, subject);
-            var message = action == NotificationAction.TestEmail && mailConfigurationId.HasValue
+            string message = action == NotificationAction.TestEmail && mailConfigurationId.HasValue
                 ? "The selected mail configuration could not be found."
                 : "No mail configurations available.";
             await _notificationLogService.LogAsync(action, toEmail, userId, mailConfigurationId, groupId, false, message, attemptId, ct);
@@ -219,7 +211,7 @@ public partial class SmtpEmailService : IEmailService
             }
             catch (Exception ex)
             {
-                var errorMessage = BuildExceptionMessage(ex);
+                string errorMessage = BuildExceptionMessage(ex);
                 LogSmtpError(_logger, config.Host, config.Port, toEmail, subject, errorMessage, ex);
                 await _mailConfigService.RecordFailedSendAsync(config.Id, errorMessage, ct);
                 await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, false, errorMessage, attemptId, ct);

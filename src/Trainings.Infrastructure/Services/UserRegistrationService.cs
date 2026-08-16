@@ -9,33 +9,22 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class UserRegistrationService : IUserRegistrationService
+public class UserRegistrationService(
+    ApplicationDbContext context,
+    IEmailService emailService,
+    IAppRuntimeModeService appRuntimeModeService,
+    IAuthorizationHelper authorizationHelper,
+    IHttpContextAccessor httpContextAccessor,
+    IPasswordHasher passwordHasher,
+    IConfiguration configuration) : IUserRegistrationService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IEmailService _emailService;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-    private readonly IAuthorizationHelper _authorizationHelper;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly string _baseUrl;
-
-    public UserRegistrationService(
-        ApplicationDbContext context,
-        IEmailService emailService,
-        IAppRuntimeModeService appRuntimeModeService,
-        IAuthorizationHelper authorizationHelper,
-        IHttpContextAccessor httpContextAccessor,
-        IPasswordHasher passwordHasher,
-        IConfiguration configuration)
-    {
-        _context = context;
-        _emailService = emailService;
-        _appRuntimeModeService = appRuntimeModeService;
-        _authorizationHelper = authorizationHelper;
-        _httpContextAccessor = httpContextAccessor;
-        _passwordHasher = passwordHasher;
-        _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IAuthorizationHelper _authorizationHelper = authorizationHelper;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly string _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
 
     public async Task<RegistrationResultDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default)
     {
@@ -65,9 +54,9 @@ public class UserRegistrationService : IUserRegistrationService
         _context.Users.Add(user);
         await _context.SaveChangesAsync(ct);
 
-        foreach (var groupId in dto.RequestedGroupIds)
+        foreach (int groupId in dto.RequestedGroupIds)
         {
-            var groupExists = await _context.Groups.AnyAsync(g => g.Id == groupId, ct);
+            bool groupExists = await _context.Groups.AnyAsync(g => g.Id == groupId, ct);
             if (!groupExists)
             {
                 continue;
@@ -95,7 +84,7 @@ public class UserRegistrationService : IUserRegistrationService
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
-        var confirmLink = BuildConfirmLink(confirmToken.Token);
+        string confirmLink = BuildConfirmLink(confirmToken.Token);
         var confirmationEmail = await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
 
         var admins = await _context.Users
@@ -106,8 +95,8 @@ public class UserRegistrationService : IUserRegistrationService
             .Where(g => dto.RequestedGroupIds.Contains(g.Id))
             .Select(g => g.Name)
             .ToListAsync(ct);
-        var requestedGroupsLabel = requestedGroups.Count == 0 ? "No group selected" : string.Join(", ", requestedGroups);
-        var userDetailsLink = BuildUserDetailsLink(user.Id);
+        string requestedGroupsLabel = requestedGroups.Count == 0 ? "No group selected" : string.Join(", ", requestedGroups);
+        string userDetailsLink = BuildUserDetailsLink(user.Id);
 
         foreach (var admin in admins)
         {
@@ -281,19 +270,19 @@ public class UserRegistrationService : IUserRegistrationService
         _context.EmailConfirmationTokens.Add(confirmToken);
         await _context.SaveChangesAsync(ct);
 
-        var confirmLink = BuildConfirmLink(confirmToken.Token);
+        string confirmLink = BuildConfirmLink(confirmToken.Token);
         return await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
     }
 
     private string BuildConfirmLink(string token)
     {
-        var baseUrl = BuildAppBaseUrl();
+        string baseUrl = BuildAppBaseUrl();
         return $"{baseUrl}/confirm-email?token={token}";
     }
 
     private string BuildUserDetailsLink(int userId)
     {
-        var baseUrl = BuildAppBaseUrl();
+        string baseUrl = BuildAppBaseUrl();
         return $"{baseUrl}/users?editUserId={userId}";
     }
 
@@ -316,7 +305,7 @@ public class UserRegistrationService : IUserRegistrationService
             return null;
         }
 
-        return _authorizationHelper.GetGroupIdsForRole(user, "Admin").ToHashSet();
+        return [.. _authorizationHelper.GetGroupIdsForRole(user, "Admin")];
     }
 
     private static UserDto MapToDto(User user) => new()

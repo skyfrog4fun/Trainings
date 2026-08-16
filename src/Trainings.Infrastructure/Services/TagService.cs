@@ -6,14 +6,9 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class TagService : ITagService
+public class TagService(ApplicationDbContext context) : ITagService
 {
-    private readonly ApplicationDbContext _context;
-
-    public TagService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<IEnumerable<TagDto>> GetAllAsync(CancellationToken ct = default)
     {

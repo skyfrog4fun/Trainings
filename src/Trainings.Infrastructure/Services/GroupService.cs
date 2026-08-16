@@ -7,16 +7,10 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class GroupService : IGroupService
+public class GroupService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : IGroupService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-
-    public GroupService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
-    {
-        _context = context;
-        _appRuntimeModeService = appRuntimeModeService;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
 
     public async Task<IEnumerable<GroupDto>> GetAllAsync(CancellationToken ct = default)
     {
@@ -56,7 +50,7 @@ public class GroupService : IGroupService
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
+        string slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
         var group = new Group
         {
             Name = dto.Name,
@@ -99,8 +93,8 @@ public class GroupService : IGroupService
             .FirstOrDefaultAsync(g => g.Id == dto.Id, ct)
             ?? throw new InvalidOperationException($"Group {dto.Id} not found.");
 
-        var oldSlug = group.Slug;
-        var newSlug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
+        string oldSlug = group.Slug;
+        string newSlug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : GenerateSlug(dto.Slug);
 
         if (!string.Equals(oldSlug, newSlug, StringComparison.Ordinal) && !string.IsNullOrEmpty(oldSlug))
         {
@@ -252,7 +246,7 @@ public class GroupService : IGroupService
 
     private static string GenerateSlug(string name)
     {
-        var slug = name.ToLowerInvariant()
+        string slug = name.ToLowerInvariant()
             .Replace("ä", "ae")
             .Replace("ö", "oe")
             .Replace("ü", "ue")
@@ -260,7 +254,7 @@ public class GroupService : IGroupService
 
         // Replace any non-alphanumeric characters with hyphens
         var builder = new System.Text.StringBuilder(slug.Length);
-        foreach (var c in slug)
+        foreach (char c in slug)
         {
             if (char.IsLetterOrDigit(c))
             {
@@ -297,7 +291,7 @@ public class GroupService : IGroupService
         MaxParticipants = group.MaxParticipants,
         CountryId = group.CountryId,
         CountryCode = group.Country?.Code,
-        AllowedLocationIds = group.AllowedLocations.Select(x => x.LocationId).ToList(),
+        AllowedLocationIds = [.. group.AllowedLocations.Select(x => x.LocationId)],
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,
         MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved)

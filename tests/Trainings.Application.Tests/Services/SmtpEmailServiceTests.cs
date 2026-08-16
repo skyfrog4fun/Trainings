@@ -121,20 +121,14 @@ public class SmtpEmailServiceTests
         return context;
     }
 
-    private sealed class TestableSmtpEmailService : SmtpEmailService
+    private sealed class TestableSmtpEmailService(
+        MailConfigurationService mailConfigService,
+        NotificationLogService notificationLogService,
+        IAppRuntimeModeService appRuntimeModeService,
+        ILogger<SmtpEmailService> logger,
+        IReadOnlyDictionary<int, SmtpEmailServiceTests.SendOutcome> outcomes) : SmtpEmailService(mailConfigService, notificationLogService, appRuntimeModeService, logger)
     {
-        private readonly IReadOnlyDictionary<int, SendOutcome> _outcomes;
-
-        public TestableSmtpEmailService(
-            MailConfigurationService mailConfigService,
-            NotificationLogService notificationLogService,
-            IAppRuntimeModeService appRuntimeModeService,
-            ILogger<SmtpEmailService> logger,
-            IReadOnlyDictionary<int, SendOutcome> outcomes)
-            : base(mailConfigService, notificationLogService, appRuntimeModeService, logger)
-        {
-            _outcomes = outcomes;
-        }
+        private readonly IReadOnlyDictionary<int, SendOutcome> _outcomes = outcomes;
 
         protected override Task SendViaConfigAsync(MailConfiguration config, string toEmail, string subject, string htmlBody, CancellationToken ct)
         {

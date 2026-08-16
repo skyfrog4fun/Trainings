@@ -6,18 +6,11 @@ using Trainings.Domain.Interfaces;
 
 namespace Trainings.Application.Services;
 
-public class RegistrationService : IRegistrationService
+public class RegistrationService(IRegistrationRepository registrationRepository, ITrainingRepository trainingRepository, IAppRuntimeModeService appRuntimeModeService) : IRegistrationService
 {
-    private readonly IRegistrationRepository _registrationRepository;
-    private readonly ITrainingRepository _trainingRepository;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-
-    public RegistrationService(IRegistrationRepository registrationRepository, ITrainingRepository trainingRepository, IAppRuntimeModeService appRuntimeModeService)
-    {
-        _registrationRepository = registrationRepository;
-        _trainingRepository = trainingRepository;
-        _appRuntimeModeService = appRuntimeModeService;
-    }
+    private readonly IRegistrationRepository _registrationRepository = registrationRepository;
+    private readonly ITrainingRepository _trainingRepository = trainingRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
 
     public async Task<IEnumerable<RegistrationDto>> GetByUserIdAsync(int userId)
     {
@@ -39,7 +32,7 @@ public class RegistrationService : IRegistrationService
             ?? throw new InvalidOperationException("Training not found.");
 
         var now = DateTime.UtcNow;
-        var isOpen = training.Status == TrainingStatus.Planned
+        bool isOpen = training.Status == TrainingStatus.Planned
             ? training.DateTime >= now && training.DateTime <= now.AddDays(28)
             : training.DateTime >= now && training.DateTime <= now.AddDays(4);
         if (!isOpen)
@@ -47,7 +40,7 @@ public class RegistrationService : IRegistrationService
             throw new InvalidOperationException("Registration is not open for this training.");
         }
 
-        var activeRegistrations = (await _registrationRepository.GetByTrainingIdAsync(trainingId))
+        int activeRegistrations = (await _registrationRepository.GetByTrainingIdAsync(trainingId))
             .Count(r => r.Status == RegistrationStatus.Registered);
         if (activeRegistrations >= training.Capacity)
             throw new InvalidOperationException("Training is at full capacity.");

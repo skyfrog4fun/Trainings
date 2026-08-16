@@ -75,7 +75,7 @@ public class AttendanceServiceTests
     [Fact]
     public async Task GetByTrainingIdAsyncReturnsEmpty()
     {
-        _repoMock.Setup(r => r.GetByTrainingIdAsync(42)).ReturnsAsync(new List<Attendance>());
+        _repoMock.Setup(r => r.GetByTrainingIdAsync(42)).ReturnsAsync([]);
         var service = CreateService();
 
         var result = await service.GetByTrainingIdAsync(42);

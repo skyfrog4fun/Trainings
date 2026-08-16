@@ -64,7 +64,7 @@ public class UserServiceTests
     public async Task ValidatePasswordAsyncReturnsFalseWhenUserNotFound()
     {
         _userRepoMock.Setup(r => r.GetByEmailAsync("noone@example.com")).ReturnsAsync((User?)null);
-        var result = await _service.ValidatePasswordAsync("noone@example.com", "pass");
+        bool result = await _service.ValidatePasswordAsync("noone@example.com", "pass");
         result.Should().BeFalse();
     }
 
@@ -74,7 +74,7 @@ public class UserServiceTests
         var user = new User { Email = "user@example.com", PasswordHash = "hash", IsActive = true };
         _userRepoMock.Setup(r => r.GetByEmailAsync("user@example.com")).ReturnsAsync(user);
         _hasherMock.Setup(h => h.Verify("pass", "hash")).Returns(true);
-        var result = await _service.ValidatePasswordAsync("user@example.com", "pass");
+        bool result = await _service.ValidatePasswordAsync("user@example.com", "pass");
         result.Should().BeTrue();
     }
 
@@ -83,7 +83,7 @@ public class UserServiceTests
     {
         var user = new User { Email = "user@example.com", PasswordHash = "hash", IsActive = false };
         _userRepoMock.Setup(r => r.GetByEmailAsync("user@example.com")).ReturnsAsync(user);
-        var result = await _service.ValidatePasswordAsync("user@example.com", "pass");
+        bool result = await _service.ValidatePasswordAsync("user@example.com", "pass");
         result.Should().BeFalse();
     }
 

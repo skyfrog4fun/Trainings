@@ -5,14 +5,9 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Repositories;
 
-public class AttendanceRepository : IAttendanceRepository
+public class AttendanceRepository(ApplicationDbContext context) : IAttendanceRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public AttendanceRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<Attendance?> GetByIdAsync(int id) =>
         await _context.Attendances.FindAsync(id);

@@ -15,5 +15,5 @@ public class TrainingBlock
     public TrainingBlock? SourceBlock { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ICollection<TrainingBlockTag> TrainingBlockTags { get; set; } = new List<TrainingBlockTag>();
+    public ICollection<TrainingBlockTag> TrainingBlockTags { get; set; } = [];
 }

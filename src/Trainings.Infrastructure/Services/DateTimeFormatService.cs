@@ -4,18 +4,13 @@ using Trainings.Application.Interfaces;
 
 namespace Trainings.Infrastructure.Services;
 
-public class DateTimeFormatService : IDateTimeFormatService
+public class DateTimeFormatService(IConfiguration configuration) : IDateTimeFormatService
 {
-    private readonly string _defaultCountry;
-
-    public DateTimeFormatService(IConfiguration configuration)
-    {
-        _defaultCountry = (configuration["App:DefaultCountry"] ?? "CH").Trim().ToUpperInvariant();
-    }
+    private readonly string _defaultCountry = (configuration["App:DefaultCountry"] ?? "CH").Trim().ToUpperInvariant();
 
     public CultureInfo GetCultureForCountry(string? countryCode)
     {
-        var code = string.IsNullOrWhiteSpace(countryCode)
+        string code = string.IsNullOrWhiteSpace(countryCode)
             ? _defaultCountry
             : countryCode.Trim().ToUpperInvariant();
 

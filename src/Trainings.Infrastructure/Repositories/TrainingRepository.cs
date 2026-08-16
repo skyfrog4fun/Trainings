@@ -5,14 +5,9 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Repositories;
 
-public class TrainingRepository : ITrainingRepository
+public class TrainingRepository(ApplicationDbContext context) : ITrainingRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public TrainingRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<Training?> GetByIdAsync(int id) =>
         await _context.Trainings

@@ -6,24 +6,16 @@ using Trainings.Domain.Interfaces;
 
 namespace Trainings.Application.Services;
 
-public class UserService : IUserService
+public class UserService(
+    IUserRepository userRepository,
+    IAppRuntimeModeService appRuntimeModeService,
+    IPasswordHasher passwordHasher,
+    ICurrentUserContext currentUserContext) : IUserService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly ICurrentUserContext _currentUserContext;
-
-    public UserService(
-        IUserRepository userRepository,
-        IAppRuntimeModeService appRuntimeModeService,
-        IPasswordHasher passwordHasher,
-        ICurrentUserContext currentUserContext)
-    {
-        _userRepository = userRepository;
-        _appRuntimeModeService = appRuntimeModeService;
-        _passwordHasher = passwordHasher;
-        _currentUserContext = currentUserContext;
-    }
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly ICurrentUserContext _currentUserContext = currentUserContext;
 
     public async Task<UserDto?> GetByIdAsync(int id)
     {
@@ -98,7 +90,7 @@ public class UserService : IUserService
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var userId = _currentUserContext.GetCurrentUserId();
+        int? userId = _currentUserContext.GetCurrentUserId();
         if (!userId.HasValue)
         {
             throw new InvalidOperationException("Authenticated user context is required.");
