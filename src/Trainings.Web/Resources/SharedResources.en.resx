@@ -129,7 +129,7 @@
   <data name="Shared_Trainings" xml:space="preserve">
     <value>Trainings</value>
   </data>
-  <data name="HomePage_WelcomeBack" xml:space="preserve">
+  <data name="DashboardWelcomeComponent_WelcomeBack" xml:space="preserve">
     <value>Welcome back</value>
   </data>
   <data name="HomePage_UpcomingTrainings" xml:space="preserve">
@@ -137,18 +137,6 @@
   </data>
   <data name="HomePage_ViewAll" xml:space="preserve">
     <value>View All</value>
-  </data>
-  <data name="HomePage_QuickAccess" xml:space="preserve">
-    <value>Quick Access</value>
-  </data>
-  <data name="HomePage_NewGroup" xml:space="preserve">
-    <value>New Group</value>
-  </data>
-  <data name="HomePage_NewUser" xml:space="preserve">
-    <value>New User</value>
-  </data>
-  <data name="HomePage_NewTraining" xml:space="preserve">
-    <value>New Training</value>
   </data>
   <data name="Shared_Add" xml:space="preserve">
     <value>Add</value>
@@ -1203,9 +1191,6 @@
   <data name="TrainingsPage_AllTrainers" xml:space="preserve">
     <value>All Trainers</value>
   </data>
-  <data name="DashboardSystemPanel_CreateGroup" xml:space="preserve">
-    <value>Create Group</value>
-  </data>
   <data name="Shared_Slug" xml:space="preserve">
     <value>Slug</value>
   </data>
@@ -1803,34 +1788,16 @@
   <data name="TrainingDetailPage_Register" xml:space="preserve">
     <value>Register</value>
   </data>
-  <data name="DashboardSystemPanel_SystemOverview" xml:space="preserve">
-    <value>System Overview</value>
+  <data name="DashboardWelcomeComponent_UnknownUser" xml:space="preserve">
+    <value>Stranger</value>
   </data>
-  <data name="DashboardSystemPanel_OpenMailConfigurationOverview" xml:space="preserve">
-    <value>Mail configuration overview</value>
+  <data name="HomePage_NewGroup" xml:space="preserve">
+    <value>New Group</value>
   </data>
-  <data name="DashboardSystemPanel_CreateMailConfiguration" xml:space="preserve">
-    <value>Create mail configuration</value>
+  <data name="HomePage_NewUser" xml:space="preserve">
+    <value>New User</value>
   </data>
-  <data name="DashboardSystemPanel_OpenLocationsOverview" xml:space="preserve">
-    <value>Locations overview</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateLocation" xml:space="preserve">
-    <value>Create location</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenGroupsOverview" xml:space="preserve">
-    <value>Groups overview</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenUsersOverview" xml:space="preserve">
-    <value>Users overview</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateUser" xml:space="preserve">
-    <value>Create user</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenTrainingsOverview" xml:space="preserve">
-    <value>Trainings overview</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateTraining" xml:space="preserve">
-    <value>Create training</value>
+  <data name="HomePage_NewTraining" xml:space="preserve">
+    <value>New Training</value>
   </data>
 </root>

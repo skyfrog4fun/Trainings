@@ -1191,9 +1191,6 @@
   <data name="TrainingsPage_AllTrainers" xml:space="preserve">
     <value>All Trainers</value>
   </data>
-  <data name="DashboardSystemPanel_CreateGroup" xml:space="preserve">
-    <value>Gruppe erstellen</value>
-  </data>
   <data name="Shared_Slug" xml:space="preserve">
     <value>Slug</value>
   </data>
@@ -1791,37 +1788,16 @@
   <data name="TrainingDetailPage_Register" xml:space="preserve">
     <value>Anmelden</value>
   </data>
-  <data name="DashboardSystemPanel_SystemOverview" xml:space="preserve">
-    <value>Systemübersicht</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenMailConfigurationOverview" xml:space="preserve">
-    <value>Mail-Konfigurationsübersicht</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateMailConfiguration" xml:space="preserve">
-    <value>Mail-Konfiguration erstellen</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenLocationsOverview" xml:space="preserve">
-    <value>Standorteübersicht</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateLocation" xml:space="preserve">
-    <value>Ort erstellen</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenGroupsOverview" xml:space="preserve">
-    <value>Gruppenübersicht</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenUsersOverview" xml:space="preserve">
-    <value>Benutzerübersicht</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateUser" xml:space="preserve">
-    <value>Benutzer erstellen</value>
-  </data>
-  <data name="DashboardSystemPanel_OpenTrainingsOverview" xml:space="preserve">
-    <value>Trainingsübersicht</value>
-  </data>
-  <data name="DashboardSystemPanel_CreateTraining" xml:space="preserve">
-    <value>Training erstellen</value>
-  </data>
   <data name="DashboardWelcomeComponent_UnknownUser" xml:space="preserve">
     <value>Neuling</value>
+  </data>
+  <data name="HomePage_NewGroup" xml:space="preserve">
+    <value>Neue Gruppe</value>
+  </data>
+  <data name="HomePage_NewUser" xml:space="preserve">
+    <value>Neuer Benutzer</value>
+  </data>
+  <data name="HomePage_NewTraining" xml:space="preserve">
+    <value>Neues Training</value>
   </data>
 </root>

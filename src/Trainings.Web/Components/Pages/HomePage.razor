@@ -83,18 +83,6 @@
     </section>
 
     <div class="row g-3 mb-4">
-        @if (_isSuperAdmin)
-        {
-            <div class="col-12 col-xl-6">
-                <DashboardSystemPanel
-                    MailConfigurationCount="@_mailConfigurationCount"
-                    LocationCount="@_locationCount"
-                    GroupCount="@_groupCount"
-                    UserCount="@_userCount"
-                    TrainingCount="@_trainingCount" />
-            </div>
-        }
-
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header dashboard-card-header">
