@@ -1,0 +1,12 @@
+<a href="@Link" class="@CssClassValue">@Text</a>
+
+@code {
+    [Parameter, EditorRequired] public string Link { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+
+    [Parameter] public string? AdditionalCssClass { get; set; }
+
+    private string CssClassValue => string.IsNullOrWhiteSpace(AdditionalCssClass)
+        ? "text-decoration-none small"
+        : $"text-decoration-none small {AdditionalCssClass}";
+}

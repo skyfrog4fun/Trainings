@@ -32,7 +32,7 @@
                 </ul>
             </div>
 
-            <a class="btn app-theme-button"
+            <a class="btn btn-sm app-theme-button"
                href="@BuildThemeToggleUrl()"
                role="switch"
                aria-checked="@IsDarkTheme"
@@ -40,7 +40,7 @@
                 <i class="fa-solid @(IsDarkTheme ? "fa-moon" : "fa-sun")" aria-hidden="true"></i>
             </a>
             <div class="dropdown">
-                <button class="btn app-menu-button" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label='@Localizer["Shared_OpenMenu"]'>
+                <button class="btn btn-sm app-menu-button" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label='@Localizer["Shared_OpenMenu"]'>
                     <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm app-menu-dropdown">
@@ -100,7 +100,7 @@
                     <li>
                         <form method="post" action="/auth/logout" data-enhance="false" class="m-0 p-0">
                             <AntiforgeryToken />
-                            <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Shared_Logout"]</button>
+                            <button type="submit" class="dropdown-item"><i class="@AppIcons.Logout me-2" aria-hidden="true"></i>@Localizer["Shared_Logout"]</button>
                         </form>
                     </li>
 

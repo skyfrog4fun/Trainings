@@ -1,4 +1,4 @@
-﻿@page "/login"
+@page "/login"
 
 @layout AnonymousLayout
 
@@ -16,7 +16,7 @@
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
             <div class="card shadow">
                 <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4"><img class="icon-login" src="logo.svg" alt="@Localizer["LoginPage_Logo"]" />rainings</h2>
+                    <h2 class="card-title-brand text-center mb-4"><img class="icon-login" src="logo.svg" alt="@Localizer["LoginPage_Logo"]" />rainings</h2>
 
                     <form method="post" action="/auth/login" data-enhance="false">
                         <AntiforgeryToken />
@@ -39,8 +39,8 @@
                     }
 
                     <div class="row mt-2">
-                        <a href="/register" class="col-6 text-start text-decoration-none small">@Localizer["LoginPage_Register"]</a>
-                        <a href="/forgot-password" class="col-6 text-end text-decoration-none small">@Localizer["LoginPage_ForgotPassword"]</a>
+                        <TextLinkComponent Link="/register" Text="@Localizer["LoginPage_Register"]" AdditionalCssClass="col-6 text-start" />
+                        <TextLinkComponent Link="/forgot-password" Text="@Localizer["LoginPage_ForgotPassword"]" AdditionalCssClass="col-6 text-end" />
                     </div>
 
                     @if (ShowInitialCredentials)

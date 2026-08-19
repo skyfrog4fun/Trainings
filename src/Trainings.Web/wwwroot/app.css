@@ -70,14 +70,15 @@
   --bs-body-bg: var(--color-bg);
   --bs-body-color: var(--color-text);
   --bs-secondary: var(--color-secondary);
-  --bs-link-color: var(--color-primary);
-  --bs-link-hover-color: var(--color-primary-hover);
+  --bs-link-color: var(--brand-community);
+  --bs-link-hover-color: var(--brand-community-60);
   --bs-success: var(--color-success);
   --bs-info: var(--color-highlight);
   --bs-warning: var(--special-warning);
   --bs-danger: var(--color-danger);
   --bs-light: var(--brand-appreciation-20);
   --bs-dark: var(--brand-tradition);
+
 }
 
 [data-theme="dark"] {
@@ -99,8 +100,17 @@
   --bs-body-bg: var(--color-bg);
   --bs-body-color: var(--color-text);
   --bs-secondary: var(--color-secondary);
-  --bs-link-color: var(--color-primary);
-  --bs-link-hover-color: var(--color-primary-hover);
+  --bs-link-color: var(--brand-community);
+  --bs-link-hover-color: var(--brand-community-60);
+}
+
+a:not(.btn):visited {
+  color: var(--bs-link-color);
+}
+
+a:not(.btn):hover,
+a:not(.btn):visited:hover {
+  color: var(--bs-link-hover-color);
 }
 
 h1:focus {
@@ -708,48 +718,49 @@ main {
   background: var(--color-header-bg);
 }
 
-.app-navbar-brand {
-  color: var(--color-text-on-dark);
+a.app-navbar-brand,
+a.app-navbar-brand:visited,
+a.app-navbar-brand:hover,
+a.app-navbar-brand:visited:hover,
+a.app-navbar-brand:focus {
+  color: var(--brand-community);
+  opacity: 1;
 }
-
-  .app-navbar-brand:hover,
-  .app-navbar-brand:focus {
-    color: var(--color-text-on-dark);
-    opacity: 0.92;
-  }
 
 .app-menu-button {
-  border: 1px solid var(--color-header-bg);
-  color: var(--color-text-on-dark);
-  background: var(--color-header-bg);
-}
-
-  .app-menu-button:hover,
-  .app-menu-button:focus {
-    border-color: var(--color-text-on-dark);
-    color: var(--color-text-on-dark);
-    background: var(--special-tradition-hover);
-  }
-
-.app-theme-button {
+  --bs-btn-active-color: var(--color-text-on-dark);
+  --bs-btn-active-bg: var(--special-tradition-hover);
+  --bs-btn-active-border-color: var(--color-header-bg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
   border: 1px solid var(--color-header-bg);
+  border-radius: 0.375rem;
+  color: var(--color-text-on-dark);
+  background: var(--color-header-bg);
+  line-height: 1;
+}
+
+
+.app-theme-button {
+  --bs-btn-active-color: var(--color-text-on-dark);
+  --bs-btn-active-bg: var(--special-tradition-hover);
+  --bs-btn-active-border-color: var(--color-header-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--color-header-bg);
+  border-radius: 0.375rem;
   background: var(--color-header-bg);
   color: var(--color-text-on-dark);
-  padding: 0.375rem 0.5rem;
   line-height: 1;
   font-size: 1.1rem;
   text-decoration: none;
-  cursor: pointer;
 }
-
-  .app-theme-button:hover,
-  .app-theme-button:focus-visible {
-    color: var(--color-text-on-dark);
-    background: var(--special-tradition-hover);
-  }
 
 .app-menu-dropdown {
   min-width: 16rem;
@@ -796,6 +807,9 @@ main {
 }
 
 .app-language-button {
+  --bs-btn-active-color: var(--color-text-on-dark);
+  --bs-btn-active-bg: var(--special-tradition-hover);
+  --bs-btn-active-border-color: var(--color-header-bg);
   min-width: 4.8rem;
   display: inline-flex;
   align-items: center;
@@ -811,14 +825,21 @@ main {
 
   .app-language-button:hover,
   .app-language-button:focus,
-  .app-language-button:active {
+  .app-language-button:focus-visible,
+  .app-language-button.show,
+  .app-theme-button:hover,
+  .app-theme-button:focus,
+  .app-theme-button:focus-visible,
+  .app-menu-button:hover,
+  .app-menu-button:focus,
+  .app-menu-button:focus-visible,
+  .app-menu-button.show {
     color: var(--color-text-on-dark);
     border-color: var(--color-header-bg);
     background: var(--special-tradition-hover);
-  }
-
-  .app-language-button:focus {
-    box-shadow: 0 0 0 0.2rem var(--special-focus-ring-rgb);
+    opacity: 1;
+    box-shadow: none;
+    outline: none;
   }
 
 .app-language-menu {
@@ -850,6 +871,13 @@ main {
     .app-language-menu .dropdown-item.active:focus {
       box-shadow: 0 0 0 0.2rem var(--special-focus-ring-rgb);
     }
+
+.card-title-brand {
+  color: var(--brand-community);
+  opacity: 1;
+}
+
+
 
 #blazor-error-ui {
   color-scheme: light only;
