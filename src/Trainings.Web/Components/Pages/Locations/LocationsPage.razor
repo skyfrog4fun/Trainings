@@ -1,5 +1,8 @@
 @page "/config/locations"
 
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+
 @rendermode InteractiveServer
 
 @attribute [Authorize(Policy = "SuperAdmin")]
@@ -7,50 +10,72 @@
 @inject ILocationService LocationService
 @inject IGroupService GroupService
 @inject ICountryService CountryService
+@inject IDateTimeFormatService DateTimeFormatService
 
 <PageTitle>@Localizer["LocationsPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <div class="d-flex justify-content-between align-items-center my-3">
-        <h2><i class="@AppIcons.Location me-2" aria-hidden="true"></i>@Localizer["LocationsPage_Heading"]</h2>
-        <button class="btn btn-success" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["LocationsPage_NewLocationButton"]</button>
-    </div>
+    <PageTitleComponent Icon="@AppIcons.Location"
+                         Text="@Localizer["LocationsPage_Heading"]"
+                         ButtonText="@Localizer["Shared_New"]"
+                         ButtonIcon="@AppIcons.Plus"
+                         OnButtonClick="ShowCreateForm" />
 
     @if (_showForm)
     {
-        <div class="card mb-4">
+        <div class="card mb-4 location-edit-form-card">
             <div class="card-body">
                 <h5>@(_editId == 0 ? Localizer["LocationsPage_CreateTitle"] : Localizer["LocationsPage_EditTitle"])</h5>
-                <div class="row g-2">
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["LocationsPage_NameLabel"]</label>
-                        <input class="form-control" @bind="_formName" />
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["LocationsPage_CityNameLabel"]</label>
-                        <input class="form-control" @bind="_formCityName" />
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["LocationsPage_CountryLabel"]</label>
-                        <select class="form-select" @bind="_formCountryId">
-                            <option value="">@Localizer["LocationsPage_SelectCountry"]</option>
-                            @foreach (var country in _countries)
-                            {
-                                <option value="@country.Id">@country.Code — @country.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" id="isSystemWide" type="checkbox" @bind="_formIsSystemWide" />
-                            <label class="form-check-label" for="isSystemWide">@Localizer["LocationsPage_SystemWideLabel"]</label>
+                <EditForm Model="_formModel" OnValidSubmit="Save">
+                    <DataAnnotationsValidator />
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["LocationsPage_NameLabel"]</label>
+                            <InputText class="form-control" @bind-Value="_formModel.Name" />
+                            <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
                         </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["LocationsPage_CityNameLabel"]</label>
+                            <InputText class="form-control" @bind-Value="_formModel.CityName" />
+                            <ValidationMessage For="() => _formModel.CityName" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["LocationsPage_CountryLabel"]</label>
+                            <select class="form-select" @bind="_formModel.CountryId">
+                                <option value="">@Localizer["LocationsPage_SelectCountry"]</option>
+                                @foreach (var country in _countries)
+                                {
+                                    <option value="@country.Id">@country.Code — @country.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-@(_editId != 0 ? 9 : 12) mt-3 d-flex">
+                            <div class="form-check">
+                                <input class="form-check-input" id="isSystemWide" type="checkbox" @bind="_formModel.IsSystemWide" />
+                                <label class="form-check-label" for="isSystemWide">@Localizer["LocationsPage_SystemWideLabel"]</label>
+                            </div>                                
+                        </div>
+                        @if (_editId != 0)
+                        {
+                            <div class="col-3 mt-3 d-flex justify-content-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="isActive" type="checkbox" @bind="_formModel.IsActive" />
+                                    <label class="form-check-label" for="isActive">@Localizer["Shared_Active"]</label>
+                                </div>
+                            </div>
+                        }
                     </div>
-                </div>
-                <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="Save"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["LocationsPage_SaveButton"]</button>
-                    <button class="btn btn-secondary" @onclick="Cancel"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["LocationsPage_CancelButton"]</button>
-                </div>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <div>
+                            <button type="submit" class="btn btn-primary me-2"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["LocationsPage_SaveButton"]</button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["LocationsPage_CancelButton"]</button>
+                        </div>
+                        @if (_editId != 0)
+                        {
+                            <button type="button" class="btn btn-outline-danger" @onclick="() => Delete(_editId)"><i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]</button>
+                        }
+                    </div>
+                </EditForm>
             </div>
         </div>
     }
@@ -61,56 +86,119 @@
         var inactiveLocations = _locations.Where(l => !l.IsActive).ToList();
     }
 
-    @RenderLocationGroup(Localizer["LocationsPage_ActiveLocations"], "active-locations", activeLocations, true)
-    @RenderLocationGroup(Localizer["LocationsPage_SystemWide"], "system-wide-locations", systemWideLocations, true)
-    @RenderLocationGroup(Localizer["LocationsPage_Inactive"], "inactive-locations", inactiveLocations, false)
+    <LocationListComponent Title="@Localizer["LocationsPage_ActiveLocations"]"
+                            Locations="activeLocations"
+                            AlwaysShow="true"
+                            EmptyText="@Localizer["LocationsPage_EmptyActive"]"
+                            OnEdit="Edit" />
+    <LocationListComponent Title="@Localizer["LocationsPage_SystemWide"]"
+                            Locations="systemWideLocations"
+                            AlwaysShow="true"
+                            EmptyText="@Localizer["LocationsPage_EmptySystemWide"]"
+                            OnEdit="Edit" />
+    <LocationListComponent Title="@Localizer["LocationsPage_Inactive"]"
+                            Locations="inactiveLocations"
+                            AlwaysShow="false"
+                            EmptyText="@Localizer["LocationsPage_EmptyInactive"]"
+                            OnEdit="Edit" />
 
-    <h4 class="mt-4">@Localizer["LocationsPage_GroupLocationAccess"]</h4>
-    @foreach (var group in _groups)
+    <div class="pt-2 pb-2"></div>
+
+    <PageTitleComponent Icon="@AppIcons.Access" Text="@Localizer["LocationsPage_GroupLocationAccess"]" />
+
+    @if (_groups.Count == 0)
     {
-        <div class="card mb-3">
-            <div class="card-header fw-bold">@group.Name</div>
-            <div class="card-body">
-                <div class="row g-2">
-                    @foreach (var location in _locations.Where(l => !l.IsSystemWide))
-                    {
-                        var key = $"{group.Id}:{location.Id}";
-                        <div class="col-12 col-md-4">
-                            <div class="form-check">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       id="grp-loc-@group.Id-@location.Id"
-                                       checked="@_groupLocationAssignments.Contains(key)"
-                                       @onchange="e => ToggleGroupLocation(group.Id, location.Id, (bool)(e.Value ?? false))" />
-                                <label class="form-check-label" for="grp-loc-@group.Id-@location.Id">
-                                    @location.Name
-                                    @if (!string.IsNullOrWhiteSpace(location.CityName))
-                                    {
-                                        <br /><small class="text-muted">@location.CityName</small>
-                                    }
-                                </label>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
+        <p class="text-muted">@Localizer["LocationsPage_GroupAccessNoGroups"]</p>
     }
+    else if (_locations.Count(l => !l.IsSystemWide) == 0)
+    {
+        <p class="text-muted">@Localizer["LocationsPage_GroupAccessNoLocations"]</p>
+    }
+    else
+    {
+        @foreach (var location in _locations.Where(l => !l.IsSystemWide))
+        {
+            var isExpanded = _expandedGroupAccessIds.Contains(location.Id);
+            var chevronClass = isExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
+            <div class="card collapsible-card mb-3">
+                <div class="card-header collapsible-card-header location-list-header">
+                    <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="() => ToggleGroupAccessExpanded(location.Id)">
+                        <i class="@chevronClass" aria-hidden="true"></i>
+                        <span>@location.Name</span>
+                    </button>
+                    <div class="collapsible-card-meta app-location-country">@location.CityName@(string.IsNullOrWhiteSpace(location.CountryCode) ? "" : $", {location.CountryCode}")</div>
+                </div>
+                @if (isExpanded)
+                {
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @foreach (var group in _groups)
+                            {
+                                var key = $"{location.Id}:{group.Id}";
+                                var groupCulture = GetGroupCulture(group);
+                                <div class="col-12 col-md-4">
+                                    <div class="form-check @(group.IsActive ? "" : "text-muted")">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="loc-grp-@location.Id-@group.Id"
+                                               checked="@_groupLocationAssignments.Contains(key)"
+                                               @onchange="e => ToggleGroupLocation(location.Id, group.Id, (bool)(e.Value ?? false))" />
+                                        <label class="form-check-label" for="loc-grp-@location.Id-@group.Id">
+                                            @group.Name
+                                            @if (group.Weekday.HasValue || group.StartTime.HasValue)
+                                            {
+                                                <br /><small>@group.Weekday @(group.StartTime.HasValue ? group.StartTime.Value.ToString("t", groupCulture) : "")</small>
+                                            }
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveGroupAccess(location.Id)"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["LocationsPage_SaveButton"]</button>
+                    </div>
+                }
+            </div>
+        }
+    }
+
 </div>
 
+<ConfirmDialogComponent IsVisible="_showDeleteConfirm"
+                        Title="@Localizer["LocationsPage_DeleteConfirmTitle"]"
+                        Message="@Localizer["LocationsPage_DeleteConfirmMessage"]"
+                        ConfirmText="@Localizer["Shared_Delete"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="ConfirmDelete"
+                        OnCancel="CancelDelete" />
+
 @code {
+    private class LocationFormModel
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "City is required.")]
+        public string CityName { get; set; } = string.Empty;
+
+        public bool IsSystemWide { get; set; }
+        public bool IsActive { get; set; } = true;
+        public int? CountryId { get; set; }
+    }
+
     private List<LocationDto> _locations = new();
     private List<GroupDto> _groups = new();
     private List<CountryDto> _countries = new();
-    private HashSet<string> _groupLocationAssignments = new();
-    private HashSet<string> _expandedLocationGroupIds = new(StringComparer.Ordinal);
+    private HashSet<string> _groupLocationAssignments = new(StringComparer.Ordinal);
+    private HashSet<int> _expandedGroupAccessIds = new();
 
     private bool _showForm;
     private int _editId;
-    private string _formName = string.Empty;
-    private string _formCityName = string.Empty;
-    private bool _formIsSystemWide;
-    private int? _formCountryId;
+    private LocationFormModel _formModel = new();
+
+    private bool _showDeleteConfirm;
+    private int _deleteId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -129,75 +217,24 @@
         _countries = (await CountryService.GetAllAsync()).ToList();
 
         _groupLocationAssignments = _groups
-            .SelectMany(g => g.AllowedLocationIds.Select(id => $"{g.Id}:{id}"))
+            .SelectMany(g => g.AllowedLocationIds.Select(id => $"{id}:{g.Id}"))
             .ToHashSet(StringComparer.Ordinal);
-
-        if (_expandedLocationGroupIds.Count == 0)
-        {
-            _expandedLocationGroupIds.Add("active-locations");
-            _expandedLocationGroupIds.Add("system-wide-locations");
-        }
     }
-
-    private RenderFragment RenderLocationGroup(string title, string collapseId, List<LocationDto> locations, bool defaultOpen) => __builder =>
-    {
-        if (locations.Count == 0)
-        {
-            return;
-        }
-
-        var isExpanded = _expandedLocationGroupIds.Contains(collapseId);
-        var chevronClass = isExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
-        <div class="card collapsible-card mb-3">
-            <div class="card-header collapsible-card-header">
-                <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="() => ToggleLocationGroup(collapseId)">
-                    <span>@title</span>
-                    <i class="@chevronClass" aria-hidden="true"></i>
-                </button>
-                <div class="collapsible-card-meta">@locations.Count</div>
-            </div>
-            @if (isExpanded)
-            {
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0">
-                            <thead>
-                                <tr>
-                                    <th>@Localizer["LocationsPage_ColName"]</th>
-                                    <th>@Localizer["LocationsPage_ColCity"]</th>
-                                    <th>@Localizer["LocationsPage_ColCountry"]</th>
-                                    <th>@Localizer["LocationsPage_ColActions"]</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var location in locations)
-                                {
-                                    <tr>
-                                        <td>@location.Name</td>
-                                        <td>@location.CityName</td>
-                                        <td>@(location.CountryCode ?? "—")</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => Edit(location)"><i class="@AppIcons.Edit" aria-hidden="true"></i></button>
-                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Delete(location.Id)" disabled="@location.IsSystemWide"><i class="@AppIcons.Trash" aria-hidden="true"></i></button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            }
-        </div>;
-    };
 
     private void ShowCreateForm()
     {
         _editId = 0;
-        _formName = string.Empty;
-        _formCityName = string.Empty;
-        _formIsSystemWide = false;
-        _formCountryId = null;
+        _formModel = new LocationFormModel
+        {
+            CountryId = GetDefaultCountryId()
+        };
         _showForm = true;
+    }
+
+    private int? GetDefaultCountryId()
+    {
+        var defaultCode = DateTimeFormatService.GetDefaultCountry();
+        return _countries.FirstOrDefault(c => string.Equals(c.Code, defaultCode, StringComparison.OrdinalIgnoreCase))?.Id;
     }
 
     private bool ShouldOpenCreateFormFromQuery()
@@ -215,10 +252,14 @@
     private void Edit(LocationDto location)
     {
         _editId = location.Id;
-        _formName = location.Name;
-        _formCityName = location.CityName;
-        _formIsSystemWide = location.IsSystemWide;
-        _formCountryId = location.CountryId;
+        _formModel = new LocationFormModel
+        {
+            Name = location.Name,
+            CityName = location.CityName,
+            IsSystemWide = location.IsSystemWide,
+            IsActive = location.IsActive,
+            CountryId = location.CountryId
+        };
         _showForm = true;
     }
 
@@ -228,23 +269,23 @@
         {
             await LocationService.CreateAsync(new CreateLocationDto
             {
-                Name = _formName,
-                CityName = _formCityName,
-                IsSystemWide = _formIsSystemWide,
-                CountryId = _formCountryId
+                Name = _formModel.Name,
+                CityName = _formModel.CityName,
+                IsSystemWide = _formModel.IsSystemWide,
+                IsActive = _formModel.IsActive,
+                CountryId = _formModel.CountryId
             });
         }
         else
         {
-            var existing = _locations.First(x => x.Id == _editId);
             await LocationService.UpdateAsync(new UpdateLocationDto
             {
                 Id = _editId,
-                Name = _formName,
-                CityName = _formCityName,
-                IsSystemWide = _formIsSystemWide,
-                IsActive = existing.IsActive,
-                CountryId = _formCountryId
+                Name = _formModel.Name,
+                CityName = _formModel.CityName,
+                IsSystemWide = _formModel.IsSystemWide,
+                IsActive = _formModel.IsActive,
+                CountryId = _formModel.CountryId
             });
         }
 
@@ -252,51 +293,63 @@
         await LoadData();
     }
 
-    private async Task Delete(int id)
+    private void Cancel() => _showForm = false;
+
+    private void Delete(int id)
     {
-        await LocationService.DeleteAsync(id);
+        _deleteId = id;
+        _showDeleteConfirm = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        _showDeleteConfirm = false;
+        await LocationService.DeleteAsync(_deleteId);
+        if (_editId == _deleteId)
+        {
+            _showForm = false;
+        }
         await LoadData();
     }
 
-    private void Cancel() => _showForm = false;
+    private void CancelDelete() => _showDeleteConfirm = false;
 
-    private void ToggleLocationGroup(string collapseId)
+    private void ToggleGroupAccessExpanded(int locationId)
     {
-        if (!_expandedLocationGroupIds.Add(collapseId))
+        if (!_expandedGroupAccessIds.Add(locationId))
         {
-            _expandedLocationGroupIds.Remove(collapseId);
+            _expandedGroupAccessIds.Remove(locationId);
         }
     }
 
-    private async Task ToggleGroupLocation(int groupId, int locationId, bool selected)
+    private CultureInfo GetGroupCulture(GroupDto group)
     {
-        var group = _groups.First(g => g.Id == groupId);
-        var allowed = group.AllowedLocationIds.ToHashSet();
+        var countryCode = _countries.FirstOrDefault(c => c.Id == group.CountryId)?.Code
+            ?? DateTimeFormatService.GetDefaultCountry();
+        return DateTimeFormatService.GetCultureForCountry(countryCode);
+    }
+
+    private void ToggleGroupLocation(int locationId, int groupId, bool selected)
+    {
+        var key = $"{locationId}:{groupId}";
         if (selected)
         {
-            allowed.Add(locationId);
+            _groupLocationAssignments.Add(key);
         }
         else
         {
-            allowed.Remove(locationId);
+            _groupLocationAssignments.Remove(key);
         }
+    }
 
-        await GroupService.UpdateAsync(new UpdateGroupDto
-        {
-            Id = group.Id,
-            Name = group.Name,
-            Slug = group.Slug,
-            Description = group.Description,
-            Weekday = group.Weekday,
-            LocationId = group.LocationId,
-            StartTime = group.StartTime,
-            DurationMinutes = group.DurationMinutes,
-            MaxParticipants = group.MaxParticipants,
-            CountryId = group.CountryId,
-            AllowedLocationIds = allowed.ToList(),
-            IsActive = group.IsActive
-        });
+    private async Task SaveGroupAccess(int locationId)
+    {
+        var selectedGroupIds = _groups
+            .Where(g => _groupLocationAssignments.Contains($"{locationId}:{g.Id}"))
+            .Select(g => g.Id)
+            .ToList();
 
+        await GroupService.UpdateAllowedGroupsForLocationAsync(locationId, selectedGroupIds);
         await LoadData();
     }
 }

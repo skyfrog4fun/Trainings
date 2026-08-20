@@ -11,6 +11,7 @@ public interface IGroupService
     Task<GroupDto> CreateAsync(CreateGroupDto dto, CancellationToken ct = default);
     Task UpdateAsync(UpdateGroupDto dto, CancellationToken ct = default);
     Task DeleteAsync(int id, CancellationToken ct = default);
+    Task UpdateAllowedGroupsForLocationAsync(int locationId, List<int> groupIds, CancellationToken ct = default);
     Task<IEnumerable<GroupMembershipDto>> GetMembersAsync(int groupId, CancellationToken ct = default);
     Task<IEnumerable<GroupMembershipDto>> GetAllMembershipsForUserAsync(int userId, CancellationToken ct = default);
     Task AddMemberAsync(AddGroupMemberDto dto, CancellationToken ct = default);

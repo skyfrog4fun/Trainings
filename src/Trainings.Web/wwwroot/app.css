@@ -258,6 +258,12 @@ main {
   overflow-x: hidden;
 }
 
+.collapsible-card {
+    border-width: 2px;
+    border-radius: 0.375rem;
+    border-color: var(--brand-community-60)
+}
+
 .collapsible-card .card-header {
   padding: 0.75rem 1rem;
 }
@@ -273,9 +279,8 @@ main {
 
 .collapsible-card-toggle {
   padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
+  border: 0;  
+  color: var(--color-text);
   text-decoration: none;
   font-weight: 700;
   display: inline-flex;
@@ -284,7 +289,7 @@ main {
 }
 
   .collapsible-card-toggle:hover {
-    color: inherit;
+    color: var(--color-text);
   }
 
   .collapsible-card-toggle:focus {
@@ -295,7 +300,7 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--brand-innovation);
   font-size: 0.875rem;
   white-space: nowrap;
 }
@@ -308,6 +313,26 @@ main {
   color: var(--color-text-muted);
   white-space: nowrap;
 }
+
+.location-edit-form-card {
+  border-color: var(--brand-community-60);
+  border-radius: 0.375rem; 
+  border-width: 2px;
+}
+
+.location-list-header {
+  padding: 0.75rem 1rem;
+  background: var(--brand-community-60);
+}
+
+.location-list-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+  .location-list-row:last-child {
+    border-bottom: 0;
+  }
 
 .icon-login {
   height: 0.78em;

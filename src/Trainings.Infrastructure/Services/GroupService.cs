@@ -146,6 +146,30 @@ public class GroupService(ApplicationDbContext context, IAppRuntimeModeService a
         }
     }
 
+    public async Task UpdateAllowedGroupsForLocationAsync(int locationId, List<int> groupIds, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var requestedGroupIds = groupIds.Distinct().ToHashSet();
+
+        var existingAssignments = await _context.GroupLocations
+            .Where(gl => gl.LocationId == locationId)
+            .ToListAsync(ct);
+        var existingGroupIds = existingAssignments.Select(x => x.GroupId).ToHashSet();
+
+        var toRemove = existingAssignments.Where(x => !requestedGroupIds.Contains(x.GroupId)).ToList();
+        if (toRemove.Count > 0)
+        {
+            _context.GroupLocations.RemoveRange(toRemove);
+        }
+
+        var toAdd = requestedGroupIds.Where(id => !existingGroupIds.Contains(id))
+            .Select(id => new GroupLocation { GroupId = id, LocationId = locationId });
+        _context.GroupLocations.AddRange(toAdd);
+
+        await _context.SaveChangesAsync(ct);
+    }
+
     public async Task<IEnumerable<GroupMembershipDto>> GetMembersAsync(int groupId, CancellationToken ct = default)
     {
         var memberships = await _context.GroupMemberships

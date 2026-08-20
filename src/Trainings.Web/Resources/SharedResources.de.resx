@@ -576,9 +576,6 @@
   <data name="LocationsPage_Heading" xml:space="preserve">
     <value>Orte</value>
   </data>
-  <data name="LocationsPage_NewLocationButton" xml:space="preserve">
-    <value>Neuer Ort</value>
-  </data>
   <data name="LocationsPage_CreateTitle" xml:space="preserve">
     <value>Ort erstellen</value>
   </data>
@@ -589,7 +586,7 @@
     <value>Name</value>
   </data>
   <data name="LocationsPage_CityNameLabel" xml:space="preserve">
-    <value>Stadtname</value>
+    <value>Ort</value>
   </data>
   <data name="LocationsPage_CountryLabel" xml:space="preserve">
     <value>Land</value>
@@ -598,7 +595,7 @@
     <value>Land auswählen</value>
   </data>
   <data name="LocationsPage_SystemWideLabel" xml:space="preserve">
-    <value>Systemweit (Außen / Sonder)</value>
+    <value>Ort unabhängig</value>
   </data>
   <data name="LocationsPage_SaveButton" xml:space="preserve">
     <value>Speichern</value>
@@ -607,28 +604,16 @@
     <value>Abbrechen</value>
   </data>
   <data name="LocationsPage_ActiveLocations" xml:space="preserve">
-    <value>Aktive Orte</value>
+    <value>Orte</value>
   </data>
   <data name="LocationsPage_SystemWide" xml:space="preserve">
-    <value>Systemweit</value>
+    <value>Andere Orte</value>
   </data>
   <data name="LocationsPage_Inactive" xml:space="preserve">
     <value>Inaktiv</value>
   </data>
   <data name="LocationsPage_GroupLocationAccess" xml:space="preserve">
     <value>Gruppen-Ortszugang</value>
-  </data>
-  <data name="LocationsPage_ColName" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="LocationsPage_ColCity" xml:space="preserve">
-    <value>Stadt</value>
-  </data>
-  <data name="LocationsPage_ColCountry" xml:space="preserve">
-    <value>Land</value>
-  </data>
-  <data name="LocationsPage_ColActions" xml:space="preserve">
-    <value>Aktionen</value>
   </data>
   <data name="MailConfigPage_PageTitle" xml:space="preserve">
     <value>Konfiguration</value>
@@ -1799,5 +1784,29 @@
   </data>
   <data name="HomePage_NewTraining" xml:space="preserve">
     <value>Neues Training</value>
+  </data>
+  <data name="Shared_New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="LocationsPage_EmptyActive" xml:space="preserve">
+    <value>Noch keine aktiven Orte.</value>
+  </data>
+  <data name="LocationsPage_EmptySystemWide" xml:space="preserve">
+    <value>Noch keine standortübergreifenden Orte.</value>
+  </data>
+  <data name="LocationsPage_EmptyInactive" xml:space="preserve">
+    <value>Keine inaktiven Orte.</value>
+  </data>
+  <data name="LocationsPage_DeleteConfirmTitle" xml:space="preserve">
+    <value>Ort löschen</value>
+  </data>
+  <data name="LocationsPage_DeleteConfirmMessage" xml:space="preserve">
+    <value>Möchten Sie diesen Ort wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="LocationsPage_GroupAccessNoGroups" xml:space="preserve">
+    <value>Keine Gruppen verfügbar.</value>
+  </data>
+  <data name="LocationsPage_GroupAccessNoLocations" xml:space="preserve">
+    <value>Keine Orte verfügbar.</value>
   </data>
 </root>
