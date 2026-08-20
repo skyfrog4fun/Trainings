@@ -3,6 +3,8 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
 
+@implements IAsyncDisposable
+
 @rendermode InteractiveServer
 
 @attribute [Authorize(Policy = "SuperAdmin")]
@@ -11,8 +13,11 @@
 @inject IGroupService GroupService
 @inject ICountryService CountryService
 @inject IDateTimeFormatService DateTimeFormatService
+@inject IJSRuntime JS
 
 <PageTitle>@Localizer["LocationsPage_PageTitle"]</PageTitle>
+
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
 
 <div class="container px-2 px-md-4">
     <PageTitleComponent Icon="@AppIcons.Location"
@@ -23,7 +28,7 @@
 
     @if (_showForm)
     {
-        <div class="card mb-4 location-edit-form-card">
+        <div class="card mb-4 location-edit-form-card" id="location-edit-form">
             <div class="card-body">
                 <h5>@(_editId == 0 ? Localizer["LocationsPage_CreateTitle"] : Localizer["LocationsPage_EditTitle"])</h5>
                 <EditForm Model="_formModel" OnValidSubmit="Save">
@@ -121,11 +126,11 @@
             var isExpanded = _expandedGroupAccessIds.Contains(location.Id);
             var chevronClass = isExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
             <div class="card collapsible-card mb-3">
-                <div class="card-header collapsible-card-header location-list-header">
-                    <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="() => ToggleGroupAccessExpanded(location.Id)">
+                <div class="card-header collapsible-card-header location-list-header collapsible-card-toggle" role="button" @onclick="() => ToggleGroupAccessExpanded(location.Id)">
+                    <div>
                         <i class="@chevronClass" aria-hidden="true"></i>
                         <span>@location.Name</span>
-                    </button>
+                    </div>
                     <div class="collapsible-card-meta app-location-country">@location.CityName@(string.IsNullOrWhiteSpace(location.CountryCode) ? "" : $", {location.CountryCode}")</div>
                 </div>
                 @if (isExpanded)
@@ -144,11 +149,7 @@
                                                checked="@_groupLocationAssignments.Contains(key)"
                                                @onchange="e => ToggleGroupLocation(location.Id, group.Id, (bool)(e.Value ?? false))" />
                                         <label class="form-check-label" for="loc-grp-@location.Id-@group.Id">
-                                            @group.Name
-                                            @if (group.Weekday.HasValue || group.StartTime.HasValue)
-                                            {
-                                                <br /><small>@group.Weekday @(group.StartTime.HasValue ? group.StartTime.Value.ToString("t", groupCulture) : "")</small>
-                                            }
+                                            @GetGroupLabel(group, groupCulture)
                                         </label>
                                     </div>
                                 </div>
@@ -174,17 +175,24 @@
                         OnCancel="CancelDelete" />
 
 @code {
-    private class LocationFormModel
+    private class LocationFormModel : IValidatableObject
     {
         [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "City is required.")]
         public string CityName { get; set; } = string.Empty;
 
         public bool IsSystemWide { get; set; }
         public bool IsActive { get; set; } = true;
         public int? CountryId { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!IsSystemWide && string.IsNullOrWhiteSpace(CityName))
+            {
+                yield return new ValidationResult("City is required.", new[] { nameof(CityName) });
+            }
+        }
     }
 
     private List<LocationDto> _locations = new();
@@ -192,6 +200,9 @@
     private List<CountryDto> _countries = new();
     private HashSet<string> _groupLocationAssignments = new(StringComparer.Ordinal);
     private HashSet<int> _expandedGroupAccessIds = new();
+    private bool _scrollToFormPending;
+    private ToastComponent? _toast;
+    private IJSObjectReference? _jsModule;
 
     private bool _showForm;
     private int _editId;
@@ -229,6 +240,7 @@
             CountryId = GetDefaultCountryId()
         };
         _showForm = true;
+        _scrollToFormPending = true;
     }
 
     private int? GetDefaultCountryId()
@@ -261,6 +273,17 @@
             CountryId = location.CountryId
         };
         _showForm = true;
+        _scrollToFormPending = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_scrollToFormPending)
+        {
+            _scrollToFormPending = false;
+            _jsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/scrollHelper.js");
+            await _jsModule.InvokeVoidAsync("scrollToElementBelowHeader", "location-edit-form");
+        }
     }
 
     private async Task Save()
@@ -291,6 +314,7 @@
 
         _showForm = false;
         await LoadData();
+        await ShowSavedToast();
     }
 
     private void Cancel() => _showForm = false;
@@ -329,6 +353,19 @@
         return DateTimeFormatService.GetCultureForCountry(countryCode);
     }
 
+    private static string GetGroupLabel(GroupDto group, CultureInfo groupCulture)
+    {
+        if (!group.Weekday.HasValue && !group.StartTime.HasValue)
+        {
+            return group.Name;
+        }
+
+        var weekdayPart = group.Weekday.HasValue ? group.Weekday.Value.ToString() : "";
+        var timePart = group.StartTime.HasValue ? group.StartTime.Value.ToString("HH:mm", groupCulture) : "";
+        var schedulePart = string.Join(" ", new[] { weekdayPart, timePart }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        return $"{group.Name} | {schedulePart}";
+    }
+
     private void ToggleGroupLocation(int locationId, int groupId, bool selected)
     {
         var key = $"{locationId}:{groupId}";
@@ -351,5 +388,22 @@
 
         await GroupService.UpdateAllowedGroupsForLocationAsync(locationId, selectedGroupIds);
         await LoadData();
+        await ShowSavedToast();
+    }
+
+    private async Task ShowSavedToast()
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(Localizer["LocationsPage_ChangesSaved"]);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_jsModule is not null)
+        {
+            await _jsModule.DisposeAsync();
+        }
     }
 }

@@ -2,11 +2,11 @@
 {
     var chevronClass = _expanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
     <div class="card collapsible-card mb-3">
-        <div class="card-header collapsible-card-header location-list-header">
-            <button type="button" class="btn btn-link collapsible-card-toggle" @onclick="ToggleExpanded">
+        <div class="card-header collapsible-card-header location-list-header collapsible-card-toggle" role="button" @onclick="ToggleExpanded">
+            <div>
                 <i class="@chevronClass" aria-hidden="true"></i>
                 <span>@Title</span>
-            </button>
+            </div>
             <div class="collapsible-card-meta">@Locations.Count</div>
         </div>
         @if (_expanded)

@@ -180,6 +180,9 @@
   <data name="Shared_City" xml:space="preserve">
     <value>City</value>
   </data>
+  <data name="Shared_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
   <data name="Shared_ClearFilters" xml:space="preserve">
     <value>Clear Filters</value>
   </data>
@@ -614,6 +617,9 @@
   </data>
   <data name="LocationsPage_GroupLocationAccess" xml:space="preserve">
     <value>Group Location Access</value>
+  </data>
+  <data name="LocationsPage_ChangesSaved" xml:space="preserve">
+    <value>Changes saved</value>
   </data>
   <data name="MailConfigPage_PageTitle" xml:space="preserve">
     <value>Configuration</value>
