@@ -1,0 +1,1818 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Shared_Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Shared_Groups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="Shared_Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Shared_Trainings" xml:space="preserve">
+    <value>Trainings</value>
+  </data>
+  <data name="DashboardWelcomeComponent_WelcomeBack" xml:space="preserve">
+    <value>Welcome back</value>
+  </data>
+  <data name="HomePage_UpcomingTrainings" xml:space="preserve">
+    <value>Upcoming Trainings</value>
+  </data>
+  <data name="HomePage_ViewAll" xml:space="preserve">
+    <value>View All</value>
+  </data>
+  <data name="Shared_Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Shared_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Shared_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Shared_View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="UsersPage_AccountEmailSentTo" xml:space="preserve">
+    <value>Account email sent to {0}.</value>
+  </data>
+  <data name="DashboardNotificationPanel_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Shared_Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="UsersPage_Activate" xml:space="preserve">
+    <value>Activate</value>
+  </data>
+  <data name="Shared_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="HomePage_AllGroups" xml:space="preserve">
+    <value>All Groups</value>
+  </data>
+  <data name="HomePage_AllTrainings" xml:space="preserve">
+    <value>All Trainings</value>
+  </data>
+  <data name="HomePage_BrowseTrainings" xml:space="preserve">
+    <value>Browse Trainings</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Shared_City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="Shared_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Shared_ClearFilters" xml:space="preserve">
+    <value>Clear Filters</value>
+  </data>
+  <data name="Shared_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="Shared_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="DashboardNotificationPanel_DateUtc" xml:space="preserve">
+    <value>Date UTC</value>
+  </data>
+  <data name="UsersPage_Deactivate" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="UsersPage_DeleteUser" xml:space="preserve">
+    <value>Delete User</value>
+  </data>
+  <data name="Shared_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="HomePage_EmailNotVerified" xml:space="preserve">
+    <value>Email Not Verified</value>
+  </data>
+  <data name="HomePage_EmailVerified" xml:space="preserve">
+    <value>Email Verified</value>
+  </data>
+  <data name="UsersPage_EmailVerified" xml:space="preserve">
+    <value>Email Verified</value>
+  </data>
+  <data name="DashboardNotificationPanel_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="UsersPage_FailedMessage" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="HomePage_FailedToResendVerificationEmail" xml:space="preserve">
+    <value>Failed to resend verification email: {0}</value>
+  </data>
+  <data name="Enum_Gender_Female" xml:space="preserve">
+    <value>Female</value>
+  </data>
+  <data name="UsersPage_Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="Enum_Role_GroupAdmin" xml:space="preserve">
+    <value>Group Admin</value>
+  </data>
+  <data name="HomePage_GroupsCount" xml:space="preserve">
+    <value>Groups: {0}</value>
+  </data>
+  <data name="Shared_Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="DashboardNotificationPanel_LogId" xml:space="preserve">
+    <value>Log ID</value>
+  </data>
+  <data name="Enum_Gender_Male" xml:space="preserve">
+    <value>Male</value>
+  </data>
+  <data name="Shared_Mobile" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="HomePage_MyNextTrainingsEnrolledAssigned" xml:space="preserve">
+    <value>My Next trainings</value>
+  </data>
+  <data name="HomePage_MyTrainingsToPlan" xml:space="preserve">
+    <value>My Trainings To Plan</value>
+  </data>
+  <data name="HomePage_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="UsersPage_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="HomePage_NextTrainingsAvailableToAttend" xml:space="preserve">
+    <value>Next Trainings Available To Attend</value>
+  </data>
+  <data name="Enum_Decision_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="HomePage_NoAvailableUpcomingTrainings" xml:space="preserve">
+    <value>No Available Upcoming Trainings</value>
+  </data>
+  <data name="UsersPage_NoEmailModePreviewShown" xml:space="preserve">
+    <value>No E-Mail mode is active. The account email for {0} is shown below.</value>
+  </data>
+  <data name="GroupsPage_NoGroupsYet" xml:space="preserve">
+    <value>No Groups Yet</value>
+  </data>
+  <data name="DashboardNotificationPanel_NoNotificationActivitySinceReset" xml:space="preserve">
+    <value>No Notification Activity Since Reset</value>
+  </data>
+  <data name="HomePage_NoOutstandingApprovals" xml:space="preserve">
+    <value>No Outstanding Approvals</value>
+  </data>
+  <data name="DashboardNotificationPanel_NotificationActivity" xml:space="preserve">
+    <value>Notification Activity</value>
+  </data>
+  <data name="HomePage_NoTrainingsToPlan" xml:space="preserve">
+    <value>No Trainings To Plan</value>
+  </data>
+  <data name="HomePage_NoUpcomingTrainings" xml:space="preserve">
+    <value>No Upcoming Trainings</value>
+  </data>
+  <data name="HomePage_OpenTrainingDetails" xml:space="preserve">
+    <value>Open Training Details</value>
+  </data>
+  <data name="Enum_Gender_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="HomePage_OutstandingUsersToApprove" xml:space="preserve">
+    <value>Outstanding Users To Approve</value>
+  </data>
+  <data name="HomePage_PendingApprovals" xml:space="preserve">
+    <value>Pending approvals ({0})</value>
+  </data>
+  <data name="UsersPage_PendingApprovals" xml:space="preserve">
+    <value>Pending approvals ({0})</value>
+  </data>
+  <data name="HomePage_Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="DashboardPlanningPanel_PlanningOverview" xml:space="preserve">
+    <value>Planning Overview: {0}</value>
+  </data>
+  <data name="UsersPage_ReadOnlyModeSuperAdminOnly" xml:space="preserve">
+    <value>Read Only mode is active. Only SuperAdmins can make changes.</value>
+  </data>
+  <data name="DashboardNotificationPanel_Recipient" xml:space="preserve">
+    <value>Recipient</value>
+  </data>
+  <data name="HomePage_RegisterForTraining" xml:space="preserve">
+    <value>Register For Training</value>
+  </data>
+  <data name="UsersPage_RegistrationDate" xml:space="preserve">
+    <value>Registration Date</value>
+  </data>
+  <data name="UsersPage_RequestedGroup" xml:space="preserve">
+    <value>Requested Group</value>
+  </data>
+  <data name="HomePage_ResendVerification" xml:space="preserve">
+    <value>Resend Verification</value>
+  </data>
+  <data name="DashboardNotificationPanel_ResetPointer" xml:space="preserve">
+    <value>Reset Pointer</value>
+  </data>
+  <data name="HomePage_Review" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="Shared_Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Shared_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Shared_SelectCountry" xml:space="preserve">
+    <value>Select Country</value>
+  </data>
+  <data name="UsersPage_SendAccountMail" xml:space="preserve">
+    <value>Send Account Mail</value>
+  </data>
+  <data name="Shared_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="HomePage_SuccessfullyRegistered" xml:space="preserve">
+    <value>Successfully Registered</value>
+  </data>
+  <data name="Enum_Role_SuperAdmin" xml:space="preserve">
+    <value>SuperAdmin</value>
+  </data>
+  <data name="UsersPage_ToggleDetails" xml:space="preserve">
+    <value>Toggle Details</value>
+  </data>
+  <data name="Shared_Trainer" xml:space="preserve">
+    <value>Trainer</value>
+  </data>
+  <data name="Enum_Role_Trainer" xml:space="preserve">
+    <value>Trainer</value>
+  </data>
+  <data name="HomePage_TrainingFull" xml:space="preserve">
+    <value>Training Full</value>
+  </data>
+  <data name="HomePage_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="HomePage_UnknownGroup" xml:space="preserve">
+    <value>Unknown Group</value>
+  </data>
+  <data name="Enum_Role_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="HomePage_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="UsersPage_UserCannotBeDeletedDueToRegistrations" xml:space="preserve">
+    <value>{0} cannot be deleted because training registrations exist.</value>
+  </data>
+  <data name="HomePage_UsersCount" xml:space="preserve">
+    <value>Users: {0}</value>
+  </data>
+  <data name="UsersPage_UserWasDeleted" xml:space="preserve">
+    <value>{0} was deleted.</value>
+  </data>
+  <data name="HomePage_VerificationEmailSent" xml:space="preserve">
+    <value>Verification Email Sent</value>
+  </data>
+  <data name="Enum_Decision_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Shared_OpenMenu" xml:space="preserve">
+    <value>Open menu</value>
+  </data>
+  <data name="Shared_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Shared_MyRegistrations" xml:space="preserve">
+    <value>My Registrations</value>
+  </data>
+  <data name="Shared_PlanTraining" xml:space="preserve">
+    <value>Plan Training</value>
+  </data>
+  <data name="Shared_Statistics" xml:space="preserve">
+    <value>Statistics</value>
+  </data>
+  <data name="StatisticsPage_Statistics" xml:space="preserve">
+    <value>Statistics</value>
+  </data>
+  <data name="Shared_UserInformation" xml:space="preserve">
+    <value>User Information</value>
+  </data>
+  <data name="Shared_Config" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="Shared_Locations" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="Shared_Icons" xml:space="preserve">
+    <value>Icons</value>
+  </data>
+  <data name="Shared_Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="StatisticsPage_ActiveUsers" xml:space="preserve">
+    <value>Active Users</value>
+  </data>
+  <data name="StatisticsPage_UsersNotInGroup" xml:space="preserve">
+    <value>Users Not in Group</value>
+  </data>
+  <data name="StatisticsPage_TotalRegistrations" xml:space="preserve">
+    <value>Total Registrations</value>
+  </data>
+  <data name="StatisticsPage_AnnualIndicators" xml:space="preserve">
+    <value>Annual Indicators ({0})</value>
+  </data>
+  <data name="StatisticsPage_AvgUsersPerGroup" xml:space="preserve">
+    <value>Average users per group</value>
+  </data>
+  <data name="StatisticsPage_AvgParticipantsPerTraining" xml:space="preserve">
+    <value>Average participants per training</value>
+  </data>
+  <data name="StatisticsPage_ScopeGlobal" xml:space="preserve">
+    <value>Global</value>
+  </data>
+  <data name="StatisticsPage_ScopeManagedGroups" xml:space="preserve">
+    <value>Managed Groups</value>
+  </data>
+  <data name="AnonymousLayout_Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="AnonymousLayout_Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="AnonymousLayout_ForgotPassword" xml:space="preserve">
+    <value>Forgot password?</value>
+  </data>
+  <data name="AttendancePage_PageTitle" xml:space="preserve">
+    <value>Attendance</value>
+  </data>
+  <data name="AttendancePage_HeadingPrefix" xml:space="preserve">
+    <value>Attendance:</value>
+  </data>
+  <data name="AttendancePage_InPlanning" xml:space="preserve">
+    <value>In planning ...</value>
+  </data>
+  <data name="AttendancePage_FinalizedOn" xml:space="preserve">
+    <value>Attendance finalized on {0}</value>
+  </data>
+  <data name="AttendancePage_NotStartedAlert" xml:space="preserve">
+    <value>Training hasn't started yet. You can save a draft, but cannot finalize attendance until after start time.</value>
+  </data>
+  <data name="AttendancePage_PreRegistered" xml:space="preserve">
+    <value>Pre-registered</value>
+  </data>
+  <data name="AttendancePage_Present" xml:space="preserve">
+    <value>Present</value>
+  </data>
+  <data name="AttendancePage_PartiallyPresent" xml:space="preserve">
+    <value>Partially present</value>
+  </data>
+  <data name="AttendancePage_Absent" xml:space="preserve">
+    <value>Absent</value>
+  </data>
+  <data name="AttendancePage_NoGroupMembers" xml:space="preserve">
+    <value>No group members found for this training.</value>
+  </data>
+  <data name="AttendancePage_Saving" xml:space="preserve">
+    <value>Saving…</value>
+  </data>
+  <data name="AttendancePage_SaveDraft" xml:space="preserve">
+    <value>Save Draft</value>
+  </data>
+  <data name="AttendancePage_FinalizeAttendance" xml:space="preserve">
+    <value>Finalize Attendance</value>
+  </data>
+  <data name="GroupMembersPage_PageTitle" xml:space="preserve">
+    <value>Group Members</value>
+  </data>
+  <data name="GroupMembersPage_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="GroupMembersPage_AddMemberTitle" xml:space="preserve">
+    <value>Add Member</value>
+  </data>
+  <data name="GroupMembersPage_SelectUser" xml:space="preserve">
+    <value>-- Select User --</value>
+  </data>
+  <data name="GroupMembersPage_RoleParticipant" xml:space="preserve">
+    <value>Participant</value>
+  </data>
+  <data name="GroupMembersPage_RoleTrainer" xml:space="preserve">
+    <value>Trainer</value>
+  </data>
+  <data name="GroupMembersPage_RoleAdmin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="GroupMembersPage_AddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="GroupMembersPage_CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="GroupMembersPage_MembersHeading" xml:space="preserve">
+    <value>Members ({0} approved)</value>
+  </data>
+  <data name="GroupMembersPage_PendingRequests" xml:space="preserve">
+    <value>Pending Requests ({0})</value>
+  </data>
+  <data name="GroupMembersPage_ColName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="GroupMembersPage_ColEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="GroupMembersPage_ColRole" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="GroupMembersPage_ColRequested" xml:space="preserve">
+    <value>Requested</value>
+  </data>
+  <data name="GroupMembersPage_ColActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="GroupMembersPage_ApproveButton" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="GroupMembersPage_DeclineButton" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="GroupMembersPage_Admins" xml:space="preserve">
+    <value>Admins ({0})</value>
+  </data>
+  <data name="GroupMembersPage_Trainers" xml:space="preserve">
+    <value>Trainers ({0})</value>
+  </data>
+  <data name="GroupMembersPage_Participants" xml:space="preserve">
+    <value>Participants ({0})</value>
+  </data>
+  <data name="GroupMembersPage_NoMembers" xml:space="preserve">
+    <value>No members yet.</value>
+  </data>
+  <data name="GroupMembersPage_ColActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="GroupMembersPage_ColJoined" xml:space="preserve">
+    <value>Joined</value>
+  </data>
+  <data name="GroupMembersPage_RemoveButton" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="LocationsPage_PageTitle" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="LocationsPage_Heading" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="LocationsPage_CreateTitle" xml:space="preserve">
+    <value>Create Location</value>
+  </data>
+  <data name="LocationsPage_EditTitle" xml:space="preserve">
+    <value>Update Location</value>
+  </data>
+  <data name="LocationsPage_NameLabel" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="LocationsPage_CityNameLabel" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="LocationsPage_CountryLabel" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="LocationsPage_SelectCountry" xml:space="preserve">
+    <value>Select country</value>
+  </data>
+  <data name="LocationsPage_SystemWideLabel" xml:space="preserve">
+    <value>Independent</value>
+  </data>
+  <data name="LocationsPage_SaveButton" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="LocationsPage_CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="LocationsPage_ActiveLocations" xml:space="preserve">
+    <value>Locations</value>
+  </data>
+  <data name="LocationsPage_SystemWide" xml:space="preserve">
+    <value>Other locations</value>
+  </data>
+  <data name="LocationsPage_Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="LocationsPage_GroupLocationAccess" xml:space="preserve">
+    <value>Group Location Access</value>
+  </data>
+  <data name="LocationsPage_ChangesSaved" xml:space="preserve">
+    <value>Changes saved</value>
+  </data>
+  <data name="MailConfigPage_PageTitle" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="MailConfigPage_Heading" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="MailConfigPage_Description" xml:space="preserve">
+    <value>Define SMTP server configurations used to send emails. Regular email sending still uses active configurations in priority order. Test email can run against all configurations or one selected configuration.</value>
+  </data>
+  <data name="MailConfigPage_RunningModeTitle" xml:space="preserve">
+    <value>Running Mode</value>
+  </data>
+  <data name="MailConfigPage_RunningModeDescription" xml:space="preserve">
+    <value>Override the startup configuration defaults for the current session. Changes take effect immediately for all users and are reset to the configured defaults on application restart.</value>
+  </data>
+  <data name="MailConfigPage_ReadOnlyLabel" xml:space="preserve">
+    <value>Read Only</value>
+  </data>
+  <data name="MailConfigPage_ReadOnlyDescription" xml:space="preserve">
+    <value>Blocks write operations for everyone except SuperAdmins</value>
+  </data>
+  <data name="MailConfigPage_NoEmailLabel" xml:space="preserve">
+    <value>No E-Mail</value>
+  </data>
+  <data name="MailConfigPage_NoEmailDescription" xml:space="preserve">
+    <value>Suppresses outgoing email and shows an in-app preview instead</value>
+  </data>
+  <data name="MailConfigPage_ApplyButton" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="MailConfigPage_ResetButton" xml:space="preserve">
+    <value>Reset to Defaults</value>
+  </data>
+  <data name="MailConfigPage_ResetTitle" xml:space="preserve">
+    <value>Reset to startup configuration defaults</value>
+  </data>
+  <data name="MailConfigPage_MailConfigTitle" xml:space="preserve">
+    <value>Mail Configuration</value>
+  </data>
+  <data name="MailConfigPage_NewConfigButton" xml:space="preserve">
+    <value>New Configuration</value>
+  </data>
+  <data name="MailConfigPage_ManageDescription" xml:space="preserve">
+    <value>Manage SMTP endpoints used by notification delivery and fallback retry order.</value>
+  </data>
+  <data name="MailConfigPage_FormTitleNew" xml:space="preserve">
+    <value>New Mail Configuration</value>
+  </data>
+  <data name="MailConfigPage_FormTitleEdit" xml:space="preserve">
+    <value>Edit Mail Configuration</value>
+  </data>
+  <data name="MailConfigPage_NameLabel" xml:space="preserve">
+    <value>Name *</value>
+  </data>
+  <data name="MailConfigPage_NamePlaceholder" xml:space="preserve">
+    <value>e.g. Primary SMTP</value>
+  </data>
+  <data name="MailConfigPage_PriorityLabel" xml:space="preserve">
+    <value>Priority *</value>
+  </data>
+  <data name="MailConfigPage_PriorityHelp" xml:space="preserve">
+    <value>1 = highest priority</value>
+  </data>
+  <data name="MailConfigPage_ActiveLabel" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="MailConfigPage_SmtpHostLabel" xml:space="preserve">
+    <value>SMTP Host *</value>
+  </data>
+  <data name="MailConfigPage_SmtpHostPlaceholder" xml:space="preserve">
+    <value>smtp.example.com</value>
+  </data>
+  <data name="MailConfigPage_PortLabel" xml:space="preserve">
+    <value>Port *</value>
+  </data>
+  <data name="MailConfigPage_UsernameLabel" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="MailConfigPage_UsernamePlaceholder" xml:space="preserve">
+    <value>SMTP username</value>
+  </data>
+  <data name="MailConfigPage_PasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="MailConfigPage_PasswordPlaceholder" xml:space="preserve">
+    <value>SMTP password</value>
+  </data>
+  <data name="MailConfigPage_PasswordHelp" xml:space="preserve">
+    <value>Leave blank to keep the existing password.</value>
+  </data>
+  <data name="MailConfigPage_FromAddressLabel" xml:space="preserve">
+    <value>From Address *</value>
+  </data>
+  <data name="MailConfigPage_FromAddressPlaceholder" xml:space="preserve">
+    <value>noreply@example.com</value>
+  </data>
+  <data name="MailConfigPage_SaveButton" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="MailConfigPage_CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="MailConfigPage_NoConfigsAlert" xml:space="preserve">
+    <value>No mail configurations defined yet. Add at least one SMTP configuration to enable email notifications.</value>
+  </data>
+  <data name="MailConfigPage_PriorityBadge" xml:space="preserve">
+    <value>Priority {0}</value>
+  </data>
+  <data name="MailConfigPage_ActiveBadge" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="MailConfigPage_InactiveBadge" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="MailConfigPage_EditButton" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="MailConfigPage_DeactivateButton" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="MailConfigPage_ActivateButton" xml:space="preserve">
+    <value>Activate</value>
+  </data>
+  <data name="MailConfigPage_DeleteButton" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="MailConfigPage_DetailHost" xml:space="preserve">
+    <value>Host:</value>
+  </data>
+  <data name="MailConfigPage_DetailUsername" xml:space="preserve">
+    <value>Username:</value>
+  </data>
+  <data name="MailConfigPage_DetailFrom" xml:space="preserve">
+    <value>From:</value>
+  </data>
+  <data name="MailConfigPage_DetailCreated" xml:space="preserve">
+    <value>Created:</value>
+  </data>
+  <data name="MailConfigPage_DetailLastSuccess" xml:space="preserve">
+    <value>Last Success Sent:</value>
+  </data>
+  <data name="MailConfigPage_DetailStatus" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="MailConfigPage_DetailLatestError" xml:space="preserve">
+    <value>Latest Error:</value>
+  </data>
+  <data name="MailConfigPage_TestEmailTitle" xml:space="preserve">
+    <value>Test Email</value>
+  </data>
+  <data name="MailConfigPage_TestEmailDescription" xml:space="preserve">
+    <value>Send a test email against all configurations in priority order or against a single selected configuration.</value>
+  </data>
+  <data name="MailConfigPage_RecipientEmailLabel" xml:space="preserve">
+    <value>Recipient Email</value>
+  </data>
+  <data name="MailConfigPage_RecipientEmailPlaceholder" xml:space="preserve">
+    <value>you@example.com</value>
+  </data>
+  <data name="MailConfigPage_MailConfigLabel" xml:space="preserve">
+    <value>Mail Configuration</value>
+  </data>
+  <data name="MailConfigPage_AllConfigurations" xml:space="preserve">
+    <value>All configurations</value>
+  </data>
+  <data name="MailConfigPage_InactiveConfigHelp" xml:space="preserve">
+    <value>Inactive configurations remain selectable for targeted testing.</value>
+  </data>
+  <data name="MailConfigPage_SendTestButton" xml:space="preserve">
+    <value>Send Test Email</value>
+  </data>
+  <data name="MyRegistrationsPage_PageTitle" xml:space="preserve">
+    <value>My Registrations</value>
+  </data>
+  <data name="MyRegistrationsPage_Heading" xml:space="preserve">
+    <value>My Registrations</value>
+  </data>
+  <data name="MyRegistrationsPage_AllGroups" xml:space="preserve">
+    <value>All groups</value>
+  </data>
+  <data name="MyRegistrationsPage_AllTrainers" xml:space="preserve">
+    <value>All trainers</value>
+  </data>
+  <data name="MyRegistrationsPage_FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="MyRegistrationsPage_FilterAvailable" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="MyRegistrationsPage_FilterFull" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="MyRegistrationsPage_ClearFilters" xml:space="preserve">
+    <value>Clear filters</value>
+  </data>
+  <data name="MyRegistrationsPage_ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="MyRegistrationsPage_NoFilterMatch" xml:space="preserve">
+    <value>No registrations match the current filters.</value>
+  </data>
+  <data name="MyRegistrationsPage_NoRegistrations" xml:space="preserve">
+    <value>You have no registrations yet.</value>
+  </data>
+  <data name="MyRegistrationsPage_BrowseTrainings" xml:space="preserve">
+    <value>Browse trainings</value>
+  </data>
+  <data name="NotFound_Heading" xml:space="preserve">
+    <value>Not Found</value>
+  </data>
+  <data name="NotFound_Message" xml:space="preserve">
+    <value>Sorry, the content you are looking for does not exist.</value>
+  </data>
+  <data name="AttendancePage_DraftSaved" xml:space="preserve">
+    <value>Attendance draft saved.</value>
+  </data>
+  <data name="AttendancePage_FinalizeBeforeStartError" xml:space="preserve">
+    <value>Cannot finalize attendance before the training has started.</value>
+  </data>
+  <data name="AttendancePage_FinalizedSuccess" xml:space="preserve">
+    <value>Attendance finalized successfully.</value>
+  </data>
+  <data name="AttendancePage_AttendanceForAriaLabel" xml:space="preserve">
+    <value>Attendance for {0}</value>
+  </data>
+  <data name="GroupMembersPage_MembersOfGroup" xml:space="preserve">
+    <value>{0} – Members</value>
+  </data>
+  <data name="GroupMembersPage_SelectUserError" xml:space="preserve">
+    <value>Please select a user.</value>
+  </data>
+  <data name="GroupMembersPage_ApprovedMessage" xml:space="preserve">
+    <value>{0} approved.</value>
+  </data>
+  <data name="GroupMembersPage_DeclinedMessage" xml:space="preserve">
+    <value>{0} declined.</value>
+  </data>
+  <data name="GroupMembersPage_FailedMessage" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="Shared_MinutesUnit" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="MailConfigPage_RequiredFieldsError" xml:space="preserve">
+    <value>Name, Host, and From Address are required.</value>
+  </data>
+  <data name="MailConfigPage_PasswordRequiredForNew" xml:space="preserve">
+    <value>Password is required for a new configuration.</value>
+  </data>
+  <data name="MailConfigPage_ConfigNotFound" xml:space="preserve">
+    <value>Configuration not found.</value>
+  </data>
+  <data name="MailConfigPage_SavedSuccess" xml:space="preserve">
+    <value>Configuration saved successfully.</value>
+  </data>
+  <data name="MailConfigPage_ActivatedMessage" xml:space="preserve">
+    <value>Configuration '{0}' activated.</value>
+  </data>
+  <data name="MailConfigPage_DeactivatedMessage" xml:space="preserve">
+    <value>Configuration '{0}' deactivated.</value>
+  </data>
+  <data name="MailConfigPage_FailedMessage" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="MailConfigPage_DeletedMessage" xml:space="preserve">
+    <value>Configuration '{0}' deleted.</value>
+  </data>
+  <data name="MailConfigPage_TestNamePlaceholder" xml:space="preserve">
+    <value>Mail Test</value>
+  </data>
+  <data name="MailConfigPage_RecipientEmailRequired" xml:space="preserve">
+    <value>Please enter a recipient email address.</value>
+  </data>
+  <data name="MailConfigPage_SelectedConfigurationLabel" xml:space="preserve">
+    <value>selected configuration</value>
+  </data>
+  <data name="MailConfigPage_ConfiguredFallbackOrderLabel" xml:space="preserve">
+    <value>configured fallback order</value>
+  </data>
+  <data name="MailConfigPage_TestEmailSentSuccess" xml:space="preserve">
+    <value>Test email sent successfully using the {0}.</value>
+  </data>
+  <data name="MailConfigPage_TestEmailFailed" xml:space="preserve">
+    <value>Test email failed using the {0}.</value>
+  </data>
+  <data name="MailConfigPage_InactiveSuffix" xml:space="preserve">
+    <value>(inactive)</value>
+  </data>
+  <data name="MailConfigPage_Never" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="MailConfigPage_StatusSuccessful" xml:space="preserve">
+    <value>Successful</value>
+  </data>
+  <data name="MailConfigPage_StatusFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="MailConfigPage_StatusUnknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="MailConfigPage_ModesUpdatedSuccess" xml:space="preserve">
+    <value>Running modes updated successfully.</value>
+  </data>
+  <data name="MailConfigPage_ModesUpdateFailed" xml:space="preserve">
+    <value>Failed to update modes: {0}</value>
+  </data>
+  <data name="MailConfigPage_ModesResetSuccess" xml:space="preserve">
+    <value>Running modes reset to startup configuration defaults.</value>
+  </data>
+  <data name="MailConfigPage_ModesResetFailed" xml:space="preserve">
+    <value>Failed to reset modes: {0}</value>
+  </data>
+  <data name="UserInformationPage_GroupNumberFallback" xml:space="preserve">
+    <value>Group #{0}</value>
+  </data>
+  <data name="UserInformationPage_PageTitle" xml:space="preserve">
+    <value>User Information</value>
+  </data>
+  <data name="UserInformationPage_UnableToLoadProfile" xml:space="preserve">
+    <value>Unable to load your profile.</value>
+  </data>
+  <data name="UserInformationPage_ProfileTitle" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="UserInformationPage_GroupMembershipsTitle" xml:space="preserve">
+    <value>Group Memberships</value>
+  </data>
+  <data name="UserInformationPage_Requested" xml:space="preserve">
+    <value>Requested</value>
+  </data>
+  <data name="UserInformationPage_NoMemberships" xml:space="preserve">
+    <value>No group memberships yet. Group assignment requests must be approved by Group Admin or SuperAdmin.</value>
+  </data>
+  <data name="UserInformationPage_UpdatedSuccess" xml:space="preserve">
+    <value>Profile updated successfully.</value>
+  </data>
+  <data name="UserInformationPage_UpdateFailed" xml:space="preserve">
+    <value>Failed to update profile: {0}</value>
+  </data>
+  <data name="UserDetailPage_PageTitle" xml:space="preserve">
+    <value>User Details</value>
+  </data>
+  <data name="UserDetailPage_AccessDenied" xml:space="preserve">
+    <value>You are not allowed to view this user.</value>
+  </data>
+  <data name="UserDetailPage_Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="UserDetailPage_ProfileTitle" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="UserDetailPage_EmailLabel" xml:space="preserve">
+    <value>Email:</value>
+  </data>
+  <data name="UserDetailPage_RoleLabel" xml:space="preserve">
+    <value>Role:</value>
+  </data>
+  <data name="UserDetailPage_GenderLabel" xml:space="preserve">
+    <value>Gender:</value>
+  </data>
+  <data name="UserDetailPage_BirthdayLabel" xml:space="preserve">
+    <value>Birthday:</value>
+  </data>
+  <data name="UserDetailPage_MobileLabel" xml:space="preserve">
+    <value>Mobile:</value>
+  </data>
+  <data name="UserDetailPage_CityLabel" xml:space="preserve">
+    <value>City:</value>
+  </data>
+  <data name="UserDetailPage_CountryLabel" xml:space="preserve">
+    <value>Country:</value>
+  </data>
+  <data name="UserDetailPage_EmailVerifiedLabel" xml:space="preserve">
+    <value>Email verified:</value>
+  </data>
+  <data name="UserDetailPage_EntryDateLabel" xml:space="preserve">
+    <value>Entry date:</value>
+  </data>
+  <data name="UserDetailPage_CreatedLabel" xml:space="preserve">
+    <value>Created:</value>
+  </data>
+  <data name="UserDetailPage_GroupMembershipsTitle" xml:space="preserve">
+    <value>Group memberships</value>
+  </data>
+  <data name="UserDetailPage_ColJoined" xml:space="preserve">
+    <value>Joined</value>
+  </data>
+  <data name="UserDetailPage_NoMemberships" xml:space="preserve">
+    <value>No memberships.</value>
+  </data>
+  <data name="UserDetailPage_RegistrationHistoryTitle" xml:space="preserve">
+    <value>Registration history</value>
+  </data>
+  <data name="UserDetailPage_ColRegistered" xml:space="preserve">
+    <value>Registered</value>
+  </data>
+  <data name="UserDetailPage_ViewTraining" xml:space="preserve">
+    <value>View training</value>
+  </data>
+  <data name="UserDetailPage_NoRegistrations" xml:space="preserve">
+    <value>No registrations yet.</value>
+  </data>
+  <data name="UserDetailPage_BioWelcomeMessageTitle" xml:space="preserve">
+    <value>Bio / Welcome message</value>
+  </data>
+  <data name="ErrorPage_PageTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ErrorPage_Heading" xml:space="preserve">
+    <value>Error.</value>
+  </data>
+  <data name="ErrorPage_Subheading" xml:space="preserve">
+    <value>An error occurred while processing your request.</value>
+  </data>
+  <data name="ErrorPage_RequestIdLabel" xml:space="preserve">
+    <value>Request ID:</value>
+  </data>
+  <data name="ErrorPage_DevelopmentModeHeading" xml:space="preserve">
+    <value>Development Mode</value>
+  </data>
+  <data name="ErrorPage_DevelopmentModeInfo" xml:space="preserve">
+    <value>Swapping to {0} environment will display more detailed information about the error that occurred.</value>
+  </data>
+  <data name="ErrorPage_DevelopmentModeWarning" xml:space="preserve">
+    <value>The Development environment shouldn't be enabled for deployed applications. It can result in displaying sensitive information from exceptions to end users. For local debugging, enable the {0} environment by setting the {1} environment variable to {0} and restarting the app.</value>
+  </data>
+  <data name="TrainerTrainingsPage_PageTitle" xml:space="preserve">
+    <value>Training Planning</value>
+  </data>
+  <data name="TrainerTrainingsPage_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="TrainerTrainingsPage_Attendance" xml:space="preserve">
+    <value>Attendance</value>
+  </data>
+  <data name="TrainerTrainingsPage_NoTrainingsYet" xml:space="preserve">
+    <value>No trainings yet.</value>
+  </data>
+  <data name="TrainerTrainingsPage_CreateOne" xml:space="preserve">
+    <value>Create one!</value>
+  </data>
+  <data name="TrainerRunPage_PageTitle" xml:space="preserve">
+    <value>Run Training</value>
+  </data>
+  <data name="TrainerRunPage_TrainingNotFound" xml:space="preserve">
+    <value>Training not found.</value>
+  </data>
+  <data name="TrainerRunPage_NoBlocksWarning" xml:space="preserve">
+    <value>This training has no blocks.</value>
+  </data>
+  <data name="TrainerRunPage_AddBlocksFirst" xml:space="preserve">
+    <value>Add blocks first.</value>
+  </data>
+  <data name="TrainerRunPage_TrainingComplete" xml:space="preserve">
+    <value>Training Complete!</value>
+  </data>
+  <data name="TrainerRunPage_AllBlocksFinished" xml:space="preserve">
+    <value>All {0} blocks finished.</value>
+  </data>
+  <data name="TrainerRunPage_EnterDurationsAndComments" xml:space="preserve">
+    <value>Enter actual durations and comments</value>
+  </data>
+  <data name="TrainerRunPage_ActualDurationMinutes" xml:space="preserve">
+    <value>Actual Duration (min)</value>
+  </data>
+  <data name="TrainerRunPage_TrainerComment" xml:space="preserve">
+    <value>Trainer Comment</value>
+  </data>
+  <data name="TrainerRunPage_SaveFeedback" xml:space="preserve">
+    <value>Save Feedback</value>
+  </data>
+  <data name="TrainerRunPage_Saved" xml:space="preserve">
+    <value>Saved!</value>
+  </data>
+  <data name="TrainerRunPage_BlockLabel" xml:space="preserve">
+    <value>BLOCK {0}</value>
+  </data>
+  <data name="TrainerRunPage_DurationMinutesSuffix" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="TrainerRunPage_NextBlock" xml:space="preserve">
+    <value>Next Block</value>
+  </data>
+  <data name="TrainerRunPage_FinishTraining" xml:space="preserve">
+    <value>Finish Training</value>
+  </data>
+  <data name="TrainerRunPage_BlockOfCount" xml:space="preserve">
+    <value>Block {0} of {1}</value>
+  </data>
+  <data name="TrainingDetailPage_PageTitleFallback" xml:space="preserve">
+    <value>Training</value>
+  </data>
+  <data name="TrainingDetailPage_NotFound" xml:space="preserve">
+    <value>Training not found.</value>
+  </data>
+  <data name="TrainingDetailPage_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="TrainingDetailPage_AreYouSure" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="TrainingDetailPage_NotifyAndDelete" xml:space="preserve">
+    <value>Notify &amp; Delete</value>
+  </data>
+  <data name="TrainingDetailPage_TrainerLabel" xml:space="preserve">
+    <value>Trainer: {0}</value>
+  </data>
+  <data name="TrainingDetailPage_RegisteredCount" xml:space="preserve">
+    <value>{0} / {1} registered</value>
+  </data>
+  <data name="TrainingDetailPage_RunTraining" xml:space="preserve">
+    <value>Run Training</value>
+  </data>
+  <data name="TrainingDetailPage_RecordAttendance" xml:space="preserve">
+    <value>Record Attendance</value>
+  </data>
+  <data name="TrainingDetailPage_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="TrainingDetailPage_SuccessfullyRegistered" xml:space="preserve">
+    <value>Successfully registered</value>
+  </data>
+  <data name="TrainingDetailPage_RegistrationCancelled" xml:space="preserve">
+    <value>Registration cancelled</value>
+  </data>
+  <data name="TrainingDetailPage_Unregister" xml:space="preserve">
+    <value>Unregister</value>
+  </data>
+  <data name="TrainingDetailPage_TrainingFull" xml:space="preserve">
+    <value>Training Full</value>
+  </data>
+  <data name="TrainingDetailPage_TrainingBlocksHeading" xml:space="preserve">
+    <value>Training Blocks ({0})</value>
+  </data>
+  <data name="TrainingDetailPage_PlannedMinutes" xml:space="preserve">
+    <value>Planned: {0} min</value>
+  </data>
+  <data name="TrainingDetailPage_ActualMinutes" xml:space="preserve">
+    <value>Actual: {0} min</value>
+  </data>
+  <data name="TrainingDetailPage_RegisteredParticipants" xml:space="preserve">
+    <value>Registered Participants</value>
+  </data>
+  <data name="TrainingDetailPage_NoOneSignedUpYet" xml:space="preserve">
+    <value>No one has signed up yet — this training is currently winning the hide-and-seek championship.</value>
+  </data>
+  <data name="TrainingDetailPage_FailedToNotify" xml:space="preserve">
+    <value>Failed to notify {0}.</value>
+  </data>
+  <data name="Shared_Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="TrainingsPage_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="TrainingsPage_AllGroups" xml:space="preserve">
+    <value>All Groups</value>
+  </data>
+  <data name="TrainingsPage_AllTrainers" xml:space="preserve">
+    <value>All Trainers</value>
+  </data>
+  <data name="Shared_Slug" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="Shared_RunningMode" xml:space="preserve">
+    <value>Running mode</value>
+  </data>
+  <data name="Shared_SomethingWentWrong" xml:space="preserve">
+    <value>Something went wrong!</value>
+  </data>
+  <data name="Shared_UnexpectedErrorLoadingPage" xml:space="preserve">
+    <value>An unexpected error occurred while loading this page. Please try again.</value>
+  </data>
+  <data name="Shared_TryAgain" xml:space="preserve">
+    <value>Try Again</value>
+  </data>
+  <data name="Shared_GoToDashboard" xml:space="preserve">
+    <value>Go to Dashboard</value>
+  </data>
+  <data name="Shared_UnhandledErrorOccurred" xml:space="preserve">
+    <value>An unhandled error has occurred.</value>
+  </data>
+  <data name="Shared_Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="Shared_DarkMode" xml:space="preserve">
+    <value>Dark mode</value>
+  </data>
+  <data name="Shared_AppName" xml:space="preserve">
+    <value>Trainings</value>
+  </data>
+  <data name="UserCreateEditPage_AssignUserToManagedGroup" xml:space="preserve">
+    <value>Please assign the user to at least one managed group.</value>
+  </data>
+  <data name="UserCreateEditPage_AccessDenied" xml:space="preserve">
+    <value>Access denied.</value>
+  </data>
+  <data name="UserCreateEditPage_Birthday" xml:space="preserve">
+    <value>Birthday</value>
+  </data>
+  <data name="UserCreateEditPage_City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="UserCreateEditPage_CityPlaceholder" xml:space="preserve">
+    <value>Enter city</value>
+  </data>
+  <data name="UserCreateEditPage_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="UserCreateEditPage_CreateUser" xml:space="preserve">
+    <value>Create User</value>
+  </data>
+  <data name="UserCreateEditPage_EditUser" xml:space="preserve">
+    <value>Edit User</value>
+  </data>
+  <data name="UserCreateEditPage_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="UserCreateEditPage_EmailPlaceholder" xml:space="preserve">
+    <value>name@example.com</value>
+  </data>
+  <data name="UserCreateEditPage_EntryDate" xml:space="preserve">
+    <value>Entry Date</value>
+  </data>
+  <data name="UserCreateEditPage_FirstName" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="UserCreateEditPage_FirstNamePlaceholder" xml:space="preserve">
+    <value>Enter first name</value>
+  </data>
+  <data name="UserCreateEditPage_Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="UserCreateEditPage_GeneratePassword" xml:space="preserve">
+    <value>Generate Password</value>
+  </data>
+  <data name="UserCreateEditPage_Groups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="UserCreateEditPage_LastName" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="UserCreateEditPage_LastNamePlaceholder" xml:space="preserve">
+    <value>Enter last name</value>
+  </data>
+  <data name="UserCreateEditPage_ManagedGroups" xml:space="preserve">
+    <value>Managed Groups</value>
+  </data>
+  <data name="UserCreateEditPage_Mobile" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="UserCreateEditPage_MobilePlaceholder" xml:space="preserve">
+    <value>Enter mobile number</value>
+  </data>
+  <data name="UserCreateEditPage_NewPasswordMinCharsPlaceholder" xml:space="preserve">
+    <value>New password (min. 8 chars)</value>
+  </data>
+  <data name="UserCreateEditPage_NoGroupsAvailableForAssignment" xml:space="preserve">
+    <value>No groups available for assignment.</value>
+  </data>
+  <data name="UserCreateEditPage_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordPlaceholder" xml:space="preserve">
+    <value>Enter password</value>
+  </data>
+  <data name="UserCreateEditPage_ReadOnlyModeSuperAdminOnly" xml:space="preserve">
+    <value>Read Only mode is active. Only SuperAdmins can make changes.</value>
+  </data>
+  <data name="UserCreateEditPage_Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="UserCreateEditPage_SelectCountry" xml:space="preserve">
+    <value>Select Country</value>
+  </data>
+  <data name="UserCreateEditPage_SetNewPasswordLeaveBlank" xml:space="preserve">
+    <value>Set new password (leave blank to keep current password)</value>
+  </data>
+  <data name="UserCreateEditPage_SuperAdmin" xml:space="preserve">
+    <value>SuperAdmin</value>
+  </data>
+  <data name="UserCreateEditPage_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="UserCreateEditPage_UserNotFound" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
+    <value>Welcome Message</value>
+  </data>
+  <data name="UserCreateEditPage_WelcomeMessagePlaceholder" xml:space="preserve">
+    <value>Optional welcome message</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordValidationMinLength" xml:space="preserve">
+    <value>Password must be at least 8 characters.</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordValidationUppercase" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter.</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordValidationLowercase" xml:space="preserve">
+    <value>Password must contain at least one lowercase letter.</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordValidationDigit" xml:space="preserve">
+    <value>Password must contain at least one digit.</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordValidationSpecialCharacter" xml:space="preserve">
+    <value>Password must contain at least one special character.</value>
+  </data>
+  <data name="UserDetailPage_Training" xml:space="preserve">
+    <value>Training</value>
+  </data>
+  <data name="LoginPage_PageTitle" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="LoginPage_Logo" xml:space="preserve">
+    <value>Trainings logo</value>
+  </data>
+  <data name="LoginPage_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="LoginPage_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LoginPage_Button" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="LoginPage_Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="LoginPage_ForgotPassword" xml:space="preserve">
+    <value>Forgot password?</value>
+  </data>
+  <data name="LoginPage_InitialSetupTitle" xml:space="preserve">
+    <value>Initial Setup</value>
+  </data>
+  <data name="LoginPage_InitialSetupDescription" xml:space="preserve">
+    <value>No users exist yet. Use these default credentials to log in:</value>
+  </data>
+  <data name="LoginPage_InitialSetupEmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="LoginPage_InitialSetupPasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LoginPage_InvalidLogin" xml:space="preserve">
+    <value>Invalid email or password!</value>
+  </data>
+  <data name="ConfirmEmailPage_PageTitle" xml:space="preserve">
+    <value>Confirm Email</value>
+  </data>
+  <data name="ConfirmEmailPage_Confirming" xml:space="preserve">
+    <value>Confirming your email...</value>
+  </data>
+  <data name="ConfirmEmailPage_SuccessTitle" xml:space="preserve">
+    <value>Registration successful</value>
+  </data>
+  <data name="ConfirmEmailPage_SuccessMessage" xml:space="preserve">
+    <value>Your email address was confirmed successfully.</value>
+  </data>
+  <data name="ConfirmEmailPage_ReviewPending" xml:space="preserve">
+    <value>Your registration is now being reviewed by the Super Admin. You will be notified by email as soon as the review is complete.</value>
+  </data>
+  <data name="ConfirmEmailPage_BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+  <data name="ConfirmEmailPage_FailedTitle" xml:space="preserve">
+    <value>Confirmation Failed</value>
+  </data>
+  <data name="ConfirmEmailPage_SendNewVerificationMail" xml:space="preserve">
+    <value>Send New Verification Mail</value>
+  </data>
+  <data name="ConfirmEmailPage_ReadOnlyModeMessage" xml:space="preserve">
+    <value>Read Only mode is active, so a replacement verification mail cannot be created right now.</value>
+  </data>
+  <data name="ForgotPasswordPage_PageTitle" xml:space="preserve">
+    <value>Forgot Password</value>
+  </data>
+  <data name="ForgotPasswordPage_Title" xml:space="preserve">
+    <value>Forgot Password</value>
+  </data>
+  <data name="ForgotPasswordPage_SuccessMessage" xml:space="preserve">
+    <value>If an account with that email exists, a password reset link has been sent. Please check your email.</value>
+  </data>
+  <data name="ForgotPasswordPage_BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+  <data name="ForgotPasswordPage_ReadOnlyModeMessage" xml:space="preserve">
+    <value>Read Only mode is active. Password reset requests are temporarily unavailable.</value>
+  </data>
+  <data name="ForgotPasswordPage_Description" xml:space="preserve">
+    <value>Enter your email address and we'll send you a link to reset your password.</value>
+  </data>
+  <data name="ForgotPasswordPage_EmailLabel" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="ForgotPasswordPage_EmailPlaceholder" xml:space="preserve">
+    <value>you@example.com</value>
+  </data>
+  <data name="ForgotPasswordPage_SendResetLink" xml:space="preserve">
+    <value>Send Reset Link</value>
+  </data>
+  <data name="RegisterPage_PageTitle" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="RegisterPage_Title" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
+  <data name="RegisterPage_SuccessTitle" xml:space="preserve">
+    <value>Registration successful!</value>
+  </data>
+  <data name="RegisterPage_SuccessMessage" xml:space="preserve">
+    <value>Please check your email to confirm your address. Your account will be reviewed and activated by an administrator.</value>
+  </data>
+  <data name="RegisterPage_NoEmailModeMessage" xml:space="preserve">
+    <value>No E-Mail mode is active. Review the email preview below and use the included verification link.</value>
+  </data>
+  <data name="RegisterPage_BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+  <data name="RegisterPage_ReadOnlyModeMessage" xml:space="preserve">
+    <value>Read Only mode is active. Registration is temporarily unavailable.</value>
+  </data>
+  <data name="RegisterPage_FirstNameLabel" xml:space="preserve">
+    <value>First Name *</value>
+  </data>
+  <data name="RegisterPage_FirstNamePlaceholder" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="RegisterPage_LastNameLabel" xml:space="preserve">
+    <value>Last Name *</value>
+  </data>
+  <data name="RegisterPage_LastNamePlaceholder" xml:space="preserve">
+    <value>Last name</value>
+  </data>
+  <data name="RegisterPage_EmailLabel" xml:space="preserve">
+    <value>Email *</value>
+  </data>
+  <data name="RegisterPage_EmailPlaceholder" xml:space="preserve">
+    <value>you@example.com</value>
+  </data>
+  <data name="RegisterPage_PasswordLabel" xml:space="preserve">
+    <value>Password *</value>
+  </data>
+  <data name="RegisterPage_GenderLabel" xml:space="preserve">
+    <value>Gender *</value>
+  </data>
+  <data name="RegisterPage_GenderMale" xml:space="preserve">
+    <value>Male</value>
+  </data>
+  <data name="RegisterPage_GenderFemale" xml:space="preserve">
+    <value>Female</value>
+  </data>
+  <data name="RegisterPage_GenderOther" xml:space="preserve">
+    <value>Other / Prefer not to say</value>
+  </data>
+  <data name="RegisterPage_BirthdayLabel" xml:space="preserve">
+    <value>Birthday</value>
+  </data>
+  <data name="RegisterPage_MobileLabel" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="RegisterPage_MobilePlaceholder" xml:space="preserve">
+    <value>+41 79 000 0000</value>
+  </data>
+  <data name="RegisterPage_CityLabel" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="RegisterPage_CityPlaceholder" xml:space="preserve">
+    <value>Your city</value>
+  </data>
+  <data name="RegisterPage_GroupMembershipLabel" xml:space="preserve">
+    <value>Request Group Membership</value>
+  </data>
+  <data name="RegisterPage_WelcomeMessageLabel" xml:space="preserve">
+    <value>Welcome Message / Bio</value>
+  </data>
+  <data name="RegisterPage_WelcomeMessagePlaceholder" xml:space="preserve">
+    <value>Tell us a little about yourself...</value>
+  </data>
+  <data name="RegisterPage_ButtonRegister" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="RegisterPage_AlreadyHaveAccount" xml:space="preserve">
+    <value>Already have an account? Login</value>
+  </data>
+  <data name="ResetPasswordPage_PageTitle" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="ResetPasswordPage_Title" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="ResetPasswordPage_Button" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="ResetPasswordPage_SuccessMessage" xml:space="preserve">
+    <value>Your password has been reset successfully.</value>
+  </data>
+  <data name="ResetPasswordPage_LoginLink" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="ResetPasswordPage_InvalidToken" xml:space="preserve">
+    <value>Invalid or missing reset token.</value>
+  </data>
+  <data name="ResetPasswordPage_RequestNewLink" xml:space="preserve">
+    <value>Request New Link</value>
+  </data>
+  <data name="ResetPasswordPage_NewPasswordLabel" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="ResetPasswordPage_NewPasswordPlaceholder" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="ResetPasswordPage_ConfirmPasswordLabel" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="ResetPasswordPage_ConfirmPasswordPlaceholder" xml:space="preserve">
+    <value>Confirm password</value>
+  </data>
+  <data name="ConfirmEmailPage_InvalidToken" xml:space="preserve">
+    <value>Invalid or missing confirmation token.</value>
+  </data>
+  <data name="ConfirmEmailPage_NewMailSent" xml:space="preserve">
+    <value>A new verification mail has been sent.</value>
+  </data>
+  <data name="ConfirmEmailPage_NoEmailModePreview" xml:space="preserve">
+    <value>No E-Mail mode is active. Review the preview below and use the new verification link.</value>
+  </data>
+  <data name="ForgotPasswordPage_EmailRequired" xml:space="preserve">
+    <value>Please enter your email address.</value>
+  </data>
+  <data name="RegisterPage_NameRequired" xml:space="preserve">
+    <value>First name and last name are required.</value>
+  </data>
+  <data name="RegisterPage_EmailRequired" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="RegisterPage_PasswordTooShort" xml:space="preserve">
+    <value>Password must be at least 6 characters.</value>
+  </data>
+  <data name="ResetPasswordPage_NewPasswordRequired" xml:space="preserve">
+    <value>Please enter a new password.</value>
+  </data>
+  <data name="ResetPasswordPage_PasswordsDoNotMatch" xml:space="preserve">
+    <value>Passwords do not match.</value>
+  </data>
+  <data name="ResetPasswordPage_PasswordTooShort" xml:space="preserve">
+    <value>Password must be at least 6 characters.</value>
+  </data>
+  <data name="GroupCreateEditPage_EditGroup" xml:space="preserve">
+    <value>Edit Group</value>
+  </data>
+  <data name="GroupCreateEditPage_CreateGroup" xml:space="preserve">
+    <value>Create Group</value>
+  </data>
+  <data name="GroupCreateEditPage_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="GroupCreateEditPage_GroupNamePlaceholder" xml:space="preserve">
+    <value>Enter group name</value>
+  </data>
+  <data name="GroupCreateEditPage_Slug" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="GroupCreateEditPage_SlugPlaceholder" xml:space="preserve">
+    <value>group-slug</value>
+  </data>
+  <data name="GroupCreateEditPage_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="GroupCreateEditPage_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="GroupCreateEditPage_Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="GroupCreateEditPage_SelectLocation" xml:space="preserve">
+    <value>Select location</value>
+  </data>
+  <data name="GroupCreateEditPage_MaxParticipants" xml:space="preserve">
+    <value>Max Participants</value>
+  </data>
+  <data name="GroupCreateEditPage_Weekday" xml:space="preserve">
+    <value>Weekday</value>
+  </data>
+  <data name="GroupCreateEditPage_SelectDay" xml:space="preserve">
+    <value>Select day</value>
+  </data>
+  <data name="GroupCreateEditPage_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="GroupCreateEditPage_DurationMinutes" xml:space="preserve">
+    <value>Duration (minutes)</value>
+  </data>
+  <data name="GroupCreateEditPage_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="GroupCreateEditPage_Localized" xml:space="preserve">
+    <value>Localized</value>
+  </data>
+  <data name="GroupCreateEditPage_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="GroupCreateEditPage_SelectCountry" xml:space="preserve">
+    <value>Select country</value>
+  </data>
+  <data name="GroupCreateEditPage_GroupNotFound" xml:space="preserve">
+    <value>Group not found.</value>
+  </data>
+  <data name="TrainingsPage_Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="TrainingsPage_Full" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="TrainingsPage_OlderThanTwoWeeks" xml:space="preserve">
+    <value>Older than 2 weeks</value>
+  </data>
+  <data name="TrainingsPage_NoRecentTrainingsMatchCurrentFilters" xml:space="preserve">
+    <value>No recent trainings match the current filters.</value>
+  </data>
+  <data name="TrainingsPage_NoTrainingsMatchCurrentFilters" xml:space="preserve">
+    <value>No trainings match the current filters.</value>
+  </data>
+  <data name="TrainingsPage_NoTrainingsAvailable" xml:space="preserve">
+    <value>No trainings available.</value>
+  </data>
+  <data name="TrainingsPage_NoTrainingsFromLastTwoWeeksAvailable" xml:space="preserve">
+    <value>No trainings from the last two weeks are available.</value>
+  </data>
+  <data name="TrainingsPage_RegistrationCancelled" xml:space="preserve">
+    <value>Registration cancelled.</value>
+  </data>
+  <data name="TrainingsPage_SuccessfullyRegistered" xml:space="preserve">
+    <value>Successfully registered.</value>
+  </data>
+  <data name="TrainingsPage_TrainingDeleted" xml:space="preserve">
+    <value>Training deleted.</value>
+  </data>
+  <data name="Shared_Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="Shared_Unregister" xml:space="preserve">
+    <value>Unregister</value>
+  </data>
+  <data name="CreateEditTrainingPage_PageTitleEdit" xml:space="preserve">
+    <value>Edit Training</value>
+  </data>
+  <data name="CreateEditTrainingPage_PageTitleNew" xml:space="preserve">
+    <value>Create Training</value>
+  </data>
+  <data name="CreateEditTrainingPage_HeadingNew" xml:space="preserve">
+    <value>New Training</value>
+  </data>
+  <data name="CreateEditTrainingPage_ReadOnlyAlert" xml:space="preserve">
+    <value>Read Only mode is active. Only SuperAdmins can create or edit trainings.</value>
+  </data>
+  <data name="CreateEditTrainingPage_EditDetails" xml:space="preserve">
+    <value>Edit Details</value>
+  </data>
+  <data name="CreateEditTrainingPage_GroupLabel" xml:space="preserve">
+    <value>Group *</value>
+  </data>
+  <data name="CreateEditTrainingPage_SelectGroup" xml:space="preserve">
+    <value>Select a group</value>
+  </data>
+  <data name="CreateEditTrainingPage_TrainerLabel" xml:space="preserve">
+    <value>Trainer *</value>
+  </data>
+  <data name="CreateEditTrainingPage_SelectTrainer" xml:space="preserve">
+    <value>Select a trainer</value>
+  </data>
+  <data name="CreateEditTrainingPage_TitleLabel" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="CreateEditTrainingPage_TitlePlaceholder" xml:space="preserve">
+    <value>Training title</value>
+  </data>
+  <data name="CreateEditTrainingPage_DateLabel" xml:space="preserve">
+    <value>Date *</value>
+  </data>
+  <data name="CreateEditTrainingPage_LocationLabel" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="CreateEditTrainingPage_SelectLocation" xml:space="preserve">
+    <value>Select location</value>
+  </data>
+  <data name="CreateEditTrainingPage_MaxParticipantLabel" xml:space="preserve">
+    <value>Max Participant</value>
+  </data>
+  <data name="CreateEditTrainingPage_StartLabel" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="CreateEditTrainingPage_DurationLabel" xml:space="preserve">
+    <value>Duration (minutes)</value>
+  </data>
+  <data name="CreateEditTrainingPage_EndLabel" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="CreateEditTrainingPage_StatusLabel" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="CreateEditTrainingPage_MarkAsPlannedTitle" xml:space="preserve">
+    <value>Mark this training as Planned</value>
+  </data>
+  <data name="CreateEditTrainingPage_MarkAsPlanned" xml:space="preserve">
+    <value>Mark as Planned</value>
+  </data>
+  <data name="CreateEditTrainingPage_RevertToPlanning" xml:space="preserve">
+    <value>Revert to Planning</value>
+  </data>
+  <data name="CreateEditTrainingPage_SpecialLocationLabel" xml:space="preserve">
+    <value>Special Location Description</value>
+  </data>
+  <data name="CreateEditTrainingPage_MeetingPointLabel" xml:space="preserve">
+    <value>Meeting Point</value>
+  </data>
+  <data name="CreateEditTrainingPage_DescriptionLabel" xml:space="preserve">
+    <value>Training Description</value>
+  </data>
+  <data name="CreateEditTrainingPage_DescriptionPlaceholder" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="CreateEditTrainingPage_UpdateButton" xml:space="preserve">
+    <value>Update Training</value>
+  </data>
+  <data name="CreateEditTrainingPage_CreateButton" xml:space="preserve">
+    <value>Create Training</value>
+  </data>
+  <data name="CreateEditTrainingPage_GroupRequired" xml:space="preserve">
+    <value>Please select a group.</value>
+  </data>
+  <data name="CreateEditTrainingPage_TrainerRequired" xml:space="preserve">
+    <value>Please select a trainer.</value>
+  </data>
+  <data name="CreateEditTrainingPage_UpdatedSuccess" xml:space="preserve">
+    <value>Training updated successfully.</value>
+  </data>
+  <data name="CreateEditTrainingPage_CreatedSuccess" xml:space="preserve">
+    <value>Training created successfully.</value>
+  </data>
+  <data name="CreateEditTrainingPage_SaveFailed" xml:space="preserve">
+    <value>Failed to save training: {0}</value>
+  </data>
+  <data name="CreateEditTrainingPage_MarkedAsPlannedSuccess" xml:space="preserve">
+    <value>Training marked as Planned.</value>
+  </data>
+  <data name="CreateEditTrainingPage_RevertedToPlanningSuccess" xml:space="preserve">
+    <value>Training reverted to Planning.</value>
+  </data>
+  <data name="TrainerTrainingsPage_View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="TrainerTrainingsPage_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="TrainingDetailPage_Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="DashboardWelcomeComponent_UnknownUser" xml:space="preserve">
+    <value>Stranger</value>
+  </data>
+  <data name="HomePage_NewGroup" xml:space="preserve">
+    <value>New Group</value>
+  </data>
+  <data name="HomePage_NewUser" xml:space="preserve">
+    <value>New User</value>
+  </data>
+  <data name="HomePage_NewTraining" xml:space="preserve">
+    <value>New Training</value>
+  </data>
+  <data name="Shared_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="LocationsPage_EmptyActive" xml:space="preserve">
+    <value>No active locations yet.</value>
+  </data>
+  <data name="LocationsPage_EmptySystemWide" xml:space="preserve">
+    <value>No system wide locations yet.</value>
+  </data>
+  <data name="LocationsPage_EmptyInactive" xml:space="preserve">
+    <value>No inactive locations.</value>
+  </data>
+  <data name="LocationsPage_DeleteConfirmTitle" xml:space="preserve">
+    <value>Delete Location</value>
+  </data>
+  <data name="LocationsPage_DeleteConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this location? This action cannot be undone.</value>
+  </data>
+  <data name="LocationsPage_GroupAccessNoGroups" xml:space="preserve">
+    <value>No groups available.</value>
+  </data>
+  <data name="LocationsPage_GroupAccessNoLocations" xml:space="preserve">
+    <value>No locations available.</value>
+  </data>
+</root>

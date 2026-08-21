@@ -16,7 +16,7 @@ public class AuthorizationHelperTests
             new Claim("GroupRole::7", "Participant")
         ], "test"));
 
-        var result = _helper.IsGroupMember(principal, 7);
+        bool result = _helper.IsGroupMember(principal, 7);
 
         result.Should().BeTrue();
     }
@@ -29,7 +29,7 @@ public class AuthorizationHelperTests
             new Claim("GroupRole::8", "Participant")
         ], "test"));
 
-        var result = _helper.IsGroupMember(principal, 7);
+        bool result = _helper.IsGroupMember(principal, 7);
 
         result.Should().BeFalse();
     }
@@ -42,7 +42,7 @@ public class AuthorizationHelperTests
             new Claim("SuperAdmin", "true")
         ], "test"));
 
-        var result = _helper.IsGroupMember(principal, 99);
+        bool result = _helper.IsGroupMember(principal, 99);
 
         result.Should().BeTrue();
     }

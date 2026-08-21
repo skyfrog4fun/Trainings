@@ -6,14 +6,9 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class CountryService : ICountryService
+public class CountryService(ApplicationDbContext context) : ICountryService
 {
-    private readonly ApplicationDbContext _context;
-
-    public CountryService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<IEnumerable<CountryDto>> GetAllAsync(CancellationToken ct = default)
     {

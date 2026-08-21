@@ -1,0 +1,394 @@
+@page "/config/locations"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "SuperAdmin")]
+
+@inject ILocationService LocationService
+@inject IGroupService GroupService
+@inject ICountryService CountryService
+@inject IDateTimeFormatService DateTimeFormatService
+@inject ScrollService ScrollService
+
+<PageTitle>@Localizer["LocationsPage_PageTitle"]</PageTitle>
+
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
+<div class="container px-2 px-md-4">
+    <PageTitleComponent Icon="@AppIcons.Location"
+                         Text="@Localizer["LocationsPage_Heading"]"
+                         ButtonText="@Localizer["Shared_New"]"
+                         ButtonIcon="@AppIcons.Plus"
+                         OnButtonClick="ShowCreateForm" />
+
+    @if (_showForm)
+    {
+        <div class="card mb-4 location-edit-form-card">
+            <ScrollAnchor Id="location-edit-form" />
+            <div class="card-body">
+                <h5>@(_editId == 0 ? Localizer["LocationsPage_CreateTitle"] : Localizer["LocationsPage_EditTitle"])</h5>
+                <EditForm Model="_formModel" OnValidSubmit="Save">
+                    <DataAnnotationsValidator />
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["LocationsPage_NameLabel"]</label>
+                            <InputText class="form-control" @bind-Value="_formModel.Name" />
+                            <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["LocationsPage_CityNameLabel"]</label>
+                            <InputText class="form-control" @bind-Value="_formModel.CityName" />
+                            <ValidationMessage For="() => _formModel.CityName" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["LocationsPage_CountryLabel"]</label>
+                            <select class="form-select" @bind="_formModel.CountryId">
+                                <option value="">@Localizer["LocationsPage_SelectCountry"]</option>
+                                @foreach (var country in _countries)
+                                {
+                                    <option value="@country.Id">@country.Code — @country.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-@(_editId != 0 ? 9 : 12) mt-3 d-flex">
+                            <div class="form-check">
+                                <input class="form-check-input" id="isSystemWide" type="checkbox" @bind="_formModel.IsSystemWide" />
+                                <label class="form-check-label" for="isSystemWide">@Localizer["LocationsPage_SystemWideLabel"]</label>
+                            </div>                                
+                        </div>
+                        @if (_editId != 0)
+                        {
+                            <div class="col-3 mt-3 d-flex justify-content-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="isActive" type="checkbox" @bind="_formModel.IsActive" />
+                                    <label class="form-check-label" for="isActive">@Localizer["Shared_Active"]</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <div>
+                            <button type="submit" class="btn btn-primary me-2"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["LocationsPage_SaveButton"]</button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["LocationsPage_CancelButton"]</button>
+                        </div>
+                        @if (_editId != 0)
+                        {
+                            <button type="button" class="btn btn-outline-danger" @onclick="() => Delete(_editId)"><i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]</button>
+                        }
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @{
+        var activeLocations = _locations.Where(l => l.IsActive && !l.IsSystemWide).ToList();
+        var systemWideLocations = _locations.Where(l => l.IsSystemWide).ToList();
+        var inactiveLocations = _locations.Where(l => !l.IsActive).ToList();
+    }
+
+    <LocationListComponent Title="@Localizer["LocationsPage_ActiveLocations"]"
+                            Locations="activeLocations"
+                            AlwaysShow="true"
+                            EmptyText="@Localizer["LocationsPage_EmptyActive"]"
+                            OnEdit="Edit" />
+    <LocationListComponent Title="@Localizer["LocationsPage_SystemWide"]"
+                            Locations="systemWideLocations"
+                            AlwaysShow="true"
+                            EmptyText="@Localizer["LocationsPage_EmptySystemWide"]"
+                            OnEdit="Edit" />
+    <LocationListComponent Title="@Localizer["LocationsPage_Inactive"]"
+                            Locations="inactiveLocations"
+                            AlwaysShow="false"
+                            EmptyText="@Localizer["LocationsPage_EmptyInactive"]"
+                            OnEdit="Edit" />
+
+    <div class="pt-2 pb-2"></div>
+
+    <PageTitleComponent Icon="@AppIcons.Access" Text="@Localizer["LocationsPage_GroupLocationAccess"]" />
+
+    @if (_groups.Count == 0)
+    {
+        <p class="text-muted">@Localizer["LocationsPage_GroupAccessNoGroups"]</p>
+    }
+    else if (_locations.Count(l => !l.IsSystemWide) == 0)
+    {
+        <p class="text-muted">@Localizer["LocationsPage_GroupAccessNoLocations"]</p>
+    }
+    else
+    {
+        @foreach (var location in _locations.Where(l => !l.IsSystemWide))
+        {
+            var isExpanded = _expandedGroupAccessIds.Contains(location.Id);
+            var chevronClass = isExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
+            <div class="card collapsible-card mb-3">
+                <div class="card-header collapsible-card-header location-list-header collapsible-card-toggle" role="button" @onclick="() => ToggleGroupAccessExpanded(location.Id)">
+                    <div>
+                        <i class="@chevronClass" aria-hidden="true"></i>
+                        <span>@location.Name</span>
+                    </div>
+                    <div class="collapsible-card-meta app-location-country">@location.CityName@(string.IsNullOrWhiteSpace(location.CountryCode) ? "" : $", {location.CountryCode}")</div>
+                </div>
+                @if (isExpanded)
+                {
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @foreach (var group in _groups)
+                            {
+                                var key = $"{location.Id}:{group.Id}";
+                                var groupCulture = GetGroupCulture(group);
+                                <div class="col-12 col-md-4">
+                                    <div class="form-check @(group.IsActive ? "" : "text-muted")">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="loc-grp-@location.Id-@group.Id"
+                                               checked="@_groupLocationAssignments.Contains(key)"
+                                               @onchange="e => ToggleGroupLocation(location.Id, group.Id, (bool)(e.Value ?? false))" />
+                                        <label class="form-check-label" for="loc-grp-@location.Id-@group.Id">
+                                            @GetGroupLabel(group, groupCulture)
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveGroupAccess(location.Id)"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["LocationsPage_SaveButton"]</button>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+</div>
+
+<ConfirmDialogComponent IsVisible="_showDeleteConfirm"
+                        Title="@Localizer["LocationsPage_DeleteConfirmTitle"]"
+                        Message="@Localizer["LocationsPage_DeleteConfirmMessage"]"
+                        ConfirmText="@Localizer["Shared_Delete"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="ConfirmDelete"
+                        OnCancel="CancelDelete" />
+
+@code {
+    private class LocationFormModel : IValidatableObject
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string Name { get; set; } = string.Empty;
+
+        public string CityName { get; set; } = string.Empty;
+
+        public bool IsSystemWide { get; set; }
+        public bool IsActive { get; set; } = true;
+        public int? CountryId { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!IsSystemWide && string.IsNullOrWhiteSpace(CityName))
+            {
+                yield return new ValidationResult("City is required.", new[] { nameof(CityName) });
+            }
+        }
+    }
+
+    private List<LocationDto> _locations = new();
+    private List<GroupDto> _groups = new();
+    private List<CountryDto> _countries = new();
+    private HashSet<string> _groupLocationAssignments = new(StringComparer.Ordinal);
+    private HashSet<int> _expandedGroupAccessIds = new();
+    private ToastComponent? _toast;
+
+    private bool _showForm;
+    private int _editId;
+    private LocationFormModel _formModel = new();
+
+    private bool _showDeleteConfirm;
+    private int _deleteId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+
+        if (ShouldOpenCreateFormFromQuery())
+        {
+            ShowCreateForm();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _locations = (await LocationService.GetAllAsync()).ToList();
+        _groups = (await GroupService.GetAllAsync()).ToList();
+        _countries = (await CountryService.GetAllAsync()).ToList();
+
+        _groupLocationAssignments = _groups
+            .SelectMany(g => g.AllowedLocationIds.Select(id => $"{id}:{g.Id}"))
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    private void ShowCreateForm()
+    {
+        _editId = 0;
+        _formModel = new LocationFormModel
+        {
+            CountryId = GetDefaultCountryId()
+        };
+        _showForm = true;
+        ScrollService.RequestScroll("location-edit-form");
+    }
+
+    private int? GetDefaultCountryId()
+    {
+        var defaultCode = DateTimeFormatService.GetDefaultCountry();
+        return _countries.FirstOrDefault(c => string.Equals(c.Code, defaultCode, StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private bool ShouldOpenCreateFormFromQuery()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query);
+        if (!query.TryGetValue("create", out var createValue))
+        {
+            return false;
+        }
+
+        var value = createValue.ToString();
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
+    }
+
+    private void Edit(LocationDto location)
+    {
+        _editId = location.Id;
+        _formModel = new LocationFormModel
+        {
+            Name = location.Name,
+            CityName = location.CityName,
+            IsSystemWide = location.IsSystemWide,
+            IsActive = location.IsActive,
+            CountryId = location.CountryId
+        };
+        _showForm = true;
+        ScrollService.RequestScroll("location-edit-form");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ScrollService.ScrollToPendingAsync();
+    }
+
+    private async Task Save()
+    {
+        if (_editId == 0)
+        {
+            await LocationService.CreateAsync(new CreateLocationDto
+            {
+                Name = _formModel.Name,
+                CityName = _formModel.CityName,
+                IsSystemWide = _formModel.IsSystemWide,
+                IsActive = _formModel.IsActive,
+                CountryId = _formModel.CountryId
+            });
+        }
+        else
+        {
+            await LocationService.UpdateAsync(new UpdateLocationDto
+            {
+                Id = _editId,
+                Name = _formModel.Name,
+                CityName = _formModel.CityName,
+                IsSystemWide = _formModel.IsSystemWide,
+                IsActive = _formModel.IsActive,
+                CountryId = _formModel.CountryId
+            });
+        }
+
+        _showForm = false;
+        await LoadData();
+        await ShowSavedToast();
+    }
+
+    private void Cancel() => _showForm = false;
+
+    private void Delete(int id)
+    {
+        _deleteId = id;
+        _showDeleteConfirm = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        _showDeleteConfirm = false;
+        await LocationService.DeleteAsync(_deleteId);
+        if (_editId == _deleteId)
+        {
+            _showForm = false;
+        }
+        await LoadData();
+    }
+
+    private void CancelDelete() => _showDeleteConfirm = false;
+
+    private void ToggleGroupAccessExpanded(int locationId)
+    {
+        if (!_expandedGroupAccessIds.Add(locationId))
+        {
+            _expandedGroupAccessIds.Remove(locationId);
+        }
+    }
+
+    private CultureInfo GetGroupCulture(GroupDto group)
+    {
+        var countryCode = _countries.FirstOrDefault(c => c.Id == group.CountryId)?.Code
+            ?? DateTimeFormatService.GetDefaultCountry();
+        return DateTimeFormatService.GetCultureForCountry(countryCode);
+    }
+
+    private static string GetGroupLabel(GroupDto group, CultureInfo groupCulture)
+    {
+        if (!group.Weekday.HasValue && !group.StartTime.HasValue)
+        {
+            return group.Name;
+        }
+
+        var weekdayPart = group.Weekday.HasValue ? group.Weekday.Value.ToString() : "";
+        var timePart = group.StartTime.HasValue ? group.StartTime.Value.ToString("HH:mm", groupCulture) : "";
+        var schedulePart = string.Join(" ", new[] { weekdayPart, timePart }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        return $"{group.Name} | {schedulePart}";
+    }
+
+    private void ToggleGroupLocation(int locationId, int groupId, bool selected)
+    {
+        var key = $"{locationId}:{groupId}";
+        if (selected)
+        {
+            _groupLocationAssignments.Add(key);
+        }
+        else
+        {
+            _groupLocationAssignments.Remove(key);
+        }
+    }
+
+    private async Task SaveGroupAccess(int locationId)
+    {
+        var selectedGroupIds = _groups
+            .Where(g => _groupLocationAssignments.Contains($"{locationId}:{g.Id}"))
+            .Select(g => g.Id)
+            .ToList();
+
+        await GroupService.UpdateAllowedGroupsForLocationAsync(locationId, selectedGroupIds);
+        await LoadData();
+        await ShowSavedToast();
+    }
+
+    private async Task ShowSavedToast()
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(Localizer["LocationsPage_ChangesSaved"]);
+        }
+    }
+
+    }

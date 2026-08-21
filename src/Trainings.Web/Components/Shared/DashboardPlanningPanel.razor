@@ -1,0 +1,77 @@
+@inject IDateTimeFormatService DateTimeFormatService
+
+@if (PlanningByGroup.Any())
+{
+    @foreach (var (groupName, trainings) in PlanningByGroup)
+    {
+        <div class="card collapsible-card mb-4">
+            <div class="card-header collapsible-card-header dashboard-card-header">
+                <button type="button" class="collapsible-card-toggle" @onclick="HandleToggleAsync">
+                    <span class="fw-bold">@Localizer["DashboardPlanningPanel_PlanningOverview", groupName]</span>
+                    <i class="@(IsExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
+                </button>
+                <div class="collapsible-card-meta small">
+                    <span class="dashboard-card-counter">
+                        <i class="@AppIcons.CalendarCheck" aria-hidden="true"></i> @trainings.Count
+                    </span>
+                </div>
+            </div>
+            @if (IsExpanded)
+            {
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr><th>@Localizer["Shared_Date"]</th><th>@Localizer["Shared_Location"]</th><th>@Localizer["Shared_Trainer"]</th><th>@Localizer["Shared_Status"]</th><th class="text-end">@Localizer["Shared_Actions"]</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var training in trainings)
+                                {
+                                    <tr>
+                                        <td class="small">@FormatDashboardDateTime(training)</td>
+                                        <td class="small">@(training.LocationName ?? "-")</td>
+                                        <td class="small">@training.TrainerName</td>
+                                        <td><span class="badge @GetStatusBadgeClass(training.Status)">@training.Status</span></td>
+                                        <td class="text-end">
+                                            <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">
+                                                <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public Dictionary<string, List<TrainingDto>> PlanningByGroup { get; set; } = new();
+    [Parameter] public bool IsExpanded { get; set; }
+    [Parameter] public string UserCountry { get; set; } = "CH";
+    [Parameter] public EventCallback OnToggle { get; set; }
+
+    private async Task HandleToggleAsync()
+    {
+        if (OnToggle.HasDelegate)
+        {
+            await OnToggle.InvokeAsync();
+        }
+    }
+
+    private string FormatDashboardDateTime(TrainingDto training)
+    {
+        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? UserCountry);
+        return training.DateTime.ToString("dd.MM. HH:mm", culture);
+    }
+
+    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
+    {
+        TrainingStatus.Planned => "bg-success",
+        TrainingStatus.Planning => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+}

@@ -1,0 +1,81 @@
+<div class="app-toast-container">
+    @foreach (var toast in _toasts)
+    {
+        <div class="app-toast alert @GetVariantClass(toast.Variant)" role="status">
+            <span>@toast.Text</span>
+            <button type="button" class="app-toast-close" aria-label="@CloseLabel" @onclick="() => Dismiss(toast.Id)">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Supported visual variants for a toast message.
+    /// </summary>
+    public enum ToastVariant
+    {
+        Success,
+        Danger,
+        Info,
+        Warning
+    }
+
+    private sealed class ToastItem
+    {
+        public required int Id { get; init; }
+        public required string Text { get; init; }
+        public required ToastVariant Variant { get; init; }
+    }
+
+    [Parameter] public string CloseLabel { get; set; } = "Close";
+
+    private readonly List<ToastItem> _toasts = new();
+    private int _nextId;
+        
+    /// <summary>
+    /// Shows a new toast message. Multiple toasts stack; each is dismissed independently
+    /// either after <paramref name="durationMs"/> milliseconds or when the user clicks its close button.
+    /// </summary>
+    /// <param name="text">The message text to display.</param>
+    /// <param name="variant">The visual style of the toast.</param>
+    /// <param name="durationMs">How long the toast stays visible before auto-dismissing, in milliseconds.</param>
+    public Task Show(string text, ToastVariant variant = ToastVariant.Success, int durationMs = 5000)
+    {
+        var id = ++_nextId;
+        _toasts.Add(new ToastItem { Id = id, Text = text, Variant = variant });
+        StateHasChanged();
+
+        _ = AutoDismissAfter(id, durationMs);
+        return Task.CompletedTask;
+    }
+
+    private async Task AutoDismissAfter(int id, int durationMs)
+    {
+        await Task.Delay(durationMs);
+        await InvokeAsync(() =>
+        {
+            RemoveToast(id);
+            StateHasChanged();
+        });
+    }
+
+    private void Dismiss(int id)
+    {
+        RemoveToast(id);
+    }
+
+    private void RemoveToast(int id)
+    {
+        _toasts.RemoveAll(t => t.Id == id);
+    }
+
+    private static string GetVariantClass(ToastVariant variant) => variant switch
+    {
+        ToastVariant.Danger => "alert-danger",
+        ToastVariant.Info => "alert-info",
+        ToastVariant.Warning => "alert-warning",
+        _ => "alert-success"
+    };
+}

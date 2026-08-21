@@ -1,0 +1,600 @@
+@page "/config/mail"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "SuperAdmin")]
+
+@using Trainings.Application.DTOs
+@using Trainings.Domain.Entities
+@using Trainings.Domain.Enums
+
+@inject IMailConfigurationService MailConfigService
+@inject IEmailService EmailService
+@inject IAppRuntimeModeService AppRuntimeModeService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserService UserService
+@inject IDateTimeFormatService DateTimeFormatService
+
+<PageTitle>@Localizer["MailConfigPage_PageTitle"]</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2><i class="@AppIcons.Gear me-2" aria-hidden="true"></i>@Localizer["MailConfigPage_Heading"]</h2>
+    </div>
+
+    <p class="text-muted">@Localizer["MailConfigPage_Description"]</p>
+
+    <div class="card mb-4">
+        <div class="card-header fw-bold">@Localizer["MailConfigPage_RunningModeTitle"]</div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                @Localizer["MailConfigPage_RunningModeDescription"]
+            </p>
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-5">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chkReadOnly" @bind="_modeReadOnly" />
+                        <label class="form-check-label" for="chkReadOnly">
+                            <strong>@Localizer["MailConfigPage_ReadOnlyLabel"]</strong>
+                            <span class="text-muted small d-block">@Localizer["MailConfigPage_ReadOnlyDescription"]</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chkNoEmail" @bind="_modeNoEmail" />
+                        <label class="form-check-label" for="chkNoEmail">
+                            <strong>@Localizer["MailConfigPage_NoEmailLabel"]</strong>
+                            <span class="text-muted small d-block">@Localizer["MailConfigPage_NoEmailDescription"]</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-2 d-flex align-items-end justify-content-lg-end">
+                    <button class="btn btn-primary me-2" @onclick="ApplyModes">@Localizer["MailConfigPage_ApplyButton"]</button>
+                    <button class="btn btn-outline-secondary" @onclick="ResetModesToDefaults" title="@Localizer["MailConfigPage_ResetTitle"]">@Localizer["MailConfigPage_ResetButton"]</button>
+                </div>
+            </div>
+            @if (_modeActionResult is not null)
+            {
+                <div class="alert @(_modeActionSuccess ? "alert-success" : "alert-danger") mt-3 mb-0">@_modeActionResult</div>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center fw-bold">
+            <span>@Localizer["MailConfigPage_MailConfigTitle"]</span>
+            <button class="btn btn-success btn-sm" @onclick="ShowCreateForm"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["MailConfigPage_NewConfigButton"]</button>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-0">@Localizer["MailConfigPage_ManageDescription"]</p>
+        </div>
+    </div>
+
+    @if (_showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header fw-bold">@(_editId == 0 ? Localizer["MailConfigPage_FormTitleNew"] : Localizer["MailConfigPage_FormTitleEdit"])</div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["MailConfigPage_NameLabel"]</label>
+                        <input class="form-control" placeholder="@Localizer["MailConfigPage_NamePlaceholder"]" @bind="_formName" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["MailConfigPage_PriorityLabel"]</label>
+                        <input class="form-control" type="number" min="1" @bind="_formPriority" />
+                        <div class="form-text">@Localizer["MailConfigPage_PriorityHelp"]</div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label d-block">&nbsp;</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="chkActive" />
+                            <label class="form-check-label" for="chkActive">@Localizer["MailConfigPage_ActiveLabel"]</label>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["MailConfigPage_SmtpHostLabel"]</label>
+                        <input class="form-control" placeholder="@Localizer["MailConfigPage_SmtpHostPlaceholder"]" @bind="_formHost" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["MailConfigPage_PortLabel"]</label>
+                        <input class="form-control" type="number" @bind="_formPort" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["MailConfigPage_UsernameLabel"]</label>
+                        <input class="form-control" placeholder="@Localizer["MailConfigPage_UsernamePlaceholder"]" @bind="_formUsername" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["MailConfigPage_PasswordLabel"]</label>
+                        <input class="form-control" type="password" placeholder="@Localizer["MailConfigPage_PasswordPlaceholder"]" @bind="_formPassword" />
+                        @if (_editId != 0)
+                        {
+                            <div class="form-text">@Localizer["MailConfigPage_PasswordHelp"]</div>
+                        }
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["MailConfigPage_FromAddressLabel"]</label>
+                        <input class="form-control" type="email" placeholder="@Localizer["MailConfigPage_FromAddressPlaceholder"]" @bind="_formFromAddress" />
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary me-2" @onclick="SaveConfig">@Localizer["MailConfigPage_SaveButton"]</button>
+                    <button class="btn btn-secondary" @onclick="CancelForm">@Localizer["MailConfigPage_CancelButton"]</button>
+                </div>
+                @if (_formError != null)
+                {
+                    <div class="alert alert-danger mt-2">@_formError</div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (!_configs.Any())
+    {
+        <div class="alert alert-info">
+            @Localizer["MailConfigPage_NoConfigsAlert"]
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var config in _configs)
+            {
+                <div class="col-12">
+                    <div class="card @(config.IsActive ? "" : "border-secondary opacity-75")">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">
+                                @config.Name
+                                <span class="badge bg-secondary ms-2">@string.Format(Localizer["MailConfigPage_PriorityBadge"].Value, config.Priority)</span>
+                                @if (config.IsActive)
+                                {
+                                    <span class="badge bg-success ms-1">@Localizer["MailConfigPage_ActiveBadge"]</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary ms-1">@Localizer["MailConfigPage_InactiveBadge"]</span>
+                                }
+                            </span>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => EditConfig(config)">@Localizer["MailConfigPage_EditButton"]</button>
+                                <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ToggleActive(config)">
+                                    @(config.IsActive ? Localizer["MailConfigPage_DeactivateButton"] : Localizer["MailConfigPage_ActivateButton"])
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteConfig(config)">@Localizer["MailConfigPage_DeleteButton"]</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 small">
+                                <div class="col-12 col-md-4">
+                                    <strong>@Localizer["MailConfigPage_DetailHost"]</strong> @config.Host:@config.Port
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>@Localizer["MailConfigPage_DetailUsername"]</strong> @config.Username
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>@Localizer["MailConfigPage_DetailFrom"]</strong> @config.FromAddress
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>@Localizer["MailConfigPage_DetailCreated"]</strong> @FormatServerDateTime(config.CreatedAt)
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>@Localizer["MailConfigPage_DetailLastSuccess"]</strong> @FormatServerDateTime(config.LastSuccessSentAt)
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <strong>@Localizer["MailConfigPage_DetailStatus"]</strong>
+                                    <span class="badge @GetStatusBadgeClass(config.Status) ms-1">@FormatStatus(config.Status)</span>
+                                </div>
+                                @if (config.Status != MailConfigurationStatus.Successful && !string.IsNullOrWhiteSpace(config.LastError))
+                                {
+                                    <div class="col-12 text-danger">
+                                        <strong>@Localizer["MailConfigPage_DetailLatestError"]</strong> @config.LastError
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (_actionResult != null)
+    {
+        <div class="alert @(_actionSuccess ? "alert-success" : "alert-danger") mt-3">@_actionResult</div>
+    }
+
+    <div class="card mt-4">
+        <div class="card-header fw-bold"><i class="@AppIcons.Envelope me-2" aria-hidden="true"></i>@Localizer["MailConfigPage_TestEmailTitle"]</div>
+        <div class="card-body">
+            <p class="text-muted mb-2">@Localizer["MailConfigPage_TestEmailDescription"]</p>
+            <div class="row g-2 align-items-start">
+                <div class="col-12 col-md-4">
+                    <label class="form-label">@Localizer["MailConfigPage_RecipientEmailLabel"]</label>
+                    <input class="form-control" type="email" @bind="_testEmail" placeholder="@Localizer["MailConfigPage_RecipientEmailPlaceholder"]" />
+                </div>
+                <div class="col-12 col-md-5">
+                    <label class="form-label">@Localizer["MailConfigPage_MailConfigLabel"]</label>
+                    <select class="form-select" @bind="_selectedTestTarget">
+                        <option value="@AllConfigurationsValue">@Localizer["MailConfigPage_AllConfigurations"]</option>
+                        @foreach (var config in _configs)
+                        {
+                            <option value="@config.Id">@GetConfigOptionLabel(config)</option>
+                        }
+                    </select>
+                    <div class="form-text">@Localizer["MailConfigPage_InactiveConfigHelp"]</div>
+                </div>
+                <div class="col-12 col-md-3 d-flex">
+                    <div class="w-100 d-flex align-items-end">
+                        <button class="btn btn-info w-100" @onclick="SendTestEmail" disabled="@_testEmailSending">
+                            @if (_testEmailSending)
+                            {
+                                <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" />
+                            }
+                            @Localizer["MailConfigPage_SendTestButton"]
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @if (_testEmailResult is not null)
+            {
+                <div class="alert @(_testEmailResult.IsSuccess ? "alert-success" : "alert-danger") mt-3">
+                    @GetTestResultSummary()
+                </div>
+
+                @if (_testEmailResult.Attempts.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var attempt in _testEmailResult.Attempts)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <span class="@(attempt.IsSuccess ? "text-success" : "text-danger")">@attempt.Message</span>
+                                @if (!attempt.IsActive)
+                                {
+                                    <span class="badge text-bg-secondary">@Localizer["MailConfigPage_InactiveBadge"]</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private const string AllConfigurationsValue = "all";
+
+    private List<MailConfiguration> _configs = new();
+    private bool _loading = true;
+    private bool _showForm;
+    private int _editId;
+    private string _formName = string.Empty;
+    private string _formHost = string.Empty;
+    private string _formUsername = string.Empty;
+    private string _formPassword = string.Empty;
+    private string _formFromAddress = string.Empty;
+    private int _formPort = 587;
+    private int _formPriority = 1;
+    private bool _formIsActive = true;
+    private string? _formError;
+    private bool _actionSuccess;
+    private string? _actionResult;
+
+    private string _testEmail = string.Empty;
+    private bool _testEmailSending;
+    private string _selectedTestTarget = AllConfigurationsValue;
+    private EmailSendResult? _testEmailResult;
+
+    private CultureInfo _userCulture = CultureInfo.CurrentCulture;
+
+    private bool _modeReadOnly;
+    private bool _modeNoEmail;
+    private bool _modeActionSuccess;
+    private string? _modeActionResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConfigs();
+
+        if (ShouldOpenCreateFormFromQuery())
+        {
+            ShowCreateForm();
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _testEmail = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+        var userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        var countryCode = userId > 0
+            ? (await UserService.GetByIdAsync(userId))?.CountryCode
+            : null;
+        _userCulture = DateTimeFormatService.GetCultureForCountry(countryCode);
+
+        var current = AppRuntimeModeService.GetCurrent();
+        _modeReadOnly = current.IsReadOnly;
+        _modeNoEmail = current.IsNoEmail;
+    }
+
+    private async Task LoadConfigs()
+    {
+        _loading = true;
+        _configs = (await MailConfigService.GetAllAsync()).ToList();
+        _loading = false;
+    }
+
+    private void ShowCreateForm()
+    {
+        _editId = 0;
+        _formName = string.Empty;
+        _formHost = string.Empty;
+        _formUsername = string.Empty;
+        _formPassword = string.Empty;
+        _formFromAddress = string.Empty;
+        _formPort = 587;
+        _formPriority = _configs.Any() ? _configs.Max(c => c.Priority) + 1 : 1;
+        _formIsActive = true;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private bool ShouldOpenCreateFormFromQuery()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query);
+        if (!query.TryGetValue("create", out var createValue))
+        {
+            return false;
+        }
+
+        var value = createValue.ToString();
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
+    }
+
+    private void EditConfig(MailConfiguration config)
+    {
+        _editId = config.Id;
+        _formName = config.Name;
+        _formHost = config.Host;
+        _formPort = config.Port;
+        _formUsername = config.Username;
+        _formPassword = string.Empty;
+        _formFromAddress = config.FromAddress;
+        _formPriority = config.Priority;
+        _formIsActive = config.IsActive;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private async Task SaveConfig()
+    {
+        _formError = null;
+        if (string.IsNullOrWhiteSpace(_formName) || string.IsNullOrWhiteSpace(_formHost) || string.IsNullOrWhiteSpace(_formFromAddress))
+        {
+            _formError = Localizer["MailConfigPage_RequiredFieldsError"];
+            return;
+        }
+
+        try
+        {
+            if (_editId == 0)
+            {
+                if (string.IsNullOrWhiteSpace(_formPassword))
+                {
+                    _formError = Localizer["MailConfigPage_PasswordRequiredForNew"];
+                    return;
+                }
+
+                await MailConfigService.CreateAsync(new MailConfiguration
+                {
+                    Name = _formName,
+                    Host = _formHost,
+                    Port = _formPort,
+                    Username = _formUsername,
+                    Password = _formPassword,
+                    FromAddress = _formFromAddress,
+                    Priority = _formPriority,
+                    IsActive = _formIsActive
+                });
+            }
+            else
+            {
+                var existing = await MailConfigService.GetByIdAsync(_editId)
+                    ?? throw new InvalidOperationException(Localizer["MailConfigPage_ConfigNotFound"]);
+
+                existing.Name = _formName;
+                existing.Host = _formHost;
+                existing.Port = _formPort;
+                existing.Username = _formUsername;
+                existing.FromAddress = _formFromAddress;
+                existing.Priority = _formPriority;
+                existing.IsActive = _formIsActive;
+
+                if (!string.IsNullOrWhiteSpace(_formPassword))
+                {
+                    existing.Password = _formPassword;
+                }
+
+                await MailConfigService.UpdateAsync(existing);
+            }
+
+            _showForm = false;
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = Localizer["MailConfigPage_SavedSuccess"];
+        }
+        catch (Exception ex)
+        {
+            _formError = ex.Message;
+        }
+    }
+
+    private async Task ToggleActive(MailConfiguration config)
+    {
+        _actionResult = null;
+        try
+        {
+            config.IsActive = !config.IsActive;
+            await MailConfigService.UpdateAsync(config);
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = config.IsActive
+                ? string.Format(Localizer["MailConfigPage_ActivatedMessage"].Value, config.Name)
+                : string.Format(Localizer["MailConfigPage_DeactivatedMessage"].Value, config.Name);
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = string.Format(Localizer["MailConfigPage_FailedMessage"].Value, ex.Message);
+        }
+    }
+
+    private async Task DeleteConfig(MailConfiguration config)
+    {
+        _actionResult = null;
+        try
+        {
+            await MailConfigService.DeleteAsync(config.Id);
+            await LoadConfigs();
+            _actionSuccess = true;
+            _actionResult = string.Format(Localizer["MailConfigPage_DeletedMessage"].Value, config.Name);
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = string.Format(Localizer["MailConfigPage_FailedMessage"].Value, ex.Message);
+        }
+    }
+
+    private void CancelForm() => _showForm = false;
+
+    private async Task SendTestEmail()
+    {
+        _testEmailResult = null;
+        if (string.IsNullOrWhiteSpace(_testEmail))
+        {
+            _testEmailResult = new EmailSendResult
+            {
+                IsSuccess = false,
+                Attempts =
+                [
+                    new EmailSendAttemptResult
+                    {
+                        MailConfigurationId = 0,
+                        ConfigurationName = Localizer["MailConfigPage_TestNamePlaceholder"],
+                        IsActive = true,
+                        IsSuccess = false,
+                        Message = Localizer["MailConfigPage_RecipientEmailRequired"]
+                    }
+                ]
+            };
+            return;
+        }
+
+        _actionResult = null;
+        _testEmailSending = true;
+
+        try
+        {
+            _testEmailResult = await EmailService.SendTestEmailAsync(_testEmail, GetSelectedTestConfigurationId());
+            await LoadConfigs();
+        }
+        catch (Exception ex)
+        {
+            _testEmailResult = new EmailSendResult
+            {
+                IsSuccess = false,
+                Attempts =
+                [
+                    new EmailSendAttemptResult
+                    {
+                        MailConfigurationId = 0,
+                        ConfigurationName = Localizer["MailConfigPage_TestNamePlaceholder"],
+                        IsActive = true,
+                        IsSuccess = false,
+                        Message = ex.Message
+                    }
+                ]
+            };
+        }
+        finally
+        {
+            _testEmailSending = false;
+        }
+    }
+
+    private int? GetSelectedTestConfigurationId()
+        => _selectedTestTarget == AllConfigurationsValue ? null : int.Parse(_selectedTestTarget);
+
+    private string GetTestResultSummary()
+    {
+        var targetLabel = GetSelectedTestConfigurationId().HasValue ? Localizer["MailConfigPage_SelectedConfigurationLabel"].Value : Localizer["MailConfigPage_ConfiguredFallbackOrderLabel"].Value;
+
+        return _testEmailResult?.IsSuccess == true
+            ? string.Format(Localizer["MailConfigPage_TestEmailSentSuccess"].Value, targetLabel)
+            : string.Format(Localizer["MailConfigPage_TestEmailFailed"].Value, targetLabel);
+    }
+
+    private string GetConfigOptionLabel(MailConfiguration config)
+        => config.IsActive
+            ? $"{config.Priority}. {config.Name}"
+            : $"{config.Priority}. {config.Name} {Localizer["MailConfigPage_InactiveSuffix"]}";
+
+    private string FormatServerDateTime(DateTime? value)
+        => value.HasValue
+            ? value.Value.ToLocalTime().ToString("f", _userCulture)
+            : Localizer["MailConfigPage_Never"];
+
+    private string FormatStatus(MailConfigurationStatus status)
+        => status switch
+        {
+            MailConfigurationStatus.Successful => Localizer["MailConfigPage_StatusSuccessful"],
+            MailConfigurationStatus.Failed => Localizer["MailConfigPage_StatusFailed"],
+            _ => Localizer["MailConfigPage_StatusUnknown"]
+        };
+
+    private static string GetStatusBadgeClass(MailConfigurationStatus status)
+        => status switch
+        {
+            MailConfigurationStatus.Successful => "bg-success",
+            MailConfigurationStatus.Failed => "bg-danger",
+            _ => "bg-secondary"
+        };
+
+    private void ApplyModes()
+    {
+        _modeActionResult = null;
+        try
+        {
+            AppRuntimeModeService.SetModes(_modeReadOnly, _modeNoEmail);
+            _modeActionSuccess = true;
+            _modeActionResult = Localizer["MailConfigPage_ModesUpdatedSuccess"];
+        }
+        catch (Exception ex)
+        {
+            _modeActionSuccess = false;
+            _modeActionResult = string.Format(Localizer["MailConfigPage_ModesUpdateFailed"].Value, ex.Message);
+        }
+    }
+
+    private void ResetModesToDefaults()
+    {
+        _modeActionResult = null;
+        try
+        {
+            AppRuntimeModeService.ResetToDefaults();
+            var defaults = AppRuntimeModeService.GetDefaults();
+            _modeReadOnly = defaults.IsReadOnly;
+            _modeNoEmail = defaults.IsNoEmail;
+            _modeActionSuccess = true;
+            _modeActionResult = Localizer["MailConfigPage_ModesResetSuccess"];
+        }
+        catch (Exception ex)
+        {
+            _modeActionSuccess = false;
+            _modeActionResult = string.Format(Localizer["MailConfigPage_ModesResetFailed"].Value, ex.Message);
+        }
+    }
+}

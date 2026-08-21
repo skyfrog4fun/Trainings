@@ -1,6 +1,6 @@
 # Trainings
 
-Version: **v1.0.14**
+Version: **v1.0.15**
 
 ## Overview
 
@@ -92,9 +92,11 @@ sudo docker logs trainings-web --follow
 Pull requests are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the contribution workflow, language policy, and coding conventions.
 
 For deeper context:
-- [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) — architecture and functional requirements.
-- [`docs/DEVELOPMENT_WORKFLOW.md`](docs/DEVELOPMENT_WORKFLOW.md) — step-by-step process from issue to production.
-- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) — conventions for AI-assisted contributions.
+- [`docs/architecture/SPECIFICATION.md`](docs/architecture/SPECIFICATION.md) — architecture and functional requirements.
+- [`docs/process/DEVELOPMENT_WORKFLOW.md`](docs/process/DEVELOPMENT_WORKFLOW.md) — step-by-step process from issue to production.
+- [`AGENTS.md`](AGENTS.md) — canonical instructions for AI-assisted contributions.
+- [`CLAUDE.md`](CLAUDE.md) — Claude adapter with references to canonical rules.
+- [`docs/developer/cheat-sheet.md`](docs/developer/cheat-sheet.md) — developer command shortcuts.
 
 ## License
 

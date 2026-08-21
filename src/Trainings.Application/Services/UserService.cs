@@ -6,24 +6,16 @@ using Trainings.Domain.Interfaces;
 
 namespace Trainings.Application.Services;
 
-public class UserService : IUserService
+public class UserService(
+    IUserRepository userRepository,
+    IAppRuntimeModeService appRuntimeModeService,
+    IPasswordHasher passwordHasher,
+    ICurrentUserContext currentUserContext) : IUserService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly ICurrentUserContext _currentUserContext;
-
-    public UserService(
-        IUserRepository userRepository,
-        IAppRuntimeModeService appRuntimeModeService,
-        IPasswordHasher passwordHasher,
-        ICurrentUserContext currentUserContext)
-    {
-        _userRepository = userRepository;
-        _appRuntimeModeService = appRuntimeModeService;
-        _passwordHasher = passwordHasher;
-        _currentUserContext = currentUserContext;
-    }
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly ICurrentUserContext _currentUserContext = currentUserContext;
 
     public async Task<UserDto?> GetByIdAsync(int id)
     {
@@ -98,7 +90,7 @@ public class UserService : IUserService
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var userId = _currentUserContext.GetCurrentUserId();
+        int? userId = _currentUserContext.GetCurrentUserId();
         if (!userId.HasValue)
         {
             throw new InvalidOperationException("Authenticated user context is required.");
@@ -116,6 +108,19 @@ public class UserService : IUserService
         user.City = dto.City;
         user.CountryId = dto.CountryId;
         user.WelcomeMessage = dto.WelcomeMessage;
+
+        await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task UpdatePreferencesAsync(int userId, string? language, string? theme)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var user = await _userRepository.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException($"User {userId} not found.");
+
+        user.Language = language;
+        user.Theme = theme;
 
         await _userRepository.UpdateAsync(user);
     }
@@ -160,6 +165,8 @@ public class UserService : IUserService
         CreationDate = user.CreationDate,
         EntryDate = user.EntryDate,
         WelcomeMessage = user.WelcomeMessage,
+        Language = user.Language,
+        Theme = user.Theme,
         CreatedAt = user.CreatedAt
     };
 }

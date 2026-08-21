@@ -8,18 +8,11 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class TrainingService : ITrainingService
+public class TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : ITrainingService
 {
-    private readonly ITrainingRepository _trainingRepository;
-    private readonly ApplicationDbContext _context;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-
-    public TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
-    {
-        _trainingRepository = trainingRepository;
-        _context = context;
-        _appRuntimeModeService = appRuntimeModeService;
-    }
+    private readonly ITrainingRepository _trainingRepository = trainingRepository;
+    private readonly ApplicationDbContext _context = context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
 
     public async Task<TrainingDto?> GetByIdAsync(int id)
     {
@@ -135,7 +128,7 @@ public class TrainingService : ITrainingService
             CreatedAt = DateTime.UtcNow
         };
 
-        foreach (var tagId in dto.TagIds)
+        foreach (int tagId in dto.TagIds)
         {
             block.TrainingBlockTags.Add(new TrainingBlockTag { TagId = tagId });
         }
@@ -171,7 +164,7 @@ public class TrainingService : ITrainingService
 
         // Update tags
         block.TrainingBlockTags.Clear();
-        foreach (var tagId in dto.TagIds)
+        foreach (int tagId in dto.TagIds)
         {
             block.TrainingBlockTags.Add(new TrainingBlockTag { TrainingBlockId = block.Id, TagId = tagId });
         }
@@ -200,7 +193,7 @@ public class TrainingService : ITrainingService
             .FirstOrDefaultAsync(b => b.Id == sourceBlockId, ct)
             ?? throw new InvalidOperationException($"Block {sourceBlockId} not found.");
 
-        var maxOrder = await _context.TrainingBlocks
+        int maxOrder = await _context.TrainingBlocks
             .Where(b => b.TrainingId == targetTrainingId)
             .MaxAsync(b => (int?)b.OrderIndex, ct) ?? 0;
 
@@ -257,7 +250,7 @@ public class TrainingService : ITrainingService
 
         const int maxWeeksAhead = 52;
         var candidate = GetNextWeekday(DateTime.Today, weekday);
-        for (var week = 0; week < maxWeeksAhead; week++, candidate = candidate.AddDays(7))
+        for (int week = 0; week < maxWeeksAhead; week++, candidate = candidate.AddDays(7))
         {
             if (!occupiedDates.Contains(candidate.Date))
                 return candidate;
@@ -269,7 +262,7 @@ public class TrainingService : ITrainingService
 
     private static DateTime GetNextWeekday(DateTime startDate, DayOfWeek day)
     {
-        var offset = ((int)day - (int)startDate.DayOfWeek + 7) % 7;
+        int offset = ((int)day - (int)startDate.DayOfWeek + 7) % 7;
         if (offset == 0)
         {
             offset = 7;
@@ -302,7 +295,7 @@ public class TrainingService : ITrainingService
         Blocks = t.Blocks?
             .OrderBy(b => b.OrderIndex)
             .Select(MapBlockToDto)
-            .ToList() ?? new List<TrainingBlockDto>()
+            .ToList() ?? []
     };
 
     private static TrainingBlockDto MapBlockToDto(TrainingBlock b) => new()
@@ -319,14 +312,13 @@ public class TrainingService : ITrainingService
         CreatedAt = b.CreatedAt,
         TrainerId = b.Training?.TrainerId ?? 0,
         TrainerName = b.Training?.Trainer?.DisplayName ?? string.Empty,
-        Tags = b.TrainingBlockTags
+        Tags = [.. b.TrainingBlockTags
             .Where(bt => bt.Tag is not null)
             .Select(bt => new TagDto
             {
                 Id = bt.Tag.Id,
                 Name = bt.Tag.Name,
                 GroupId = bt.Tag.GroupId
-            })
-            .ToList()
+            })]
     };
 }

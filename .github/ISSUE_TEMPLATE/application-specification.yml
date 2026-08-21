@@ -10,7 +10,7 @@ body:
     attributes:
       value: |
         > **Language:** English (US)
-        > Refer to [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md) for the full machine-readable specification.
+        > Refer to [`docs/architecture/SPECIFICATION.md`](../../docs/architecture/SPECIFICATION.md) for the full machine-readable specification.
 
   # ── SECTION 1: OVERVIEW ───────────────────────────────────────────────────
   - type: markdown

@@ -1,0 +1,113 @@
+@page "/login"
+
+@layout AnonymousLayout
+
+@attribute [AllowAnonymous]
+
+@inject IUserService UserService
+@inject IGroupService GroupService
+@inject IConfiguration Configuration
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@Localizer["LoginPage_PageTitle"]</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="card-title-brand text-center mb-4"><img class="icon-login" src="logo.svg" alt="@Localizer["LoginPage_Logo"]" />rainings</h2>
+
+                    <form method="post" action="/auth/login" data-enhance="false">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">@Localizer["LoginPage_Email"]</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="Email" value="@Email" required autofocus />
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">@Localizer["LoginPage_Password"]</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="Password" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">@Localizer["LoginPage_Button"]</button>
+                    </form>
+
+                    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">@ErrorMessage</div>
+                    }
+
+                    <div class="row mt-2">
+                        <TextLinkComponent Link="/register" Text="@Localizer["LoginPage_Register"]" AdditionalCssClass="col-6 text-start" />
+                        <TextLinkComponent Link="/forgot-password" Text="@Localizer["LoginPage_ForgotPassword"]" AdditionalCssClass="col-6 text-end" />
+                    </div>
+
+                    @if (ShowInitialCredentials)
+                    {
+                        <div class="alert alert-info mt-3 small">
+                            <strong>@Localizer["LoginPage_InitialSetupTitle"]</strong><br />
+                            @Localizer["LoginPage_InitialSetupDescription"]<br />
+                            <strong>@Localizer["LoginPage_InitialSetupEmailLabel"]:</strong> @SeedEmail<br />
+                            <strong>@Localizer["LoginPage_InitialSetupPasswordLabel"]:</strong> @SeedPassword
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string ReturnUrl { get; set; } = "/";
+    private string Email { get; set; } = string.Empty;
+    private string? ErrorMessage { get; set; }
+    private bool ShowInitialCredentials { get; set; }
+    private string SeedEmail { get; set; } = string.Empty;
+    private string SeedPassword { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            NavigationManager.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        var users = await UserService.GetAllAsync();
+        if (!users.Any())
+        {
+            ShowInitialCredentials = true;
+            SeedEmail = Configuration["Seed:Email"] ?? "superadmin@trainings.app";
+            SeedPassword = Configuration["Seed:Password"] ?? "Admin123!";
+        }
+
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("returnUrl", out var returnUrlValues))
+        {
+            var candidate = returnUrlValues.ToString();
+            if (!string.IsNullOrWhiteSpace(candidate)
+                && Uri.IsWellFormedUriString(candidate, UriKind.Relative)
+                && !candidate.StartsWith("//", StringComparison.Ordinal))
+            {
+                ReturnUrl = candidate.StartsWith('/') ? candidate : "/" + candidate;
+            }
+        }
+
+        if (query.TryGetValue("email", out var emailValues))
+        {
+            Email = emailValues.ToString();
+        }
+
+        if (query.TryGetValue("error", out var errorValues) && string.Equals(errorValues.ToString(), "invalid", StringComparison.OrdinalIgnoreCase))
+        {
+            ErrorMessage = Localizer["LoginPage_InvalidLogin"];
+        }
+    }
+
+}
+

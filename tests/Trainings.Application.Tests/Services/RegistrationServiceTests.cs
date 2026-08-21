@@ -50,10 +50,10 @@ public class RegistrationServiceTests
             DateTime = DateTime.UtcNow.AddDays(14),
             Capacity = 10,
             Status = TrainingStatus.Planned,
-            Registrations = new List<Registration>()
+            Registrations = []
         };
         _trainingRepoMock.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(training);
-        _regRepoMock.Setup(r => r.GetByTrainingIdAsync(2)).ReturnsAsync(new List<Registration>());
+        _regRepoMock.Setup(r => r.GetByTrainingIdAsync(2)).ReturnsAsync([]);
         _regRepoMock.Setup(r => r.GetByUserAndTrainingAsync(99, 2)).ReturnsAsync((Registration?)null);
         _regRepoMock.Setup(r => r.AddAsync(It.IsAny<Registration>())).Returns(Task.CompletedTask);
 

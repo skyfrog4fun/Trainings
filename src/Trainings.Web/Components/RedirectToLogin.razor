@@ -1,0 +1,8 @@
+@code {
+    protected override void OnInitialized()
+    {
+        var relativeUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var returnUrl = PreferenceNavigationService.BuildReturnUrlFromRelativePath(relativeUri);
+        NavigationManager.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+}

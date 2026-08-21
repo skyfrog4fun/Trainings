@@ -1,24 +1,15 @@
 using Microsoft.AspNetCore.Http;
+
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 
 namespace Trainings.Infrastructure.Services;
 
-public class AppRuntimeModeService : IAppRuntimeModeService
+public class AppRuntimeModeService(AppRuntimeModeState state, IHttpContextAccessor httpContextAccessor, IAuthorizationHelper authorizationHelper) : IAppRuntimeModeService
 {
-    private readonly AppRuntimeModeState _state;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IAuthorizationHelper _authorizationHelper;
-
-    public AppRuntimeModeService(
-        AppRuntimeModeState state,
-        IHttpContextAccessor httpContextAccessor,
-        IAuthorizationHelper authorizationHelper)
-    {
-        _state = state;
-        _httpContextAccessor = httpContextAccessor;
-        _authorizationHelper = authorizationHelper;
-    }
+    private readonly AppRuntimeModeState _state = state;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IAuthorizationHelper _authorizationHelper = authorizationHelper;
 
     public AppRuntimeModeDto GetCurrent()
     {
@@ -38,7 +29,7 @@ public class AppRuntimeModeService : IAppRuntimeModeService
 
     public void EnsureWriteAllowed()
     {
-        var (readOnly, noEmail) = _state.GetEffective();
+        var (readOnly, _) = _state.GetEffective();
         if (!readOnly)
         {
             return;

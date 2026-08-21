@@ -1,0 +1,32 @@
+@page "/Error"
+
+@using System.Diagnostics
+
+<PageTitle>@Localizer["ErrorPage_PageTitle"]</PageTitle>
+
+<h1 class="text-danger">@Localizer["ErrorPage_Heading"]</h1>
+<h2 class="text-danger">@Localizer["ErrorPage_Subheading"]</h2>
+
+@if (ShowRequestId)
+{
+    <p>
+        <strong>@Localizer["ErrorPage_RequestIdLabel"]:</strong> <code>@RequestId</code>
+    </p>
+}
+
+<h3>@Localizer["ErrorPage_DevelopmentModeHeading"]</h3>
+<p>
+    @string.Format(Localizer["ErrorPage_DevelopmentModeInfo"].Value, "Development")
+</p>
+<p>
+    <strong>@string.Format(Localizer["ErrorPage_DevelopmentModeWarning"].Value, "Development", "ASPNETCORE_ENVIRONMENT")</strong>
+</p>
+
+@code {
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() => RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

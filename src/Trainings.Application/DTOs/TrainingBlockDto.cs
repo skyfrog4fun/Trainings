@@ -14,7 +14,7 @@ public class TrainingBlockDto
     public DateTime CreatedAt { get; set; }
     public int TrainerId { get; set; }
     public string TrainerName { get; set; } = string.Empty;
-    public List<TagDto> Tags { get; set; } = new();
+    public List<TagDto> Tags { get; set; } = [];
 }
 
 public class CreateTrainingBlockDto
@@ -24,7 +24,7 @@ public class CreateTrainingBlockDto
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public int PlannedDurationMinutes { get; set; }
-    public List<int> TagIds { get; set; } = new();
+    public List<int> TagIds { get; set; } = [];
 }
 
 public class UpdateTrainingBlockDto
@@ -36,7 +36,7 @@ public class UpdateTrainingBlockDto
     public int PlannedDurationMinutes { get; set; }
     public int? EffectiveDurationMinutes { get; set; }
     public string? TrainerComment { get; set; }
-    public List<int> TagIds { get; set; } = new();
+    public List<int> TagIds { get; set; } = [];
 }
 
 public class TagDto

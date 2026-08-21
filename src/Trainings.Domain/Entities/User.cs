@@ -21,16 +21,18 @@ public class User
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
     public DateTime? EntryDate { get; set; }
     public string? WelcomeMessage { get; set; }
+    public string? Language { get; set; }
+    public string? Theme { get; set; }
 
     /// <summary>Kept for backwards compatibility with EF migrations from CreatedAt.</summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public string DisplayName => $"{FirstName} {LastName}".Trim();
 
-    public ICollection<Training> TrainingsAsTrainer { get; set; } = new List<Training>();
-    public ICollection<Registration> Registrations { get; set; } = new List<Registration>();
-    public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
-    public ICollection<GroupMembership> GroupMemberships { get; set; } = new List<GroupMembership>();
-    public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
-    public ICollection<EmailConfirmationToken> EmailConfirmationTokens { get; set; } = new List<EmailConfirmationToken>();
+    public ICollection<Training> TrainingsAsTrainer { get; set; } = [];
+    public ICollection<Registration> Registrations { get; set; } = [];
+    public ICollection<Attendance> Attendances { get; set; } = [];
+    public ICollection<GroupMembership> GroupMemberships { get; set; } = [];
+    public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = [];
+    public ICollection<EmailConfirmationToken> EmailConfirmationTokens { get; set; } = [];
 }

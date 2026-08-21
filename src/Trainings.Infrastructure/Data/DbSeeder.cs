@@ -9,20 +9,12 @@ using Trainings.Domain.Enums;
 
 namespace Trainings.Infrastructure.Data;
 
-public partial class DbSeeder
+public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher passwordHasher, IConfiguration configuration, ILogger<DbSeeder> logger)
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<DbSeeder> _logger;
-
-    public DbSeeder(ApplicationDbContext context, IPasswordHasher passwordHasher, IConfiguration configuration, ILogger<DbSeeder> logger)
-    {
-        _context = context;
-        _passwordHasher = passwordHasher;
-        _configuration = configuration;
-        _logger = logger;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger<DbSeeder> _logger = logger;
 
     public async Task SeedAsync()
     {
@@ -34,9 +26,9 @@ public partial class DbSeeder
 
         if (!_context.Users.Any())
         {
-            var email = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
-            var password = _configuration["Seed:Password"] ?? "Admin123!";
-            var defaultCountry = (_configuration["App:DefaultCountry"] ?? "CH").ToUpperInvariant();
+            string email = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
+            string password = _configuration["Seed:Password"] ?? "Admin123!";
+            //string defaultCountry = (_configuration["App:DefaultCountry"] ?? "CH").ToUpperInvariant();
 
             var superAdmin = new User
             {
@@ -63,13 +55,13 @@ public partial class DbSeeder
             return;
         }
 
-        var globalTags = new[]
-        {
+        string[] globalTags =
+        [
             "Warm-up", "Stretching", "Strength", "Cardio", "Coordination",
             "Technique", "Mental", "Game", "Cool-down", "Other"
-        };
+        ];
 
-        foreach (var name in globalTags)
+        foreach (string name in globalTags)
         {
             _context.Tags.Add(new Tag { Name = name, GroupId = null });
         }
@@ -110,20 +102,20 @@ public partial class DbSeeder
     /// </summary>
     private Task EnsureDataDirectoryExistsAsync()
     {
-        var connectionString = _context.Database.GetConnectionString();
+        string? connectionString = _context.Database.GetConnectionString();
         if (string.IsNullOrEmpty(connectionString))
         {
             return Task.CompletedTask;
         }
 
         var builder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString);
-        var dbPath = builder.DataSource;
+        string? dbPath = builder.DataSource;
         if (string.IsNullOrEmpty(dbPath))
         {
             return Task.CompletedTask;
         }
 
-        var directory = Path.GetDirectoryName(dbPath);
+        string? directory = Path.GetDirectoryName(dbPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             LogCreatingDataDirectory(_logger, directory);
@@ -156,7 +148,7 @@ public partial class DbSeeder
             // Check if the Users table exists (proxy for "schema is already present")
             using var checkTablesCmd = connection.CreateCommand();
             checkTablesCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='Users'";
-            var tablesExist = await checkTablesCmd.ExecuteScalarAsync() is long tableCount && tableCount > 0;
+            bool tablesExist = await checkTablesCmd.ExecuteScalarAsync() is long tableCount && tableCount > 0;
             if (!tablesExist)
             {
                 return;
@@ -166,13 +158,13 @@ public partial class DbSeeder
             using var checkHistoryCmd = connection.CreateCommand();
             checkHistoryCmd.CommandText =
                 "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsHistory'";
-            var historyTableExists = await checkHistoryCmd.ExecuteScalarAsync() is long historyCount && historyCount > 0;
+            bool historyTableExists = await checkHistoryCmd.ExecuteScalarAsync() is long historyCount && historyCount > 0;
 
             if (historyTableExists)
             {
                 using var checkRowsCmd = connection.CreateCommand();
                 checkRowsCmd.CommandText = "SELECT COUNT(*) FROM \"__EFMigrationsHistory\"";
-                var rowCount = await checkRowsCmd.ExecuteScalarAsync() is long rows ? rows : 0;
+                long rowCount = await checkRowsCmd.ExecuteScalarAsync() is long rows ? rows : 0;
                 if (rowCount > 0)
                 {
                     return;
@@ -246,7 +238,7 @@ public partial class DbSeeder
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = '{column}'";
-        var result = await cmd.ExecuteScalarAsync();
+        object? result = await cmd.ExecuteScalarAsync();
         return result is long count && count > 0;
     }
 }

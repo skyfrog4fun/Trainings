@@ -1,18 +1,25 @@
-﻿@using System.Net.Http
+@using System.Globalization
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.Extensions.Localization
 @using Microsoft.JSInterop
+@using Trainings.Application.DTOs
+@using Trainings.Application.Interfaces
+@using Trainings.Domain.Enums
 @using Trainings.Web
 @using Trainings.Web.Components
 @using Trainings.Web.Components.Layout
 @using Trainings.Web.Components.Shared
 @using Trainings.Web.Icons
-@using Trainings.Application.DTOs
-@using Trainings.Application.Interfaces
-@using Trainings.Domain.Enums
+@using Trainings.Web.Services
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+@inject NavigationManager NavigationManager
+@inject IStringLocalizer<SharedResources> Localizer
+@inject Trainings.Web.Services.ThemeService ThemeService

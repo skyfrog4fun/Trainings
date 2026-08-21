@@ -25,7 +25,7 @@ public class DbSeederTagSeedingTests
         return ctx;
     }
 
-    private static readonly string[] ExpectedGlobalTags =
+    private static readonly string[] _expectedGlobalTags =
     [
         "Warm-up", "Stretching", "Strength", "Cardio", "Coordination",
         "Technique", "Mental", "Game", "Cool-down", "Other"
@@ -42,7 +42,7 @@ public class DbSeederTagSeedingTests
             return;
         }
 
-        foreach (var name in ExpectedGlobalTags)
+        foreach (string name in _expectedGlobalTags)
         {
             ctx.Tags.Add(new Tag { Name = name, GroupId = null });
         }
@@ -57,7 +57,7 @@ public class DbSeederTagSeedingTests
 
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync();
+        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync(TestContext.Current.CancellationToken);
         globalTags.Should().HaveCount(10);
     }
 
@@ -68,8 +68,8 @@ public class DbSeederTagSeedingTests
 
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var names = await ctx.Tags.Where(t => t.GroupId == null).Select(t => t.Name).ToListAsync();
-        names.Should().BeEquivalentTo(ExpectedGlobalTags);
+        var names = await ctx.Tags.Where(t => t.GroupId == null).Select(t => t.Name).ToListAsync(TestContext.Current.CancellationToken);
+        names.Should().BeEquivalentTo(_expectedGlobalTags);
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class DbSeederTagSeedingTests
         await SeedGlobalTagsDirectlyAsync(ctx);
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync();
+        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync(TestContext.Current.CancellationToken);
         globalTags.Should().HaveCount(10);
     }
 
@@ -91,11 +91,11 @@ public class DbSeederTagSeedingTests
 
         // Insert a group-scoped tag first
         ctx.Tags.Add(new Tag { Name = "Custom", GroupId = 1 });
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await SeedGlobalTagsDirectlyAsync(ctx);
 
-        var groupTags = await ctx.Tags.Where(t => t.GroupId != null).ToListAsync();
+        var groupTags = await ctx.Tags.Where(t => t.GroupId != null).ToListAsync(TestContext.Current.CancellationToken);
         groupTags.Should().HaveCount(1);
         groupTags[0].Name.Should().Be("Custom");
     }

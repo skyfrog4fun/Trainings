@@ -1,0 +1,454 @@
+﻿@page "/users/new"
+@page "/users/{Id:int}/edit"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "GroupAdmin")]
+
+@inject IUserService UserService
+@inject IGroupService GroupService
+@inject ICountryService CountryService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAppRuntimeModeService AppRuntimeModeService
+
+<PageTitle>@(_isEdit ? Localizer["UserCreateEditPage_EditUser"] : Localizer["UserCreateEditPage_CreateUser"])</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="my-3">
+        <BackButton Href="/users" />
+    </div>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">@Localizer["UserCreateEditPage_AccessDenied"]</div>
+    }
+    else
+    {
+        <h2>@(_isEdit ? Localizer["UserCreateEditPage_EditUser"] : Localizer["UserCreateEditPage_CreateUser"])</h2>
+
+        @if (IsWriteBlocked)
+        {
+            <div class="alert alert-warning">
+                @Localizer["UserCreateEditPage_ReadOnlyModeSuperAdminOnly"]
+            </div>
+        }
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserCreateEditPage_FirstName"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_FirstNamePlaceholder"]' @bind="_formFirstName" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserCreateEditPage_LastName"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_LastNamePlaceholder"]' @bind="_formLastName" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserCreateEditPage_Email"]</label>
+                        <input class="form-control" type="email" placeholder='@Localizer["UserCreateEditPage_EmailPlaceholder"]' @bind="_formEmail" />
+                    </div>
+                    @if (!_isEdit)
+                    {
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserCreateEditPage_Password"]</label>
+                            <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_PasswordPlaceholder"]' @bind="_formPassword" />
+                        </div>
+                    }
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["UserCreateEditPage_Role"]</label>
+                        @if (_isSuperAdmin)
+                        {
+                            <select class="form-select" @bind="_formRole">
+                                <option value="User">@Localizer["UserCreateEditPage_User"]</option>
+                                <option value="SuperAdmin">@Localizer["UserCreateEditPage_SuperAdmin"]</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <select class="form-select" @bind="_formRole">
+                                <option value="User">@Localizer["UserCreateEditPage_User"]</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["UserCreateEditPage_Gender"]</label>
+                        <select class="form-select" @bind="_formGender">
+                            <option value="Male">@Localizer["Enum_Gender_Male"]</option>
+                            <option value="Female">@Localizer["Enum_Gender_Female"]</option>
+                            <option value="Other">@Localizer["Enum_Gender_Other"]</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["UserCreateEditPage_Birthday"]</label>
+                        <input class="form-control" type="date" @bind="_formBirthday" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserCreateEditPage_Mobile"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_MobilePlaceholder"]' @bind="_formMobile" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserCreateEditPage_City"]</label>
+                        <input class="form-control" placeholder='@Localizer["UserCreateEditPage_CityPlaceholder"]' @bind="_formCity" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserCreateEditPage_Country"]</label>
+                        <select class="form-select" @bind="_formCountryId">
+                            <option value="">@Localizer["UserCreateEditPage_SelectCountry"]</option>
+                            @foreach (var country in _countries)
+                            {
+                                <option value="@country.Id">@country.Code â€” @country.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">@(_isSuperAdmin ? Localizer["UserCreateEditPage_Groups"] : Localizer["UserCreateEditPage_ManagedGroups"])</label>
+                        @if (_availableGroups.Any())
+                        {
+                            <div class="border rounded p-2 scroll-container-sm">
+                                @foreach (var group in _availableGroups)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="user-group-@group.Id"
+                                               checked="@_selectedGroupIds.Contains(group.Id)"
+                                               @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
+                                        <label class="form-check-label" for="user-group-@group.Id">@group.Name</label>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-text text-muted">@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]</div>
+                        }
+                    </div>
+                    @if (_isEdit)
+                    {
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserCreateEditPage_EntryDate"]</label>
+                            <input class="form-control" type="date" @bind="_formEntryDate" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["UserCreateEditPage_WelcomeMessage"]</label>
+                            <textarea class="form-control" rows="2" @bind="_formWelcomeMessage" placeholder='@Localizer["UserCreateEditPage_WelcomeMessagePlaceholder"]'></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["UserCreateEditPage_SetNewPasswordLeaveBlank"]</label>
+                            <div class="input-group">
+                                <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_NewPasswordMinCharsPlaceholder"]' @bind="_formNewPassword" />
+                                <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserCreateEditPage_GeneratePassword"]'>
+                                    <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_passwordValidationError))
+                            {
+                                <div class="text-danger small mt-1">@_passwordValidationError</div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-primary" @onclick="SaveUserAsync" disabled="@(_saving || IsWriteBlocked)">@Localizer["Shared_Save"]</button>
+                    <a href="/users" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</a>
+                </div>
+
+                <div class="mt-2">
+                    <ActionAlert IsSuccess="false" Message="@_formError" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private List<GroupDto> _availableGroups = new();
+    private List<CountryDto> _countries = new();
+    private HashSet<int> _managedGroupIds = new();
+    private HashSet<int> _selectedGroupIds = new();
+    private AppRuntimeModeDto _runtimeMode = new();
+    private bool _isSuperAdmin;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _isAccessDenied;
+    private bool _isActive = true;
+    private string _formFirstName = string.Empty;
+    private string _formLastName = string.Empty;
+    private string _formEmail = string.Empty;
+    private string _formPassword = string.Empty;
+    private string _formRole = "User";
+    private string _formGender = "Other";
+    private DateTime? _formBirthday;
+    private string _formMobile = string.Empty;
+    private string _formCity = string.Empty;
+    private int? _formCountryId;
+    private string _formWelcomeMessage = string.Empty;
+    private string _formNewPassword = string.Empty;
+    private string _passwordValidationError = string.Empty;
+    private DateTime? _formEntryDate;
+    private string? _formError;
+
+    private bool _isEdit => Id.HasValue;
+    private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUser = authState.User;
+        _isSuperAdmin = currentUser.HasClaim("SuperAdmin", "true");
+        _managedGroupIds = currentUser.Claims
+            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin")
+            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+
+        var allGroups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
+        _availableGroups = _isSuperAdmin
+            ? allGroups
+            : allGroups.Where(g => _managedGroupIds.Contains(g.Id)).ToList();
+
+        _countries = (await CountryService.GetAllAsync()).ToList();
+
+        if (_isEdit)
+        {
+            await LoadForEditAsync();
+        }
+
+        _loading = false;
+    }
+
+    private async Task LoadForEditAsync()
+    {
+        if (!Id.HasValue)
+        {
+            return;
+        }
+
+        var user = await UserService.GetByIdAsync(Id.Value);
+        if (user is null)
+        {
+            _formError = Localizer["UserCreateEditPage_UserNotFound"];
+            return;
+        }
+
+        var memberships = (await GroupService.GetAllMembershipsForUserAsync(user.Id)).ToList();
+
+        if (!_isSuperAdmin)
+        {
+            var canAccess = memberships.Any(m =>
+                m.Status == GroupMembershipStatus.Approved &&
+                m.IsActive &&
+                _managedGroupIds.Contains(m.GroupId));
+
+            if (!canAccess)
+            {
+                _isAccessDenied = true;
+                return;
+            }
+        }
+
+        _formFirstName = user.FirstName;
+        _formLastName = user.LastName;
+        _formEmail = user.Email;
+        _formRole = user.Role.ToString();
+        _formGender = user.Gender.ToString();
+        _formBirthday = user.Birthday?.ToDateTime(TimeOnly.MinValue);
+        _formMobile = user.Mobile ?? string.Empty;
+        _formCity = user.City ?? string.Empty;
+        _formCountryId = user.CountryId;
+        _formWelcomeMessage = user.WelcomeMessage ?? string.Empty;
+        _formEntryDate = user.EntryDate;
+        _isActive = user.IsActive;
+        _selectedGroupIds = memberships
+            .Where(m => _isSuperAdmin || _managedGroupIds.Contains(m.GroupId))
+            .Select(m => m.GroupId)
+            .ToHashSet();
+    }
+
+    private async Task SaveUserAsync()
+    {
+        if (IsWriteBlocked)
+        {
+            return;
+        }
+
+        _saving = true;
+        _formError = null;
+        _passwordValidationError = string.Empty;
+
+        if (!_isSuperAdmin && _selectedGroupIds.Count == 0)
+        {
+            _formError = Localizer["UserCreateEditPage_AssignUserToManagedGroup"];
+            _saving = false;
+            return;
+        }
+
+        try
+        {
+            var birthday = _formBirthday.HasValue ? DateOnly.FromDateTime(_formBirthday.Value) : (DateOnly?)null;
+            int userId;
+
+            if (!_isEdit)
+            {
+                var createdUser = await UserService.CreateAsync(new CreateUserDto
+                {
+                    FirstName = _formFirstName,
+                    LastName = _formLastName,
+                    Email = _formEmail,
+                    Password = _formPassword,
+                    Role = Enum.Parse<UserRole>(_formRole),
+                    Gender = Enum.Parse<Gender>(_formGender),
+                    Birthday = birthday,
+                    Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
+                    City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity,
+                    CountryId = _formCountryId
+                });
+
+                userId = createdUser.Id;
+            }
+            else
+            {
+                userId = Id!.Value;
+                await UserService.UpdateAsync(new UpdateUserDto
+                {
+                    Id = userId,
+                    FirstName = _formFirstName,
+                    LastName = _formLastName,
+                    Email = _formEmail,
+                    Role = Enum.Parse<UserRole>(_formRole),
+                    Gender = Enum.Parse<Gender>(_formGender),
+                    IsActive = _isActive,
+                    Birthday = birthday,
+                    Mobile = string.IsNullOrWhiteSpace(_formMobile) ? null : _formMobile,
+                    City = string.IsNullOrWhiteSpace(_formCity) ? null : _formCity,
+                    CountryId = _formCountryId,
+                    EntryDate = _formEntryDate,
+                    WelcomeMessage = string.IsNullOrWhiteSpace(_formWelcomeMessage) ? null : _formWelcomeMessage
+                });
+            }
+
+            await SyncUserGroupsAsync(userId);
+
+            if (_isEdit && !string.IsNullOrWhiteSpace(_formNewPassword))
+            {
+                if (!ValidatePassword(_formNewPassword, out var pwError))
+                {
+                    _passwordValidationError = Localizer[pwError];
+                    return;
+                }
+
+                await UserService.ChangePasswordAsync(userId, _formNewPassword);
+            }
+
+            NavigationManager.NavigateTo($"/users/{userId}");
+        }
+        catch (Exception ex)
+        {
+            _formError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task SyncUserGroupsAsync(int userId)
+    {
+        var availableGroupIds = _availableGroups.Select(g => g.Id).ToHashSet();
+        var memberships = (await GroupService.GetAllMembershipsForUserAsync(userId))
+            .Where(m => availableGroupIds.Contains(m.GroupId))
+            .ToList();
+
+        foreach (var membership in memberships.Where(m => !_selectedGroupIds.Contains(m.GroupId)))
+        {
+            await GroupService.RemoveMemberAsync(membership.Id);
+        }
+
+        foreach (var groupId in _selectedGroupIds)
+        {
+            var groupMemberships = memberships.Where(m => m.GroupId == groupId).ToList();
+            if (groupMemberships.Any(m => m.Status == GroupMembershipStatus.Approved && m.IsActive))
+            {
+                continue;
+            }
+
+            foreach (var membership in groupMemberships)
+            {
+                await GroupService.RemoveMemberAsync(membership.Id);
+            }
+
+            await GroupService.AddMemberAsync(new AddGroupMemberDto
+            {
+                GroupId = groupId,
+                UserId = userId,
+                Role = GroupMemberRole.Participant
+            });
+        }
+    }
+
+    private void ToggleGroup(int groupId, bool selected)
+    {
+        if (selected)
+        {
+            _selectedGroupIds.Add(groupId);
+        }
+        else
+        {
+            _selectedGroupIds.Remove(groupId);
+        }
+    }
+
+    private void GeneratePassword()
+    {
+        const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lower = "abcdefghjkmnpqrstuvwxyz";
+        const string digits = "23456789";
+        const string special = "!@#$%^&*";
+        const string all = upper + lower + digits + special;
+
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        var bytes = new byte[12];
+        rng.GetBytes(bytes);
+
+        var chars = new char[12];
+        chars[0] = upper[bytes[0] % upper.Length];
+        chars[1] = lower[bytes[1] % lower.Length];
+        chars[2] = digits[bytes[2] % digits.Length];
+        chars[3] = special[bytes[3] % special.Length];
+        for (var i = 4; i < 12; i++)
+        {
+            chars[i] = all[bytes[i] % all.Length];
+        }
+
+        for (var i = chars.Length - 1; i > 0; i--)
+        {
+            var j = bytes[i % bytes.Length] % (i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        _formNewPassword = new string(chars);
+        _passwordValidationError = string.Empty;
+    }
+
+    private static bool ValidatePassword(string password, out string error)
+    {
+        error = string.Empty;
+        if (password.Length < 8) { error = "UserCreateEditPage_PasswordValidationMinLength"; return false; }
+        if (!password.Any(char.IsUpper)) { error = "UserCreateEditPage_PasswordValidationUppercase"; return false; }
+        if (!password.Any(char.IsLower)) { error = "UserCreateEditPage_PasswordValidationLowercase"; return false; }
+        if (!password.Any(char.IsDigit)) { error = "UserCreateEditPage_PasswordValidationDigit"; return false; }
+        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { error = "UserCreateEditPage_PasswordValidationSpecialCharacter"; return false; }
+        return true;
+    }
+}
+

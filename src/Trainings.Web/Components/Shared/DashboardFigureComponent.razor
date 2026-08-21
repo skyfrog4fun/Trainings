@@ -1,0 +1,18 @@
+<article class="dashboard-stat-card h-100">
+    <div class="dashboard-stat-icon dashboard-icon-badge" aria-hidden="true"><i class="@Icon"></i></div>
+    <p class="dashboard-stat-label mb-1">@Title</p>
+    <p class="dashboard-stat-value mb-0">@Value</p>
+    @if (!string.IsNullOrWhiteSpace(Subtitle))
+    {
+        <p class="dashboard-stat-subtitle mb-0">@Subtitle</p>
+    }
+</article>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Icon { get; set; } = AppIcons.ChartSimple;
+
+    [Parameter] public string Value { get; set; } = string.Empty;
+
+    [Parameter] public string? Subtitle { get; set; }
+}

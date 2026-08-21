@@ -7,22 +7,13 @@ namespace Trainings.Domain.Tests.Entities;
 public class AttendanceStatusTests
 {
     [Fact]
-    public void AttendanceStatusHasPresentValue()
-    {
-        ((int)AttendanceStatus.Present).Should().Be(0);
-    }
+    public void AttendanceStatusHasPresentValue() => ((int)AttendanceStatus.Present).Should().Be(0);
 
     [Fact]
-    public void AttendanceStatusHasAbsentValue()
-    {
-        ((int)AttendanceStatus.Absent).Should().Be(1);
-    }
+    public void AttendanceStatusHasAbsentValue() => ((int)AttendanceStatus.Absent).Should().Be(1);
 
     [Fact]
-    public void AttendanceStatusHasPartiallyPresentValue()
-    {
-        ((int)AttendanceStatus.PartiallyPresent).Should().Be(2);
-    }
+    public void AttendanceStatusHasPartiallyPresentValue() => ((int)AttendanceStatus.PartiallyPresent).Should().Be(2);
 
     [Fact]
     public void AttendanceStatusHasExactlyThreeValues()

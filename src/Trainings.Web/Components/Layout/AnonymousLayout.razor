@@ -1,0 +1,105 @@
+@inherits LayoutComponentBase
+
+@inject Trainings.Web.Services.VersionService VersionService
+
+<nav class="navbar app-navbar sticky-top shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand app-navbar-brand fw-bold" href="/"><img class="icon-logo" src="logo.svg" alt="@Localizer["Shared_AppName"]" aria-hidden="true" />rainings</a>
+        <div class="d-flex align-items-center gap-1 gap-md-2">
+            <div class="dropdown app-language-dropdown">
+                <button id="language-menu-button"
+                        type="button"
+                        class="btn btn-sm app-language-button dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
+                        aria-expanded="false"
+                        aria-label="@Localizer["Shared_Language"]">
+                    <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                    <span>@CurrentLanguageDisplayName</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm app-language-menu">
+                    @foreach (var option in LanguageOptions)
+                    {
+                        <li>
+                            <a class="dropdown-item @(string.Equals(CurrentLanguage, option.Code, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)"
+                               href="@BuildCultureUrl(option.Code)"
+                               data-enhance-nav="false">
+                                @option.DisplayName
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <a class="btn btn-sm app-theme-button"
+               href="@BuildThemeToggleUrl()"
+               role="switch"
+               aria-checked="@IsDarkTheme"
+               aria-label="@Localizer["Shared_DarkMode"]"
+               data-enhance-nav="false">
+                <i class="fa-solid @(IsDarkTheme ? "fa-moon" : "fa-sun")" aria-hidden="true"></i>
+            </a>
+
+            <div class="dropdown">
+                <button class="btn btn-sm app-menu-button" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="@Localizer["Shared_OpenMenu"]">
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm app-menu-dropdown">
+                    <li>
+                        <a class="dropdown-item" href="/login"><i class="fa-solid fa-right-to-bracket me-2" aria-hidden="true"></i>@Localizer["AnonymousLayout_Login"]</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/register"><i class="fa-solid fa-user-plus me-2" aria-hidden="true"></i>@Localizer["AnonymousLayout_Register"]</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/forgot-password"><i class="fa-solid fa-key me-2" aria-hidden="true"></i>@Localizer["AnonymousLayout_ForgotPassword"]</a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <span class="dropdown-item-text text-muted small d-inline-flex align-items-center">
+                            <i class="@($"{AppIcons.Tag} me-2")" aria-hidden="true"></i>@($"v{VersionService.ApplicationVersion}")
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <article class="content">
+        @Body
+    </article>
+</main>
+
+@code {
+    private static readonly IReadOnlyList<(string Code, string DisplayName)> LanguageOptions =
+    [
+        ("de", "DE"),
+        ("en", "EN")
+    ];
+
+    private bool IsDarkTheme => ThemeService.CurrentTheme == "dark";
+
+    private string CurrentLanguage => PreferenceNavigationService.GetCurrentLanguageCode();
+
+    private string CurrentLanguageDisplayName =>
+        LanguageOptions.FirstOrDefault(x => string.Equals(x.Code, CurrentLanguage, StringComparison.OrdinalIgnoreCase)).DisplayName
+        ?? "EN";
+
+    private string BuildCultureUrl(string culture)
+    {
+        var relativeUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var returnUrl = PreferenceNavigationService.BuildReturnUrlFromRelativePath(relativeUri);
+
+        return PreferenceNavigationService.BuildCultureUrl(culture, returnUrl);
+    }
+
+    private string BuildThemeToggleUrl()
+    {
+        var relativeUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var returnUrl = PreferenceNavigationService.BuildReturnUrlFromRelativePath(relativeUri);
+
+        return PreferenceNavigationService.BuildThemeToggleUrl(ThemeService.CurrentTheme, returnUrl);
+    }
+}

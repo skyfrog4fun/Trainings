@@ -18,8 +18,8 @@ public class Group
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ICollection<GroupMembership> Memberships { get; set; } = new List<GroupMembership>();
-    public ICollection<Training> Trainings { get; set; } = new List<Training>();
-    public ICollection<GroupMailConfiguration> MailConfigurations { get; set; } = new List<GroupMailConfiguration>();
-    public ICollection<GroupLocation> AllowedLocations { get; set; } = new List<GroupLocation>();
+    public ICollection<GroupMembership> Memberships { get; set; } = [];
+    public ICollection<Training> Trainings { get; set; } = [];
+    public ICollection<GroupMailConfiguration> MailConfigurations { get; set; } = [];
+    public ICollection<GroupLocation> AllowedLocations { get; set; } = [];
 }

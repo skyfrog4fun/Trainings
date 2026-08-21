@@ -6,16 +6,10 @@ using Trainings.Domain.Interfaces;
 
 namespace Trainings.Application.Services;
 
-public class AttendanceService : IAttendanceService
+public class AttendanceService(IAttendanceRepository attendanceRepository, IAppRuntimeModeService appRuntimeModeService) : IAttendanceService
 {
-    private readonly IAttendanceRepository _attendanceRepository;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-
-    public AttendanceService(IAttendanceRepository attendanceRepository, IAppRuntimeModeService appRuntimeModeService)
-    {
-        _attendanceRepository = attendanceRepository;
-        _appRuntimeModeService = appRuntimeModeService;
-    }
+    private readonly IAttendanceRepository _attendanceRepository = attendanceRepository;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
 
     public async Task<IEnumerable<AttendanceDto>> GetByTrainingIdAsync(int trainingId)
     {

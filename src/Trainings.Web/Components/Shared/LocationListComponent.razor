@@ -1,0 +1,66 @@
+@if (AlwaysShow || Locations.Count > 0)
+{
+    var chevronClass = _expanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
+    <div class="card collapsible-card mb-3">
+        <div class="card-header collapsible-card-header location-list-header collapsible-card-toggle" role="button" @onclick="ToggleExpanded">
+            <div>
+                <i class="@chevronClass" aria-hidden="true"></i>
+                <span>@Title</span>
+            </div>
+            <div class="collapsible-card-meta">@Locations.Count</div>
+        </div>
+        @if (_expanded)
+        {
+            <div class="card-body">
+                @if (Locations.Count == 0)
+                {
+                    <p class="text-muted mb-0">@EmptyText</p>
+                }
+                else
+                {
+                    @foreach (var location in Locations)
+                    {
+                        <div class="location-list-row d-flex justify-content-between align-items-center">
+                            <div>
+                                @location.Name
+                                @if (!string.IsNullOrWhiteSpace(location.CityName))
+                                {
+                                    <br /><small class="text-muted">@location.CityName</small>
+                                }
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => OnEdit.InvokeAsync(location)">
+                                    <i class="@AppIcons.Edit" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public List<LocationDto> Locations { get; set; } = new();
+    [Parameter] public bool AlwaysShow { get; set; }
+    [Parameter] public string EmptyText { get; set; } = string.Empty;
+    [Parameter] public EventCallback<LocationDto> OnEdit { get; set; }
+    [Parameter] public bool DefaultExpanded { get; set; } = true;
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized)
+        {
+            _expanded = DefaultExpanded;
+            _initialized = true;
+        }
+    }
+
+    private bool _initialized;
+
+    private bool _expanded = true;
+
+    private void ToggleExpanded() => _expanded = !_expanded;
+}

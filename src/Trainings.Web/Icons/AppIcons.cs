@@ -46,6 +46,7 @@ public static class AppIcons
     public const string XMark = "fa-solid fa-xmark";
     public const string ChevronUp = "fa-solid fa-chevron-up";
     public const string ChevronDown = "fa-solid fa-chevron-down";
+    public const string Access = "fa-solid fa-key";
 
     public static IReadOnlyList<AppIconDefinition> All { get; } =
     [
@@ -58,7 +59,6 @@ public static class AppIcons
         new("Trash/Delete", Trash),
         new("Back", Back),
         new("Notifications", Bell),
-        new("Brand", Bolt),
         new("Blocks", BookOpen),
         new("Calendar Check", CalendarCheck),
         new("Statistics", ChartSimple),
@@ -92,7 +92,8 @@ public static class AppIcons
         new("User Management", Users),
         new("Close/Cancel", XMark),
         new("Expand", ChevronDown),
-        new("Collapse", ChevronUp)
+        new("Collapse", ChevronUp),
+        new("Group Access", Access)
     ];
 }
 

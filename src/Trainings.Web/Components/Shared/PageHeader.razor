@@ -1,0 +1,12 @@
+<div class="d-flex justify-content-between align-items-center my-3">
+    <h2 class="mb-0">@Title</h2>
+    @if (Actions is not null)
+    {
+        @Actions
+    }
+</div>
+
+@code {
+    [Parameter] public required string Title { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+}

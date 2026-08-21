@@ -6,16 +6,10 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class MailConfigurationService : IMailConfigurationService
+public class MailConfigurationService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : IMailConfigurationService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IAppRuntimeModeService _appRuntimeModeService;
-
-    public MailConfigurationService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService)
-    {
-        _context = context;
-        _appRuntimeModeService = appRuntimeModeService;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
 
     public async Task<IReadOnlyList<MailConfiguration>> GetAllAsync(CancellationToken ct = default)
     {
@@ -24,10 +18,7 @@ public class MailConfigurationService : IMailConfigurationService
             .ToListAsync(ct);
     }
 
-    public async Task<MailConfiguration?> GetByIdAsync(int id, CancellationToken ct = default)
-    {
-        return await _context.MailConfigurations.FindAsync([id], ct);
-    }
+    public async Task<MailConfiguration?> GetByIdAsync(int id, CancellationToken ct = default) => await _context.MailConfigurations.FindAsync([id], ct);
 
     public async Task<MailConfiguration> CreateAsync(MailConfiguration config, CancellationToken ct = default)
     {

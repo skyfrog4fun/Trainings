@@ -108,8 +108,8 @@ public class TrainingServiceTests
             DateTime = DateTime.UtcNow,
             Capacity = 10,
             TrainerId = 1,
-            Blocks = new List<TrainingBlock>
-            {
+            Blocks =
+            [
                 new()
                 {
                     Id = 5,
@@ -117,11 +117,11 @@ public class TrainingServiceTests
                     OrderIndex = 2,
                     Title = "Block B",
                     PlannedDurationMinutes = 20,
-                    TrainingBlockTags = new List<TrainingBlockTag>
-                    {
+                    TrainingBlockTags =
+                    [
                         new() { TrainingBlockId = 5, TagId = 999, Tag = null! },
                         new() { TrainingBlockId = 5, TagId = 2, Tag = validTag }
-                    }
+                    ]
                 },
                 new()
                 {
@@ -131,7 +131,7 @@ public class TrainingServiceTests
                     Title = "Block A",
                     PlannedDurationMinutes = 10
                 }
-            }
+            ]
         };
 
         _trainingRepoMock.Setup(r => r.GetByIdAsync(11)).ReturnsAsync(training);
@@ -159,12 +159,12 @@ public class TrainingServiceTests
             GroupId = 1
         };
         ctx.Trainings.Add(training);
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
-        await service.SetStatusAsync(20, TrainingStatus.Planned);
+        await service.SetStatusAsync(20, TrainingStatus.Planned, TestContext.Current.CancellationToken);
 
-        var updated = await ctx.Trainings.FindAsync(20);
+        var updated = await ctx.Trainings.FindAsync([20], TestContext.Current.CancellationToken);
         updated!.Status.Should().Be(TrainingStatus.Planned);
     }
 
@@ -175,7 +175,7 @@ public class TrainingServiceTests
         var service = new TrainingService(_trainingRepoMock.Object, ctx, _runtimeModeServiceMock.Object);
 
         var weekday = DayOfWeek.Monday;
-        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 99, weekday);
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 99, weekday, TestContext.Current.CancellationToken);
 
         result.DayOfWeek.Should().Be(weekday);
         result.Date.Should().BeAfter(DateTime.Today);
@@ -189,7 +189,7 @@ public class TrainingServiceTests
 
         var weekday = DayOfWeek.Wednesday;
 
-        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        int offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
         if (offset == 0) offset = 7;
         var firstOccurrence = DateTime.Today.AddDays(offset);
 
@@ -201,9 +201,9 @@ public class TrainingServiceTests
             TrainerId = 1,
             GroupId = 42
         });
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 42, weekday);
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 42, weekday, TestContext.Current.CancellationToken);
 
         result.Date.Should().Be(firstOccurrence.AddDays(7).Date);
         result.DayOfWeek.Should().Be(weekday);
@@ -217,11 +217,11 @@ public class TrainingServiceTests
 
         var weekday = DayOfWeek.Friday;
 
-        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        int offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
         if (offset == 0) offset = 7;
         var firstOccurrence = DateTime.Today.AddDays(offset);
 
-        for (var week = 0; week < 3; week++)
+        for (int week = 0; week < 3; week++)
         {
             ctx.Trainings.Add(new Training
             {
@@ -233,9 +233,9 @@ public class TrainingServiceTests
             });
         }
 
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 7, weekday);
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 7, weekday, TestContext.Current.CancellationToken);
 
         result.Date.Should().Be(firstOccurrence.AddDays(3 * 7).Date);
         result.DayOfWeek.Should().Be(weekday);
@@ -249,7 +249,7 @@ public class TrainingServiceTests
 
         var weekday = DayOfWeek.Tuesday;
 
-        var offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
+        int offset = ((int)weekday - (int)DateTime.Today.DayOfWeek + 7) % 7;
         if (offset == 0) offset = 7;
         var firstOccurrence = DateTime.Today.AddDays(offset);
 
@@ -262,9 +262,9 @@ public class TrainingServiceTests
             TrainerId = 1,
             GroupId = 99
         });
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 5, weekday);
+        var result = await service.GetNextAvailableDateForGroupAsync(groupId: 5, weekday, TestContext.Current.CancellationToken);
 
         result.Date.Should().Be(firstOccurrence.Date);
     }

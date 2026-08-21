@@ -1,0 +1,85 @@
+@page "/groups"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "GroupAdmin")]
+
+@inject IGroupService GroupService
+
+<PageTitle>@Localizer["Shared_Groups"]</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <PageHeader Title='@Localizer["Shared_Groups"]'>
+        <Actions>
+            <a href="/groups/new" class="btn btn-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Shared_Add"]</a>
+        </Actions>
+    </PageHeader>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        <div class="app-overview-grid">
+            @foreach (var group in _groups)
+            {
+                <div class="app-overview-card">
+                    <div class="app-overview-main">
+                        <div class="app-overview-title text-break">@group.Name</div>
+                        <div class="app-overview-meta">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
+                        <div class="app-overview-meta mt-1">
+                            <span class="me-3"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</span>
+                            @if (group.IsActive)
+                            {
+                                <span><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Active"]</span>
+                            }
+                            else
+                            {
+                                <span><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Enum_Decision_No"]</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="app-overview-actions">
+                        <a href="/groups/@group.Slug/members" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        </a>
+                        <a href="/groups/@group.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                        </a>
+                        <button class="btn btn-sm btn-app-icon btn-app-outline-danger" title='@Localizer["Shared_Delete"]' aria-label='@Localizer["Shared_Delete"]' @onclick="() => DeleteGroup(group)">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (!_groups.Any())
+        {
+            <div class="alert alert-info">@Localizer["GroupsPage_NoGroupsYet"]</div>
+        }
+    }
+</div>
+
+@code {
+    private List<GroupDto> _groups = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGroups();
+    }
+
+    private async Task LoadGroups()
+    {
+        _loading = true;
+        _groups = (await GroupService.GetAllAsync()).ToList();
+        _loading = false;
+    }
+
+    private async Task DeleteGroup(GroupDto group)
+    {
+        await GroupService.DeleteAsync(group.Id);
+        await LoadGroups();
+    }
+}

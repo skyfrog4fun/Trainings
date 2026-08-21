@@ -7,5 +7,5 @@ public class Tag
     public int? GroupId { get; set; }
     public Group? Group { get; set; }
 
-    public ICollection<TrainingBlockTag> TrainingBlockTags { get; set; } = new List<TrainingBlockTag>();
+    public ICollection<TrainingBlockTag> TrainingBlockTags { get; set; } = [];
 }

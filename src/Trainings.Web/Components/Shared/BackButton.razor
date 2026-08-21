@@ -1,0 +1,8 @@
+<a href="@Href" class="btn btn-sm btn-outline-secondary">
+    <i class="@AppIcons.Back me-1" aria-hidden="true"></i>@(string.IsNullOrWhiteSpace(Label) ? "Back" : Label)
+</a>
+
+@code {
+    [Parameter] public required string Href { get; set; }
+    [Parameter] public string? Label { get; set; }
+}

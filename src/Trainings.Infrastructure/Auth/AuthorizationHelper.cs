@@ -5,13 +5,10 @@ namespace Trainings.Infrastructure.Auth;
 
 public class AuthorizationHelper : IAuthorizationHelper
 {
-    private const string SuperAdminClaim = "SuperAdmin";
-    private const string GroupRoleClaimPrefix = "GroupRole::";
+    private const string _superAdminClaim = "SuperAdmin";
+    private const string _groupRoleClaimPrefix = "GroupRole::";
 
-    public bool IsSuperAdmin(ClaimsPrincipal user)
-    {
-        return user.HasClaim(SuperAdminClaim, "true");
-    }
+    public bool IsSuperAdmin(ClaimsPrincipal user) => user.HasClaim(_superAdminClaim, "true");
 
     public bool IsGroupAdmin(ClaimsPrincipal user, int groupId)
     {
@@ -20,7 +17,7 @@ public class AuthorizationHelper : IAuthorizationHelper
             return true;
         }
 
-        return user.HasClaim($"{GroupRoleClaimPrefix}{groupId}", "Admin");
+        return user.HasClaim($"{_groupRoleClaimPrefix}{groupId}", "Admin");
     }
 
     public bool IsGroupTrainer(ClaimsPrincipal user, int groupId)
@@ -30,7 +27,7 @@ public class AuthorizationHelper : IAuthorizationHelper
             return true;
         }
 
-        return user.HasClaim($"{GroupRoleClaimPrefix}{groupId}", "Trainer");
+        return user.HasClaim($"{_groupRoleClaimPrefix}{groupId}", "Trainer");
     }
 
     public bool IsGroupMember(ClaimsPrincipal user, int groupId)
@@ -41,7 +38,7 @@ public class AuthorizationHelper : IAuthorizationHelper
         }
 
         return user.Claims.Any(c =>
-            c.Type == $"{GroupRoleClaimPrefix}{groupId}" &&
+            c.Type == $"{_groupRoleClaimPrefix}{groupId}" &&
             (c.Value == "Admin" || c.Value == "Trainer" || c.Value == "Participant"));
     }
 
@@ -53,18 +50,17 @@ public class AuthorizationHelper : IAuthorizationHelper
         }
 
         return user.Claims.Any(c =>
-            c.Type.StartsWith(GroupRoleClaimPrefix, StringComparison.Ordinal) &&
+            c.Type.StartsWith(_groupRoleClaimPrefix, StringComparison.Ordinal) &&
             c.Value == role);
     }
 
     public IReadOnlyList<int> GetGroupIdsForRole(ClaimsPrincipal user, string role)
     {
-        return user.Claims
+        return [.. user.Claims
             .Where(c =>
-                c.Type.StartsWith(GroupRoleClaimPrefix, StringComparison.Ordinal) &&
+                c.Type.StartsWith(_groupRoleClaimPrefix, StringComparison.Ordinal) &&
                 c.Value == role)
-            .Select(c => int.TryParse(c.Type[GroupRoleClaimPrefix.Length..], out var id) ? id : -1)
-            .Where(id => id > 0)
-            .ToList();
+            .Select(c => int.TryParse(c.Type[_groupRoleClaimPrefix.Length..], out int id) ? id : -1)
+            .Where(id => id > 0)];
     }
 }

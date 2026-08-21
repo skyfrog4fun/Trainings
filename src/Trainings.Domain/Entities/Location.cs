@@ -10,7 +10,7 @@ public class Location
     public int? CountryId { get; set; }
     public Country? Country { get; set; }
 
-    public ICollection<Group> DefaultForGroups { get; set; } = new List<Group>();
-    public ICollection<Training> Trainings { get; set; } = new List<Training>();
-    public ICollection<GroupLocation> AllowedForGroups { get; set; } = new List<GroupLocation>();
+    public ICollection<Group> DefaultForGroups { get; set; } = [];
+    public ICollection<Training> Trainings { get; set; } = [];
+    public ICollection<GroupLocation> AllowedForGroups { get; set; } = [];
 }

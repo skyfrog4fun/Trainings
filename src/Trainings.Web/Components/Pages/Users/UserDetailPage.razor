@@ -1,0 +1,242 @@
+@page "/users/{Id:int}"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "GroupAdmin")]
+
+@inject IUserService UserService
+@inject IGroupService GroupService
+@inject IRegistrationService RegistrationService
+@inject ICountryService CountryService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@Localizer["UserDetailPage_PageTitle"]</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <div class="my-3 d-flex flex-wrap gap-2">
+        <BackButton Href="/users" />
+        @if (_user is not null)
+        {
+            <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
+                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["UserDetailPage_Edit"]
+            </a>
+        }
+    </div>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (_user is null)
+    {
+        <div class="alert alert-danger">@Localizer["UserDetailPage_UserNotFound"]</div>
+    }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">@Localizer["UserDetailPage_AccessDenied"]</div>
+    }
+    else
+    {
+        <PageHeader Title="@_user.DisplayName">
+            <Actions>
+                <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? Localizer["UserDetailPage_Active"] : Localizer["UserDetailPage_Inactive"])</span>
+            </Actions>
+        </PageHeader>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">@Localizer["UserDetailPage_ProfileTitle"]</div>
+                    <div class="card-body">
+                        <div><strong>@Localizer["UserDetailPage_EmailLabel"]</strong> @_user.Email</div>
+                        <div><strong>@Localizer["UserDetailPage_RoleLabel"]</strong> @_user.Role</div>
+                        <div><strong>@Localizer["UserDetailPage_GenderLabel"]</strong> @_user.Gender</div>
+                        <div><strong>@Localizer["UserDetailPage_BirthdayLabel"]</strong> @FormatDate(_user.Birthday)</div>
+                        <div><strong>@Localizer["UserDetailPage_MobileLabel"]</strong> @FormatText(_user.Mobile)</div>
+                        <div><strong>@Localizer["UserDetailPage_CityLabel"]</strong> @FormatText(_user.City)</div>
+                        <div><strong>@Localizer["UserDetailPage_CountryLabel"]</strong> @GetCountryLabel(_user.CountryId, _user.CountryCode)</div>
+                        <div><strong>@Localizer["UserDetailPage_EmailVerifiedLabel"]</strong> @(_user.EmailConfirmedAt.HasValue ? Localizer["Enum_Decision_Yes"] : Localizer["Enum_Decision_No"])</div>
+                        <div><strong>@Localizer["UserDetailPage_EntryDateLabel"]</strong> @FormatDateTime(_user.EntryDate)</div>
+                        <div><strong>@Localizer["UserDetailPage_CreatedLabel"]</strong> @FormatDateTime(_user.CreationDate)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">@Localizer["UserDetailPage_GroupMembershipsTitle"]</div>
+                    <div class="card-body p-0">
+                        @if (_memberships.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>@Localizer["UserDetailPage_Group"]</th>
+                                            <th>@Localizer["UserDetailPage_Role"]</th>
+                                            <th>@Localizer["UserDetailPage_Status"]</th>
+                                            <th>@Localizer["UserDetailPage_Joined"]</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var membership in _memberships)
+                                        {
+                                            <tr>
+                                                <td>@GetGroupLabel(membership.GroupId)</td>
+                                                <td>@membership.Role</td>
+                                                <td>@membership.Status</td>
+                                                <td>@FormatDateTime(membership.JoinedAt)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-3 text-muted">@Localizer["UserDetailPage_NoMemberships"]</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header fw-bold">@Localizer["UserDetailPage_RegistrationHistoryTitle"]</div>
+            <div class="card-body p-0">
+                @if (_registrations.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>@Localizer["UserDetailPage_Training"]</th>
+                                    <th>@Localizer["UserDetailPage_Date"]</th>
+                                    <th>@Localizer["UserDetailPage_Status"]</th>
+                                    <th>@Localizer["UserDetailPage_Registered"]</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var registration in _registrations)
+                                {
+                                    <tr>
+                                        <td>@registration.TrainingTitle</td>
+                                        <td>@FormatDateTime(registration.TrainingDateTime)</td>
+                                        <td>@registration.Status</td>
+                                        <td>@FormatDateTime(registration.RegisteredAt)</td>
+                                        <td>
+                                            <a href="/trainings/@registration.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="@Localizer["UserDetailPage_ViewTraining"]" aria-label="@Localizer["UserDetailPage_ViewTraining"]">
+                                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 text-muted">@Localizer["UserDetailPage_NoRegistrations"]</div>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_user.WelcomeMessage))
+        {
+            <div class="card mb-4">
+                <div class="card-header fw-bold">@Localizer["UserDetailPage_BioWelcomeMessageTitle"]</div>
+                <div class="card-body">
+                    @_user.WelcomeMessage
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private UserDto? _user;
+    private List<GroupMembershipDto> _memberships = new();
+    private List<RegistrationDto> _registrations = new();
+    private Dictionary<int, string> _groupNameById = new();
+    private Dictionary<int, string> _countryNameById = new();
+    private bool _loading = true;
+    private bool _isAccessDenied;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUser = authState.User;
+        var isSuperAdmin = currentUser.HasClaim("SuperAdmin", "true");
+        var managedGroupIds = currentUser.Claims
+            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin")
+            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+
+        _user = await UserService.GetByIdAsync(Id);
+        if (_user is null)
+        {
+            _loading = false;
+            return;
+        }
+
+        _memberships = (await GroupService.GetAllMembershipsForUserAsync(Id))
+            .OrderBy(m => m.GroupId)
+            .ThenBy(m => m.Status)
+            .ToList();
+
+        if (!isSuperAdmin)
+        {
+            var canAccess = _memberships.Any(m =>
+                m.Status == GroupMembershipStatus.Approved &&
+                m.IsActive &&
+                managedGroupIds.Contains(m.GroupId));
+
+            if (!canAccess)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+        }
+
+        _registrations = (await RegistrationService.GetByUserIdAsync(Id))
+            .OrderByDescending(r => r.TrainingDateTime)
+            .ToList();
+
+        _groupNameById = (await GroupService.GetAllAsync())
+            .ToDictionary(g => g.Id, g => g.Name);
+
+        _countryNameById = (await CountryService.GetAllAsync())
+            .ToDictionary(c => c.Id, c => c.Name);
+
+        _loading = false;
+    }
+
+    private string GetGroupLabel(int groupId) =>
+        _groupNameById.TryGetValue(groupId, out var groupName) ? groupName : string.Format(Localizer["UserDetailPage_GroupNumberFallback"].Value, groupId);
+
+    private string GetCountryLabel(int? countryId, string? countryCode)
+    {
+        if (countryId.HasValue && _countryNameById.TryGetValue(countryId.Value, out var countryName))
+        {
+            return countryName;
+        }
+
+        return string.IsNullOrWhiteSpace(countryCode) ? "-" : countryCode;
+    }
+
+    private static string FormatDate(DateOnly? date) =>
+        date.HasValue ? date.Value.ToString("yyyy-MM-dd") : "-";
+
+    private static string FormatDateTime(DateTime? dateTime) =>
+        dateTime.HasValue ? dateTime.Value.ToString("yyyy-MM-dd HH:mm") : "-";
+
+    private static string FormatText(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "-" : value;
+}

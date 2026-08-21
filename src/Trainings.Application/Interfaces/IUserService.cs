@@ -12,6 +12,7 @@ public interface IUserService
     Task<UserDto> CreateAsync(CreateUserDto dto);
     Task UpdateAsync(UpdateUserDto dto);
     Task UpdateSelfAsync(UpdateSelfUserDto dto);
+    Task UpdatePreferencesAsync(int userId, string? language, string? theme);
     Task DeleteAsync(int id);
     Task<bool> ValidatePasswordAsync(string email, string password);
     Task ChangePasswordAsync(int userId, string newPassword);

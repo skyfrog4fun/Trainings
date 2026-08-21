@@ -22,7 +22,7 @@ public class Training
     public Group? Group { get; set; }
     public bool AttendanceLocked { get; set; }
     public DateTime? AttendanceLockedAt { get; set; }
-    public ICollection<Registration> Registrations { get; set; } = new List<Registration>();
-    public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
-    public ICollection<TrainingBlock> Blocks { get; set; } = new List<TrainingBlock>();
+    public ICollection<Registration> Registrations { get; set; } = [];
+    public ICollection<Attendance> Attendances { get; set; } = [];
+    public ICollection<TrainingBlock> Blocks { get; set; } = [];
 }

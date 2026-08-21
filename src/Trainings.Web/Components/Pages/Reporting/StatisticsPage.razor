@@ -1,0 +1,89 @@
+@page "/statistics"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "GroupAdmin")]
+
+@using Trainings.Web.Auth
+
+@inject IStatisticsService StatisticsService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>@Localizer["StatisticsPage_Statistics"]</PageTitle>
+
+<div class="container px-2 px-md-4">
+    <PageHeader Title='@Localizer["StatisticsPage_Statistics"]'>
+        <Actions>
+            <span class="badge bg-secondary">@_scopeLabel</span>
+        </Actions>
+    </PageHeader>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6 col-xl-3">
+                <DashboardFigureComponent Title="@Localizer["Shared_Groups"]" Icon="@AppIcons.Group" Value="@_stats.TotalGroups.ToString()" />
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <DashboardFigureComponent Title="@Localizer["StatisticsPage_ActiveUsers"]" Icon="@AppIcons.Users" Value="@_stats.ActiveUsers.ToString()" />
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <DashboardFigureComponent Title="@Localizer["StatisticsPage_UsersNotInGroup"]" Icon="@AppIcons.UserMinus" Value="@_stats.UsersNotInGroup.ToString()" />
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <DashboardFigureComponent Title="@Localizer["Shared_Trainings"]" Icon="@AppIcons.Fire" Value="@_stats.TotalTrainings.ToString()" />
+            </div>
+            <div class="col-12 col-md-6 col-xl-3">
+                <DashboardFigureComponent Title="@Localizer["StatisticsPage_TotalRegistrations"]" Icon="@AppIcons.ClipboardList" Value="@_stats.TotalRegistrations.ToString()" />
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">@Localizer["StatisticsPage_AnnualIndicators", DateTime.UtcNow.Year]</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">@Localizer["StatisticsPage_AvgUsersPerGroup"]</div>
+                            <div class="fs-3">@_stats.AverageUsersPerGroup.ToString("0.##")</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">@Localizer["StatisticsPage_AvgParticipantsPerTraining"]</div>
+                            <div class="fs-3">@_stats.AverageParticipantsPerTraining.ToString("0.##")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private StatisticsDto _stats = new();
+    private bool _loading = true;
+    private string _scopeLabel = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var isSuperAdmin = user.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        var managedGroupIds = user.Claims
+            .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Admin")
+            .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .Distinct()
+            .ToList();
+
+        _stats = await StatisticsService.GetStatisticsAsync(isSuperAdmin, managedGroupIds);
+        _scopeLabel = isSuperAdmin ? Localizer["StatisticsPage_ScopeGlobal"] : Localizer["StatisticsPage_ScopeManagedGroups"];
+        _loading = false;
+    }
+}

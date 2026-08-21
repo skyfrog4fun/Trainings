@@ -12,6 +12,6 @@ public class RegisterRequestDto
     public string Password { get; set; } = string.Empty;
     public string? Mobile { get; set; }
     public string? City { get; set; }
-    public List<int> RequestedGroupIds { get; set; } = new();
+    public List<int> RequestedGroupIds { get; set; } = [];
     public string? WelcomeMessage { get; set; }
 }

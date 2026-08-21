@@ -1,0 +1,28 @@
+@if (Inline)
+{
+    <span class="@BuildSpinnerClass()" role="status">
+        <span class="visually-hidden">@(string.IsNullOrWhiteSpace(Label) ? "Loading" : Label)</span>
+    </span>
+}
+else
+{
+    <div class="@ContainerClass">
+        <div class="@BuildSpinnerClass()" role="status">
+            <span class="visually-hidden">@(string.IsNullOrWhiteSpace(Label) ? "Loading" : Label)</span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public bool Inline { get; set; }
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public string ContainerClass { get; set; } = "text-center my-4";
+    [Parameter] public string? SpinnerClass { get; set; }
+
+    private string BuildSpinnerClass()
+    {
+        var baseClass = Small ? "spinner-border spinner-border-sm" : "spinner-border";
+        return string.IsNullOrWhiteSpace(SpinnerClass) ? baseClass : $"{baseClass} {SpinnerClass}";
+    }
+}
