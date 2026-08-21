@@ -25,6 +25,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<VersionService>();
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<ScrollService>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();

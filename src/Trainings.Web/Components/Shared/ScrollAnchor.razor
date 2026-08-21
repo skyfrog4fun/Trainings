@@ -1,0 +1,6 @@
+@* Invisible marker element used as a scroll target for ScrollService.ScrollToAsync(Id). *@
+<span id="@Id" class="visually-hidden" aria-hidden="true"></span>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+}

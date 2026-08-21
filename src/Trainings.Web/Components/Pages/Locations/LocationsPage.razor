@@ -3,8 +3,6 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
 
-@implements IAsyncDisposable
-
 @rendermode InteractiveServer
 
 @attribute [Authorize(Policy = "SuperAdmin")]
@@ -13,7 +11,7 @@
 @inject IGroupService GroupService
 @inject ICountryService CountryService
 @inject IDateTimeFormatService DateTimeFormatService
-@inject IJSRuntime JS
+@inject ScrollService ScrollService
 
 <PageTitle>@Localizer["LocationsPage_PageTitle"]</PageTitle>
 
@@ -28,7 +26,8 @@
 
     @if (_showForm)
     {
-        <div class="card mb-4 location-edit-form-card" id="location-edit-form">
+        <div class="card mb-4 location-edit-form-card">
+            <ScrollAnchor Id="location-edit-form" />
             <div class="card-body">
                 <h5>@(_editId == 0 ? Localizer["LocationsPage_CreateTitle"] : Localizer["LocationsPage_EditTitle"])</h5>
                 <EditForm Model="_formModel" OnValidSubmit="Save">
@@ -200,9 +199,7 @@
     private List<CountryDto> _countries = new();
     private HashSet<string> _groupLocationAssignments = new(StringComparer.Ordinal);
     private HashSet<int> _expandedGroupAccessIds = new();
-    private bool _scrollToFormPending;
     private ToastComponent? _toast;
-    private IJSObjectReference? _jsModule;
 
     private bool _showForm;
     private int _editId;
@@ -240,7 +237,7 @@
             CountryId = GetDefaultCountryId()
         };
         _showForm = true;
-        _scrollToFormPending = true;
+        ScrollService.RequestScroll("location-edit-form");
     }
 
     private int? GetDefaultCountryId()
@@ -273,17 +270,12 @@
             CountryId = location.CountryId
         };
         _showForm = true;
-        _scrollToFormPending = true;
+        ScrollService.RequestScroll("location-edit-form");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_scrollToFormPending)
-        {
-            _scrollToFormPending = false;
-            _jsModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/scrollHelper.js");
-            await _jsModule.InvokeVoidAsync("scrollToElementBelowHeader", "location-edit-form");
-        }
+        await ScrollService.ScrollToPendingAsync();
     }
 
     private async Task Save()
@@ -399,11 +391,4 @@
         }
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        if (_jsModule is not null)
-        {
-            await _jsModule.DisposeAsync();
-        }
     }
-}

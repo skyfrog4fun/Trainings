@@ -181,7 +181,7 @@
     <value>Stadt</value>
   </data>
   <data name="Shared_Close" xml:space="preserve">
-    <value>Schließen</value>
+    <value>Schliessen</value>
   </data>
   <data name="Shared_ClearFilters" xml:space="preserve">
     <value>Filter löschen</value>
@@ -235,7 +235,7 @@
     <value>Gruppen: {0}</value>
   </data>
   <data name="Shared_Location" xml:space="preserve">
-    <value>Location</value>
+    <value>Ort</value>
   </data>
   <data name="DashboardNotificationPanel_LogId" xml:space="preserve">
     <value>Log ID</value>
