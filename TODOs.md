@@ -3,7 +3,19 @@ TODOs
 
 General
 ---
-- [] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
+- [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
+
+Design Groups Pages
+---
+- [ ] Rework the idea how to navigate inside the groups
+    - [ ] all pages uses {slug} for navigation
+    - [ ] overview (list) -> new | details of group -> edit | add member | delete
+        - [ ] overview (/groups): list of groups (only possibility to go into details (/groups/{slug}) => see detail at end of this file
+- [ ] 
+- [ ] Groups (/groups):
+- [ ] Create Group (/groups/new):
+- [ ] Edit Group (/groups/2/edit):
+- [ ] Group Members (/groups/{slug}/members):
 
 Mail
 ---
@@ -47,3 +59,23 @@ Done - Localization
 - [X] Check if all found pattern [Page]_[Resource] on pages are available on RESX files. If not, add them to the RESX file.
 - [X] Remove all text on RESX files that not not match the pattern [Page]_[Resource] and/or are not used on any page.
 - [X] Properly translate all the text on the RESX files from EN to DE.
+
+
+Notes
+---
+
+Example on how to structure the navigation for copilot chat?!
+
+/groups
+  ├── New
+  │    └── /groups/new
+  │
+  └── Group detail
+       └── /groups/{slug}
+              ├── Update
+              │    └── /groups/{slug}/update
+              │    
+              ├── Delete
+              │
+              └── Manage Members
+                   └── /groups/{slug}/members
