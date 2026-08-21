@@ -616,7 +616,7 @@
     <value>Inactive</value>
   </data>
   <data name="LocationsPage_GroupLocationAccess" xml:space="preserve">
-    <value>Group Location Access</value>
+    <value>Group Assignment</value>
   </data>
   <data name="LocationsPage_ChangesSaved" xml:space="preserve">
     <value>Changes saved</value>
