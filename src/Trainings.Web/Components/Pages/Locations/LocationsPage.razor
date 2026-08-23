@@ -45,13 +45,12 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["LocationsPage_CountryLabel"]</label>
-                            <select class="form-select" @bind="_formModel.CountryId">
-                                <option value="">@Localizer["LocationsPage_SelectCountry"]</option>
-                                @foreach (var country in _countries)
-                                {
-                                    <option value="@country.Id">@country.Code — @country.Name</option>
-                                }
-                            </select>
+                            <SelectDropdownComponent TItem="CountryDto" TValue="int?"
+                                                     @bind-Value="_formModel.CountryId"
+                                                     Items="_countries"
+                                                     ValueSelector="c => (int?)c.Id"
+                                                     TextSelector="@(c => $"{c.Code} — {c.Name}")"
+                                                     PlaceholderText="@Localizer["LocationsPage_SelectCountry"]" />
                         </div>
                         <div class="col-@(_editId != 0 ? 9 : 12) mt-3 d-flex">
                             <div class="form-check">

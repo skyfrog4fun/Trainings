@@ -1,0 +1,79 @@
+@typeparam TItem
+@typeparam TValue
+
+<div class="app-select @CssClass" tabindex="0" @onfocusout="Close">
+    <button type="button"
+            class="app-select-toggle form-select"
+            @onclick="ToggleOpen"
+            aria-haspopup="listbox"
+            aria-expanded="@(_isOpen ? "true" : "false")">
+        <span class="app-select-toggle-label">@CurrentLabel</span>
+    </button>
+    @if (_isOpen)
+    {
+        <ul class="app-select-menu" role="listbox">
+            @if (PlaceholderText is not null)
+            {
+                var isPlaceholderSelected = EqualityComparer<TValue>.Default.Equals(PlaceholderValue, Value);
+                <li class="app-select-option @(isPlaceholderSelected ? "selected" : "")" role="option" aria-selected="@(isPlaceholderSelected ? "true" : "false")"
+                    @onmousedown="() => SelectValue(PlaceholderValue!)"
+                    @onmousedown:preventDefault="true">
+                    @PlaceholderText
+                </li>
+            }
+            @foreach (var item in Items)
+            {
+                var itemValue = ValueSelector(item);
+                var isSelected = EqualityComparer<TValue>.Default.Equals(itemValue, Value);
+                <li class="app-select-option @(isSelected ? "selected" : "")" role="option" aria-selected="@(isSelected ? "true" : "false")"
+                    @onmousedown="() => SelectValue(itemValue)"
+                    @onmousedown:preventDefault="true">
+                    @TextSelector(item)
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public TValue Value { get; set; } = default!;
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyList<TItem> Items { get; set; } = Array.Empty<TItem>();
+    [Parameter, EditorRequired] public Func<TItem, TValue> ValueSelector { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TItem, string> TextSelector { get; set; } = default!;
+    [Parameter] public string? PlaceholderText { get; set; }
+    [Parameter] public TValue PlaceholderValue { get; set; } = default!;
+    [Parameter] public string? CssClass { get; set; }
+
+    private bool _isOpen;
+
+    private string CurrentLabel
+    {
+        get
+        {
+            foreach (var item in Items)
+            {
+                if (EqualityComparer<TValue>.Default.Equals(ValueSelector(item), Value))
+                {
+                    return TextSelector(item);
+                }
+            }
+
+            return PlaceholderText ?? string.Empty;
+        }
+    }
+
+    private void ToggleOpen() => _isOpen = !_isOpen;
+
+    private void Close() => _isOpen = false;
+
+    private async Task SelectValue(TValue value)
+    {
+        _isOpen = false;
+        if (!EqualityComparer<TValue>.Default.Equals(value, Value))
+        {
+            Value = value;
+            await ValueChanged.InvokeAsync(value);
+        }
+    }
+}
