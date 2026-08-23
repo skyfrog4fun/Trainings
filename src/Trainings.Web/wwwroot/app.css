@@ -78,7 +78,6 @@
   --bs-danger: var(--color-danger);
   --bs-light: var(--brand-appreciation-20);
   --bs-dark: var(--brand-tradition);
-
 }
 
 [data-theme="dark"] {
@@ -108,10 +107,10 @@ a:not(.btn):visited {
   color: var(--bs-link-color);
 }
 
-a:not(.btn):hover,
-a:not(.btn):visited:hover {
-  color: var(--bs-link-hover-color);
-}
+  a:not(.btn):hover,
+  a:not(.btn):visited:hover {
+    color: var(--bs-link-hover-color);
+  }
 
 h1:focus {
   outline: none;
@@ -152,14 +151,43 @@ h1:focus {
   accent-color: var(--brand-community-60);
 }
 
-.form-check-input:checked {
-  background-color: var(--brand-community-60);
-  border-color: var(--brand-community-60);
-}
+  .form-check-input:checked {
+    background-color: var(--brand-community-60);
+    border-color: var(--brand-community-60);
+  }
+
   .form-check-input:focus {
     border-color: var(--brand-community-60);
     box-shadow: 0 0 0 0.2rem var(--brand-community-40);
   }
+
+.form-control:focus,
+.form-select:focus,
+.form-control-plaintext:focus {
+  border-color: var(--brand-community-60);
+  box-shadow: 0 0 0 0.2rem var(--brand-community-40);
+}
+
+/* Note: the popup list of a native <select> is rendered by the browser/OS, not by
+   page CSS. Chromium-based browsers (Chrome, Edge) apply background-color/color
+   for option:checked, letting the selected value stay highlighted in brand colors.
+   However, the transient mouse-hover highlight inside the popup is drawn by the
+   browser's own UI and cannot be restyled with plain CSS (attempts to do so via
+   "appearance: base-select" caused rendering regressions - duplicated arrow, dark
+   popup background - so that approach was reverted). Firefox/Safari ignore both
+   rules and keep their default styling entirely. Full cross-browser control over
+   the hover color would require replacing the native <select> with a custom
+   dropdown component. */
+.form-select option:checked {
+  background-color: var(--brand-community-60);
+  color: var(--brand-tradition);
+}
+
+.form-select option:hover,
+.form-select option:focus {
+  background-color: var(--brand-community-20);
+  color: var(--brand-tradition);
+}
 
 .btn-primary {
   --bs-btn-color: var(--brand-tradition);
@@ -309,14 +337,14 @@ main {
 }
 
 .collapsible-card {
-    border-width: 2px;
-    border-radius: 0.375rem;
-    border-color: var(--brand-community-60)
+  border-width: 2px;
+  border-radius: 0.375rem;
+  border-color: var(--brand-community-60)
 }
 
-.collapsible-card .card-header {
-  padding: 0.75rem 1rem;
-}
+  .collapsible-card .card-header {
+    padding: 0.75rem 1rem;
+  }
 
 .collapsible-card-header,
 .dashboard-card-header,
@@ -329,10 +357,9 @@ main {
 
 .collapsible-card-toggle {
   padding: 0;
-  border: 0;  
+  border: 0;
   color: var(--color-text);
   text-decoration: none;
-  font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -366,23 +393,24 @@ main {
   white-space: nowrap;
 }
 
-.location-edit-form-card {
+.card-component {
   border-color: var(--brand-community-60);
-  border-radius: 0.375rem; 
+  border-radius: 0.375rem;
   border-width: 2px;
 }
 
-.location-list-header {
+.card-component-header {
   padding: 0.75rem 1rem;
+  font-weight: 700;
   background: var(--brand-community-60);
 }
 
-.location-list-row {
+.card-list-row {
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--bs-border-color);
 }
 
-  .location-list-row:last-child {
+  .card-list-row:last-child {
     border-bottom: 0;
   }
 

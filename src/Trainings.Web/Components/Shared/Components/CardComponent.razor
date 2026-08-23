@@ -1,0 +1,61 @@
+<div class="card collapsible-card card-component mb-3 @CssClass">
+    <div class="card-header collapsible-card-header card-component-header @(IsCollapsable ? "collapsible-card-toggle" : "") @HeaderCssClass"
+         role="@(IsCollapsable ? "button" : null)"
+         @onclick="ToggleExpanded">
+        <div>
+            @if (IsCollapsable)
+            {
+                var chevronClass = _collapsed ? AppIcons.ChevronDown : AppIcons.ChevronUp;
+                <i class="@chevronClass me-2" aria-hidden="true"></i>
+            }
+            @Title
+        </div>
+        <div class="collapsible-card-meta">
+            @TitleMeta
+        </div>
+    </div>
+    @if (!IsCollapsable || !_collapsed)
+    {
+        <div class="card-body">
+            @Body
+        </div>
+        @if (ShowFooter)
+        {
+            <div class="card-footer">
+                @Footer
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public bool ShowFooter { get; set; } = false;
+    [Parameter] public bool Collapsed { get; set; } = false;
+    [Parameter] public bool IsCollapsable { get; set; } = true;
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public string? HeaderCssClass { get; set; }
+    [Parameter] public RenderFragment? Title { get; set; }
+    [Parameter] public RenderFragment? TitleMeta { get; set; }
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    private bool _initialized;
+    private bool _collapsed;
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized)
+        {
+            _collapsed = Collapsed;
+            _initialized = true;
+        }
+    }
+
+    private void ToggleExpanded()
+    {
+        if (IsCollapsable)
+        {
+            _collapsed = !_collapsed;
+        }
+    }
+}

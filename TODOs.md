@@ -5,7 +5,13 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
-Design Groups Pages
+Location Pages
+---
+- [ ] Group Assignment (Access): in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
+- [ ] ...
+
+
+Design Group Pages
 ---
 - [ ] Rework the idea how to navigate inside the groups
     - [ ] all pages uses {slug} for navigation
@@ -16,6 +22,10 @@ Design Groups Pages
 - [ ] Create Group (/groups/new):
 - [ ] Edit Group (/groups/2/edit):
 - [ ] Group Members (/groups/{slug}/members):
+
+Design User Pages
+---
+- [ ] ...
 
 Mail
 ---

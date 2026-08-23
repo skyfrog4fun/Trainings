@@ -26,10 +26,10 @@
 
     @if (_showForm)
     {
-        <div class="card mb-4 location-edit-form-card">
-            <ScrollAnchor Id="location-edit-form" />
-            <div class="card-body">
-                <h5>@(_editId == 0 ? Localizer["LocationsPage_CreateTitle"] : Localizer["LocationsPage_EditTitle"])</h5>
+        <ScrollAnchor Id="location-edit-form" />
+        <CardComponent IsCollapsable="false">
+            <Title>@(_editId == 0 ? Localizer["LocationsPage_CreateTitle"] : Localizer["LocationsPage_EditTitle"])</Title>
+            <Body>
                 <EditForm Model="_formModel" OnValidSubmit="Save">
                     <DataAnnotationsValidator />
                     <div class="row g-2">
@@ -80,8 +80,8 @@
                         }
                     </div>
                 </EditForm>
-            </div>
-        </div>
+            </Body>
+        </CardComponent>
     }
 
     @{
@@ -122,56 +122,41 @@
     {
         @foreach (var location in _locations.Where(l => !l.IsSystemWide))
         {
-            var isExpanded = _expandedGroupAccessIds.Contains(location.Id);
-            var chevronClass = isExpanded ? AppIcons.ChevronUp : AppIcons.ChevronDown;
-            <div class="card collapsible-card mb-3">
-                <div class="card-header collapsible-card-header location-list-header collapsible-card-toggle" role="button" @onclick="() => ToggleGroupAccessExpanded(location.Id)">
-                    <div>
-                        <i class="@chevronClass" aria-hidden="true"></i>
-                        <span>@location.Name</span>
-                    </div>
-                    <div class="collapsible-card-meta app-location-country">@location.CityName@(string.IsNullOrWhiteSpace(location.CountryCode) ? "" : $", {location.CountryCode}")</div>
-                </div>
-                @if (isExpanded)
-                {
-                    <div class="card-body">
-                        <div class="row g-2">
-                            @foreach (var group in _groups)
-                            {
-                                var key = $"{location.Id}:{group.Id}";
-                                var groupCulture = GetGroupCulture(group);
-                                <div class="col-12 col-md-6">
-                                    <div class="form-check @(group.IsActive ? "" : "text-muted")">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="loc-grp-@location.Id-@group.Id"
-                                               checked="@_groupLocationAssignments.Contains(key)"
-                                               @onchange="e => ToggleGroupLocation(location.Id, group.Id, (bool)(e.Value ?? false))" />
-                                        <label class="form-check-label" for="loc-grp-@location.Id-@group.Id">
-                                            @GetGroupLabel(group, groupCulture)
-                                        </label>
-                                    </div>
+            <CardComponent ShowFooter="true" Collapsed="true" HeaderCssClass="location-list-header">
+                <Title>@($"{location.Name} | {location.CityName}{(string.IsNullOrWhiteSpace(location.CountryCode) ? "" : $", {location.CountryCode}")}")</Title>
+                <TitleMeta>@(_groups.Count(g => _groupLocationAssignments.Contains($"{location.Id}:{g.Id}")))</TitleMeta>
+                <Body>
+                    <div class="row g-2">
+                        @foreach (var group in _groups)
+                        {
+                            var key = $"{location.Id}:{group.Id}";
+                            <div class="col-12 col-md-6">
+                                <div class="form-check @(group.IsActive ? "" : "text-muted")">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="loc-grp-@location.Id-@group.Id"
+                                           checked="@_groupLocationAssignments.Contains(key)"
+                                           @onchange="e => ToggleGroupLocation(location.Id, group.Id, (bool)(e.Value ?? false))" />
+                                    <label class="form-check-label" for="loc-grp-@location.Id-@group.Id">@GetGroupLabel(group)</label>
                                 </div>
-                            }
-                        </div>
+                            </div>
+                        }
                     </div>
-                    <div class="card-footer d-flex justify-content-end">
+                </Body>
+                <Footer>
+                    <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveGroupAccess(location.Id)"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["LocationsPage_SaveButton"]</button>
                     </div>
-                }
-            </div>
+                </Footer>
+            </CardComponent>
         }
     }
 
 </div>
 
-<ConfirmDialogComponent IsVisible="_showDeleteConfirm"
-                        Title="@Localizer["LocationsPage_DeleteConfirmTitle"]"
-                        Message="@Localizer["LocationsPage_DeleteConfirmMessage"]"
-                        ConfirmText="@Localizer["Shared_Delete"]"
-                        CancelText="@Localizer["Shared_Cancel"]"
-                        OnConfirm="ConfirmDelete"
-                        OnCancel="CancelDelete" />
+<ConfirmDialogComponent IsVisible="_showDeleteConfirm" Title="@Localizer["LocationsPage_DeleteConfirmTitle"]" Message="@Localizer["LocationsPage_DeleteConfirmMessage"]"
+                        ConfirmText="@Localizer["Shared_Delete"]" CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="ConfirmDelete" OnCancel="CancelDelete" />
 
 @code {
     private class LocationFormModel : IValidatableObject
@@ -198,7 +183,6 @@
     private List<GroupDto> _groups = new();
     private List<CountryDto> _countries = new();
     private HashSet<string> _groupLocationAssignments = new(StringComparer.Ordinal);
-    private HashSet<int> _expandedGroupAccessIds = new();
     private ToastComponent? _toast;
 
     private bool _showForm;
@@ -330,30 +314,17 @@
 
     private void CancelDelete() => _showDeleteConfirm = false;
 
-    private void ToggleGroupAccessExpanded(int locationId)
-    {
-        if (!_expandedGroupAccessIds.Add(locationId))
-        {
-            _expandedGroupAccessIds.Remove(locationId);
-        }
-    }
-
-    private CultureInfo GetGroupCulture(GroupDto group)
-    {
-        var countryCode = _countries.FirstOrDefault(c => c.Id == group.CountryId)?.Code
-            ?? DateTimeFormatService.GetDefaultCountry();
-        return DateTimeFormatService.GetCultureForCountry(countryCode);
-    }
-
-    private static string GetGroupLabel(GroupDto group, CultureInfo groupCulture)
+    private static string GetGroupLabel(GroupDto group)
     {
         if (!group.Weekday.HasValue && !group.StartTime.HasValue)
         {
             return group.Name;
         }
 
-        var weekdayPart = group.Weekday.HasValue ? group.Weekday.Value.ToString() : "";
-        var timePart = group.StartTime.HasValue ? group.StartTime.Value.ToString("HH:mm", groupCulture) : "";
+        var weekdayPart = group.Weekday.HasValue
+            ? CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(group.Weekday.Value)
+            : "";
+        var timePart = group.StartTime.HasValue ? group.StartTime.Value.ToString("HH:mm", CultureInfo.InvariantCulture) : "";
         var schedulePart = string.Join(" ", new[] { weekdayPart, timePart }.Where(s => !string.IsNullOrWhiteSpace(s)));
         return $"{group.Name} | {schedulePart}";
     }
