@@ -5,12 +5,6 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
-Location Pages
----
-- [ ] Group Assignment (Access): in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
-- [ ] ...
-
-
 Design Group Pages
 ---
 - [ ] Rework the idea how to navigate inside the groups
@@ -69,6 +63,9 @@ Done - Localization
 - [X] Check if all found pattern [Page]_[Resource] on pages are available on RESX files. If not, add them to the RESX file.
 - [X] Remove all text on RESX files that not not match the pattern [Page]_[Resource] and/or are not used on any page.
 - [X] Properly translate all the text on the RESX files from EN to DE.
+- [X] LocationsPage: Group Assignment (Access): in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
+- [X] LocationsPage: Visualization: in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
+- [X] LocationsPage: Visualization of dropdown fixed (coloring, etc...)
 
 
 Notes
