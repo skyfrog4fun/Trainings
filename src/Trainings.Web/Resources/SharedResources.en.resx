@@ -621,6 +621,12 @@
   <data name="LocationsPage_ChangesSaved" xml:space="preserve">
     <value>Changes saved</value>
   </data>
+  <data name="LocationsPage_NameRequired" xml:space="preserve">
+    <value>Name is required.</value>
+  </data>
+  <data name="LocationsPage_CityRequired" xml:space="preserve">
+    <value>City is required.</value>
+  </data>
   <data name="MailConfigPage_PageTitle" xml:space="preserve">
     <value>Configuration</value>
   </data>

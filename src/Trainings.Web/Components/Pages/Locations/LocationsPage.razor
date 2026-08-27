@@ -1,4 +1,5 @@
 @page "/config/locations"
+@implements IDisposable
 
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
@@ -109,26 +110,30 @@
 
     <PageTitleComponent Icon="@AppIcons.Access" Text="@Localizer["LocationsPage_GroupLocationAccess"]" />
 
+    @{
+        var groupAccessLocations = _locations.Where(l => !l.IsSystemWide).ToList();
+    }
+
     @if (_groups.Count == 0)
     {
         <p class="text-muted">@Localizer["LocationsPage_GroupAccessNoGroups"]</p>
     }
-    else if (_locations.Count(l => !l.IsSystemWide) == 0)
+    else if (groupAccessLocations.Count == 0)
     {
         <p class="text-muted">@Localizer["LocationsPage_GroupAccessNoLocations"]</p>
     }
     else
     {
-        @foreach (var location in _locations.Where(l => !l.IsSystemWide))
+        @foreach (var location in groupAccessLocations)
         {
             <CardComponent ShowFooter="true" Collapsed="true" HeaderCssClass="location-list-header">
                 <Title>@($"{location.Name} | {location.CityName}{(string.IsNullOrWhiteSpace(location.CountryCode) ? "" : $", {location.CountryCode}")}")</Title>
-                <TitleMeta>@(_groups.Count(g => _groupLocationAssignments.Contains($"{location.Id}:{g.Id}")))</TitleMeta>
+                <TitleMeta>@(_groups.Count(g => _groupLocationAssignments.Contains((location.Id, g.Id))))</TitleMeta>
                 <Body>
                     <div class="row g-2">
                         @foreach (var group in _groups)
                         {
-                            var key = $"{location.Id}:{group.Id}";
+                            var key = (location.Id, group.Id);
                             <div class="col-12 col-md-6">
                                 <div class="form-check @(group.IsActive ? "" : "text-muted")">
                                     <input class="form-check-input"
@@ -160,7 +165,6 @@
 @code {
     private class LocationFormModel : IValidatableObject
     {
-        [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; } = string.Empty;
 
         public string CityName { get; set; } = string.Empty;
@@ -171,18 +175,28 @@
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            var localizer = validationContext.GetService(typeof(IStringLocalizer<SharedResources>)) as IStringLocalizer<SharedResources>;
+
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                yield return new ValidationResult(GetMessage(localizer, "LocationsPage_NameRequired"), new[] { nameof(Name) });
+            }
+
             if (!IsSystemWide && string.IsNullOrWhiteSpace(CityName))
             {
-                yield return new ValidationResult("City is required.", new[] { nameof(CityName) });
+                yield return new ValidationResult(GetMessage(localizer, "LocationsPage_CityRequired"), new[] { nameof(CityName) });
             }
         }
+
+        private static string GetMessage(IStringLocalizer<SharedResources>? localizer, string key) => localizer is null ? key : localizer[key].Value;
     }
 
     private List<LocationDto> _locations = new();
     private List<GroupDto> _groups = new();
     private List<CountryDto> _countries = new();
-    private HashSet<string> _groupLocationAssignments = new(StringComparer.Ordinal);
+    private HashSet<(int LocationId, int GroupId)> _groupLocationAssignments = new();
     private ToastComponent? _toast;
+    private readonly CancellationTokenSource _cts = new();
 
     private bool _showForm;
     private int _editId;
@@ -203,13 +217,13 @@
 
     private async Task LoadData()
     {
-        _locations = (await LocationService.GetAllAsync()).ToList();
-        _groups = (await GroupService.GetAllAsync()).ToList();
-        _countries = (await CountryService.GetAllAsync()).ToList();
+        _locations = (await LocationService.GetAllAsync(_cts.Token)).ToList();
+        _groups = (await GroupService.GetAllAsync(_cts.Token)).ToList();
+        _countries = (await CountryService.GetAllAsync(_cts.Token)).ToList();
 
         _groupLocationAssignments = _groups
-            .SelectMany(g => g.AllowedLocationIds.Select(id => $"{id}:{g.Id}"))
-            .ToHashSet(StringComparer.Ordinal);
+            .SelectMany(g => g.AllowedLocationIds.Select(id => (LocationId: id, GroupId: g.Id)))
+            .ToHashSet();
     }
 
     private void ShowCreateForm()
@@ -272,7 +286,7 @@
                 IsSystemWide = _formModel.IsSystemWide,
                 IsActive = _formModel.IsActive,
                 CountryId = _formModel.CountryId
-            });
+            }, _cts.Token);
         }
         else
         {
@@ -284,7 +298,7 @@
                 IsSystemWide = _formModel.IsSystemWide,
                 IsActive = _formModel.IsActive,
                 CountryId = _formModel.CountryId
-            });
+            }, _cts.Token);
         }
 
         _showForm = false;
@@ -303,7 +317,7 @@
     private async Task ConfirmDelete()
     {
         _showDeleteConfirm = false;
-        await LocationService.DeleteAsync(_deleteId);
+        await LocationService.DeleteAsync(_deleteId, _cts.Token);
         if (_editId == _deleteId)
         {
             _showForm = false;
@@ -330,7 +344,7 @@
 
     private void ToggleGroupLocation(int locationId, int groupId, bool selected)
     {
-        var key = $"{locationId}:{groupId}";
+        var key = (locationId, groupId);
         if (selected)
         {
             _groupLocationAssignments.Add(key);
@@ -344,11 +358,11 @@
     private async Task SaveGroupAccess(int locationId)
     {
         var selectedGroupIds = _groups
-            .Where(g => _groupLocationAssignments.Contains($"{locationId}:{g.Id}"))
+            .Where(g => _groupLocationAssignments.Contains((locationId, g.Id)))
             .Select(g => g.Id)
             .ToList();
 
-        await GroupService.UpdateAllowedGroupsForLocationAsync(locationId, selectedGroupIds);
+        await GroupService.UpdateAllowedGroupsForLocationAsync(locationId, selectedGroupIds, _cts.Token);
         await LoadData();
         await ShowSavedToast();
     }
@@ -359,6 +373,12 @@
         {
             await _toast.Show(Localizer["LocationsPage_ChangesSaved"]);
         }
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
     }
 
     }
