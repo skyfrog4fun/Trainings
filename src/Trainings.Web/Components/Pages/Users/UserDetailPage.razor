@@ -5,6 +5,7 @@
 @attribute [Authorize(Policy = "GroupAdmin")]
 
 @inject IUserService UserService
+@inject IUserRegistrationService UserRegistrationService
 @inject IGroupService GroupService
 @inject IRegistrationService RegistrationService
 @inject ICountryService CountryService
@@ -18,9 +19,23 @@
         @if (_user is not null)
         {
             <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
-                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["UserDetailPage_Edit"]
+                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
             </a>
+            <button type="button" class="btn btn-sm btn-app-outline" @onclick="SendAccountMail" disabled="@_sendingMail">
+                @if (_sendingMail)
+                {
+                    <LoadingSpinner Inline="true" Small="true" />
+                }
+                else
+                {
+                    <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>@Localizer["UserDetailPage_SendAccountMail"]
+                }
+            </button>
         }
+    </div>
+
+    <div class="mb-3">
+        <ActionAlert IsSuccess="@_actionSuccess" Message="@_actionResult" />
     </div>
 
     @if (_loading)
@@ -154,6 +169,8 @@
     }
 </div>
 
+<EmailPreviewModal Preview="_emailPreview" OnClose="CloseEmailPreview" />
+
 @code {
     [Parameter] public int Id { get; set; }
 
@@ -164,6 +181,10 @@
     private Dictionary<int, string> _countryNameById = new();
     private bool _loading = true;
     private bool _isAccessDenied;
+    private bool _sendingMail;
+    private bool _actionSuccess;
+    private string? _actionResult;
+    private EmailPreviewDto? _emailPreview;
 
     protected override async Task OnInitializedAsync()
     {
@@ -239,4 +260,40 @@
 
     private static string FormatText(string? value) =>
         string.IsNullOrWhiteSpace(value) ? "-" : value;
+
+    private async Task SendAccountMail()
+    {
+        if (_user is null)
+        {
+            return;
+        }
+
+        _actionResult = null;
+        _sendingMail = true;
+
+        try
+        {
+            var result = await UserRegistrationService.ResendEmailConfirmationAsync(_user.Id);
+            _actionSuccess = true;
+            _actionResult = result.Preview is null
+                ? Localizer["UserDetailPage_AccountEmailSentTo", _user.Email]
+                : Localizer["UserDetailPage_NoEmailModePreviewShown", _user.Email];
+            _emailPreview = result.Preview;
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = Localizer["UserDetailPage_FailedMessage", ex.Message];
+        }
+        finally
+        {
+            _sendingMail = false;
+        }
+    }
+
+    private Task CloseEmailPreview()
+    {
+        _emailPreview = null;
+        return Task.CompletedTask;
+    }
 }

@@ -159,9 +159,6 @@
   <data name="Shared_Actions" xml:space="preserve">
     <value>Actions</value>
   </data>
-  <data name="UsersPage_Activate" xml:space="preserve">
-    <value>Activate</value>
-  </data>
   <data name="Shared_Active" xml:space="preserve">
     <value>Active</value>
   </data>
@@ -195,12 +192,6 @@
   <data name="DashboardNotificationPanel_DateUtc" xml:space="preserve">
     <value>Datum UTC</value>
   </data>
-  <data name="UsersPage_Deactivate" xml:space="preserve">
-    <value>Deaktivieren</value>
-  </data>
-  <data name="UsersPage_DeleteUser" xml:space="preserve">
-    <value>Benutzer löschen</value>
-  </data>
   <data name="Shared_Email" xml:space="preserve">
     <value>E-Mail</value>
   </data>
@@ -215,9 +206,6 @@
   </data>
   <data name="DashboardNotificationPanel_Error" xml:space="preserve">
     <value>Error</value>
-  </data>
-  <data name="UsersPage_FailedMessage" xml:space="preserve">
-    <value>Fehlgeschlagen: {0}</value>
   </data>
   <data name="HomePage_FailedToResendVerificationEmail" xml:space="preserve">
     <value>Verifizierungs-E-Mail konnte nicht erneut gesendet werden: {0}</value>
@@ -266,9 +254,6 @@
   </data>
   <data name="HomePage_NoAvailableUpcomingTrainings" xml:space="preserve">
     <value>No Available Upcoming Trainings</value>
-  </data>
-  <data name="UsersPage_NoEmailModePreviewShown" xml:space="preserve">
-    <value>Der Kein-E-Mail-Modus ist aktiv. Die Konto-E-Mail fuer {0} wird unten angezeigt.</value>
   </data>
   <data name="GroupsPage_NoGroupsYet" xml:space="preserve">
     <value>No Groups Yet</value>
@@ -342,9 +327,6 @@
   <data name="Shared_SelectCountry" xml:space="preserve">
     <value>Select Country</value>
   </data>
-  <data name="UsersPage_SendAccountMail" xml:space="preserve">
-    <value>Send Account Mail</value>
-  </data>
   <data name="Shared_Status" xml:space="preserve">
     <value>Status</value>
   </data>
@@ -378,14 +360,8 @@
   <data name="HomePage_User" xml:space="preserve">
     <value>User</value>
   </data>
-  <data name="UsersPage_UserCannotBeDeletedDueToRegistrations" xml:space="preserve">
-    <value>{0} kann nicht geloescht werden, da Trainingsanmeldungen vorhanden sind.</value>
-  </data>
   <data name="HomePage_UsersCount" xml:space="preserve">
     <value>Benutzer: {0}</value>
-  </data>
-  <data name="UsersPage_UserWasDeleted" xml:space="preserve">
-    <value>{0} wurde geloescht.</value>
   </data>
   <data name="HomePage_VerificationEmailSent" xml:space="preserve">
     <value>Verification Email Sent</value>
@@ -1820,5 +1796,53 @@
   </data>
   <data name="LocationsPage_GroupAccessNoLocations" xml:space="preserve">
     <value>Keine Orte verfügbar.</value>
+  </data>
+  <data name="UsersPage_Inactive" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+  <data name="UsersPage_AllGroups" xml:space="preserve">
+    <value>Alle Gruppen</value>
+  </data>
+  <data name="UsersPage_AllRoles" xml:space="preserve">
+    <value>Alle Rollen</value>
+  </data>
+  <data name="UsersPage_AllStatuses" xml:space="preserve">
+    <value>Alle Status</value>
+  </data>
+  <data name="Shared_Apply" xml:space="preserve">
+    <value>Anwenden</value>
+  </data>
+  <data name="UsersPage_EntryDate" xml:space="preserve">
+    <value>Eintrittsdatum</value>
+  </data>
+  <data name="UsersPage_NoUsersMatchCurrentFilters" xml:space="preserve">
+    <value>Keine Benutzer entsprechen den aktuellen Filtern.</value>
+  </data>
+  <data name="UserDetailPage_AccountEmailSentTo" xml:space="preserve">
+    <value>Konto-E-Mail wurde an {0} gesendet.</value>
+  </data>
+  <data name="UserDetailPage_FailedMessage" xml:space="preserve">
+    <value>Fehlgeschlagen: {0}</value>
+  </data>
+  <data name="UserDetailPage_NoEmailModePreviewShown" xml:space="preserve">
+    <value>Der Kein-E-Mail-Modus ist aktiv. Die Konto-E-Mail fuer {0} wird unten angezeigt.</value>
+  </data>
+  <data name="UserDetailPage_SendAccountMail" xml:space="preserve">
+    <value>Verifizieren</value>
+  </data>
+  <data name="UserCreateEditPage_Activate" xml:space="preserve">
+    <value>Aktivieren</value>
+  </data>
+  <data name="UserCreateEditPage_Deactivate" xml:space="preserve">
+    <value>Deaktivieren</value>
+  </data>
+  <data name="UserCreateEditPage_DeleteConfirmTitle" xml:space="preserve">
+    <value>Benutzer löschen</value>
+  </data>
+  <data name="UserCreateEditPage_DeleteConfirmMessage" xml:space="preserve">
+    <value>Möchten Sie diesen Benutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="UserCreateEditPage_FailedMessage" xml:space="preserve">
+    <value>Fehlgeschlagen: {0}</value>
   </data>
 </root>

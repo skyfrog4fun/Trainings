@@ -5,6 +5,14 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
+Design User Pages
+---
+- [ ] Users: sorting (by name?), searching (by name?), paging (10, 20, 50, 100)
+- [ ] Edit User: visually style the form to make it more user-friendly and intuitive. (Issue: Dark Mode color of placeholder)
+- [ ] Selection Color is blue, but it shouldn't. Compare with Location page.
+- [ ] ...
+
+
 Design Group Pages
 ---
 - [ ] Rework the idea how to navigate inside the groups
@@ -16,10 +24,6 @@ Design Group Pages
 - [ ] Create Group (/groups/new):
 - [ ] Edit Group (/groups/2/edit):
 - [ ] Group Members (/groups/{slug}/members):
-
-Design User Pages
----
-- [ ] ...
 
 Mail
 ---

@@ -1,5 +1,8 @@
 # Razor Component Naming Conventions
 
+> For structural/behavioral conventions (page layout, CRUD form pattern, validation,
+> delete confirmation, etc.), see `docs/developer/razor-page-style-guide.md`.
+
 This document defines the naming convention for all `*.razor` files in this repository. It applies to `src/Trainings.Web` (Blazor Web App) and to any future project that adds Razor components. All new pages/components MUST follow these rules, and any renamed/refactored files should be brought into compliance as part of that change.
 
 ## 1. Pages (routable components)

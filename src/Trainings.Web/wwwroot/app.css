@@ -820,6 +820,15 @@ main {
   justify-content: flex-end;
 }
 
+.app-overview-card-link {
+  transition: background-color 0.15s ease-in-out;
+}
+
+  .app-overview-card-link:hover,
+  .app-overview-card-link:focus-visible {
+    background: var(--color-surface-alt);
+  }
+
 .btn-app-outline {
   --bs-btn-color: var(--color-text);
   --bs-btn-bg: var(--color-surface);

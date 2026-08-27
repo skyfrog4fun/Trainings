@@ -6,7 +6,6 @@
 
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
-@inject IRegistrationService RegistrationService
 @inject IGroupService GroupService
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -15,18 +14,55 @@
 <PageTitle>@Localizer["Shared_Users"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <PageHeader Title='@Localizer["Shared_Users"]'>
-        <Actions>
-            @if (IsWriteBlocked)
+    <PageTitleComponent Icon="@AppIcons.Users"
+                        Text="@Localizer["Shared_Users"]"
+                        ButtonText="@Localizer["Shared_Add"]"
+                        ButtonIcon="@AppIcons.Plus"
+                        ButtonDisabled="@IsWriteBlocked"
+                        OnButtonClick="GoToCreateUser"
+                        ShowFilterButton="true"                        
+                        OnFilterButtonClick="ToggleFilter">
+        <Filter>
+            @if (_showFilter)
             {
-                <button class="btn btn-primary" disabled><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Shared_Add"]</button>
+                <div class="row g-2 mb-3">
+                    <div class="col-12 col-md-4">
+                        <select class="form-select" @bind="_pendingGroupId">
+                            <option value="">@Localizer["UsersPage_AllGroups"]</option>
+                            @foreach (var group in _availableGroups)
+                            {
+                                <option value="@group.Id">@group.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select class="form-select" @bind="_pendingRole">
+                            <option value="">@Localizer["UsersPage_AllRoles"]</option>
+                            <option value="SuperAdmin">@Localizer["Enum_Role_SuperAdmin"]</option>
+                            <option value="GroupAdmin">@Localizer["Enum_Role_GroupAdmin"]</option>
+                            <option value="Trainer">@Localizer["Enum_Role_Trainer"]</option>
+                            <option value="User">@Localizer["Enum_Role_User"]</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select class="form-select" @bind="_pendingStatus">
+                            <option value="">@Localizer["UsersPage_AllStatuses"]</option>
+                            <option value="Active">@Localizer["Shared_Active"]</option>
+                            <option value="Inactive">@Localizer["UsersPage_Inactive"]</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button type="button" class="btn btn-primary flex-fill" @onclick="ApplyFilters">
+                            <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Apply"]
+                        </button>
+                        <button type="button" class="btn btn-app-outline" @onclick="ClearFilters" title="@Localizer["Shared_ClearFilters"]" aria-label="@Localizer["Shared_ClearFilters"]">
+                            <i class="@AppIcons.FilterClear" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
             }
-            else
-            {
-                <a href="/users/new" class="btn btn-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Shared_Add"]</a>
-            }
-        </Actions>
-    </PageHeader>
+        </Filter>
+    </PageTitleComponent>
 
     @if (IsWriteBlocked)
     {
@@ -95,78 +131,31 @@
             </div>
         }
 
-        <div class="app-overview-grid">
-            @foreach (var user in _users)
-            {
-                <div class="app-overview-card">
-                    <div class="app-overview-main">
-                        <div class="app-overview-title text-break">@user.DisplayName</div>
-                        <div class="app-overview-meta text-break">@user.Email</div>
-                        <div class="app-overview-meta mt-1">@GetDisplayRole(user)</div>
-                        <div class="app-overview-meta mt-1">@FormatApprovedGroups(user.Id)</div>
-                        <div class="app-overview-meta mt-1">
-                            <span class="me-3">@Localizer["UsersPage_EmailVerified"]: @(user.EmailConfirmedAt.HasValue ? Localizer["Enum_Decision_Yes"] : Localizer["Enum_Decision_No"])</span>
-                            <span>@Localizer["Shared_Active"]: @(user.IsActive ? Localizer["Enum_Decision_Yes"] : Localizer["Enum_Decision_No"])</span>
+        @if (FilteredUsers.Count == 0)
+        {
+            <div class="alert alert-info">@Localizer["UsersPage_NoUsersMatchCurrentFilters"]</div>
+        }
+        else
+        {
+            <div class="app-overview-grid">
+                @foreach (var user in FilteredUsers)
+                {
+                    <a href="/users/@user.Id" class="app-overview-card app-overview-card-link text-decoration-none text-reset">
+                        <div class="app-overview-main">
+                            <div class="app-overview-title text-break">@user.DisplayName</div>
+                            <div class="app-overview-meta text-break mt-1"><i class="@AppIcons.UserGroup me-1" aria-hidden="true"></i>@FormatApprovedGroups(user.Id)</div>
+                            <div class="app-overview-meta mt-1"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@Localizer["UsersPage_EntryDate"]: @FormatEntryDate(user.EntryDate)</div>
                         </div>
-                    </div>
-                    <div class="app-overview-actions">
-                        <a href="/users/@user.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
-                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
-                        </a>
-                        @if (IsWriteBlocked)
-                        {
-                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]' disabled>
-                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <a href="/users/@user.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
-                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                            </a>
-                        }
-                        <button type="button" class="btn btn-sm btn-app-icon btn-app-outline" title='@Localizer["UsersPage_SendAccountMail"]' aria-label='@Localizer["UsersPage_SendAccountMail"]'
-                                @onclick="() => SendAccountMail(user)"
-                                disabled="@IsWriteBlocked || IsUserBusy(user.Id)">
-                            @if (IsUserBusy(user.Id))
-                            {
-                                <LoadingSpinner Inline="true" Small="true" />
-                            }
-                            else
-                            {
-                                <i class="@AppIcons.Envelope" aria-hidden="true"></i>
-                            }
-                        </button>
-                        @if (CanDeleteUser(user.Id))
-                        {
-                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title='@Localizer["UsersPage_DeleteUser"]' aria-label='@Localizer["UsersPage_DeleteUser"]'
-                                    @onclick="() => DeleteUserAsync(user)"
-                                    disabled="@IsWriteBlocked">
-                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-secondary"
-                                    title='@(user.IsActive ? Localizer["UsersPage_Deactivate"] : Localizer["UsersPage_Activate"])'
-                                    aria-label='@(user.IsActive ? Localizer["UsersPage_Deactivate"] : Localizer["UsersPage_Activate"])'
-                                    @onclick="() => ToggleActive(user)"
-                                    disabled="@IsWriteBlocked">
-                                <i class="@(user.IsActive ? AppIcons.UserSlash : AppIcons.UserCheck)" aria-hidden="true"></i>
-                            </button>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-
-        <div class="mt-2">
-            <ActionAlert IsSuccess="@_actionSuccess" Message="@_actionResult" />
-        </div>
+                        <div class="app-overview-actions">
+                            <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">@(user.IsActive ? Localizer["Shared_Active"] : Localizer["UsersPage_Inactive"])</span>
+                            <i class="fa-solid fa-chevron-right text-muted" aria-hidden="true"></i>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
     }
 </div>
-
-<EmailPreviewModal Preview="_emailPreview" OnClose="CloseEmailPreview" />
 
 @code {
     private List<UserDto> _users = new();
@@ -174,18 +163,50 @@
     private Dictionary<int, List<GroupMembershipDto>> _membershipsByUser = new();
     private List<GroupDto> _availableGroups = new();
     private List<CountryDto> _countries = new();
-    private readonly Dictionary<int, bool> _hasRegistrationHistoryByUser = new();
     private readonly HashSet<int> _expandedPendingUserIds = new();
     private HashSet<int> _managedGroupIds = new();
     private AppRuntimeModeDto _runtimeMode = new();
     private bool _isSuperAdmin;
     private bool _loading = true;
-    private int? _busyUserId;
-    private bool _actionSuccess;
-    private string? _actionResult;
-    private EmailPreviewDto? _emailPreview;
+
+    private bool _showFilter;
+    private string _pendingGroupId = string.Empty;
+    private string _pendingRole = string.Empty;
+    private string _pendingStatus = string.Empty;
+    private string _appliedGroupId = string.Empty;
+    private string _appliedRole = string.Empty;
+    private string _appliedStatus = string.Empty;
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
+
+    private List<UserDto> FilteredUsers
+    {
+        get
+        {
+            IEnumerable<UserDto> query = _users;
+
+            if (int.TryParse(_appliedGroupId, out var groupId))
+            {
+                query = query.Where(user => GetMemberships(user.Id).Any(m =>
+                    m.Status == GroupMembershipStatus.Approved &&
+                    m.IsActive &&
+                    m.GroupId == groupId));
+            }
+
+            if (!string.IsNullOrEmpty(_appliedRole))
+            {
+                query = query.Where(user => GetRoleKey(user) == _appliedRole);
+            }
+
+            if (!string.IsNullOrEmpty(_appliedStatus))
+            {
+                var wantActive = _appliedStatus == "Active";
+                query = query.Where(user => user.IsActive == wantActive);
+            }
+
+            return query.ToList();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -239,7 +260,6 @@
                 .ToList();
         }
 
-        await LoadRegistrationHistoryAsync(_users.Select(u => u.Id));
         _loading = false;
     }
 
@@ -252,70 +272,37 @@
         }
     }
 
-    private async Task LoadRegistrationHistoryAsync(IEnumerable<int> userIds)
-    {
-        _hasRegistrationHistoryByUser.Clear();
-        foreach (var userId in userIds.Distinct())
-        {
-            _hasRegistrationHistoryByUser[userId] = (await RegistrationService.GetByUserIdAsync(userId)).Any();
-        }
-    }
-
     private List<GroupMembershipDto> GetMemberships(int userId) =>
         _membershipsByUser.TryGetValue(userId, out var memberships) ? memberships : [];
 
-    private bool CanDeleteUser(int userId) =>
-        !_hasRegistrationHistoryByUser.GetValueOrDefault(userId);
-
-    private async Task ToggleActive(UserDto user)
+    private void GoToCreateUser()
     {
-        await UserService.UpdateAsync(new UpdateUserDto
+        if (!IsWriteBlocked)
         {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            Role = user.Role,
-            Gender = user.Gender,
-            IsActive = !user.IsActive,
-            Birthday = user.Birthday,
-            Mobile = user.Mobile,
-            City = user.City,
-            CountryId = user.CountryId,
-            EntryDate = user.EntryDate,
-            WelcomeMessage = user.WelcomeMessage
-        });
-
-        await LoadUsers();
+            NavigationManager.NavigateTo("/users/new");
+        }
     }
 
-    private async Task DeleteUserAsync(UserDto user)
+    private void ToggleFilter()
     {
-        if (!CanDeleteUser(user.Id))
-        {
-            _actionSuccess = false;
-            _actionResult = Localizer["UsersPage_UserCannotBeDeletedDueToRegistrations", user.DisplayName];
-            return;
-        }
+        _showFilter = !_showFilter;
+    }
 
-        try
-        {
-            var memberships = (await GroupService.GetAllMembershipsForUserAsync(user.Id)).ToList();
-            foreach (var membership in memberships)
-            {
-                await GroupService.RemoveMemberAsync(membership.Id);
-            }
+    private void ApplyFilters()
+    {
+        _appliedGroupId = _pendingGroupId;
+        _appliedRole = _pendingRole;
+        _appliedStatus = _pendingStatus;
+    }
 
-            await UserService.DeleteAsync(user.Id);
-            _actionSuccess = true;
-            _actionResult = Localizer["UsersPage_UserWasDeleted", user.DisplayName];
-            await LoadUsers();
-        }
-        catch (Exception ex)
-        {
-            _actionSuccess = false;
-            _actionResult = Localizer["UsersPage_FailedMessage", ex.Message];
-        }
+    private void ClearFilters()
+    {
+        _pendingGroupId = string.Empty;
+        _pendingRole = string.Empty;
+        _pendingStatus = string.Empty;
+        _appliedGroupId = string.Empty;
+        _appliedRole = string.Empty;
+        _appliedStatus = string.Empty;
     }
 
     private async Task ApproveUser(UserDto user)
@@ -330,31 +317,6 @@
         await LoadUsers();
     }
 
-    private async Task SendAccountMail(UserDto user)
-    {
-        _actionResult = null;
-        _busyUserId = user.Id;
-
-        try
-        {
-            var result = await UserRegistrationService.ResendEmailConfirmationAsync(user.Id);
-            _actionSuccess = true;
-            _actionResult = result.Preview is null
-                ? Localizer["UsersPage_AccountEmailSentTo", user.Email]
-                : Localizer["UsersPage_NoEmailModePreviewShown", user.Email];
-            _emailPreview = result.Preview;
-        }
-        catch (Exception ex)
-        {
-            _actionSuccess = false;
-            _actionResult = Localizer["UsersPage_FailedMessage", ex.Message];
-        }
-        finally
-        {
-            _busyUserId = null;
-        }
-    }
-
     private void TogglePendingExpand(int userId)
     {
         if (_expandedPendingUserIds.Contains(userId))
@@ -366,14 +328,6 @@
             _expandedPendingUserIds.Add(userId);
         }
     }
-
-    private Task CloseEmailPreview()
-    {
-        _emailPreview = null;
-        return Task.CompletedTask;
-    }
-
-    private bool IsUserBusy(int userId) => _busyUserId == userId;
 
     private string FormatApprovedGroups(int userId)
     {
@@ -408,11 +362,14 @@
         return country is null ? "—" : $"{country.Code} — {country.Name}";
     }
 
-    private string GetDisplayRole(UserDto user)
+    private static string FormatEntryDate(DateTime? entryDate) =>
+        entryDate.HasValue ? entryDate.Value.ToString("yyyy-MM-dd") : "—";
+
+    private string GetRoleKey(UserDto user)
     {
         if (user.Role == UserRole.SuperAdmin)
         {
-            return Localizer["Enum_Role_SuperAdmin"];
+            return "SuperAdmin";
         }
 
         var memberships = GetMemberships(user.Id)
@@ -421,14 +378,14 @@
 
         if (memberships.Any(m => m.Role == GroupMemberRole.Admin))
         {
-            return Localizer["Enum_Role_GroupAdmin"];
+            return "GroupAdmin";
         }
 
         if (memberships.Any(m => m.Role == GroupMemberRole.Trainer))
         {
-            return Localizer["Enum_Role_Trainer"];
+            return "Trainer";
         }
 
-        return Localizer["Enum_Role_User"];
+        return "User";
     }
 }
