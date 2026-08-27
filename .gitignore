@@ -1,15 +1,35 @@
+# Visual Studio
 *.user
 *.suo
 .vs/
+
+# Build Output
 bin/
 obj/
 *\\Debug
 *\\Release
+
+# NuGet
+*.nupkg
+
+# Database / Local Data
 *.db
 *.db-shm
 *.db-wal
-*.nupkg
+
+# Environment / Secrets
+.env
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Test Results
 TestResults/
-.env
+test-results/
+playwright-report/
+blob-report/
+
+# Playwright CLI
+.playwright-cli/
+playwright/.cache/
