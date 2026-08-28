@@ -1006,7 +1006,7 @@
     <value>No registrations yet.</value>
   </data>
   <data name="UserDetailPage_BioWelcomeMessageTitle" xml:space="preserve">
-    <value>Bio / Welcome message</value>
+    <value>Welcome Message</value>
   </data>
   <data name="ErrorPage_PageTitle" xml:space="preserve">
     <value>Error</value>
@@ -1294,7 +1294,7 @@
     <value>Welcome Message</value>
   </data>
   <data name="UserCreateEditPage_WelcomeMessagePlaceholder" xml:space="preserve">
-    <value>Optional welcome message</value>
+    <value>Welcome Message</value>
   </data>
   <data name="UserCreateEditPage_PasswordValidationMinLength" xml:space="preserve">
     <value>Password must be at least 8 characters.</value>
@@ -1853,5 +1853,14 @@
   </data>
   <data name="RegisterPage_FirstNameRequired" xml:space="preserve">
     <value>First name is required.</value>
+  </data>
+  <data name="UserInformationPage_FirstName" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="UserInformationPage_LastName" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="UserInformationPage_WelcomeMessageBio" xml:space="preserve">
+    <value>Welcome Message</value>
   </data>
 </root>
