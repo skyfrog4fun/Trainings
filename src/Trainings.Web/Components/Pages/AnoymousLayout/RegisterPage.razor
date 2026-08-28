@@ -60,11 +60,11 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">@Localizer["RegisterPage_GenderLabel"]</label>
-                                <select class="form-select" @bind="_gender">
-                                    <option value="Male">@Localizer["RegisterPage_GenderMale"]</option>
-                                    <option value="Female">@Localizer["RegisterPage_GenderFemale"]</option>
-                                    <option value="Other">@Localizer["RegisterPage_GenderOther"]</option>
-                                </select>
+                                <SelectDropdownComponent TItem="(string Value, string Label)" TValue="string"
+                                                         @bind-Value="_gender"
+                                                         Items="_genderOptions"
+                                                         ValueSelector="o => o.Value"
+                                                         TextSelector="o => o.Label" />
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">@Localizer["RegisterPage_BirthdayLabel"]</label>
@@ -132,11 +132,18 @@
     private string? _error;
     private AppRuntimeModeDto _runtimeMode = new();
     private EmailPreviewDto? _emailPreview;
+    private List<(string Value, string Label)> _genderOptions = new();
 
     protected override async Task OnInitializedAsync()
     {
         _runtimeMode = AppRuntimeModeService.GetCurrent();
         _groups = (await GroupService.GetAllAsync()).Where(g => g.IsActive).ToList();
+        _genderOptions = new List<(string Value, string Label)>
+        {
+            ("Male", Localizer["RegisterPage_GenderMale"]),
+            ("Female", Localizer["RegisterPage_GenderFemale"]),
+            ("Other", Localizer["RegisterPage_GenderOther"])
+        };
     }
 
     private void ToggleGroup(int groupId, bool selected)
