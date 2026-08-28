@@ -1863,4 +1863,73 @@
   <data name="UserInformationPage_WelcomeMessageBio" xml:space="preserve">
     <value>Welcome Message</value>
   </data>
+  <data name="UserInformationPage_Birthday" xml:space="preserve">
+    <value>Birthday</value>
+  </data>
+  <data name="UserInformationPage_Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="UserInformationPage_ChangePasswordTitle" xml:space="preserve">
+    <value>Change Password</value>
+  </data>
+  <data name="UserInformationPage_CurrentPassword" xml:space="preserve">
+    <value>Current Password</value>
+  </data>
+  <data name="UserInformationPage_NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="UserInformationPage_ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm New Password</value>
+  </data>
+  <data name="UserInformationPage_GeneratePassword" xml:space="preserve">
+    <value>Generate Password</value>
+  </data>
+  <data name="UserInformationPage_CurrentPasswordRequired" xml:space="preserve">
+    <value>Current password is required.</value>
+  </data>
+  <data name="UserInformationPage_CurrentPasswordIncorrect" xml:space="preserve">
+    <value>Current password is incorrect.</value>
+  </data>
+  <data name="UserInformationPage_NewPasswordsDoNotMatch" xml:space="preserve">
+    <value>New passwords do not match.</value>
+  </data>
+  <data name="UserInformationPage_PasswordChangedSuccess" xml:space="preserve">
+    <value>Password changed successfully.</value>
+  </data>
+  <data name="UserInformationPage_PasswordChangeFailed" xml:space="preserve">
+    <value>Failed to change password: {0}</value>
+  </data>
+  <data name="UserInformationPage_NewPasswordPlaceholder" xml:space="preserve">
+    <value>New password (min. 8 chars)</value>
+  </data>
+  <data name="UserInformationPage_PasswordValidationMinLength" xml:space="preserve">
+    <value>Password must be at least 8 characters.</value>
+  </data>
+  <data name="UserInformationPage_PasswordValidationUppercase" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter.</value>
+  </data>
+  <data name="UserInformationPage_PasswordValidationLowercase" xml:space="preserve">
+    <value>Password must contain at least one lowercase letter.</value>
+  </data>
+  <data name="UserInformationPage_PasswordValidationDigit" xml:space="preserve">
+    <value>Password must contain at least one digit.</value>
+  </data>
+  <data name="UserInformationPage_PasswordValidationSpecialCharacter" xml:space="preserve">
+    <value>Password must contain at least one special character.</value>
+  </data>
+  <data name="UserInformationPage_FirstNameRequired" xml:space="preserve">
+    <value>First name is required.</value>
+  </data>
+  <data name="UserInformationPage_LastNameRequired" xml:space="preserve">
+    <value>Last name is required.</value>
+  </data>
+  <data name="UserInformationPage_EmailRequired" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="UserInformationPage_CountryRequired" xml:space="preserve">
+    <value>Country is required.</value>
+  </data>
+  <data name="UserInformationPage_TogglePasswordVisibility" xml:space="preserve">
+    <value>Show/hide password</value>
+  </data>
 </root>

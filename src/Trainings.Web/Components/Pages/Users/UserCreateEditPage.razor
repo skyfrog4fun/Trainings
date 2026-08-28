@@ -150,7 +150,7 @@
                             <div class="input-group">
                                 <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_NewPasswordMinCharsPlaceholder"]' @bind="_formNewPassword" />
                                 <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserCreateEditPage_GeneratePassword"]'>
-                                    <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                                    <i class="@AppIcons.Wand" aria-hidden="true"></i>
                                 </button>
                             </div>
                             @if (!string.IsNullOrEmpty(_passwordValidationError))
@@ -533,33 +533,7 @@
 
     private void GeneratePassword()
     {
-        const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-        const string lower = "abcdefghjkmnpqrstuvwxyz";
-        const string digits = "23456789";
-        const string special = "!@#$%^&*";
-        const string all = upper + lower + digits + special;
-
-        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-        var bytes = new byte[12];
-        rng.GetBytes(bytes);
-
-        var chars = new char[12];
-        chars[0] = upper[bytes[0] % upper.Length];
-        chars[1] = lower[bytes[1] % lower.Length];
-        chars[2] = digits[bytes[2] % digits.Length];
-        chars[3] = special[bytes[3] % special.Length];
-        for (var i = 4; i < 12; i++)
-        {
-            chars[i] = all[bytes[i] % all.Length];
-        }
-
-        for (var i = chars.Length - 1; i > 0; i--)
-        {
-            var j = bytes[i % bytes.Length] % (i + 1);
-            (chars[i], chars[j]) = (chars[j], chars[i]);
-        }
-
-        _formNewPassword = new string(chars);
+        _formNewPassword = PasswordGenerator.Generate();
         _passwordValidationError = string.Empty;
     }
 

@@ -11,8 +11,10 @@
 
 <PageTitle>@Localizer["UserInformationPage_PageTitle"]</PageTitle>
 
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
 <div class="container px-2 px-md-4">
-    <h2 class="my-3">@Localizer["UserInformationPage_PageTitle"]</h2>
+    <PageTitleComponent Icon="@AppIcons.User" Text="@Localizer["UserInformationPage_PageTitle"]" />
 
     @if (_loading)
     {
@@ -24,87 +26,142 @@
     }
     else
     {
-        <div class="card mb-4">
-            <div class="card-header fw-bold">@Localizer["UserInformationPage_ProfileTitle"]</div>
-            <div class="card-body">
+        <EditForm Model="_profile" OnValidSubmit="SaveProfile">
+            <DataAnnotationsValidator />
+            <CardComponent IsCollapsable="false" ShowFooter="true">
+                <Title>@Localizer["UserInformationPage_ProfileTitle"]</Title>
+                <Body>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserInformationPage_FirstName"]</label>
+                            <InputText class="form-control" @bind-Value="_profile.FirstName" />
+                            <ValidationMessage For="() => _profile.FirstName" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserInformationPage_LastName"]</label>
+                            <InputText class="form-control" @bind-Value="_profile.LastName" />
+                            <ValidationMessage For="() => _profile.LastName" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["Shared_Email"]</label>
+                            <InputText type="email" class="form-control" @bind-Value="_profile.Email" />
+                            <ValidationMessage For="() => _profile.Email" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["Shared_Mobile"]</label>
+                            <InputText class="form-control" @bind-Value="_profile.Mobile" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserInformationPage_Birthday"]</label>
+                            <InputDate class="form-control" @bind-Value="_profile.Birthday" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserInformationPage_Gender"]</label>
+                            <select class="form-select" @bind="_profile.Gender">
+                                <option value="Male">@Localizer["Enum_Gender_Male"]</option>
+                                <option value="Female">@Localizer["Enum_Gender_Female"]</option>
+                                <option value="Other">@Localizer["Enum_Gender_Other"]</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["Shared_City"]</label>
+                            <InputText class="form-control" @bind-Value="_profile.City" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["Shared_Country"]</label>
+                            <input class="form-control" value="@_profile.CountryDisplay" readonly />
+                            <ValidationMessage For="() => _profile.CountryId" class="text-danger small" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["UserInformationPage_WelcomeMessageBio"]</label>
+                            <InputTextArea class="form-control" rows="2" @bind-Value="_profile.WelcomeMessage" />
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <ActionAlert IsSuccess="_resultSuccess" Message="@_resultMessage" />
+                    </div>
+                </Body>
+                <Footer>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
+                    </div>
+                </Footer>
+            </CardComponent>
+        </EditForm>
+
+        <CardComponent Collapsed="true" ShowFooter="true">
+            <Title>@Localizer["UserInformationPage_ChangePasswordTitle"]</Title>
+            <Body>
                 <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserInformationPage_FirstName"]</label>
-                        <input class="form-control" @bind="_firstName" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["UserInformationPage_LastName"]</label>
-                        <input class="form-control" @bind="_lastName" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Shared_Email"]</label>
-                        <input class="form-control" type="email" @bind="_email" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Shared_Mobile"]</label>
-                        <input class="form-control" @bind="_mobile" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Shared_City"]</label>
-                        <input class="form-control" @bind="_city" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["Shared_Country"]</label>
-                        <select class="form-select" @bind="_countryId">
-                            <option value="">@Localizer["Shared_SelectCountry"]</option>
-                            @foreach (var country in _countries)
-                            {
-                                <option value="@country.Id">@country.Code — @country.Name</option>
-                            }
-                        </select>
-                    </div>
                     <div class="col-12">
-                        <label class="form-label">@Localizer["UserInformationPage_WelcomeMessageBio"]</label>
-                        <textarea class="form-control" rows="2" @bind="_welcomeMessage"></textarea>
+                        <label class="form-label">@Localizer["UserInformationPage_CurrentPassword"]</label>
+                        <div class="input-group">
+                            <input class="form-control" type="@(_showCurrentPassword ? "text" : "password")" autocomplete="current-password" @bind="_passwordForm.CurrentPassword" />
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showCurrentPassword = !_showCurrentPassword" title='@Localizer["UserInformationPage_TogglePasswordVisibility"]'>
+                                <i class="@(_showCurrentPassword ? AppIcons.EyeSlash : AppIcons.Eye)" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserInformationPage_NewPassword"]</label>
+                        <div class="input-group">
+                            <input class="form-control" type="@(_showNewPassword ? "text" : "password")" autocomplete="new-password" placeholder='@Localizer["UserInformationPage_NewPasswordPlaceholder"]' @bind="_passwordForm.NewPassword" />
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showNewPassword = !_showNewPassword" title='@Localizer["UserInformationPage_TogglePasswordVisibility"]'>
+                                <i class="@(_showNewPassword ? AppIcons.EyeSlash : AppIcons.Eye)" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserInformationPage_GeneratePassword"]'>
+                                <i class="@AppIcons.Wand" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["UserInformationPage_ConfirmNewPassword"]</label>
+                        <div class="input-group">
+                            <input class="form-control" type="@(_showConfirmPassword ? "text" : "password")" autocomplete="new-password" @bind="_passwordForm.ConfirmNewPassword" />
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showConfirmPassword = !_showConfirmPassword" title='@Localizer["UserInformationPage_TogglePasswordVisibility"]'>
+                                <i class="@(_showConfirmPassword ? AppIcons.EyeSlash : AppIcons.Eye)" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="mt-3">
-                    <button type="button" class="btn btn-primary" @onclick="SaveProfile">@Localizer["Shared_Save"]</button>
+                    <ActionAlert IsSuccess="_passwordResultSuccess" Message="@_passwordResultMessage" />
                 </div>
+            </Body>
+            <Footer>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" @onclick="ChangePassword"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
+                </div>
+            </Footer>
+        </CardComponent>
 
-                @if (_resultMessage is not null)
-                {
-                    <div class="alert @(_resultSuccess ? "alert-success" : "alert-danger") mt-3 mb-0">@_resultMessage</div>
-                }
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header fw-bold">@Localizer["UserInformationPage_GroupMembershipsTitle"]</div>
-            <div class="card-body">
+        <CardComponent IsCollapsable="false">
+            <Title>@Localizer["UserInformationPage_GroupMembershipsTitle"]</Title>
+            <Body>
                 @if (_memberships.Any())
                 {
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead>
-                                <tr><th>@Localizer["Shared_Group"]</th><th>@Localizer["Shared_Role"]</th><th>@Localizer["Shared_Status"]</th><th>@Localizer["UserInformationPage_Requested"]</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var membership in _memberships)
-                                {
-                                    <tr>
-                                        <td>@membership.GroupName</td>
-                                        <td>@membership.Role</td>
-                                        <td>@membership.Status</td>
-                                        <td>@membership.RequestedAt.ToString("MMM d, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                    @foreach (var membership in _memberships)
+                    {
+                        <div class="card-list-row">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="fw-semibold">@membership.GroupName</div>
+                                <div>@membership.Role</div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">@membership.Status</small>
+                                <small class="text-muted">@Localizer["UserInformationPage_Requested"]: @membership.RequestedAt.ToString("MMM d, yyyy")</small>
+                            </div>
+                        </div>
+                    }
                 }
                 else
                 {
                     <div class="text-muted">@Localizer["UserInformationPage_NoMemberships"]</div>
                 }
-            </div>
-        </div>
+            </Body>
+        </CardComponent>
     }
 </div>
 
@@ -112,25 +169,21 @@
     private UserDto? _user;
     private bool _loading = true;
     private int _userId;
-    private string _firstName = string.Empty;
-    private string _lastName = string.Empty;
-    private string _email = string.Empty;
-    private string _mobile = string.Empty;
-    private string _city = string.Empty;
-    private int? _countryId;
-    private string _welcomeMessage = string.Empty;
+    private ToastComponent? _toast;
+
+    private UserProfileFormModel _profile = new();
     private string? _resultMessage;
     private bool _resultSuccess;
-    private List<CountryDto> _countries = new();
-    private List<MembershipRow> _memberships = new();
 
-    private sealed class MembershipRow
-    {
-        public string GroupName { get; init; } = string.Empty;
-        public GroupMemberRole Role { get; init; }
-        public GroupMembershipStatus Status { get; init; }
-        public DateTime RequestedAt { get; init; }
-    }
+    private ChangePasswordFormModel _passwordForm = new();
+    private string? _passwordResultMessage;
+    private bool _passwordResultSuccess;
+    private bool _showCurrentPassword;
+    private bool _showNewPassword;
+    private bool _showConfirmPassword;
+
+    private List<CountryDto> _countries = new();
+    private List<GroupMembershipRow> _memberships = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,29 +194,46 @@
         _user = await UserService.GetByIdAsync(_userId);
         if (_user is not null)
         {
-            _firstName = _user.FirstName;
-            _lastName = _user.LastName;
-            _email = _user.Email;
-            _mobile = _user.Mobile ?? string.Empty;
-            _city = _user.City ?? string.Empty;
-            _countryId = _user.CountryId;
-            _welcomeMessage = _user.WelcomeMessage ?? string.Empty;
-
-            var memberships = await GroupService.GetAllMembershipsForUserAsync(_user.Id);
-            var groups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
-            _memberships = memberships
-                .Select(m => new MembershipRow
-                {
-                    GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : string.Format(Localizer["UserInformationPage_GroupNumberFallback"].Value, m.GroupId),
-                    Role = m.Role,
-                    Status = m.Status,
-                    RequestedAt = m.RequestedAt
-                })
-                .OrderBy(m => m.GroupName)
-                .ToList();
+            _profile = BuildProfileForm(_user);
+            _memberships = await LoadMembershipsAsync(_user.Id);
         }
 
         _loading = false;
+    }
+
+    private UserProfileFormModel BuildProfileForm(UserDto user)
+    {
+        var country = _countries.FirstOrDefault(c => c.Id == user.CountryId);
+        return new UserProfileFormModel
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Mobile = user.Mobile ?? string.Empty,
+            Birthday = user.Birthday?.ToDateTime(TimeOnly.MinValue),
+            Gender = user.Gender.ToString(),
+            City = user.City ?? string.Empty,
+            CountryId = user.CountryId,
+            CountryDisplay = country?.Name ?? string.Empty,
+            WelcomeMessage = user.WelcomeMessage ?? string.Empty
+        };
+    }
+
+    private async Task<List<GroupMembershipRow>> LoadMembershipsAsync(int userId)
+    {
+        var memberships = await GroupService.GetAllMembershipsForUserAsync(userId);
+        var groups = (await GroupService.GetAllAsync()).ToDictionary(g => g.Id, g => g.Name);
+
+        return memberships
+            .Select(m => new GroupMembershipRow
+            {
+                GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : string.Format(Localizer["UserInformationPage_GroupNumberFallback"].Value, m.GroupId),
+                Role = m.Role,
+                Status = m.Status,
+                RequestedAt = m.RequestedAt
+            })
+            .OrderBy(m => m.GroupName)
+            .ToList();
     }
 
     private async Task SaveProfile()
@@ -178,25 +248,105 @@
         {
             await UserService.UpdateSelfAsync(new UpdateSelfUserDto
             {
-                FirstName = _firstName,
-                LastName = _lastName,
-                Email = _email,
-                Gender = _user.Gender,
-                Birthday = _user.Birthday,
-                Mobile = string.IsNullOrWhiteSpace(_mobile) ? null : _mobile,
-                City = string.IsNullOrWhiteSpace(_city) ? null : _city,
-                CountryId = _countryId,
-                WelcomeMessage = string.IsNullOrWhiteSpace(_welcomeMessage) ? null : _welcomeMessage
+                FirstName = _profile.FirstName,
+                LastName = _profile.LastName,
+                Email = _profile.Email,
+                Gender = Enum.Parse<Gender>(_profile.Gender),
+                Birthday = _profile.Birthday.HasValue ? DateOnly.FromDateTime(_profile.Birthday.Value) : null,
+                Mobile = string.IsNullOrWhiteSpace(_profile.Mobile) ? null : _profile.Mobile,
+                City = string.IsNullOrWhiteSpace(_profile.City) ? null : _profile.City,
+                CountryId = _profile.CountryId,
+                WelcomeMessage = string.IsNullOrWhiteSpace(_profile.WelcomeMessage) ? null : _profile.WelcomeMessage
             });
 
-            _resultSuccess = true;
-            _resultMessage = Localizer["UserInformationPage_UpdatedSuccess"];
             _user = await UserService.GetByIdAsync(_userId);
+            await ShowToastAsync(Localizer["UserInformationPage_UpdatedSuccess"]);
         }
         catch (Exception ex)
         {
             _resultSuccess = false;
             _resultMessage = string.Format(Localizer["UserInformationPage_UpdateFailed"].Value, ex.Message);
         }
+    }
+
+    private void GeneratePassword()
+    {
+        var password = PasswordGenerator.Generate();
+        _passwordForm.NewPassword = password;
+        _passwordForm.ConfirmNewPassword = password;
+        _showNewPassword = true;
+        _passwordResultMessage = null;
+    }
+
+    private async Task ChangePassword()
+    {
+        _passwordResultMessage = null;
+        if (_user is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_passwordForm.CurrentPassword))
+        {
+            _passwordResultSuccess = false;
+            _passwordResultMessage = Localizer["UserInformationPage_CurrentPasswordRequired"];
+            return;
+        }
+
+        if (_passwordForm.NewPassword != _passwordForm.ConfirmNewPassword)
+        {
+            _passwordResultSuccess = false;
+            _passwordResultMessage = Localizer["UserInformationPage_NewPasswordsDoNotMatch"];
+            return;
+        }
+
+        if (!ValidatePassword(_passwordForm.NewPassword, out var validationErrorKey))
+        {
+            _passwordResultSuccess = false;
+            _passwordResultMessage = Localizer[validationErrorKey];
+            return;
+        }
+
+        try
+        {
+            if (!await UserService.ValidatePasswordAsync(_user.Email, _passwordForm.CurrentPassword))
+            {
+                _passwordResultSuccess = false;
+                _passwordResultMessage = Localizer["UserInformationPage_CurrentPasswordIncorrect"];
+                return;
+            }
+
+            await UserService.ChangePasswordAsync(_userId, _passwordForm.NewPassword);
+
+            _passwordForm = new ChangePasswordFormModel();
+            _showCurrentPassword = false;
+            _showNewPassword = false;
+            _showConfirmPassword = false;
+            await ShowToastAsync(Localizer["UserInformationPage_PasswordChangedSuccess"]);
+        }
+        catch (Exception ex)
+        {
+            _passwordResultSuccess = false;
+            _passwordResultMessage = string.Format(Localizer["UserInformationPage_PasswordChangeFailed"].Value, ex.Message);
+        }
+    }
+
+    private async Task ShowToastAsync(string message)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message);
+        }
+    }
+
+    private static bool ValidatePassword(string password, out string errorKey)
+    {
+        errorKey = string.Empty;
+        if (password.Length < 8) { errorKey = "UserInformationPage_PasswordValidationMinLength"; return false; }
+        if (!password.Any(char.IsUpper)) { errorKey = "UserInformationPage_PasswordValidationUppercase"; return false; }
+        if (!password.Any(char.IsLower)) { errorKey = "UserInformationPage_PasswordValidationLowercase"; return false; }
+        if (!password.Any(char.IsDigit)) { errorKey = "UserInformationPage_PasswordValidationDigit"; return false; }
+        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { errorKey = "UserInformationPage_PasswordValidationSpecialCharacter"; return false; }
+        return true;
     }
 }
