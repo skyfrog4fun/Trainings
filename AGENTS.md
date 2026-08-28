@@ -79,6 +79,10 @@ Trainings.Web             <- Blazor Server UI and DI composition root
 - Prefer built-in .NET and Blazor functionality before introducing new packages.
 - Do not add new NuGet dependencies without explicit trade-off discussion.
 - Use Font Awesome Free icons only.
+- Never add inline `style="..."` attributes to Razor markup. Use Bootstrap utility classes
+  first; if none fit, add a named CSS class with a clear definition to
+  `src/Trainings.Web/wwwroot/app.css` (see the `/* === Utility === */` section) and reference
+  that class from the markup instead.
 
 ## Security and Safety Rules
 

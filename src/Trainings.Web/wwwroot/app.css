@@ -920,6 +920,13 @@ main {
   overflow-y: auto;
 }
 
+/* Use with a flex-based .form-check layout to bypass Bootstrap's float/negative-margin
+   checkbox positioning, which overlaps this app's enlarged .form-check-input (see above). */
+.form-check-input-flex {
+  float: none;
+  margin-left: 0;
+}
+
 .progress-thin {
   height: 6px;
 }

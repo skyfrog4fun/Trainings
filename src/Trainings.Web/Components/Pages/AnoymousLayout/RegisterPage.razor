@@ -82,14 +82,14 @@
                             {
                                 <div class="col-12">
                                     <label class="form-label">@Localizer["RegisterPage_GroupMembershipLabel"]</label>
-                                    <div class="border rounded p-2" style="max-height:160px;overflow-y:auto;">
+                                    <div class="border rounded p-2">
                                         @foreach (var group in _groups)
                                         {
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="grp-@group.Id"
+                                            <div class="form-check d-flex align-items-center gap-2 mb-2">
+                                                <input class="form-check-input form-check-input-flex flex-shrink-0" type="checkbox" id="grp-@group.Id"
                                                        checked="@_selectedGroupIds.Contains(group.Id)"
                                                        @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
-                                                <label class="form-check-label" for="grp-@group.Id">@group.Name</label>
+                                                <label class="form-check-label mb-0" for="grp-@group.Id">@group.Name</label>
                                             </div>
                                         }
                                     </div>
