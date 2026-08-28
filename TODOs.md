@@ -5,6 +5,14 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
+User Information
+---
+- [X] UserInformation: Reworked
+- [ ] User Overview (/users) - Admin View: rework
+- [ ] User Detail (/users/{id}) - Admin View: rework
+- [ ] User Edit (/users/{id}/edit) - Admin View: rework
+
+
 Design User Pages
 ---
 - [ ] Users: sorting (by name?), searching (by name?), paging (10, 20, 50, 100)
