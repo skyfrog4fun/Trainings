@@ -1441,7 +1441,7 @@
     <value>Password *</value>
   </data>
   <data name="RegisterPage_GenderLabel" xml:space="preserve">
-    <value>Gender *</value>
+    <value>Gender</value>
   </data>
   <data name="RegisterPage_GenderMale" xml:space="preserve">
     <value>Male</value>
@@ -1524,8 +1524,8 @@
   <data name="ForgotPasswordPage_EmailRequired" xml:space="preserve">
     <value>Please enter your email address.</value>
   </data>
-  <data name="RegisterPage_NameRequired" xml:space="preserve">
-    <value>First name and last name are required.</value>
+  <data name="RegisterPage_LastNameRequired" xml:space="preserve">
+    <value>Last name is required.</value>
   </data>
   <data name="RegisterPage_EmailRequired" xml:space="preserve">
     <value>Email is required.</value>
@@ -1835,5 +1835,23 @@
   </data>
   <data name="UserCreateEditPage_FailedMessage" xml:space="preserve">
     <value>Failed: {0}</value>
+  </data>
+  <data name="RegisterPage_CountryLabel" xml:space="preserve">
+    <value>Country *</value>
+  </data>
+  <data name="RegisterPage_SelectCountry" xml:space="preserve">
+    <value>Select a country</value>
+  </data>
+  <data name="RegisterPage_GroupMembership_SelectCountryFirst" xml:space="preserve">
+    <value>First select your country to see available groups.</value>
+  </data>
+  <data name="RegisterPage_GroupMembership_NoGroupsForCountry" xml:space="preserve">
+    <value>There are no groups for this country.</value>
+  </data>
+  <data name="RegisterPage_CountryRequired" xml:space="preserve">
+    <value>Please select a country.</value>
+  </data>
+  <data name="RegisterPage_FirstNameRequired" xml:space="preserve">
+    <value>First name is required.</value>
   </data>
 </root>

@@ -46,6 +46,7 @@ public class UserRegistrationService(
             Birthday = dto.Birthday,
             Mobile = dto.Mobile,
             City = dto.City,
+            CountryId = dto.CountryId,
             WelcomeMessage = dto.WelcomeMessage,
             IsActive = true,
             CreationDate = DateTime.UtcNow,

@@ -673,7 +673,7 @@
     <value>SMTP-Host *</value>
   </data>
   <data name="MailConfigPage_SmtpHostPlaceholder" xml:space="preserve">
-    <value>smtp.beispiel.de</value>
+    <value>smtp.beispiel.ch</value>
   </data>
   <data name="MailConfigPage_PortLabel" xml:space="preserve">
     <value>Port *</value>
@@ -697,7 +697,7 @@
     <value>Absenderadresse *</value>
   </data>
   <data name="MailConfigPage_FromAddressPlaceholder" xml:space="preserve">
-    <value>noreply@beispiel.de</value>
+    <value>noreply@beispiel.ch</value>
   </data>
   <data name="MailConfigPage_SaveButton" xml:space="preserve">
     <value>Speichern</value>
@@ -760,7 +760,7 @@
     <value>Empfänger-E-Mail</value>
   </data>
   <data name="MailConfigPage_RecipientEmailPlaceholder" xml:space="preserve">
-    <value>du@beispiel.de</value>
+    <value>du@beispiel.ch</value>
   </data>
   <data name="MailConfigPage_MailConfigLabel" xml:space="preserve">
     <value>Mail-Konfiguration</value>
@@ -1222,7 +1222,7 @@
     <value>E-Mail</value>
   </data>
   <data name="UserCreateEditPage_EmailPlaceholder" xml:space="preserve">
-    <value>name@beispiel.de</value>
+    <value>name@beispiel.ch</value>
   </data>
   <data name="UserCreateEditPage_EntryDate" xml:space="preserve">
     <value>Eintrittsdatum</value>
@@ -1435,13 +1435,13 @@
     <value>E-Mail *</value>
   </data>
   <data name="RegisterPage_EmailPlaceholder" xml:space="preserve">
-    <value>du@beispiel.de</value>
+    <value>du@beispiel.ch</value>
   </data>
   <data name="RegisterPage_PasswordLabel" xml:space="preserve">
     <value>Passwort *</value>
   </data>
   <data name="RegisterPage_GenderLabel" xml:space="preserve">
-    <value>Geschlecht *</value>
+    <value>Geschlecht</value>
   </data>
   <data name="RegisterPage_GenderMale" xml:space="preserve">
     <value>Männlich</value>
@@ -1524,8 +1524,8 @@
   <data name="ForgotPasswordPage_EmailRequired" xml:space="preserve">
     <value>Bitte gib deine E-Mail-Adresse ein.</value>
   </data>
-  <data name="RegisterPage_NameRequired" xml:space="preserve">
-    <value>Vorname und Nachname sind erforderlich.</value>
+  <data name="RegisterPage_LastNameRequired" xml:space="preserve">
+    <value>Nachname ist erforderlich.</value>
   </data>
   <data name="RegisterPage_EmailRequired" xml:space="preserve">
     <value>E-Mail ist erforderlich.</value>
@@ -1835,5 +1835,23 @@
   </data>
   <data name="UserCreateEditPage_FailedMessage" xml:space="preserve">
     <value>Fehlgeschlagen: {0}</value>
+  </data>
+  <data name="RegisterPage_CountryLabel" xml:space="preserve">
+    <value>Land *</value>
+  </data>
+  <data name="RegisterPage_SelectCountry" xml:space="preserve">
+    <value>Land auswählen</value>
+  </data>
+  <data name="RegisterPage_GroupMembership_SelectCountryFirst" xml:space="preserve">
+    <value>Bitte wähle zuerst dein Land aus, um verfügbare Gruppen zu sehen.</value>
+  </data>
+  <data name="RegisterPage_GroupMembership_NoGroupsForCountry" xml:space="preserve">
+    <value>Für dieses Land gibt es keine Gruppen.</value>
+  </data>
+  <data name="RegisterPage_CountryRequired" xml:space="preserve">
+    <value>Bitte wähle ein Land aus.</value>
+  </data>
+  <data name="RegisterPage_FirstNameRequired" xml:space="preserve">
+    <value>Vorname ist erforderlich.</value>
   </data>
 </root>

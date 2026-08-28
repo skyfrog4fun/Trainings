@@ -6,6 +6,7 @@
 
 @inject IUserRegistrationService UserRegistrationService
 @inject IGroupService GroupService
+@inject ICountryService CountryService
 @inject IAppRuntimeModeService AppRuntimeModeService
 
 <PageTitle>@Localizer["RegisterPage_PageTitle"]</PageTitle>
@@ -41,78 +42,104 @@
                             </div>
                         }
 
-                        <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["RegisterPage_FirstNameLabel"]</label>
-                                <input class="form-control" @bind="_firstName" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["RegisterPage_LastNameLabel"]</label>
-                                <input class="form-control" @bind="_lastName" />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">@Localizer["RegisterPage_EmailLabel"]</label>
-                                <input type="email" class="form-control" @bind="_email" placeholder="@Localizer["RegisterPage_EmailPlaceholder"]" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["RegisterPage_PasswordLabel"]</label>
-                                <input type="password" class="form-control" @bind="_password" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["RegisterPage_GenderLabel"]</label>
-                                <SelectDropdownComponent TItem="(string Value, string Label)" TValue="string"
-                                                         @bind-Value="_gender"
-                                                         Items="_genderOptions"
-                                                         ValueSelector="o => o.Value"
-                                                         TextSelector="o => o.Label" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["RegisterPage_BirthdayLabel"]</label>
-                                <input type="date" class="form-control" @bind="_birthday" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["RegisterPage_MobileLabel"]</label>
-                                <input class="form-control" @bind="_mobile" placeholder="@Localizer["RegisterPage_MobilePlaceholder"]" />
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">@Localizer["RegisterPage_CityLabel"]</label>
-                                <input class="form-control" @bind="_city" />
-                            </div>
-                            @if (_groups.Any())
-                            {
+                        <EditForm Model="_formModel" OnValidSubmit="Submit">
+                            <DataAnnotationsValidator />
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_FirstNameLabel"]</label>
+                                    <InputText class="form-control" @bind-Value="_formModel.FirstName" />
+                                    <ValidationMessage For="() => _formModel.FirstName" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_LastNameLabel"]</label>
+                                    <InputText class="form-control" @bind-Value="_formModel.LastName" />
+                                    <ValidationMessage For="() => _formModel.LastName" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">@Localizer["RegisterPage_EmailLabel"]</label>
+                                    <InputText type="email" class="form-control" @bind-Value="_formModel.Email" placeholder="@Localizer["RegisterPage_EmailPlaceholder"]" />
+                                    <ValidationMessage For="() => _formModel.Email" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_PasswordLabel"]</label>
+                                    <input type="password" class="form-control" @bind="_formModel.Password" />
+                                    <ValidationMessage For="() => _formModel.Password" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_GenderLabel"]</label>
+                                    <SelectDropdownComponent TItem="(string Value, string Label)" TValue="string"
+                                                             @bind-Value="_formModel.Gender"
+                                                             Items="_genderOptions"
+                                                             ValueSelector="o => o.Value"
+                                                             TextSelector="o => o.Label" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_BirthdayLabel"]</label>
+                                    <InputDate class="form-control" @bind-Value="_formModel.Birthday" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_MobileLabel"]</label>
+                                    <InputText class="form-control" @bind-Value="_formModel.Mobile" placeholder="@Localizer["RegisterPage_MobilePlaceholder"]" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_CityLabel"]</label>
+                                    <InputText class="form-control" @bind-Value="_formModel.City" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["RegisterPage_CountryLabel"]</label>
+                                    <SelectDropdownComponent TItem="CountryDto" TValue="int?"
+                                                             @bind-Value="_formModel.CountryId"
+                                                             @bind-Value:after="OnCountryChanged"
+                                                             Items="_realCountries"
+                                                             ValueSelector="c => (int?)c.Id"
+                                                             TextSelector="c => c.Name"
+                                                             PlaceholderText="@Localizer["RegisterPage_SelectCountry"]" />
+                                    <ValidationMessage For="() => _formModel.CountryId" />
+                                </div>
                                 <div class="col-12">
                                     <label class="form-label">@Localizer["RegisterPage_GroupMembershipLabel"]</label>
-                                    <div class="border rounded p-2">
-                                        @foreach (var group in _groups)
-                                        {
-                                            <div class="form-check d-flex align-items-center gap-2 mb-2">
-                                                <input class="form-check-input form-check-input-flex flex-shrink-0" type="checkbox" id="grp-@group.Id"
-                                                       checked="@_selectedGroupIds.Contains(group.Id)"
-                                                       @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
-                                                <label class="form-check-label mb-0" for="grp-@group.Id">@group.Name</label>
-                                            </div>
-                                        }
-                                    </div>
+                                    @if (_formModel.CountryId is null)
+                                    {
+                                        <div class="alert alert-info mb-0">@Localizer["RegisterPage_GroupMembership_SelectCountryFirst"]</div>
+                                    }
+                                    else if (!GroupsForSelectedCountry.Any())
+                                    {
+                                        <div class="alert alert-info mb-0">@Localizer["RegisterPage_GroupMembership_NoGroupsForCountry"]</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="border rounded p-2">
+                                            @foreach (var group in GroupsForSelectedCountry)
+                                            {
+                                                <div class="form-check d-flex align-items-center gap-2 mb-2">
+                                                    <input class="form-check-input form-check-input-flex flex-shrink-0" type="checkbox" id="grp-@group.Id"
+                                                           checked="@_selectedGroupIds.Contains(group.Id)"
+                                                           @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
+                                                    <label class="form-check-label mb-0" for="grp-@group.Id">@group.Name</label>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
                                 </div>
-                            }
-                            <div class="col-12">
-                                <label class="form-label">@Localizer["RegisterPage_WelcomeMessageLabel"]</label>
-                                <textarea class="form-control" rows="3" @bind="_welcomeMessage" placeholder="@Localizer["RegisterPage_WelcomeMessagePlaceholder"]"></textarea>
+                                <div class="col-12">
+                                    <label class="form-label">@Localizer["RegisterPage_WelcomeMessageLabel"]</label>
+                                    <InputTextArea class="form-control" rows="3" @bind-Value="_formModel.WelcomeMessage" placeholder="@Localizer["RegisterPage_WelcomeMessagePlaceholder"]" />
+                                </div>
                             </div>
-                        </div>
 
-                        @if (_error != null)
-                        {
-                            <div class="alert alert-danger mt-3">@_error</div>
-                        }
+                            @if (_error != null)
+                            {
+                                <div class="alert alert-danger mt-3">@_error</div>
+                            }
 
-                        <button class="btn btn-primary btn-lg w-100 mt-3" @onclick="Submit" disabled="@(_loading || _runtimeMode.IsReadOnly)">
-                            @if (_loading) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
-                            @Localizer["RegisterPage_ButtonRegister"]
-                        </button>
-                        <div class="mt-2 text-center">
-                            <TextLinkComponent Link="/login" Text="@Localizer["RegisterPage_AlreadyHaveAccount"]" />                            
-                        </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mt-3" disabled="@(_loading || _runtimeMode.IsReadOnly)">
+                                @if (_loading) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
+                                @Localizer["RegisterPage_ButtonRegister"]
+                            </button>
+                            <div class="mt-2 text-center">
+                                <TextLinkComponent Link="/login" Text="@Localizer["RegisterPage_AlreadyHaveAccount"]" />
+                            </div>
+                        </EditForm>
                     }
                 </div>
             </div>
@@ -123,12 +150,13 @@
 <EmailPreviewModal Preview="_emailPreview" OnClose="CloseEmailPreview" />
 
 @code {
-    private string _firstName = "", _lastName = "", _email = "", _password = "";
-    private string _gender = "Other", _mobile = "", _city = "", _welcomeMessage = "";
-    private DateTime? _birthday;
+    private RegisterFormModel _formModel = new();
     private List<GroupDto> _groups = new();
+    private List<CountryDto> _countries = new();
+    private List<CountryDto> _realCountries = new();
     private HashSet<int> _selectedGroupIds = new();
-    private bool _loading, _registered;
+    private bool _loading;
+    private bool _registered;
     private string? _error;
     private AppRuntimeModeDto _runtimeMode = new();
     private EmailPreviewDto? _emailPreview;
@@ -138,12 +166,32 @@
     {
         _runtimeMode = AppRuntimeModeService.GetCurrent();
         _groups = (await GroupService.GetAllAsync()).Where(g => g.IsActive).ToList();
+        _countries = (await CountryService.GetAllAsync()).ToList();
+        _realCountries = _countries.Where(c => c.IsRealCountry).ToList();
         _genderOptions = new List<(string Value, string Label)>
         {
             ("Male", Localizer["RegisterPage_GenderMale"]),
             ("Female", Localizer["RegisterPage_GenderFemale"]),
             ("Other", Localizer["RegisterPage_GenderOther"])
         };
+    }
+
+    private List<GroupDto> GroupsForSelectedCountry => _formModel.CountryId is null ? [] : [.. _groups.Where(g => IsGroupAvailableForCountry(g, _formModel.CountryId.Value))];
+
+    private bool IsGroupAvailableForCountry(GroupDto group, int countryId)
+    {
+        if (group.CountryId is null)
+        {
+            return true;
+        }
+
+        var country = _countries.FirstOrDefault(c => c.Id == group.CountryId);
+        if (country is null || !country.IsRealCountry)
+        {
+            return true;
+        }
+
+        return country.Id == countryId;
     }
 
     private void ToggleGroup(int groupId, bool selected)
@@ -158,43 +206,34 @@
         }
     }
 
+    private void OnCountryChanged()
+    {
+        var visibleGroupIds = GroupsForSelectedCountry.Select(g => g.Id).ToHashSet();
+        _selectedGroupIds.RemoveWhere(id => !visibleGroupIds.Contains(id));
+    }
+
     private async Task Submit()
     {
         _error = null;
-        if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName))
-        {
-            _error = Localizer["RegisterPage_NameRequired"];
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(_email))
-        {
-            _error = Localizer["RegisterPage_EmailRequired"];
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(_password) || _password.Length < 6)
-        {
-            _error = Localizer["RegisterPage_PasswordTooShort"];
-            return;
-        }
-
         _loading = true;
         try
         {
-            DateOnly? birthday = _birthday.HasValue
-                ? DateOnly.FromDateTime(_birthday.Value)
+            DateOnly? birthday = _formModel.Birthday.HasValue
+                ? DateOnly.FromDateTime(_formModel.Birthday.Value)
                 : null;
 
             var result = await UserRegistrationService.RegisterAsync(new RegisterRequestDto
             {
-                FirstName = _firstName,
-                LastName = _lastName,
-                Email = _email,
-                Password = _password,
-                Gender = Enum.Parse<Gender>(_gender),
+                FirstName = _formModel.FirstName,
+                LastName = _formModel.LastName,
+                Email = _formModel.Email,
+                Password = _formModel.Password,
+                Gender = Enum.Parse<Gender>(_formModel.Gender),
                 Birthday = birthday,
-                Mobile = string.IsNullOrWhiteSpace(_mobile) ? null : _mobile,
-                City = string.IsNullOrWhiteSpace(_city) ? null : _city,
-                WelcomeMessage = string.IsNullOrWhiteSpace(_welcomeMessage) ? null : _welcomeMessage,
+                Mobile = string.IsNullOrWhiteSpace(_formModel.Mobile) ? null : _formModel.Mobile,
+                City = string.IsNullOrWhiteSpace(_formModel.City) ? null : _formModel.City,
+                CountryId = _formModel.CountryId,
+                WelcomeMessage = string.IsNullOrWhiteSpace(_formModel.WelcomeMessage) ? null : _formModel.WelcomeMessage,
                 RequestedGroupIds = _selectedGroupIds.ToList()
             });
             _emailPreview = result.ConfirmationEmail.Preview;
@@ -216,4 +255,3 @@
         return Task.CompletedTask;
     }
 }
-
