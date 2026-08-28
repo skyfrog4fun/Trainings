@@ -78,6 +78,12 @@
   --bs-danger: var(--color-danger);
   --bs-light: var(--brand-appreciation-20);
   --bs-dark: var(--brand-tradition);
+  /* Bootstrap hardcodes --bs-secondary-color per [data-bs-theme], but this app
+     switches themes via [data-theme] instead, so that Bootstrap override never
+     applies. Re-point it at our own themed muted-text token so anything using
+     it (e.g. .form-control::placeholder) adapts correctly, including in dark
+     mode. */
+  --bs-secondary-color: var(--color-text-muted);
 }
 
 [data-theme="dark"] {
@@ -87,6 +93,7 @@
   --color-header-bg: var(--brand-black);
   --color-text: var(--brand-appreciation-20);
   --color-text-muted: var(--brand-tradition-40);
+  --bs-secondary-color: var(--color-text-muted);
   --color-text-on-dark: var(--brand-appreciation-20);
   --color-primary: var(--brand-accent);
   --color-primary-hover: var(--brand-accent-80);
@@ -407,9 +414,17 @@ h1:focus {
   color: var(--special-text-on-light) !important;
 }
 
+/* Global placeholder color for every input/textarea on every page. The
+   browser default placeholder color does not adapt to the dark theme and has
+   very poor contrast against dark backgrounds, so it is pinned to the themed
+   muted-text color instead. */
+::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
 .form-floating > .form-control-plaintext::placeholder,
 .form-floating > .form-control::placeholder {
-  color: var(--color-text-muted);
   text-align: end;
 }
 

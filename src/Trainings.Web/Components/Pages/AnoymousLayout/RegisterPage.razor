@@ -44,11 +44,11 @@
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label">@Localizer["RegisterPage_FirstNameLabel"]</label>
-                                <input class="form-control" @bind="_firstName" placeholder="@Localizer["RegisterPage_FirstNamePlaceholder"]" />
+                                <input class="form-control" @bind="_firstName" />
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">@Localizer["RegisterPage_LastNameLabel"]</label>
-                                <input class="form-control" @bind="_lastName" placeholder="@Localizer["RegisterPage_LastNamePlaceholder"]" />
+                                <input class="form-control" @bind="_lastName" />
                             </div>
                             <div class="col-12">
                                 <label class="form-label">@Localizer["RegisterPage_EmailLabel"]</label>
@@ -76,7 +76,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">@Localizer["RegisterPage_CityLabel"]</label>
-                                <input class="form-control" @bind="_city" placeholder="@Localizer["RegisterPage_CityPlaceholder"]" />
+                                <input class="form-control" @bind="_city" />
                             </div>
                             @if (_groups.Any())
                             {

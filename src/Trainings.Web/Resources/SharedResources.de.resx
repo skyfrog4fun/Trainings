@@ -1428,14 +1428,8 @@
   <data name="RegisterPage_FirstNameLabel" xml:space="preserve">
     <value>Vorname *</value>
   </data>
-  <data name="RegisterPage_FirstNamePlaceholder" xml:space="preserve">
-    <value>Vorname</value>
-  </data>
   <data name="RegisterPage_LastNameLabel" xml:space="preserve">
     <value>Nachname *</value>
-  </data>
-  <data name="RegisterPage_LastNamePlaceholder" xml:space="preserve">
-    <value>Nachname</value>
   </data>
   <data name="RegisterPage_EmailLabel" xml:space="preserve">
     <value>E-Mail *</value>
@@ -1470,14 +1464,11 @@
   <data name="RegisterPage_CityLabel" xml:space="preserve">
     <value>Stadt</value>
   </data>
-  <data name="RegisterPage_CityPlaceholder" xml:space="preserve">
-    <value>Deine Stadt</value>
-  </data>
   <data name="RegisterPage_GroupMembershipLabel" xml:space="preserve">
     <value>Gruppenmitgliedschaft anfragen</value>
   </data>
   <data name="RegisterPage_WelcomeMessageLabel" xml:space="preserve">
-    <value>Willkommensnachricht / Bio</value>
+    <value>Willkommensnachricht</value>
   </data>
   <data name="RegisterPage_WelcomeMessagePlaceholder" xml:space="preserve">
     <value>Erzähl uns ein bisschen über dich...</value>

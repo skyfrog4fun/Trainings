@@ -33,3 +33,4 @@ blob-report/
 # Playwright CLI
 .playwright-cli/
 playwright/.cache/
+src/Trainings.Web/.playwright-mcp/
