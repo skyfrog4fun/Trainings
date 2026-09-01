@@ -948,6 +948,9 @@
   <data name="UserDetailPage_AccessDenied" xml:space="preserve">
     <value>Du darfst diesen Benutzer nicht ansehen.</value>
   </data>
+  <data name="UserDetailPage_UserNotFound" xml:space="preserve">
+    <value>Benutzer nicht gefunden.</value>
+  </data>
   <data name="UserDetailPage_Inactive" xml:space="preserve">
     <value>Inaktiv</value>
   </data>
@@ -987,7 +990,10 @@
   <data name="UserDetailPage_GroupMembershipsTitle" xml:space="preserve">
     <value>Gruppenmitgliedschaften</value>
   </data>
-  <data name="UserDetailPage_ColJoined" xml:space="preserve">
+  <data name="UserDetailPage_GroupNumberFallback" xml:space="preserve">
+    <value>Gruppe #{0}</value>
+  </data>
+  <data name="UserDetailPage_Joined" xml:space="preserve">
     <value>Beigetreten</value>
   </data>
   <data name="UserDetailPage_NoMemberships" xml:space="preserve">
@@ -996,7 +1002,7 @@
   <data name="UserDetailPage_RegistrationHistoryTitle" xml:space="preserve">
     <value>Anmeldeverlauf</value>
   </data>
-  <data name="UserDetailPage_ColRegistered" xml:space="preserve">
+  <data name="UserDetailPage_Registered" xml:space="preserve">
     <value>Angemeldet</value>
   </data>
   <data name="UserDetailPage_ViewTraining" xml:space="preserve">
@@ -1821,17 +1827,26 @@
   <data name="UserDetailPage_SendAccountMail" xml:space="preserve">
     <value>Verifizieren</value>
   </data>
-  <data name="UserCreateEditPage_Activate" xml:space="preserve">
-    <value>Aktivieren</value>
-  </data>
-  <data name="UserCreateEditPage_Deactivate" xml:space="preserve">
-    <value>Deaktivieren</value>
-  </data>
-  <data name="UserCreateEditPage_DeleteConfirmTitle" xml:space="preserve">
+  <data name="UserDetailPage_DeleteConfirmTitle" xml:space="preserve">
     <value>Benutzer löschen</value>
   </data>
-  <data name="UserCreateEditPage_DeleteConfirmMessage" xml:space="preserve">
+  <data name="UserDetailPage_DeleteConfirmMessage" xml:space="preserve">
     <value>Möchten Sie diesen Benutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="UserCreateEditPage_FirstNameRequired" xml:space="preserve">
+    <value>Vorname ist erforderlich.</value>
+  </data>
+  <data name="UserCreateEditPage_LastNameRequired" xml:space="preserve">
+    <value>Nachname ist erforderlich.</value>
+  </data>
+  <data name="UserCreateEditPage_EmailRequired" xml:space="preserve">
+    <value>E-Mail ist erforderlich.</value>
+  </data>
+  <data name="UserCreateEditPage_EmailInvalid" xml:space="preserve">
+    <value>Bitte gib eine gültige E-Mail-Adresse ein.</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordRequired" xml:space="preserve">
+    <value>Passwort ist erforderlich.</value>
   </data>
   <data name="UserCreateEditPage_FailedMessage" xml:space="preserve">
     <value>Fehlgeschlagen: {0}</value>
@@ -1931,5 +1946,8 @@
   </data>
   <data name="UserInformationPage_TogglePasswordVisibility" xml:space="preserve">
     <value>Passwort anzeigen/verbergen</value>
+  </data>
+  <data name="Shared_Back" xml:space="preserve">
+    <value>Zurück</value>
   </data>
 </root>

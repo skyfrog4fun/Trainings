@@ -19,11 +19,7 @@
 <ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
 
 <div class="container px-2 px-md-4">
-    <PageTitleComponent Icon="@AppIcons.Location"
-                         Text="@Localizer["LocationsPage_Heading"]"
-                         ButtonText="@Localizer["Shared_New"]"
-                         ButtonIcon="@AppIcons.Plus"
-                         OnButtonClick="ShowCreateForm" />
+    <PageTitleComponent Icon="@AppIcons.Location" Text="@Localizer["LocationsPage_Heading"]" ButtonText="@Localizer["Shared_New"]" ButtonIcon="@AppIcons.Plus" OnButtonClick="ShowCreateForm" />
 
     @if (_showForm)
     {

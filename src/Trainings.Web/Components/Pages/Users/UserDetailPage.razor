@@ -14,30 +14,6 @@
 <PageTitle>@Localizer["UserDetailPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <div class="my-3 d-flex flex-wrap gap-2">
-        <BackButton Href="/users" />
-        @if (_user is not null)
-        {
-            <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
-                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
-            </a>
-            <button type="button" class="btn btn-sm btn-app-outline" @onclick="SendAccountMail" disabled="@_sendingMail">
-                @if (_sendingMail)
-                {
-                    <LoadingSpinner Inline="true" Small="true" />
-                }
-                else
-                {
-                    <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>@Localizer["UserDetailPage_SendAccountMail"]
-                }
-            </button>
-        }
-    </div>
-
-    <div class="mb-3">
-        <ActionAlert IsSuccess="@_actionSuccess" Message="@_actionResult" />
-    </div>
-
     @if (_loading)
     {
         <LoadingSpinner />
@@ -52,17 +28,43 @@
     }
     else
     {
-        <PageHeader Title="@_user.DisplayName">
-            <Actions>
-                <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? Localizer["UserDetailPage_Active"] : Localizer["UserDetailPage_Inactive"])</span>
-            </Actions>
-        </PageHeader>
+        <PageTitleComponent Icon="@AppIcons.User" Text="@_user.DisplayName" />
+
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? Localizer["Shared_Active"] : Localizer["UserDetailPage_Inactive"])</span>
+            <div class="ms-auto d-flex flex-wrap gap-2">
+                <BackButton Href="/users" Label="@Localizer["Shared_Cancel"]" />
+                <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
+                    <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
+                </a>
+                @if (_canDelete)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="PromptDelete" disabled="@_deleting">
+                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
+                    </button>
+                }
+                <button type="button" class="btn btn-sm btn-app-outline" @onclick="SendAccountMail" disabled="@_sendingMail">
+                    @if (_sendingMail)
+                    {
+                        <LoadingSpinner Inline="true" Small="true" />
+                    }
+                    else
+                    {
+                        <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>@Localizer["UserDetailPage_SendAccountMail"]
+                    }
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <ActionAlert IsSuccess="@_actionSuccess" Message="@_actionResult" />
+        </div>
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header fw-bold">@Localizer["UserDetailPage_ProfileTitle"]</div>
-                    <div class="card-body">
+                <CardComponent IsCollapsable="false" CssClass="h-100">
+                    <Title>@Localizer["UserDetailPage_ProfileTitle"]</Title>
+                    <Body>
                         <div><strong>@Localizer["UserDetailPage_EmailLabel"]</strong> @_user.Email</div>
                         <div><strong>@Localizer["UserDetailPage_RoleLabel"]</strong> @_user.Role</div>
                         <div><strong>@Localizer["UserDetailPage_GenderLabel"]</strong> @_user.Gender</div>
@@ -73,22 +75,22 @@
                         <div><strong>@Localizer["UserDetailPage_EmailVerifiedLabel"]</strong> @(_user.EmailConfirmedAt.HasValue ? Localizer["Enum_Decision_Yes"] : Localizer["Enum_Decision_No"])</div>
                         <div><strong>@Localizer["UserDetailPage_EntryDateLabel"]</strong> @FormatDateTime(_user.EntryDate)</div>
                         <div><strong>@Localizer["UserDetailPage_CreatedLabel"]</strong> @FormatDateTime(_user.CreationDate)</div>
-                    </div>
-                </div>
+                    </Body>
+                </CardComponent>
             </div>
             <div class="col-12 col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header fw-bold">@Localizer["UserDetailPage_GroupMembershipsTitle"]</div>
-                    <div class="card-body p-0">
+                <CardComponent IsCollapsable="false" CssClass="h-100">
+                    <Title>@Localizer["UserDetailPage_GroupMembershipsTitle"]</Title>
+                    <Body>
                         @if (_memberships.Any())
                         {
                             <div class="table-responsive">
                                 <table class="table table-sm mb-0">
                                     <thead>
                                         <tr>
-                                            <th>@Localizer["UserDetailPage_Group"]</th>
-                                            <th>@Localizer["UserDetailPage_Role"]</th>
-                                            <th>@Localizer["UserDetailPage_Status"]</th>
+                                            <th>@Localizer["Shared_Group"]</th>
+                                            <th>@Localizer["Shared_Role"]</th>
+                                            <th>@Localizer["Shared_Status"]</th>
                                             <th>@Localizer["UserDetailPage_Joined"]</th>
                                         </tr>
                                     </thead>
@@ -108,16 +110,16 @@
                         }
                         else
                         {
-                            <div class="p-3 text-muted">@Localizer["UserDetailPage_NoMemberships"]</div>
+                            <div class="text-muted">@Localizer["UserDetailPage_NoMemberships"]</div>
                         }
-                    </div>
-                </div>
+                    </Body>
+                </CardComponent>
             </div>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-header fw-bold">@Localizer["UserDetailPage_RegistrationHistoryTitle"]</div>
-            <div class="card-body p-0">
+        <CardComponent IsCollapsable="false">
+            <Title>@Localizer["UserDetailPage_RegistrationHistoryTitle"]</Title>
+            <Body>
                 @if (_registrations.Any())
                 {
                     <div class="table-responsive">
@@ -125,8 +127,8 @@
                             <thead>
                                 <tr>
                                     <th>@Localizer["UserDetailPage_Training"]</th>
-                                    <th>@Localizer["UserDetailPage_Date"]</th>
-                                    <th>@Localizer["UserDetailPage_Status"]</th>
+                                    <th>@Localizer["Shared_Date"]</th>
+                                    <th>@Localizer["Shared_Status"]</th>
                                     <th>@Localizer["UserDetailPage_Registered"]</th>
                                     <th></th>
                                 </tr>
@@ -152,22 +154,30 @@
                 }
                 else
                 {
-                    <div class="p-3 text-muted">@Localizer["UserDetailPage_NoRegistrations"]</div>
+                    <div class="text-muted">@Localizer["UserDetailPage_NoRegistrations"]</div>
                 }
-            </div>
-        </div>
+            </Body>
+        </CardComponent>
 
         @if (!string.IsNullOrWhiteSpace(_user.WelcomeMessage))
         {
-            <div class="card mb-4">
-                <div class="card-header fw-bold">@Localizer["UserDetailPage_BioWelcomeMessageTitle"]</div>
-                <div class="card-body">
+            <CardComponent IsCollapsable="false">
+                <Title>@Localizer["UserDetailPage_BioWelcomeMessageTitle"]</Title>
+                <Body>
                     @_user.WelcomeMessage
-                </div>
-            </div>
+                </Body>
+            </CardComponent>
         }
     }
 </div>
+
+<ConfirmDialogComponent IsVisible="_showDeleteConfirm"
+                        Title="@Localizer["UserDetailPage_DeleteConfirmTitle"]"
+                        Message="@Localizer["UserDetailPage_DeleteConfirmMessage"]"
+                        ConfirmText="@Localizer["Shared_Delete"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="ConfirmDeleteAsync"
+                        OnCancel="CancelDelete" />
 
 <EmailPreviewModal Preview="_emailPreview" OnClose="CloseEmailPreview" />
 
@@ -185,6 +195,9 @@
     private bool _actionSuccess;
     private string? _actionResult;
     private EmailPreviewDto? _emailPreview;
+    private bool _canDelete;
+    private bool _showDeleteConfirm;
+    private bool _deleting;
 
     protected override async Task OnInitializedAsync()
     {
@@ -229,6 +242,8 @@
         _registrations = (await RegistrationService.GetByUserIdAsync(Id))
             .OrderByDescending(r => r.TrainingDateTime)
             .ToList();
+
+        _canDelete = _registrations.Count == 0;
 
         _groupNameById = (await GroupService.GetAllAsync())
             .ToDictionary(g => g.Id, g => g.Name);
@@ -295,5 +310,46 @@
     {
         _emailPreview = null;
         return Task.CompletedTask;
+    }
+
+    private void PromptDelete()
+    {
+        if (!_canDelete)
+        {
+            return;
+        }
+
+        _showDeleteConfirm = true;
+    }
+
+    private void CancelDelete() => _showDeleteConfirm = false;
+
+    private async Task ConfirmDeleteAsync()
+    {
+        _showDeleteConfirm = false;
+
+        if (_user is null || !_canDelete)
+        {
+            return;
+        }
+
+        _deleting = true;
+
+        try
+        {
+            foreach (var membership in _memberships)
+            {
+                await GroupService.RemoveMemberAsync(membership.Id);
+            }
+
+            await UserService.DeleteAsync(_user.Id);
+            NavigationManager.NavigateTo("/users");
+        }
+        catch (Exception ex)
+        {
+            _actionSuccess = false;
+            _actionResult = Localizer["UserDetailPage_FailedMessage", ex.Message];
+            _deleting = false;
+        }
     }
 }

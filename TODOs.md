@@ -56,6 +56,9 @@ Others
 Ideas
 ---
 - [ ] Overview: Create an overview documentation that shows what page links to what other pages. This will help developers understand the navigation flow and dependencies between pages.
+- [ ] How can a user request to participate in a new group? [UserInformation -> extend section 'Group Memberships']
+
+
 
 ---
 

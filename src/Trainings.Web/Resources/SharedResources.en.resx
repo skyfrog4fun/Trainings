@@ -948,6 +948,9 @@
   <data name="UserDetailPage_AccessDenied" xml:space="preserve">
     <value>You are not allowed to view this user.</value>
   </data>
+  <data name="UserDetailPage_UserNotFound" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
   <data name="UserDetailPage_Inactive" xml:space="preserve">
     <value>Inactive</value>
   </data>
@@ -987,7 +990,10 @@
   <data name="UserDetailPage_GroupMembershipsTitle" xml:space="preserve">
     <value>Group memberships</value>
   </data>
-  <data name="UserDetailPage_ColJoined" xml:space="preserve">
+  <data name="UserDetailPage_GroupNumberFallback" xml:space="preserve">
+    <value>Group #{0}</value>
+  </data>
+  <data name="UserDetailPage_Joined" xml:space="preserve">
     <value>Joined</value>
   </data>
   <data name="UserDetailPage_NoMemberships" xml:space="preserve">
@@ -996,7 +1002,7 @@
   <data name="UserDetailPage_RegistrationHistoryTitle" xml:space="preserve">
     <value>Registration history</value>
   </data>
-  <data name="UserDetailPage_ColRegistered" xml:space="preserve">
+  <data name="UserDetailPage_Registered" xml:space="preserve">
     <value>Registered</value>
   </data>
   <data name="UserDetailPage_ViewTraining" xml:space="preserve">
@@ -1821,17 +1827,26 @@
   <data name="UserDetailPage_SendAccountMail" xml:space="preserve">
     <value>Verify</value>
   </data>
-  <data name="UserCreateEditPage_Activate" xml:space="preserve">
-    <value>Activate</value>
-  </data>
-  <data name="UserCreateEditPage_Deactivate" xml:space="preserve">
-    <value>Deactivate</value>
-  </data>
-  <data name="UserCreateEditPage_DeleteConfirmTitle" xml:space="preserve">
+  <data name="UserDetailPage_DeleteConfirmTitle" xml:space="preserve">
     <value>Delete User</value>
   </data>
-  <data name="UserCreateEditPage_DeleteConfirmMessage" xml:space="preserve">
+  <data name="UserDetailPage_DeleteConfirmMessage" xml:space="preserve">
     <value>Are you sure you want to delete this user? This action cannot be undone.</value>
+  </data>
+  <data name="UserCreateEditPage_FirstNameRequired" xml:space="preserve">
+    <value>First name is required.</value>
+  </data>
+  <data name="UserCreateEditPage_LastNameRequired" xml:space="preserve">
+    <value>Last name is required.</value>
+  </data>
+  <data name="UserCreateEditPage_EmailRequired" xml:space="preserve">
+    <value>Email is required.</value>
+  </data>
+  <data name="UserCreateEditPage_EmailInvalid" xml:space="preserve">
+    <value>Please enter a valid email address.</value>
+  </data>
+  <data name="UserCreateEditPage_PasswordRequired" xml:space="preserve">
+    <value>Password is required.</value>
   </data>
   <data name="UserCreateEditPage_FailedMessage" xml:space="preserve">
     <value>Failed: {0}</value>
@@ -1931,5 +1946,8 @@
   </data>
   <data name="UserInformationPage_TogglePasswordVisibility" xml:space="preserve">
     <value>Show/hide password</value>
+  </data>
+  <data name="Shared_Back" xml:space="preserve">
+    <value>Back</value>
   </data>
 </root>
