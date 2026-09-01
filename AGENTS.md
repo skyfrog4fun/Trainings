@@ -83,6 +83,12 @@ Trainings.Web             <- Blazor Server UI and DI composition root
   first; if none fit, add a named CSS class with a clear definition to
   `src/Trainings.Web/wwwroot/app.css` (see the `/* === Utility === */` section) and reference
   that class from the markup instead.
+- Do not define classes, records, or enums inside a `.razor` file's `@code` block (except
+  small page-local helper types with no reuse potential, e.g. simple `enum`s used only for
+  local UI state). Form models, DTO-like types, and anything used by validation
+  (`IValidatableObject`) belong in `src/Trainings.Web/Models/`.
+- Prefer the shared `SelectDropdownComponent` over raw `<select>` elements for dropdowns
+  (role, gender, country, and similar option lists).
 
 ## Security and Safety Rules
 

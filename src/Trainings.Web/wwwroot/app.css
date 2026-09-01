@@ -110,6 +110,10 @@
   --bs-link-hover-color: var(--brand-community-60);
 }
 
+/* Bootstrap's own `a` rule reads --bs-link-color-rgb (not --bs-link-color), which we
+   don't remap, so plain links would otherwise fall back to Bootstrap's default blue.
+   Set the default state explicitly here to keep links on the brand-community palette. */
+a:not(.btn),
 a:not(.btn):visited {
   color: var(--bs-link-color);
 }

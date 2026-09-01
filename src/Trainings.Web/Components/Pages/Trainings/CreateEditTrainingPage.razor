@@ -12,6 +12,7 @@
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_PageTitleNew"])</PageTitle>
 
@@ -235,12 +236,10 @@
         var user = authState.User;
         _currentUserId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         _trainerId = _currentUserId;
-        _isSuperAdmin = user.HasClaim("SuperAdmin", "true");
+        _isSuperAdmin = AuthorizationHelper.IsSuperAdmin(user);
 
-        var managedGroupIds = user.Claims
-            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && (c.Value == "Admin" || c.Value == "Trainer"))
-            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
-            .Where(groupId => groupId > 0)
+        var managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(user, "Admin")
+            .Concat(AuthorizationHelper.GetGroupIdsForRole(user, "Trainer"))
             .ToHashSet();
 
         var groups = await GroupService.GetAllAsync();

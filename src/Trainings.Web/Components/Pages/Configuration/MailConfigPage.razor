@@ -107,7 +107,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["MailConfigPage_PasswordLabel"]</label>
-                        <input class="form-control" type="password" placeholder="@Localizer["MailConfigPage_PasswordPlaceholder"]" @bind="_formPassword" />
+                        <PasswordInputComponent @bind-Value="_formPassword" placeholder="@Localizer["MailConfigPage_PasswordPlaceholder"]" />
                         @if (_editId != 0)
                         {
                             <div class="form-text">@Localizer["MailConfigPage_PasswordHelp"]</div>

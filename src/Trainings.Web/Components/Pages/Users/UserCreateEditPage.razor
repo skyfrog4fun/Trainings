@@ -1,8 +1,6 @@
 @page "/users/new"
 @page "/users/{Id:int}/edit"
 
-@using System.ComponentModel.DataAnnotations
-
 @rendermode InteractiveServer
 
 @attribute [Authorize(Policy = "GroupAdmin")]
@@ -12,6 +10,7 @@
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@(_isEdit ? Localizer["UserCreateEditPage_EditUser"] : Localizer["UserCreateEditPage_CreateUser"])</PageTitle>
 
@@ -45,12 +44,12 @@
                     <div class="row g-2">
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_FirstName"]</label>
-                            <InputText class="form-control" placeholder='@Localizer["UserCreateEditPage_FirstNamePlaceholder"]' @bind-Value="_formModel.FirstName" />
+                            <InputText class="form-control" @bind-Value="_formModel.FirstName" />
                             <ValidationMessage For="() => _formModel.FirstName" class="text-danger small" />
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_LastName"]</label>
-                            <InputText class="form-control" placeholder='@Localizer["UserCreateEditPage_LastNamePlaceholder"]' @bind-Value="_formModel.LastName" />
+                            <InputText class="form-control" @bind-Value="_formModel.LastName" />
                             <ValidationMessage For="() => _formModel.LastName" class="text-danger small" />
                         </div>
                         <div class="col-12 col-md-6">
@@ -62,33 +61,25 @@
                         {
                             <div class="col-12 col-md-6">
                                 <label class="form-label">@Localizer["UserCreateEditPage_Password"]</label>
-                                <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_PasswordPlaceholder"]' @bind="_formModel.Password" />
+                                <PasswordInputComponent @bind-Value="_formModel.Password" />
                                 <ValidationMessage For="() => _formModel.Password" class="text-danger small" />
                             </div>
                         }
                         <div class="col-12 col-md-4">
                             <label class="form-label">@Localizer["UserCreateEditPage_Role"]</label>
-                            @if (_isSuperAdmin)
-                            {
-                                <select class="form-select" @bind="_formModel.Role">
-                                    <option value="User">@Localizer["UserCreateEditPage_User"]</option>
-                                    <option value="SuperAdmin">@Localizer["UserCreateEditPage_SuperAdmin"]</option>
-                                </select>
-                            }
-                            else
-                            {
-                                <select class="form-select" @bind="_formModel.Role">
-                                    <option value="User">@Localizer["UserCreateEditPage_User"]</option>
-                                </select>
-                            }
+                            <SelectDropdownComponent TItem="(string Value, string Label)" TValue="string"
+                                                     @bind-Value="_formModel.Role"
+                                                     Items="_roleOptions"
+                                                     ValueSelector="o => o.Value"
+                                                     TextSelector="o => o.Label" />
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label">@Localizer["UserCreateEditPage_Gender"]</label>
-                            <select class="form-select" @bind="_formModel.Gender">
-                                <option value="Male">@Localizer["Enum_Gender_Male"]</option>
-                                <option value="Female">@Localizer["Enum_Gender_Female"]</option>
-                                <option value="Other">@Localizer["Enum_Gender_Other"]</option>
-                            </select>
+                            <SelectDropdownComponent TItem="(string Value, string Label)" TValue="string"
+                                                     @bind-Value="_formModel.Gender"
+                                                     Items="_genderOptions"
+                                                     ValueSelector="o => o.Value"
+                                                     TextSelector="o => o.Label" />
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label">@Localizer["UserCreateEditPage_Birthday"]</label>
@@ -96,44 +87,28 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_Mobile"]</label>
-                            <InputText class="form-control" placeholder='@Localizer["UserCreateEditPage_MobilePlaceholder"]' @bind-Value="_formModel.Mobile" />
+                            <InputText class="form-control" @bind-Value="_formModel.Mobile" />
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_City"]</label>
-                            <InputText class="form-control" placeholder='@Localizer["UserCreateEditPage_CityPlaceholder"]' @bind-Value="_formModel.City" />
+                            <InputText class="form-control" @bind-Value="_formModel.City" />
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_Country"]</label>
-                            <select class="form-select" @bind="_formModel.CountryId">
-                                <option value="">@Localizer["UserCreateEditPage_SelectCountry"]</option>
-                                @foreach (var country in _countries)
-                                {
-                                    <option value="@country.Id">@country.Name</option>
-                                }
-                            </select>
+                            <SelectDropdownComponent TItem="CountryDto" TValue="int?"
+                                                     @bind-Value="_formModel.CountryId"
+                                                     Items="_countries"
+                                                     ValueSelector="c => (int?)c.Id"
+                                                     TextSelector="c => c.Name"
+                                                     PlaceholderText="@Localizer["UserCreateEditPage_SelectCountry"]" />
                         </div>
                         <div class="col-12">
                             <label class="form-label">@(_isSuperAdmin ? Localizer["UserCreateEditPage_Groups"] : Localizer["UserCreateEditPage_ManagedGroups"])</label>
-                            @if (_availableGroups.Any())
-                            {
-                                <div class="border rounded p-2 scroll-container-sm">
-                                    @foreach (var group in _availableGroups)
-                                    {
-                                        <div class="form-check">
-                                            <input class="form-check-input"
-                                                   type="checkbox"
-                                                   id="user-group-@group.Id"
-                                                   checked="@_selectedGroupIds.Contains(group.Id)"
-                                                   @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
-                                            <label class="form-check-label" for="user-group-@group.Id">@group.Name</label>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="form-text text-muted">@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]</div>
-                            }
+                            <GroupCheckboxListComponent Groups="_availableGroups"
+                                                         SelectedGroupIds="_selectedGroupIds"
+                                                         IdPrefix="user-group"
+                                                         ListCssClass="scroll-container-sm"
+                                                         EmptyText="@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]" />
                         </div>
                         @if (_isEdit)
                         {
@@ -149,16 +124,13 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">@Localizer["UserCreateEditPage_WelcomeMessage"]</label>
-                                <InputTextArea class="form-control" rows="2" @bind-Value="_formModel.WelcomeMessage" placeholder='@Localizer["UserCreateEditPage_WelcomeMessagePlaceholder"]' />
+                                <InputTextArea class="form-control" rows="2" @bind-Value="_formModel.WelcomeMessage" />
                             </div>
                             <div class="col-12">
                                 <label class="form-label">@Localizer["UserCreateEditPage_SetNewPasswordLeaveBlank"]</label>
-                                <div class="input-group">
-                                    <input class="form-control" type="password" placeholder='@Localizer["UserCreateEditPage_NewPasswordMinCharsPlaceholder"]' @bind="_formModel.NewPassword" />
-                                    <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserCreateEditPage_GeneratePassword"]'>
-                                        <i class="@AppIcons.Wand" aria-hidden="true"></i>
-                                    </button>
-                                </div>
+                                <PasswordInputComponent @bind-Value="_formModel.NewPassword"
+                                                         placeholder='@Localizer["UserCreateEditPage_NewPasswordMinCharsPlaceholder"]'
+                                                         ShowGenerateButton="true" OnGenerated="OnNewPasswordGenerated" />
                                 @if (!string.IsNullOrEmpty(_passwordValidationError))
                                 {
                                     <div class="text-danger small mt-1">@_passwordValidationError</div>
@@ -172,9 +144,9 @@
                     </div>
                 </Body>
                 <Footer>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex justify-content-between">
                         <button type="submit" class="btn btn-primary" disabled="@(_saving || IsWriteBlocked)"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
-                        <a href="/users" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</a>
+                        <button type="button" class="btn btn-secondary" @onclick="GoBack"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</button>
                     </div>
                 </Footer>
             </CardComponent>
@@ -183,57 +155,6 @@
 </div>
 
 @code {
-    private class UserFormModel : IValidatableObject
-    {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string Role { get; set; } = "User";
-        public string Gender { get; set; } = "Other";
-        public DateTime? Birthday { get; set; }
-        public string Mobile { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
-        public int? CountryId { get; set; }
-        public string WelcomeMessage { get; set; } = string.Empty;
-        public string NewPassword { get; set; } = string.Empty;
-        public DateTime? EntryDate { get; set; }
-        public bool IsActive { get; set; } = true;
-
-        internal bool IsEdit { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            var localizer = validationContext.GetService(typeof(IStringLocalizer<SharedResources>)) as IStringLocalizer<SharedResources>;
-
-            if (string.IsNullOrWhiteSpace(FirstName))
-            {
-                yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_FirstNameRequired"), new[] { nameof(FirstName) });
-            }
-
-            if (string.IsNullOrWhiteSpace(LastName))
-            {
-                yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_LastNameRequired"), new[] { nameof(LastName) });
-            }
-
-            if (string.IsNullOrWhiteSpace(Email))
-            {
-                yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EmailRequired"), new[] { nameof(Email) });
-            }
-            else if (!new EmailAddressAttribute().IsValid(Email))
-            {
-                yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EmailInvalid"), new[] { nameof(Email) });
-            }
-
-            if (!IsEdit && string.IsNullOrWhiteSpace(Password))
-            {
-                yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_PasswordRequired"), new[] { nameof(Password) });
-            }
-        }
-
-        private static string GetMessage(IStringLocalizer<SharedResources>? localizer, string key) => localizer is null ? key : localizer[key].Value;
-    }
-
     [Parameter] public int? Id { get; set; }
 
     private List<GroupDto> _availableGroups = new();
@@ -248,6 +169,8 @@
     private string _passwordValidationError = string.Empty;
     private string? _formError;
     private UserFormModel _formModel = new();
+    private List<(string Value, string Label)> _roleOptions = new();
+    private List<(string Value, string Label)> _genderOptions = new();
 
     private bool _isEdit => Id.HasValue;
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
@@ -259,12 +182,26 @@
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var currentUser = authState.User;
-        _isSuperAdmin = currentUser.HasClaim("SuperAdmin", "true");
-        _managedGroupIds = currentUser.Claims
-            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin")
-            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
-            .Where(groupId => groupId > 0)
-            .ToHashSet();
+        _isSuperAdmin = AuthorizationHelper.IsSuperAdmin(currentUser);
+        _managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Admin").ToHashSet();
+
+        _roleOptions = _isSuperAdmin
+            ? new List<(string Value, string Label)>
+            {
+                ("User", Localizer["UserCreateEditPage_User"]),
+                ("SuperAdmin", Localizer["UserCreateEditPage_SuperAdmin"])
+            }
+            : new List<(string Value, string Label)>
+            {
+                ("User", Localizer["UserCreateEditPage_User"])
+            };
+
+        _genderOptions = new List<(string Value, string Label)>
+        {
+            ("Male", Localizer["Enum_Gender_Male"]),
+            ("Female", Localizer["Enum_Gender_Female"]),
+            ("Other", Localizer["Enum_Gender_Other"])
+        };
 
         var allGroups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
         _availableGroups = _isSuperAdmin
@@ -395,7 +332,7 @@
 
             if (_isEdit && !string.IsNullOrWhiteSpace(_formModel.NewPassword))
             {
-                if (!ValidatePassword(_formModel.NewPassword, out var pwError))
+                if (!PasswordGenerator.Validate(_formModel.NewPassword, out var pwError))
                 {
                     _passwordValidationError = Localizer[pwError];
                     return;
@@ -450,45 +387,10 @@
         }
     }
 
-    private void GoBack()
-    {
-        if (_isEdit)
-        {
-            NavigationManager.NavigateTo($"/users/{Id}");
-        }
-        else
-        {
-            NavigationManager.NavigateTo("/users");
-        
-        }
-    }
+    private void GoBack() => NavigationManager.NavigateTo(_isEdit ? $"/users/{Id}" : "/users");
 
-    private void ToggleGroup(int groupId, bool selected)
+    private void OnNewPasswordGenerated(string password)
     {
-        if (selected)
-        {
-            _selectedGroupIds.Add(groupId);
-        }
-        else
-        {
-            _selectedGroupIds.Remove(groupId);
-        }
-    }
-
-    private void GeneratePassword()
-    {
-        _formModel.NewPassword = PasswordGenerator.Generate();
         _passwordValidationError = string.Empty;
-    }
-
-    private static bool ValidatePassword(string password, out string error)
-    {
-        error = string.Empty;
-        if (password.Length < 8) { error = "UserCreateEditPage_PasswordValidationMinLength"; return false; }
-        if (!password.Any(char.IsUpper)) { error = "UserCreateEditPage_PasswordValidationUppercase"; return false; }
-        if (!password.Any(char.IsLower)) { error = "UserCreateEditPage_PasswordValidationLowercase"; return false; }
-        if (!password.Any(char.IsDigit)) { error = "UserCreateEditPage_PasswordValidationDigit"; return false; }
-        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { error = "UserCreateEditPage_PasswordValidationSpecialCharacter"; return false; }
-        return true;
     }
 }

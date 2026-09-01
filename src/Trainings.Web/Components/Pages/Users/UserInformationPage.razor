@@ -96,33 +96,17 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">@Localizer["UserInformationPage_CurrentPassword"]</label>
-                        <div class="input-group">
-                            <input class="form-control" type="@(_showCurrentPassword ? "text" : "password")" autocomplete="current-password" @bind="_passwordForm.CurrentPassword" />
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showCurrentPassword = !_showCurrentPassword" title='@Localizer["UserInformationPage_TogglePasswordVisibility"]'>
-                                <i class="@(_showCurrentPassword ? AppIcons.EyeSlash : AppIcons.Eye)" aria-hidden="true"></i>
-                            </button>
-                        </div>
+                        <PasswordInputComponent @key="_passwordFieldsResetKey" @bind-Value="_passwordForm.CurrentPassword" autocomplete="current-password" />
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["UserInformationPage_NewPassword"]</label>
-                        <div class="input-group">
-                            <input class="form-control" type="@(_showNewPassword ? "text" : "password")" autocomplete="new-password" placeholder='@Localizer["UserInformationPage_NewPasswordPlaceholder"]' @bind="_passwordForm.NewPassword" />
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showNewPassword = !_showNewPassword" title='@Localizer["UserInformationPage_TogglePasswordVisibility"]'>
-                                <i class="@(_showNewPassword ? AppIcons.EyeSlash : AppIcons.Eye)" aria-hidden="true"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" @onclick="GeneratePassword" title='@Localizer["UserInformationPage_GeneratePassword"]'>
-                                <i class="@AppIcons.Wand" aria-hidden="true"></i>
-                            </button>
-                        </div>
+                        <PasswordInputComponent @key="_passwordFieldsResetKey" @bind-Value="_passwordForm.NewPassword" autocomplete="new-password"
+                                                 placeholder='@Localizer["UserInformationPage_NewPasswordPlaceholder"]'
+                                                 ShowGenerateButton="true" OnGenerated="OnNewPasswordGenerated" />
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["UserInformationPage_ConfirmNewPassword"]</label>
-                        <div class="input-group">
-                            <input class="form-control" type="@(_showConfirmPassword ? "text" : "password")" autocomplete="new-password" @bind="_passwordForm.ConfirmNewPassword" />
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => _showConfirmPassword = !_showConfirmPassword" title='@Localizer["UserInformationPage_TogglePasswordVisibility"]'>
-                                <i class="@(_showConfirmPassword ? AppIcons.EyeSlash : AppIcons.Eye)" aria-hidden="true"></i>
-                            </button>
-                        </div>
+                        <PasswordInputComponent @key="_passwordFieldsResetKey" @bind-Value="_passwordForm.ConfirmNewPassword" autocomplete="new-password" />
                     </div>
                 </div>
 
@@ -178,9 +162,7 @@
     private ChangePasswordFormModel _passwordForm = new();
     private string? _passwordResultMessage;
     private bool _passwordResultSuccess;
-    private bool _showCurrentPassword;
-    private bool _showNewPassword;
-    private bool _showConfirmPassword;
+    private int _passwordFieldsResetKey;
 
     private List<CountryDto> _countries = new();
     private List<GroupMembershipRow> _memberships = new();
@@ -269,12 +251,9 @@
         }
     }
 
-    private void GeneratePassword()
+    private void OnNewPasswordGenerated(string password)
     {
-        var password = PasswordGenerator.Generate();
-        _passwordForm.NewPassword = password;
         _passwordForm.ConfirmNewPassword = password;
-        _showNewPassword = true;
         _passwordResultMessage = null;
     }
 
@@ -319,9 +298,7 @@
             await UserService.ChangePasswordAsync(_userId, _passwordForm.NewPassword);
 
             _passwordForm = new ChangePasswordFormModel();
-            _showCurrentPassword = false;
-            _showNewPassword = false;
-            _showConfirmPassword = false;
+            _passwordFieldsResetKey++;
             await ShowToastAsync(Localizer["UserInformationPage_PasswordChangedSuccess"]);
         }
         catch (Exception ex)

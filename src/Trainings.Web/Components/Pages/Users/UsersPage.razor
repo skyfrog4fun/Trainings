@@ -10,6 +10,7 @@
 @inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@Localizer["Shared_Users"]</PageTitle>
 
@@ -221,12 +222,8 @@
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var currentUser = authState.User;
-        _isSuperAdmin = currentUser.HasClaim("SuperAdmin", "true");
-        _managedGroupIds = currentUser.Claims
-            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && c.Value == "Admin")
-            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
-            .Where(groupId => groupId > 0)
-            .ToHashSet();
+        _isSuperAdmin = AuthorizationHelper.IsSuperAdmin(currentUser);
+        _managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Admin").ToHashSet();
 
         var allGroups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
         _availableGroups = _isSuperAdmin

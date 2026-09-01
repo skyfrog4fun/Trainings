@@ -8,9 +8,13 @@ General
 User Information
 ---
 - [X] UserInformation: Reworked
+- [X] User Detail (/users/{id}) - Admin View: rework
+- [X] User Edit (/users/{id}/edit) - Admin View: rework
+- [ ] Back button on 'Create User' has a strange green when pressed and hold
+- [ ] Method 'ValidatePassword' still used on UserInformationPage?
+- [ ] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
+- [ ] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
 - [ ] User Overview (/users) - Admin View: rework
-- [ ] User Detail (/users/{id}) - Admin View: rework
-- [ ] User Edit (/users/{id}/edit) - Admin View: rework
 
 
 Design User Pages
@@ -61,6 +65,11 @@ Ideas
 
 
 ---
+
+Done - Reworked Sections
+- [X] Locations
+- [X] User Information
+- [ ] Users (List, Details, Edit/New)
 
 Done - General
 ---

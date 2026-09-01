@@ -62,7 +62,7 @@
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <label class="form-label">@Localizer["RegisterPage_PasswordLabel"]</label>
-                                    <input type="password" class="form-control" @bind="_formModel.Password" />
+                                    <PasswordInputComponent @bind-Value="_formModel.Password" />
                                     <ValidationMessage For="() => _formModel.Password" />
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -108,17 +108,7 @@
                                     }
                                     else
                                     {
-                                        <div class="border rounded p-2">
-                                            @foreach (var group in GroupsForSelectedCountry)
-                                            {
-                                                <div class="form-check d-flex align-items-center gap-2 mb-2">
-                                                    <input class="form-check-input form-check-input-flex flex-shrink-0" type="checkbox" id="grp-@group.Id"
-                                                           checked="@_selectedGroupIds.Contains(group.Id)"
-                                                           @onchange="e => ToggleGroup(group.Id, (bool)(e.Value ?? false))" />
-                                                    <label class="form-check-label mb-0" for="grp-@group.Id">@group.Name</label>
-                                                </div>
-                                            }
-                                        </div>
+                                        <GroupCheckboxListComponent Groups="GroupsForSelectedCountry" SelectedGroupIds="_selectedGroupIds" IdPrefix="grp" />
                                     }
                                 </div>
                                 <div class="col-12">
@@ -192,18 +182,6 @@
         }
 
         return country.Id == countryId;
-    }
-
-    private void ToggleGroup(int groupId, bool selected)
-    {
-        if (selected)
-        {
-            _selectedGroupIds.Add(groupId);
-        }
-        else
-        {
-            _selectedGroupIds.Remove(groupId);
-        }
     }
 
     private void OnCountryChanged()

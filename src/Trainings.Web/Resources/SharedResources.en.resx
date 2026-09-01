@@ -1212,9 +1212,6 @@
   <data name="UserCreateEditPage_City" xml:space="preserve">
     <value>City</value>
   </data>
-  <data name="UserCreateEditPage_CityPlaceholder" xml:space="preserve">
-    <value>Enter city</value>
-  </data>
   <data name="UserCreateEditPage_Country" xml:space="preserve">
     <value>Country</value>
   </data>
@@ -1236,14 +1233,8 @@
   <data name="UserCreateEditPage_FirstName" xml:space="preserve">
     <value>First Name</value>
   </data>
-  <data name="UserCreateEditPage_FirstNamePlaceholder" xml:space="preserve">
-    <value>Enter first name</value>
-  </data>
   <data name="UserCreateEditPage_Gender" xml:space="preserve">
     <value>Gender</value>
-  </data>
-  <data name="UserCreateEditPage_GeneratePassword" xml:space="preserve">
-    <value>Generate Password</value>
   </data>
   <data name="UserCreateEditPage_Groups" xml:space="preserve">
     <value>Groups</value>
@@ -1251,17 +1242,11 @@
   <data name="UserCreateEditPage_LastName" xml:space="preserve">
     <value>Last Name</value>
   </data>
-  <data name="UserCreateEditPage_LastNamePlaceholder" xml:space="preserve">
-    <value>Enter last name</value>
-  </data>
   <data name="UserCreateEditPage_ManagedGroups" xml:space="preserve">
     <value>Managed Groups</value>
   </data>
   <data name="UserCreateEditPage_Mobile" xml:space="preserve">
     <value>Mobile</value>
-  </data>
-  <data name="UserCreateEditPage_MobilePlaceholder" xml:space="preserve">
-    <value>Enter mobile number</value>
   </data>
   <data name="UserCreateEditPage_NewPasswordMinCharsPlaceholder" xml:space="preserve">
     <value>New password (min. 8 chars)</value>
@@ -1271,9 +1256,6 @@
   </data>
   <data name="UserCreateEditPage_Password" xml:space="preserve">
     <value>Password</value>
-  </data>
-  <data name="UserCreateEditPage_PasswordPlaceholder" xml:space="preserve">
-    <value>Enter password</value>
   </data>
   <data name="UserCreateEditPage_ReadOnlyModeSuperAdminOnly" xml:space="preserve">
     <value>Read Only mode is active. Only SuperAdmins can make changes.</value>
@@ -1297,9 +1279,6 @@
     <value>User not found.</value>
   </data>
   <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
-    <value>Welcome Message</value>
-  </data>
-  <data name="UserCreateEditPage_WelcomeMessagePlaceholder" xml:space="preserve">
     <value>Welcome Message</value>
   </data>
   <data name="UserCreateEditPage_PasswordValidationMinLength" xml:space="preserve">
@@ -1896,9 +1875,6 @@
   <data name="UserInformationPage_ConfirmNewPassword" xml:space="preserve">
     <value>Confirm New Password</value>
   </data>
-  <data name="UserInformationPage_GeneratePassword" xml:space="preserve">
-    <value>Generate Password</value>
-  </data>
   <data name="UserInformationPage_CurrentPasswordRequired" xml:space="preserve">
     <value>Current password is required.</value>
   </data>
@@ -1944,8 +1920,11 @@
   <data name="UserInformationPage_CountryRequired" xml:space="preserve">
     <value>Country is required.</value>
   </data>
-  <data name="UserInformationPage_TogglePasswordVisibility" xml:space="preserve">
+  <data name="Shared_TogglePasswordVisibility" xml:space="preserve">
     <value>Show/hide password</value>
+  </data>
+  <data name="Shared_GeneratePassword" xml:space="preserve">
+    <value>Generate Password</value>
   </data>
   <data name="Shared_Back" xml:space="preserve">
     <value>Back</value>
