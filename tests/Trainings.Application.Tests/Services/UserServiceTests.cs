@@ -49,15 +49,38 @@ public class UserServiceTests
     [Fact]
     public async Task CreateAsyncCallsRepositoryAndReturnsDto()
     {
-        _hasherMock.Setup(h => h.Hash("password")).Returns("hashed");
+        _hasherMock.Setup(h => h.Hash("Password1!")).Returns("hashed");
         _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
-        var dto = new CreateUserDto { FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", Password = "password", Role = UserRole.User };
+        var dto = new CreateUserDto { FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", Password = "Password1!", Role = UserRole.User };
         var result = await _service.CreateAsync(dto);
 
         result.Should().NotBeNull();
         result.DisplayName.Should().Be("Bob Jones");
         _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsyncThrowsForWeakPasswordWithoutTouchingRepository()
+    {
+        var dto = new CreateUserDto { FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", Password = "weak", Role = UserRole.User };
+
+        var act = () => _service.CreateAsync(dto);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+        _userRepoMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ChangePasswordAsyncThrowsForWeakPasswordWithoutUpdatingUser()
+    {
+        var user = new User { Id = 3, PasswordHash = "old-hash" };
+        _userRepoMock.Setup(r => r.GetByIdAsync(3)).ReturnsAsync(user);
+
+        var act = () => _service.ChangePasswordAsync(3, "weak");
+
+        await act.Should().ThrowAsync<ArgumentException>();
+        _userRepoMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
     }
 
     [Fact]

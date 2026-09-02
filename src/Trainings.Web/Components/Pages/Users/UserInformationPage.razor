@@ -279,10 +279,10 @@
             return;
         }
 
-        if (!ValidatePassword(_passwordForm.NewPassword, out var validationErrorKey))
+        if (!PasswordPolicy.Validate(_passwordForm.NewPassword, out var passwordError))
         {
             _passwordResultSuccess = false;
-            _passwordResultMessage = Localizer[validationErrorKey];
+            _passwordResultMessage = Localizer[PasswordPolicyLocalization.GetResourceKey(passwordError)];
             return;
         }
 
@@ -301,6 +301,11 @@
             _passwordFieldsResetKey++;
             await ShowToastAsync(Localizer["UserInformationPage_PasswordChangedSuccess"]);
         }
+        catch (PasswordPolicyViolationException ex)
+        {
+            _passwordResultSuccess = false;
+            _passwordResultMessage = Localizer[PasswordPolicyLocalization.GetResourceKey(ex.Error)];
+        }
         catch (Exception ex)
         {
             _passwordResultSuccess = false;
@@ -314,16 +319,5 @@
         {
             await _toast.Show(message);
         }
-    }
-
-    private static bool ValidatePassword(string password, out string errorKey)
-    {
-        errorKey = string.Empty;
-        if (password.Length < 8) { errorKey = "UserInformationPage_PasswordValidationMinLength"; return false; }
-        if (!password.Any(char.IsUpper)) { errorKey = "UserInformationPage_PasswordValidationUppercase"; return false; }
-        if (!password.Any(char.IsLower)) { errorKey = "UserInformationPage_PasswordValidationLowercase"; return false; }
-        if (!password.Any(char.IsDigit)) { errorKey = "UserInformationPage_PasswordValidationDigit"; return false; }
-        if (!password.Any(c => "!@#$%^&*()-_=+[]{}|;:',.<>?".Contains(c))) { errorKey = "UserInformationPage_PasswordValidationSpecialCharacter"; return false; }
-        return true;
     }
 }

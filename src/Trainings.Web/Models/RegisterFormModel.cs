@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.Extensions.Localization;
 
+using Trainings.Application.Services;
+using Trainings.Web.Services;
+
 namespace Trainings.Web.Models;
 
 public class RegisterFormModel : IValidatableObject
@@ -23,26 +26,30 @@ public class RegisterFormModel : IValidatableObject
 
         if (string.IsNullOrWhiteSpace(FirstName))
         {
-            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_FirstNameRequired"), new[] { nameof(FirstName) });
+            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_FirstNameRequired"), [nameof(FirstName)]);
         }
         if (string.IsNullOrWhiteSpace(LastName))
         {
-            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_LastNameRequired"), new[] { nameof(LastName) });
+            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_LastNameRequired"), [nameof(LastName)]);
         }
 
         if (string.IsNullOrWhiteSpace(Email))
         {
-            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_EmailRequired"), new[] { nameof(Email) });
+            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_EmailRequired"), [nameof(Email)]);
         }
 
-        if (string.IsNullOrWhiteSpace(Password) || Password.Length < 6)
+        if (string.IsNullOrWhiteSpace(Password))
         {
-            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_PasswordTooShort"), new[] { nameof(Password) });
+            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_PasswordRequired"), [nameof(Password)]);
+        }
+        else if (!PasswordPolicy.Validate(Password, out var passwordError))
+        {
+            yield return new ValidationResult(GetMessage(localizer, PasswordPolicyLocalization.GetResourceKey(passwordError)), [nameof(Password)]);
         }
 
         if (CountryId is null)
         {
-            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_CountryRequired"), new[] { nameof(CountryId) });
+            yield return new ValidationResult(GetMessage(localizer, "RegisterPage_CountryRequired"), [nameof(CountryId)]);
         }
     }
 

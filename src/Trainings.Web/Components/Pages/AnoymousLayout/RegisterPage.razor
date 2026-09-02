@@ -217,6 +217,10 @@
             _emailPreview = result.ConfirmationEmail.Preview;
             _registered = true;
         }
+        catch (PasswordPolicyViolationException ex)
+        {
+            _error = Localizer[PasswordPolicyLocalization.GetResourceKey(ex.Error)];
+        }
         catch (Exception ex)
         {
             _error = ex.Message;

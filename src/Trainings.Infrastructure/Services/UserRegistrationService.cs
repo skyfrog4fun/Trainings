@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
+using Trainings.Application.Services;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;
@@ -29,6 +30,7 @@ public class UserRegistrationService(
     public async Task<RegistrationResultDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+        PasswordPolicy.EnsureValid(dto.Password, nameof(dto.Password));
 
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email, ct))
         {

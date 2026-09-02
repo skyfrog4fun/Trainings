@@ -44,6 +44,7 @@ public class UserService(
     public async Task<UserDto> CreateAsync(CreateUserDto dto)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+        PasswordPolicy.EnsureValid(dto.Password, nameof(dto.Password));
 
         var user = new User
         {
@@ -134,6 +135,7 @@ public class UserService(
     public async Task ChangePasswordAsync(int userId, string newPassword)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+        PasswordPolicy.EnsureValid(newPassword, nameof(newPassword));
         var user = await _userRepository.GetByIdAsync(userId)
             ?? throw new InvalidOperationException($"User {userId} not found.");
         user.PasswordHash = _passwordHasher.Hash(newPassword);

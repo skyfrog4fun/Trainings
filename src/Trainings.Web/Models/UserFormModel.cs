@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.Extensions.Localization;
 
+using Trainings.Application.Services;
+using Trainings.Web.Services;
+
 namespace Trainings.Web.Models;
 
 public class UserFormModel : IValidatableObject
@@ -29,26 +32,38 @@ public class UserFormModel : IValidatableObject
 
         if (string.IsNullOrWhiteSpace(FirstName))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_FirstNameRequired"), new[] { nameof(FirstName) });
+            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_FirstNameRequired"), [nameof(FirstName)]);
         }
 
         if (string.IsNullOrWhiteSpace(LastName))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_LastNameRequired"), new[] { nameof(LastName) });
+            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_LastNameRequired"), [nameof(LastName)]);
         }
 
         if (string.IsNullOrWhiteSpace(Email))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EmailRequired"), new[] { nameof(Email) });
+            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EmailRequired"), [nameof(Email)]);
         }
         else if (!new EmailAddressAttribute().IsValid(Email))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EmailInvalid"), new[] { nameof(Email) });
+            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EmailInvalid"), [nameof(Email)]);
         }
 
-        if (!IsEdit && string.IsNullOrWhiteSpace(Password))
+        if (!IsEdit)
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_PasswordRequired"), new[] { nameof(Password) });
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_PasswordRequired"), [nameof(Password)]);
+            }
+            else if (!PasswordPolicy.Validate(Password, out var passwordError))
+            {
+                yield return new ValidationResult(GetMessage(localizer, PasswordPolicyLocalization.GetResourceKey(passwordError)), [nameof(Password)]);
+            }
+        }
+
+        if (IsEdit && !string.IsNullOrWhiteSpace(NewPassword) && !PasswordPolicy.Validate(NewPassword, out var newPasswordError))
+        {
+            yield return new ValidationResult(GetMessage(localizer, PasswordPolicyLocalization.GetResourceKey(newPasswordError)), [nameof(NewPassword)]);
         }
     }
 

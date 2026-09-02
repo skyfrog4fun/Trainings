@@ -10,10 +10,10 @@ User Information
 - [X] UserInformation: Reworked
 - [X] User Detail (/users/{id}) - Admin View: rework
 - [X] User Edit (/users/{id}/edit) - Admin View: rework
-- [ ] Back button on 'Create User' has a strange green when pressed and hold
-- [ ] Method 'ValidatePassword' still used on UserInformationPage?
+- [X] Back button on 'Create User' has a strange green when pressed and hold
+- [X] Method 'ValidatePassword' still used on UserInformationPage?
 - [ ] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
-- [ ] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
+- [X] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
 - [ ] User Overview (/users) - Admin View: rework
 
 

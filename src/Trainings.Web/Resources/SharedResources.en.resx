@@ -1281,19 +1281,19 @@
   <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
     <value>Welcome Message</value>
   </data>
-  <data name="UserCreateEditPage_PasswordValidationMinLength" xml:space="preserve">
+  <data name="Shared_PasswordValidationMinLength" xml:space="preserve">
     <value>Password must be at least 8 characters.</value>
   </data>
-  <data name="UserCreateEditPage_PasswordValidationUppercase" xml:space="preserve">
+  <data name="Shared_PasswordValidationUppercase" xml:space="preserve">
     <value>Password must contain at least one uppercase letter.</value>
   </data>
-  <data name="UserCreateEditPage_PasswordValidationLowercase" xml:space="preserve">
+  <data name="Shared_PasswordValidationLowercase" xml:space="preserve">
     <value>Password must contain at least one lowercase letter.</value>
   </data>
-  <data name="UserCreateEditPage_PasswordValidationDigit" xml:space="preserve">
+  <data name="Shared_PasswordValidationDigit" xml:space="preserve">
     <value>Password must contain at least one digit.</value>
   </data>
-  <data name="UserCreateEditPage_PasswordValidationSpecialCharacter" xml:space="preserve">
+  <data name="Shared_PasswordValidationSpecialCharacter" xml:space="preserve">
     <value>Password must contain at least one special character.</value>
   </data>
   <data name="UserDetailPage_Training" xml:space="preserve">
@@ -1515,17 +1515,14 @@
   <data name="RegisterPage_EmailRequired" xml:space="preserve">
     <value>Email is required.</value>
   </data>
-  <data name="RegisterPage_PasswordTooShort" xml:space="preserve">
-    <value>Password must be at least 6 characters.</value>
+  <data name="RegisterPage_PasswordRequired" xml:space="preserve">
+    <value>Password is required.</value>
   </data>
   <data name="ResetPasswordPage_NewPasswordRequired" xml:space="preserve">
     <value>Please enter a new password.</value>
   </data>
   <data name="ResetPasswordPage_PasswordsDoNotMatch" xml:space="preserve">
     <value>Passwords do not match.</value>
-  </data>
-  <data name="ResetPasswordPage_PasswordTooShort" xml:space="preserve">
-    <value>Password must be at least 6 characters.</value>
   </data>
   <data name="GroupCreateEditPage_EditGroup" xml:space="preserve">
     <value>Edit Group</value>
@@ -1892,21 +1889,6 @@
   </data>
   <data name="UserInformationPage_NewPasswordPlaceholder" xml:space="preserve">
     <value>New password (min. 8 chars)</value>
-  </data>
-  <data name="UserInformationPage_PasswordValidationMinLength" xml:space="preserve">
-    <value>Password must be at least 8 characters.</value>
-  </data>
-  <data name="UserInformationPage_PasswordValidationUppercase" xml:space="preserve">
-    <value>Password must contain at least one uppercase letter.</value>
-  </data>
-  <data name="UserInformationPage_PasswordValidationLowercase" xml:space="preserve">
-    <value>Password must contain at least one lowercase letter.</value>
-  </data>
-  <data name="UserInformationPage_PasswordValidationDigit" xml:space="preserve">
-    <value>Password must contain at least one digit.</value>
-  </data>
-  <data name="UserInformationPage_PasswordValidationSpecialCharacter" xml:space="preserve">
-    <value>Password must contain at least one special character.</value>
   </data>
   <data name="UserInformationPage_FirstNameRequired" xml:space="preserve">
     <value>First name is required.</value>

@@ -130,11 +130,8 @@
                                 <label class="form-label">@Localizer["UserCreateEditPage_SetNewPasswordLeaveBlank"]</label>
                                 <PasswordInputComponent @bind-Value="_formModel.NewPassword"
                                                          placeholder='@Localizer["UserCreateEditPage_NewPasswordMinCharsPlaceholder"]'
-                                                         ShowGenerateButton="true" OnGenerated="OnNewPasswordGenerated" />
-                                @if (!string.IsNullOrEmpty(_passwordValidationError))
-                                {
-                                    <div class="text-danger small mt-1">@_passwordValidationError</div>
-                                }
+                                                         ShowGenerateButton="true" />
+                                <ValidationMessage For="() => _formModel.NewPassword" class="text-danger small" />
                             </div>
                         }
                     </div>
@@ -166,7 +163,6 @@
     private bool _loading = true;
     private bool _saving;
     private bool _isAccessDenied;
-    private string _passwordValidationError = string.Empty;
     private string? _formError;
     private UserFormModel _formModel = new();
     private List<(string Value, string Label)> _roleOptions = new();
@@ -275,7 +271,6 @@
 
         _saving = true;
         _formError = null;
-        _passwordValidationError = string.Empty;
 
         if (!_isSuperAdmin && _selectedGroupIds.Count == 0)
         {
@@ -332,16 +327,14 @@
 
             if (_isEdit && !string.IsNullOrWhiteSpace(_formModel.NewPassword))
             {
-                if (!PasswordGenerator.Validate(_formModel.NewPassword, out var pwError))
-                {
-                    _passwordValidationError = Localizer[pwError];
-                    return;
-                }
-
                 await UserService.ChangePasswordAsync(userId, _formModel.NewPassword);
             }
 
             NavigationManager.NavigateTo($"/users/{userId}");
+        }
+        catch (PasswordPolicyViolationException ex)
+        {
+            _formError = Localizer[PasswordPolicyLocalization.GetResourceKey(ex.Error)];
         }
         catch (Exception ex)
         {
@@ -388,9 +381,4 @@
     }
 
     private void GoBack() => NavigationManager.NavigateTo(_isEdit ? $"/users/{Id}" : "/users");
-
-    private void OnNewPasswordGenerated(string password)
-    {
-        _passwordValidationError = string.Empty;
-    }
 }
