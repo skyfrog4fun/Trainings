@@ -317,6 +317,9 @@ h1:focus {
   --bs-btn-hover-color: var(--brand-tradition);
   --bs-btn-hover-bg: var(--special-secondary-hover);
   --bs-btn-hover-border-color: var(--special-secondary-hover);
+  --bs-btn-active-color: var(--brand-tradition);
+  --bs-btn-active-bg: var(--color-success);
+  --bs-btn-active-border-color: var(--color-success);
 }
 
 .btn-secondary,
