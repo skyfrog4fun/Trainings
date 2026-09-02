@@ -12,8 +12,11 @@ User Information
 - [X] User Edit (/users/{id}/edit) - Admin View: rework
 - [X] Back button on 'Create User' has a strange green when pressed and hold
 - [X] Method 'ValidatePassword' still used on UserInformationPage?
-- [ ] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
 - [X] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
+- [X] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
+- [X] UserInformationPage: Gender has no German translation
+- [ ] UserInformaitonPage: fix localization in Group Memberships section (EN/DE)
+- [ ] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
 - [ ] User Overview (/users) - Admin View: rework
 
 

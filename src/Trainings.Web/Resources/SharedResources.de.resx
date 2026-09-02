@@ -211,7 +211,7 @@
     <value>Verifizierungs-E-Mail konnte nicht erneut gesendet werden: {0}</value>
   </data>
   <data name="Enum_Gender_Female" xml:space="preserve">
-    <value>Female</value>
+    <value>Weiblich</value>
   </data>
   <data name="UsersPage_Gender" xml:space="preserve">
     <value>Gender</value>
@@ -229,7 +229,7 @@
     <value>Log ID</value>
   </data>
   <data name="Enum_Gender_Male" xml:space="preserve">
-    <value>Male</value>
+    <value>Männlich</value>
   </data>
   <data name="Shared_Mobile" xml:space="preserve">
     <value>Mobile</value>
@@ -277,7 +277,7 @@
     <value>Open Training Details</value>
   </data>
   <data name="Enum_Gender_Other" xml:space="preserve">
-    <value>Other</value>
+    <value>Keine Angabe / Nicht-binär</value>
   </data>
   <data name="HomePage_OutstandingUsersToApprove" xml:space="preserve">
     <value>Outstanding Users To Approve</value>
@@ -1281,21 +1281,6 @@
   <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
     <value>Willkommensnachricht</value>
   </data>
-  <data name="Shared_PasswordValidationMinLength" xml:space="preserve">
-    <value>Das Passwort muss mindestens 8 Zeichen lang sein.</value>
-  </data>
-  <data name="Shared_PasswordValidationUppercase" xml:space="preserve">
-    <value>Das Passwort muss mindestens einen Grossbuchstaben enthalten.</value>
-  </data>
-  <data name="Shared_PasswordValidationLowercase" xml:space="preserve">
-    <value>Das Passwort muss mindestens einen Kleinbuchstaben enthalten.</value>
-  </data>
-  <data name="Shared_PasswordValidationDigit" xml:space="preserve">
-    <value>Das Passwort muss mindestens eine Ziffer enthalten.</value>
-  </data>
-  <data name="Shared_PasswordValidationSpecialCharacter" xml:space="preserve">
-    <value>Das Passwort muss mindestens ein Sonderzeichen enthalten.</value>
-  </data>
   <data name="UserDetailPage_Training" xml:space="preserve">
     <value>Training</value>
   </data>
@@ -1435,7 +1420,7 @@
     <value>Weiblich</value>
   </data>
   <data name="RegisterPage_GenderOther" xml:space="preserve">
-    <value>Andere / Keine Angabe</value>
+    <value>Keine Angabe / Nicht-binär</value>
   </data>
   <data name="RegisterPage_BirthdayLabel" xml:space="preserve">
     <value>Geburtstag</value>
@@ -1514,9 +1499,6 @@
   </data>
   <data name="RegisterPage_EmailRequired" xml:space="preserve">
     <value>E-Mail ist erforderlich.</value>
-  </data>
-  <data name="RegisterPage_PasswordRequired" xml:space="preserve">
-    <value>Passwort ist erforderlich.</value>
   </data>
   <data name="ResetPasswordPage_NewPasswordRequired" xml:space="preserve">
     <value>Bitte gib ein neues Passwort ein.</value>
@@ -1910,5 +1892,23 @@
   </data>
   <data name="Shared_Back" xml:space="preserve">
     <value>Zurück</value>
+  </data>
+  <data name="Shared_PasswordValidationMinLength" xml:space="preserve">
+    <value>Das Passwort muss mindestens 8 Zeichen lang sein.</value>
+  </data>
+  <data name="Shared_PasswordValidationUppercase" xml:space="preserve">
+    <value>Das Passwort muss mindestens einen Grossbuchstaben enthalten.</value>
+  </data>
+  <data name="Shared_PasswordValidationLowercase" xml:space="preserve">
+    <value>Das Passwort muss mindestens einen Kleinbuchstaben enthalten.</value>
+  </data>
+  <data name="Shared_PasswordValidationDigit" xml:space="preserve">
+    <value>Das Passwort muss mindestens eine Ziffer enthalten.</value>
+  </data>
+  <data name="Shared_PasswordValidationSpecialCharacter" xml:space="preserve">
+    <value>Das Passwort muss mindestens ein Sonderzeichen enthalten.</value>
+  </data>
+  <data name="RegisterPage_PasswordRequired" xml:space="preserve">
+    <value>Passwort ist erforderlich.</value>
   </data>
 </root>

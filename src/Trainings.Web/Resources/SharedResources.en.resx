@@ -277,7 +277,7 @@
     <value>Open Training Details</value>
   </data>
   <data name="Enum_Gender_Other" xml:space="preserve">
-    <value>Other</value>
+    <value>Prefer not to say / Non-binary</value>
   </data>
   <data name="HomePage_OutstandingUsersToApprove" xml:space="preserve">
     <value>Outstanding Users To Approve</value>
@@ -1281,21 +1281,6 @@
   <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
     <value>Welcome Message</value>
   </data>
-  <data name="Shared_PasswordValidationMinLength" xml:space="preserve">
-    <value>Password must be at least 8 characters.</value>
-  </data>
-  <data name="Shared_PasswordValidationUppercase" xml:space="preserve">
-    <value>Password must contain at least one uppercase letter.</value>
-  </data>
-  <data name="Shared_PasswordValidationLowercase" xml:space="preserve">
-    <value>Password must contain at least one lowercase letter.</value>
-  </data>
-  <data name="Shared_PasswordValidationDigit" xml:space="preserve">
-    <value>Password must contain at least one digit.</value>
-  </data>
-  <data name="Shared_PasswordValidationSpecialCharacter" xml:space="preserve">
-    <value>Password must contain at least one special character.</value>
-  </data>
   <data name="UserDetailPage_Training" xml:space="preserve">
     <value>Training</value>
   </data>
@@ -1435,7 +1420,7 @@
     <value>Female</value>
   </data>
   <data name="RegisterPage_GenderOther" xml:space="preserve">
-    <value>Other / Prefer not to say</value>
+    <value>Prefer not to say / Non-binary</value>
   </data>
   <data name="RegisterPage_BirthdayLabel" xml:space="preserve">
     <value>Birthday</value>
@@ -1514,9 +1499,6 @@
   </data>
   <data name="RegisterPage_EmailRequired" xml:space="preserve">
     <value>Email is required.</value>
-  </data>
-  <data name="RegisterPage_PasswordRequired" xml:space="preserve">
-    <value>Password is required.</value>
   </data>
   <data name="ResetPasswordPage_NewPasswordRequired" xml:space="preserve">
     <value>Please enter a new password.</value>
@@ -1910,5 +1892,23 @@
   </data>
   <data name="Shared_Back" xml:space="preserve">
     <value>Back</value>
+  </data>
+  <data name="Shared_PasswordValidationMinLength" xml:space="preserve">
+    <value>Password must be at least 8 characters.</value>
+  </data>
+  <data name="Shared_PasswordValidationUppercase" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter.</value>
+  </data>
+  <data name="Shared_PasswordValidationLowercase" xml:space="preserve">
+    <value>Password must contain at least one lowercase letter.</value>
+  </data>
+  <data name="Shared_PasswordValidationDigit" xml:space="preserve">
+    <value>Password must contain at least one digit.</value>
+  </data>
+  <data name="Shared_PasswordValidationSpecialCharacter" xml:space="preserve">
+    <value>Password must contain at least one special character.</value>
+  </data>
+  <data name="RegisterPage_PasswordRequired" xml:space="preserve">
+    <value>Password is required.</value>
   </data>
 </root>
