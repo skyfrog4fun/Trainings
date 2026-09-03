@@ -213,6 +213,24 @@
   <data name="Enum_Gender_Female" xml:space="preserve">
     <value>Female</value>
   </data>
+  <data name="Enum_GroupMemberRole_Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Enum_GroupMemberRole_Trainer" xml:space="preserve">
+    <value>Trainer</value>
+  </data>
+  <data name="Enum_GroupMemberRole_Participant" xml:space="preserve">
+    <value>Participant</value>
+  </data>
+  <data name="Enum_GroupMembershipStatus_Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Enum_GroupMembershipStatus_Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Enum_GroupMembershipStatus_Declined" xml:space="preserve">
+    <value>Declined</value>
+  </data>
   <data name="UsersPage_Gender" xml:space="preserve">
     <value>Gender</value>
   </data>
@@ -929,9 +947,6 @@
   </data>
   <data name="UserInformationPage_GroupMembershipsTitle" xml:space="preserve">
     <value>Group Memberships</value>
-  </data>
-  <data name="UserInformationPage_Requested" xml:space="preserve">
-    <value>Requested</value>
   </data>
   <data name="UserInformationPage_NoMemberships" xml:space="preserve">
     <value>No group memberships yet. Group assignment requests must be approved by Group Admin or SuperAdmin.</value>

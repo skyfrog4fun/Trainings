@@ -131,11 +131,11 @@
                         <div class="card-list-row">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="fw-semibold">@membership.GroupName</div>
-                                <div>@membership.Role</div>
+                                <div>@membership.Role.Localize(Localizer)</div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">@membership.Status</small>
-                                <small class="text-muted">@Localizer["UserInformationPage_Requested"]: @membership.RequestedAt.ToString("MMM d, yyyy")</small>
+                                <small class="text-muted">@membership.Status.Localize(Localizer)</small>
+                                <small class="text-muted">@GetStatusDate(membership).ToString("dd.MM.yyyy")</small>
                             </div>
                         </div>
                     }
@@ -212,11 +212,20 @@
                 GroupName = groups.TryGetValue(m.GroupId, out var groupName) ? groupName : string.Format(Localizer["UserInformationPage_GroupNumberFallback"].Value, m.GroupId),
                 Role = m.Role,
                 Status = m.Status,
-                RequestedAt = m.RequestedAt
+                RequestedAt = m.RequestedAt,
+                ApprovedAt = m.ApprovedAt,
+                DeclinedAt = m.DeclinedAt
             })
             .OrderBy(m => m.GroupName)
             .ToList();
     }
+
+    private static DateTime GetStatusDate(GroupMembershipRow membership) => membership.Status switch
+    {
+        GroupMembershipStatus.Approved => membership.ApprovedAt ?? membership.RequestedAt,
+        GroupMembershipStatus.Declined => membership.DeclinedAt ?? membership.RequestedAt,
+        _ => membership.RequestedAt
+    };
 
     private async Task SaveProfile()
     {
