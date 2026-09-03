@@ -16,8 +16,10 @@ User Information
 - [X] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
 - [X] UserInformationPage: Gender has no German translation
 - [X] UserInformationPage: fix localization in Group Memberships section (EN/DE)
+- [X] Registration: Send mail to GroupAdmin for new registrations
+- [X] User Overview (/users) - Admin View: rework
+- [ ] Search for users: add search by email, first name, last name, username, etc. (currently only by name) on page /users (UsersPage)
 - [ ] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
-- [ ] User Overview (/users) - Admin View: rework
 
 
 Design User Pages

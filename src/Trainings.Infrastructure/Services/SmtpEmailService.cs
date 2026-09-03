@@ -45,11 +45,31 @@ public partial class SmtpEmailService(
         return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.EmailConfirmation, null, null, null, ct);
     }
 
-    public async Task<EmailSendResult> SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, string userEmail, string requestedGroups, string userDetailsLink, CancellationToken ct = default)
+    public async Task<EmailSendResult> SendGroupAdminNewParticipantNotificationAsync(IReadOnlyCollection<string> groupAdminEmails, IReadOnlyCollection<string> superAdminEmails, string userName, string userEmail, int groupId, string groupName, string userDetailsLink, CancellationToken ct = default)
     {
         string encodedUserName = WebUtility.HtmlEncode(userName);
         string encodedUserEmail = WebUtility.HtmlEncode(userEmail);
-        string encodedRequestedGroups = WebUtility.HtmlEncode(requestedGroups);
+        string encodedGroupName = WebUtility.HtmlEncode(groupName);
+        string encodedUserDetailsLink = WebUtility.HtmlEncode(userDetailsLink);
+        string subject = $"New Participant Registration Pending Approval – {groupName}";
+        string body = $"""
+            <p>A new participant has registered and requested to join <strong>{encodedGroupName}</strong>:</p>
+            <ul>
+                <li><strong>Name:</strong> {encodedUserName}</li>
+                <li><strong>Email:</strong> {encodedUserEmail}</li>
+                <li><strong>Requested group:</strong> {encodedGroupName}</li>
+            </ul>
+            <p>Open the user directly:</p>
+            <p><a href="{encodedUserDetailsLink}">{encodedUserDetailsLink}</a></p>
+            <p>Please review and approve or reject the registration in the admin panel.</p>
+            """;
+        return await SendWithFallbackAsync(groupAdminEmails, superAdminEmails, subject, body, NotificationAction.Registration, null, groupId, null, ct);
+    }
+
+    public async Task<EmailSendResult> SendSuperAdminNewParticipantNotificationAsync(IReadOnlyCollection<string> superAdminEmails, string userName, string userEmail, string userDetailsLink, CancellationToken ct = default)
+    {
+        string encodedUserName = WebUtility.HtmlEncode(userName);
+        string encodedUserEmail = WebUtility.HtmlEncode(userEmail);
         string encodedUserDetailsLink = WebUtility.HtmlEncode(userDetailsLink);
         string subject = "New Participant Registration Pending Approval";
         string body = $"""
@@ -57,13 +77,13 @@ public partial class SmtpEmailService(
             <ul>
                 <li><strong>Name:</strong> {encodedUserName}</li>
                 <li><strong>Email:</strong> {encodedUserEmail}</li>
-                <li><strong>Requested group(s):</strong> {encodedRequestedGroups}</li>
+                <li><strong>Requested group(s):</strong> No group selected</li>
             </ul>
             <p>Open the user directly:</p>
             <p><a href="{encodedUserDetailsLink}">{encodedUserDetailsLink}</a></p>
             <p>Please review and approve or reject the registration in the admin panel.</p>
             """;
-        return await SendWithFallbackAsync(adminEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
+        return await SendWithFallbackAsync(superAdminEmails, [], subject, body, NotificationAction.Registration, null, null, null, ct);
     }
 
     public async Task<EmailSendResult> SendRegistrationApprovedAsync(string toEmail, string appLink, CancellationToken ct = default)
@@ -151,8 +171,20 @@ public partial class SmtpEmailService(
         return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.TestEmail, null, null, mailConfigurationId, ct);
     }
 
-    private async Task<EmailSendResult> SendWithFallbackAsync(
+    private Task<EmailSendResult> SendWithFallbackAsync(
         string toEmail,
+        string subject,
+        string htmlBody,
+        NotificationAction action,
+        int? userId,
+        int? groupId,
+        int? mailConfigurationId,
+        CancellationToken ct)
+        => SendWithFallbackAsync([toEmail], [], subject, htmlBody, action, userId, groupId, mailConfigurationId, ct);
+
+    private async Task<EmailSendResult> SendWithFallbackAsync(
+        IReadOnlyCollection<string> toEmails,
+        IReadOnlyCollection<string> ccEmails,
         string subject,
         string htmlBody,
         NotificationAction action,
@@ -164,10 +196,15 @@ public partial class SmtpEmailService(
         var runtimeMode = _appRuntimeModeService.GetCurrent();
         var preview = new EmailPreviewDto
         {
-            RecipientEmail = toEmail,
+            RecipientEmail = string.Join("; ", toEmails),
+            CcEmails = [.. ccEmails],
             Subject = subject,
             HtmlBody = htmlBody
         };
+
+        // All recipients (TO + CC) share one attempt/log entry per address so the notification
+        // feed keeps its existing "one row per recipient" shape even for multi-recipient emails.
+        var allRecipients = toEmails.Concat(ccEmails).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
         if (runtimeMode.IsEmailSuppressed)
         {
@@ -176,7 +213,10 @@ public partial class SmtpEmailService(
                 ? "Email delivery skipped because the application is running in Read Only mode."
                 : "Email delivery skipped because the application is running in No E-Mail mode.";
 
-            await _notificationLogService.LogAsync(action, toEmail, userId, null, groupId, true, message, previewAttemptId, ct);
+            foreach (var recipient in allRecipients)
+            {
+                await _notificationLogService.LogAsync(action, recipient, userId, null, groupId, true, message, previewAttemptId, ct);
+            }
 
             return new EmailSendResult
             {
@@ -206,7 +246,10 @@ public partial class SmtpEmailService(
             string message = action == NotificationAction.TestEmail && mailConfigurationId.HasValue
                 ? "The selected mail configuration could not be found."
                 : "No mail configurations available.";
-            await _notificationLogService.LogAsync(action, toEmail, userId, mailConfigurationId, groupId, false, message, attemptId, ct);
+            foreach (var recipient in allRecipients)
+            {
+                await _notificationLogService.LogAsync(action, recipient, userId, mailConfigurationId, groupId, false, message, attemptId, ct);
+            }
             return new EmailSendResult
             {
                 IsSuccess = false,
@@ -219,9 +262,20 @@ public partial class SmtpEmailService(
         {
             try
             {
-                await SendViaConfigAsync(config, toEmail, subject, htmlBody, ct);
+                if (toEmails.Count == 1 && ccEmails.Count == 0)
+                {
+                    await SendViaConfigAsync(config, toEmails.First(), subject, htmlBody, ct);
+                }
+                else
+                {
+                    await SendViaConfigAsync(config, toEmails, ccEmails, subject, htmlBody, ct);
+                }
+
                 await _mailConfigService.RecordSuccessfulSendAsync(config.Id, DateTime.UtcNow, ct);
-                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, true, null, attemptId, ct);
+                foreach (var recipient in allRecipients)
+                {
+                    await _notificationLogService.LogAsync(action, recipient, userId, config.Id, groupId, true, null, attemptId, ct);
+                }
                 attempts.Add(new EmailSendAttemptResult
                 {
                     MailConfigurationId = config.Id,
@@ -241,9 +295,12 @@ public partial class SmtpEmailService(
             catch (Exception ex)
             {
                 string errorMessage = BuildExceptionMessage(ex);
-                LogSmtpError(_logger, config.Host, config.Port, toEmail, subject, errorMessage, ex);
+                LogSmtpError(_logger, config.Host, config.Port, string.Join(", ", allRecipients), subject, errorMessage, ex);
                 await _mailConfigService.RecordFailedSendAsync(config.Id, errorMessage, ct);
-                await _notificationLogService.LogAsync(action, toEmail, userId, config.Id, groupId, false, errorMessage, attemptId, ct);
+                foreach (var recipient in allRecipients)
+                {
+                    await _notificationLogService.LogAsync(action, recipient, userId, config.Id, groupId, false, errorMessage, attemptId, ct);
+                }
                 attempts.Add(new EmailSendAttemptResult
                 {
                     MailConfigurationId = config.Id,
@@ -285,6 +342,48 @@ public partial class SmtpEmailService(
         {
             await client.SendAsync(message, ct);
             LogSmtpSent(_logger, toEmail, subject);
+        }
+        finally
+        {
+            if (client.IsConnected)
+            {
+                await client.DisconnectAsync(true, CancellationToken.None);
+            }
+        }
+    }
+
+    protected virtual async Task SendViaConfigAsync(MailConfiguration config, IReadOnlyCollection<string> toEmails, IReadOnlyCollection<string> ccEmails, string subject, string htmlBody, CancellationToken ct)
+    {
+        // Avoid listing the same address in both To and Cc (e.g. a group admin who is also a SuperAdmin).
+        var distinctCc = ccEmails.Where(cc => !toEmails.Contains(cc, StringComparer.OrdinalIgnoreCase)).ToList();
+        string allRecipients = string.Join(", ", toEmails.Concat(distinctCc));
+        LogSmtpSending(_logger, config.Host, config.Port, config.FromAddress, allRecipients, subject);
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Trainings App", config.FromAddress));
+        foreach (var toEmail in toEmails)
+        {
+            message.To.Add(MailboxAddress.Parse(toEmail));
+        }
+        foreach (var ccEmail in distinctCc)
+        {
+            message.Cc.Add(MailboxAddress.Parse(ccEmail));
+        }
+        message.Subject = subject;
+        message.Body = new TextPart("html") { Text = htmlBody };
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(config.Host, config.Port, SecureSocketOptions.Auto, ct);
+
+        if (!string.IsNullOrEmpty(config.Username) && !string.IsNullOrEmpty(config.Password))
+        {
+            await client.AuthenticateAsync(config.Username, config.Password, ct);
+        }
+
+        try
+        {
+            await client.SendAsync(message, ct);
+            LogSmtpSent(_logger, allRecipients, subject);
         }
         finally
         {
