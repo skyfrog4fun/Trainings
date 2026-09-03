@@ -513,6 +513,10 @@ main {
   background: var(--brand-community-60);
 }
 
+[data-theme="dark"] .card-component > .card-footer {
+  background-color: var(--brand-tradition-80);
+}
+
 .card-list-row {
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--bs-border-color);
