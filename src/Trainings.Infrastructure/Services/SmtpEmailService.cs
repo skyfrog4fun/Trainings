@@ -93,6 +93,35 @@ public partial class SmtpEmailService(
         return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.Registration, null, null, null, ct);
     }
 
+    public async Task<EmailSendResult> SendGroupMembershipApprovedAsync(string toEmail, int userId, int groupId, string groupName, string appLink, CancellationToken ct = default)
+    {
+        string encodedGroupName = WebUtility.HtmlEncode(groupName);
+        string encodedLink = WebUtility.HtmlEncode(appLink);
+        string subject = $"Your request to join {groupName} was approved";
+        string body = $"""
+            <p>Your request to join <strong>{encodedGroupName}</strong> has been approved.</p>
+            <p>You can now sign in and use the Trainings app:</p>
+            <p><a href="{encodedLink}">{encodedLink}</a></p>
+            """;
+
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.GroupApproval, userId, groupId, null, ct);
+    }
+
+    public async Task<EmailSendResult> SendGroupMembershipDeclinedAsync(string toEmail, int userId, int groupId, string groupName, string appLink, CancellationToken ct = default)
+    {
+        string encodedGroupName = WebUtility.HtmlEncode(groupName);
+        string encodedLink = WebUtility.HtmlEncode(appLink);
+        string subject = $"Your request to join {groupName} was reviewed";
+        string body = $"""
+            <p>Your request to join <strong>{encodedGroupName}</strong> was reviewed and is currently not approved.</p>
+            <p>If needed, please contact your administrator for details.</p>
+            <p>Application link:</p>
+            <p><a href="{encodedLink}">{encodedLink}</a></p>
+            """;
+
+        return await SendWithFallbackAsync(toEmail, subject, body, NotificationAction.GroupRejection, userId, groupId, null, ct);
+    }
+
     public async Task<EmailSendResult> SendTrainingCancellationAsync(string toEmail, string trainingTitle, DateTime trainingDateTime, string appLink, CancellationToken ct = default)
     {
         string encodedTitle = WebUtility.HtmlEncode(trainingTitle);

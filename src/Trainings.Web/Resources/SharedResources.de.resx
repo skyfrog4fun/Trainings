@@ -304,7 +304,7 @@
     <value>Ausstehende Freigaben</value>
   </data>
   <data name="UsersPage_PendingApprovals" xml:space="preserve">
-    <value>Ausstehende Freigaben ({0})</value>
+    <value>Ausstehende Freigaben</value>
   </data>
   <data name="HomePage_Plan" xml:space="preserve">
     <value>Plan</value>
@@ -326,6 +326,30 @@
   </data>
   <data name="UsersPage_RequestedGroup" xml:space="preserve">
     <value>Requested Group</value>
+  </data>
+  <data name="UsersPage_RequestDate" xml:space="preserve">
+    <value>Anfragedatum</value>
+  </data>
+  <data name="UsersPage_NoGroup" xml:space="preserve">
+    <value>Keine Gruppe</value>
+  </data>
+  <data name="UsersPage_NoPendingApprovals" xml:space="preserve">
+    <value>Aktuell keine ausstehenden Freigaben.</value>
+  </data>
+  <data name="UsersPage_MembershipApprovedToast" xml:space="preserve">
+    <value>{0} wurde fuer {1} freigegeben.</value>
+  </data>
+  <data name="UsersPage_MembershipDeclinedToast" xml:space="preserve">
+    <value>{0} wurde fuer {1} abgelehnt.</value>
+  </data>
+  <data name="UsersPage_MembershipActionFailed" xml:space="preserve">
+    <value>Aktion fehlgeschlagen: {0}</value>
+  </data>
+  <data name="UsersPage_ApproveMembership" xml:space="preserve">
+    <value>Freigeben</value>
+  </data>
+  <data name="UsersPage_DeclineMembership" xml:space="preserve">
+    <value>Ablehnen</value>
   </data>
   <data name="HomePage_ResendVerification" xml:space="preserve">
     <value>Resend Verification</value>

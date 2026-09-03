@@ -946,6 +946,22 @@ main {
   background-color: var(--brand-tradition-80);
 }
 
+.badge-status-active {
+  background-color: var(--brand-innovation);
+  color: var(--brand-tradition);
+}
+
+/* Applied alongside .btn-app-outline on every "clear filters" button so it stands out
+   from the other outline buttons (e.g. the filter toggle) sharing that base class. */
+.btn-filter-clear {
+  --bs-btn-bg: var(--brand-accent-20);
+  --bs-btn-border-color: var(--brand-accent-20);
+  --bs-btn-hover-bg: var(--brand-accent-40);
+  --bs-btn-hover-border-color: var(--brand-accent-40);
+  --bs-btn-active-bg: var(--brand-accent-40);
+  --bs-btn-active-border-color: var(--brand-accent-40);
+}
+
 /* === Navbar & Layout === */
 .app-navbar {
   background: var(--color-header-bg);

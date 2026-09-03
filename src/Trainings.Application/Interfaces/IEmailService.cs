@@ -9,6 +9,8 @@ public interface IEmailService
     Task<EmailSendResult> SendAdminNewParticipantNotificationAsync(string adminEmail, string userName, string userEmail, string requestedGroups, string userDetailsLink, CancellationToken ct = default);
     Task<EmailSendResult> SendRegistrationApprovedAsync(string toEmail, string appLink, CancellationToken ct = default);
     Task<EmailSendResult> SendRegistrationRejectedAsync(string toEmail, string appLink, CancellationToken ct = default);
+    Task<EmailSendResult> SendGroupMembershipApprovedAsync(string toEmail, int userId, int groupId, string groupName, string appLink, CancellationToken ct = default);
+    Task<EmailSendResult> SendGroupMembershipDeclinedAsync(string toEmail, int userId, int groupId, string groupName, string appLink, CancellationToken ct = default);
     Task<EmailSendResult> SendTrainingCancellationAsync(string toEmail, string trainingTitle, DateTime trainingDateTime, string appLink, CancellationToken ct = default);
     /// <summary>
     /// Sends a test email and returns the ordered per-configuration attempts.

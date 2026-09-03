@@ -2,26 +2,27 @@
 
 @rendermode InteractiveServer
 
-@attribute [Authorize(Policy = "GroupAdmin")]
+@attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
 @inject IGroupService GroupService
-@inject ICountryService CountryService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@Localizer["Shared_Users"]</PageTitle>
 
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
 <div class="container px-2 px-md-4">
     <PageTitleComponent Icon="@AppIcons.Users"
                         Text="@Localizer["Shared_Users"]"
-                        ButtonText="@Localizer["Shared_Add"]"
+                        ButtonText="@(_canManage ? Localizer["Shared_Add"].Value : null)"
                         ButtonIcon="@AppIcons.Plus"
                         ButtonDisabled="@IsWriteBlocked"
                         OnButtonClick="GoToCreateUser"
-                        ShowFilterButton="true"                        
+                        ShowFilterButton="true"
                         OnFilterButtonClick="ToggleFilter">
         <Filter>
             @if (_showFilter)
@@ -30,6 +31,7 @@
                     <div class="col-12 col-md-4">
                         <select class="form-select" @bind="_pendingGroupId">
                             <option value="">@Localizer["UsersPage_AllGroups"]</option>
+                            <option value="none">@Localizer["UsersPage_NoGroup"]</option>
                             @foreach (var group in _availableGroups)
                             {
                                 <option value="@group.Id">@group.Name</option>
@@ -56,7 +58,7 @@
                         <button type="button" class="btn btn-primary flex-fill" @onclick="ApplyFilters">
                             <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Apply"]
                         </button>
-                        <button type="button" class="btn btn-app-outline" @onclick="ClearFilters" title="@Localizer["Shared_ClearFilters"]" aria-label="@Localizer["Shared_ClearFilters"]">
+                        <button type="button" class="btn btn-app-outline btn-filter-clear" @onclick="ClearFilters" title="@Localizer["Shared_ClearFilters"]" aria-label="@Localizer["Shared_ClearFilters"]">
                             <i class="@AppIcons.FilterClear" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -78,58 +80,41 @@
     }
     else
     {
-        @if (_pendingUsers.Any())
+        @if (_canManage)
         {
-            <div class="card mb-4 border-warning">
-                <div class="card-header bg-warning text-dark fw-bold">
-                    @Localizer["UsersPage_PendingApprovals", _pendingUsers.Count]
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-sm mb-0">
-                        <thead>
-                            <tr><th></th><th>@Localizer["UsersPage_Name"]</th><th>@Localizer["UsersPage_RequestedGroup"]</th><th>@Localizer["UsersPage_RegistrationDate"]</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var user in _pendingUsers)
+            <CardComponent @key="_pendingRows.Count == 0" Collapsed="_pendingRows.Count == 0">
+                <Title>@Localizer["UsersPage_PendingApprovals"]</Title>
+                <TitleMeta>@_pendingRows.Count</TitleMeta>
+                <Body>
+                    @if (_pendingRows.Count == 0)
+                    {
+                        <p class="text-muted mb-0">@Localizer["UsersPage_NoPendingApprovals"]</p>
+                    }
+                    else
+                    {
+                        <div class="app-overview-grid">
+                            @foreach (var row in _pendingRows)
                             {
-                                <tr>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" title='@Localizer["UsersPage_ToggleDetails"]' @onclick="() => TogglePendingExpand(user.Id)">
-                                            <i class="@(_expandedPendingUserIds.Contains(user.Id) ? AppIcons.ChevronUp : AppIcons.ChevronDown)" aria-hidden="true"></i>
+                                <div class="app-overview-card">
+                                    <a href="/users/@row.UserId" class="app-overview-main text-decoration-none text-reset">
+                                        <div class="app-overview-title text-break">@row.DisplayName</div>
+                                        <div class="app-overview-meta text-break mt-1"><i class="@AppIcons.UserGroup me-1" aria-hidden="true"></i>@row.GroupName</div>
+                                        <div class="app-overview-meta mt-1"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@Localizer["UsersPage_RequestDate"]: @row.RequestedAt.ToString("yyyy-MM-dd")</div>
+                                    </a>
+                                    <div class="app-overview-actions">
+                                        <button type="button" class="btn btn-success" title="@Localizer["UsersPage_ApproveMembership"]" aria-label="@Localizer["UsersPage_ApproveMembership"]" disabled="@IsWriteBlocked" @onclick="() => ApproveRow(row)">
+                                            <i class="@AppIcons.Check" aria-hidden="true"></i>
                                         </button>
-                                    </td>
-                                    <td>@user.DisplayName</td>
-                                    <td>@FormatPendingGroups(user.Id)</td>
-                                    <td>@user.CreationDate.ToString("MMM d, yyyy")</td>
-                                </tr>
-                                @if (_expandedPendingUserIds.Contains(user.Id))
-                                {
-                                    <tr class="table-light">
-                                        <td colspan="4">
-                                            <div class="row g-2">
-                                                <div class="col-12 col-md-6"><strong>@Localizer["Shared_Email"]:</strong> @user.Email</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["Shared_Country"]:</strong> @(GetCountryLabel(user.CountryId))</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["Shared_City"]:</strong> @(string.IsNullOrWhiteSpace(user.City) ? "—" : user.City)</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["Shared_Mobile"]:</strong> @(string.IsNullOrWhiteSpace(user.Mobile) ? "—" : user.Mobile)</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["UsersPage_Gender"]:</strong> @user.Gender</div>
-                                                <div class="col-12 col-md-6"><strong>@Localizer["UsersPage_EmailVerified"]:</strong> @(user.EmailConfirmedAt.HasValue ? Localizer["Enum_Decision_Yes"] : Localizer["Enum_Decision_No"])</div>
-                                                <div class="col-12 text-end">
-                                                    <button type="button" class="btn btn-sm btn-success me-1" @onclick="() => ApproveUser(user)" disabled="@IsWriteBlocked">
-                                                        <i class="@AppIcons.Check" aria-hidden="true"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => RejectUser(user)" disabled="@IsWriteBlocked">
-                                                        <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
+                                        <button type="button" class="btn btn-danger" title="@Localizer["UsersPage_DeclineMembership"]" aria-label="@Localizer["UsersPage_DeclineMembership"]" disabled="@IsWriteBlocked" @onclick="() => DeclineRow(row)">
+                                            <i class="@AppIcons.XMark" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        </div>
+                    }
+                </Body>
+            </CardComponent>
         }
 
         @if (FilteredUsers.Count == 0)
@@ -148,8 +133,7 @@
                             <div class="app-overview-meta mt-1"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@Localizer["UsersPage_EntryDate"]: @FormatEntryDate(user.EntryDate)</div>
                         </div>
                         <div class="app-overview-actions">
-                            <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">@(user.IsActive ? Localizer["Shared_Active"] : Localizer["UsersPage_Inactive"])</span>
-                            <i class="fa-solid fa-chevron-right text-muted" aria-hidden="true"></i>
+                            <BadgeStatusComponent IsActive="user.IsActive" />
                         </div>
                     </a>
                 }
@@ -159,16 +143,19 @@
 </div>
 
 @code {
+    private sealed record PendingApprovalRow(int MembershipId, int UserId, string DisplayName, int GroupId, string GroupName, DateTime RequestedAt);
+
     private List<UserDto> _users = new();
     private List<UserDto> _pendingUsers = new();
+    private List<PendingApprovalRow> _pendingRows = new();
     private Dictionary<int, List<GroupMembershipDto>> _membershipsByUser = new();
     private List<GroupDto> _availableGroups = new();
-    private List<CountryDto> _countries = new();
-    private readonly HashSet<int> _expandedPendingUserIds = new();
-    private HashSet<int> _managedGroupIds = new();
+    private HashSet<int> _adminGroupIds = new();
+    private HashSet<int> _listingGroupIds = new();
     private AppRuntimeModeDto _runtimeMode = new();
     private bool _isSuperAdmin;
     private bool _loading = true;
+    private ToastComponent? _toast;
 
     private bool _showFilter;
     private string _pendingGroupId = string.Empty;
@@ -180,13 +167,21 @@
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
 
+    private bool _canManage => _isSuperAdmin || _adminGroupIds.Count > 0;
+
     private List<UserDto> FilteredUsers
     {
         get
         {
             IEnumerable<UserDto> query = _users;
 
-            if (int.TryParse(_appliedGroupId, out var groupId))
+            if (_appliedGroupId == "none")
+            {
+                query = query.Where(user => !GetMemberships(user.Id).Any(m =>
+                    m.Status == GroupMembershipStatus.Approved &&
+                    m.IsActive));
+            }
+            else if (int.TryParse(_appliedGroupId, out var groupId))
             {
                 query = query.Where(user => GetMemberships(user.Id).Any(m =>
                     m.Status == GroupMembershipStatus.Approved &&
@@ -218,46 +213,57 @@
     private async Task LoadUsers()
     {
         _loading = true;
-        _expandedPendingUserIds.Clear();
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var currentUser = authState.User;
         _isSuperAdmin = AuthorizationHelper.IsSuperAdmin(currentUser);
-        _managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Admin").ToHashSet();
+        _adminGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Admin").ToHashSet();
+        var trainerGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Trainer").ToHashSet();
+        _listingGroupIds = _adminGroupIds.Concat(trainerGroupIds).ToHashSet();
 
         var allGroups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
         _availableGroups = _isSuperAdmin
             ? allGroups
-            : allGroups.Where(g => _managedGroupIds.Contains(g.Id)).ToList();
-
-        _countries = (await CountryService.GetAllAsync()).ToList();
+            : allGroups.Where(g => _listingGroupIds.Contains(g.Id)).ToList();
 
         var allUsers = (await UserService.GetAllAsync()).ToList();
-        var pendingUsers = (await UserRegistrationService.GetPendingApprovalsAsync()).ToList();
-        await LoadMembershipsAsync(allUsers.Select(u => u.Id).Concat(pendingUsers.Select(u => u.Id)));
+        _pendingUsers = _canManage
+            ? (await UserRegistrationService.GetPendingApprovalsAsync()).ToList()
+            : new List<UserDto>();
 
-        if (_isSuperAdmin)
-        {
-            _users = allUsers;
-            _pendingUsers = pendingUsers;
-        }
-        else
-        {
-            _users = allUsers
+        await LoadMembershipsAsync(allUsers.Select(u => u.Id).Concat(_pendingUsers.Select(u => u.Id)));
+
+        _users = _isSuperAdmin
+            ? allUsers
+            : allUsers
                 .Where(user => GetMemberships(user.Id).Any(m =>
                     m.Status == GroupMembershipStatus.Approved &&
                     m.IsActive &&
-                    _managedGroupIds.Contains(m.GroupId)))
+                    _listingGroupIds.Contains(m.GroupId)))
                 .ToList();
 
-            _pendingUsers = pendingUsers
-                .Where(user => GetMemberships(user.Id).Any(m =>
-                    m.Status == GroupMembershipStatus.Pending &&
-                    _managedGroupIds.Contains(m.GroupId)))
-                .ToList();
-        }
+        _pendingRows = BuildPendingRows();
 
         _loading = false;
+    }
+
+    private List<PendingApprovalRow> BuildPendingRows()
+    {
+        var rows = new List<PendingApprovalRow>();
+
+        foreach (var user in _pendingUsers)
+        {
+            var pendingMemberships = GetMemberships(user.Id)
+                .Where(m => m.Status == GroupMembershipStatus.Pending && (_isSuperAdmin || _adminGroupIds.Contains(m.GroupId)));
+
+            foreach (var membership in pendingMemberships)
+            {
+                var groupName = _availableGroups.FirstOrDefault(g => g.Id == membership.GroupId)?.Name ?? $"Group #{membership.GroupId}";
+                rows.Add(new PendingApprovalRow(membership.Id, user.Id, user.DisplayName, membership.GroupId, groupName, membership.RequestedAt));
+            }
+        }
+
+        return rows.OrderBy(r => r.RequestedAt).ToList();
     }
 
     private async Task LoadMembershipsAsync(IEnumerable<int> userIds)
@@ -302,27 +308,47 @@
         _appliedStatus = string.Empty;
     }
 
-    private async Task ApproveUser(UserDto user)
+    private async Task ApproveRow(PendingApprovalRow row)
     {
-        await UserRegistrationService.ApproveUserAsync(user.Id, 0);
-        await LoadUsers();
-    }
-
-    private async Task RejectUser(UserDto user)
-    {
-        await UserRegistrationService.RejectUserAsync(user.Id, 0);
-        await LoadUsers();
-    }
-
-    private void TogglePendingExpand(int userId)
-    {
-        if (_expandedPendingUserIds.Contains(userId))
+        try
         {
-            _expandedPendingUserIds.Remove(userId);
+            await GroupService.ApproveMemberAsync(row.MembershipId);
+            await LoadUsers();
+            await ShowToastAsync(
+                string.Format(Localizer["UsersPage_MembershipApprovedToast"].Value, row.DisplayName, row.GroupName),
+                ToastComponent.ToastVariant.Success);
         }
-        else
+        catch (Exception ex)
         {
-            _expandedPendingUserIds.Add(userId);
+            await ShowToastAsync(
+                string.Format(Localizer["UsersPage_MembershipActionFailed"].Value, ex.Message),
+                ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task DeclineRow(PendingApprovalRow row)
+    {
+        try
+        {
+            await GroupService.DeclineMemberAsync(row.MembershipId);
+            await LoadUsers();
+            await ShowToastAsync(
+                string.Format(Localizer["UsersPage_MembershipDeclinedToast"].Value, row.DisplayName, row.GroupName),
+                ToastComponent.ToastVariant.Info);
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(
+                string.Format(Localizer["UsersPage_MembershipActionFailed"].Value, ex.Message),
+                ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
         }
     }
 
@@ -337,30 +363,7 @@
         return names.Count == 0 ? "—" : string.Join(", ", names);
     }
 
-    private string FormatPendingGroups(int userId)
-    {
-        var names = GetMemberships(userId)
-            .Where(m => m.Status == GroupMembershipStatus.Pending)
-            .Select(m => _availableGroups.FirstOrDefault(g => g.Id == m.GroupId)?.Name ?? $"Group #{m.GroupId}")
-            .Distinct()
-            .ToList();
-
-        return names.Count == 0 ? "—" : string.Join(", ", names);
-    }
-
-    private string GetCountryLabel(int? countryId)
-    {
-        if (!countryId.HasValue)
-        {
-            return "—";
-        }
-
-        var country = _countries.FirstOrDefault(c => c.Id == countryId.Value);
-        return country is null ? "—" : $"{country.Code} — {country.Name}";
-    }
-
-    private static string FormatEntryDate(DateTime? entryDate) =>
-        entryDate.HasValue ? entryDate.Value.ToString("yyyy-MM-dd") : "—";
+    private static string FormatEntryDate(DateTime? entryDate) => entryDate.HasValue ? entryDate.Value.ToString("dd.MM.yyyy") : "N/A";
 
     private string GetRoleKey(UserDto user)
     {

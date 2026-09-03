@@ -2,7 +2,7 @@
 
 @rendermode InteractiveServer
 
-@attribute [Authorize(Policy = "GroupAdmin")]
+@attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject IUserService UserService
 @inject IUserRegistrationService UserRegistrationService
@@ -32,7 +32,7 @@
         <PageTitleComponent Icon="@AppIcons.User" Text="@_user.DisplayName" />
 
         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-            <span class="badge @(_user.IsActive ? "bg-success" : "bg-secondary")">@(_user.IsActive ? Localizer["Shared_Active"] : Localizer["UserDetailPage_Inactive"])</span>
+            <BadgeStatusComponent IsActive="_user.IsActive" />
             <div class="ms-auto d-flex flex-wrap gap-2">
                 <BackButton Href="/users" Label="@Localizer["Shared_Cancel"]" />
                 <a href="/users/@_user.Id/edit" class="btn btn-sm btn-primary">
@@ -207,7 +207,9 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var currentUser = authState.User;
         var isSuperAdmin = AuthorizationHelper.IsSuperAdmin(currentUser);
-        var managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Admin").ToHashSet();
+        var managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(currentUser, "Admin")
+            .Concat(AuthorizationHelper.GetGroupIdsForRole(currentUser, "Trainer"))
+            .ToHashSet();
 
         _user = await UserService.GetByIdAsync(Id);
         if (_user is null)

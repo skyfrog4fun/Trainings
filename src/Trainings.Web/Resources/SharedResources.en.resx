@@ -304,7 +304,7 @@
     <value>Pending approvals ({0})</value>
   </data>
   <data name="UsersPage_PendingApprovals" xml:space="preserve">
-    <value>Pending approvals ({0})</value>
+    <value>Pending Approvals</value>
   </data>
   <data name="HomePage_Plan" xml:space="preserve">
     <value>Plan</value>
@@ -326,6 +326,30 @@
   </data>
   <data name="UsersPage_RequestedGroup" xml:space="preserve">
     <value>Requested Group</value>
+  </data>
+  <data name="UsersPage_RequestDate" xml:space="preserve">
+    <value>Request Date</value>
+  </data>
+  <data name="UsersPage_NoGroup" xml:space="preserve">
+    <value>No group</value>
+  </data>
+  <data name="UsersPage_NoPendingApprovals" xml:space="preserve">
+    <value>No pending approvals right now.</value>
+  </data>
+  <data name="UsersPage_MembershipApprovedToast" xml:space="preserve">
+    <value>Approved {0} for {1}.</value>
+  </data>
+  <data name="UsersPage_MembershipDeclinedToast" xml:space="preserve">
+    <value>Declined {0} for {1}.</value>
+  </data>
+  <data name="UsersPage_MembershipActionFailed" xml:space="preserve">
+    <value>Action failed: {0}</value>
+  </data>
+  <data name="UsersPage_ApproveMembership" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="UsersPage_DeclineMembership" xml:space="preserve">
+    <value>Decline</value>
   </data>
   <data name="HomePage_ResendVerification" xml:space="preserve">
     <value>Resend Verification</value>

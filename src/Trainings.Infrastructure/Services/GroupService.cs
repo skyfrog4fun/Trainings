@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
@@ -7,10 +9,18 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class GroupService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : IGroupService
+public class GroupService(
+    ApplicationDbContext context,
+    IAppRuntimeModeService appRuntimeModeService,
+    IEmailService emailService,
+    IHttpContextAccessor httpContextAccessor,
+    IConfiguration configuration) : IGroupService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly string _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
 
     public async Task<IEnumerable<GroupDto>> GetAllAsync(CancellationToken ct = default)
     {
@@ -225,24 +235,69 @@ public class GroupService(ApplicationDbContext context, IAppRuntimeModeService a
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
+        var membership = await _context.GroupMemberships
+            .Include(gm => gm.User)
+            .Include(gm => gm.Group)
+            .FirstOrDefaultAsync(gm => gm.Id == membershipId, ct)
             ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
         membership.Status = GroupMembershipStatus.Approved;
         membership.ApprovedAt = DateTime.UtcNow;
         membership.IsActive = true;
+
+        if (membership.User is not null && membership.User.EntryDate is null)
+        {
+            membership.User.EntryDate = DateTime.UtcNow;
+        }
+
         await _context.SaveChangesAsync(ct);
+
+        if (membership.User is not null && membership.Group is not null)
+        {
+            await _emailService.SendGroupMembershipApprovedAsync(
+                membership.User.Email,
+                membership.UserId,
+                membership.GroupId,
+                membership.Group.Name,
+                BuildAppBaseUrl(),
+                ct);
+        }
     }
 
     public async Task DeclineMemberAsync(int membershipId, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
+        var membership = await _context.GroupMemberships
+            .Include(gm => gm.User)
+            .Include(gm => gm.Group)
+            .FirstOrDefaultAsync(gm => gm.Id == membershipId, ct)
             ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
         membership.Status = GroupMembershipStatus.Declined;
         membership.DeclinedAt = DateTime.UtcNow;
         membership.IsActive = false;
         await _context.SaveChangesAsync(ct);
+
+        if (membership.User is not null && membership.Group is not null)
+        {
+            await _emailService.SendGroupMembershipDeclinedAsync(
+                membership.User.Email,
+                membership.UserId,
+                membership.GroupId,
+                membership.Group.Name,
+                BuildAppBaseUrl(),
+                ct);
+        }
+    }
+
+    private string BuildAppBaseUrl()
+    {
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is not null && request.Host.HasValue)
+        {
+            return $"{request.Scheme}://{request.Host.Value}";
+        }
+
+        return _baseUrl;
     }
 
     public async Task<IEnumerable<GroupDto>> GetGroupsForUserAsync(int userId, CancellationToken ct = default)
