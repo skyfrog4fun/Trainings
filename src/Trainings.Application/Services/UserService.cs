@@ -58,6 +58,7 @@ public class UserService(
             Mobile = dto.Mobile,
             City = dto.City,
             CountryId = dto.CountryId,
+            EntryDate = dto.EntryDate,
             IsActive = true,
             CreationDate = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow

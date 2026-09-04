@@ -150,6 +150,55 @@ public class UserRegistrationServiceTests
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    [Fact]
+    public async Task ApproveUserAsyncSetsEntryDateWhenNotAlreadySet()
+    {
+        using var context = CreateInMemoryContext();
+
+        var newUser = new User { FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", Role = UserRole.User, PasswordHash = "x" };
+        context.Users.Add(newUser);
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var group = new Group { Name = "Group A", Slug = "group-a", Identifier = "GA" };
+        context.Groups.Add(group);
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        context.GroupMemberships.Add(new GroupMembership { UserId = newUser.Id, GroupId = group.Id, Role = GroupMemberRole.Participant, Status = GroupMembershipStatus.Pending, IsActive = false });
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var emailServiceMock = CreateEmailServiceMock();
+        var service = CreateService(context, emailServiceMock);
+
+        await service.ApproveUserAsync(newUser.Id, adminUserId: 1, TestContext.Current.CancellationToken);
+
+        newUser.EntryDate.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task ApproveUserAsyncDoesNotOverwriteExistingEntryDate()
+    {
+        using var context = CreateInMemoryContext();
+
+        var existingEntryDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var existingUser = new User { FirstName = "Jane", LastName = "Doe", Email = "jane.doe@example.com", Role = UserRole.User, PasswordHash = "x", EntryDate = existingEntryDate };
+        context.Users.Add(existingUser);
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var group = new Group { Name = "Group B", Slug = "group-b", Identifier = "GB" };
+        context.Groups.Add(group);
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        context.GroupMemberships.Add(new GroupMembership { UserId = existingUser.Id, GroupId = group.Id, Role = GroupMemberRole.Participant, Status = GroupMembershipStatus.Pending, IsActive = false });
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var emailServiceMock = CreateEmailServiceMock();
+        var service = CreateService(context, emailServiceMock);
+
+        await service.ApproveUserAsync(existingUser.Id, adminUserId: 1, TestContext.Current.CancellationToken);
+
+        existingUser.EntryDate.Should().Be(existingEntryDate);
+    }
+
     private static Mock<IEmailService> CreateEmailServiceMock()
     {
         var mock = new Mock<IEmailService>();

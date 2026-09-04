@@ -123,12 +123,13 @@
                                                              EmptyText="@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]" />
                             }
                         </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["UserCreateEditPage_EntryDate"]</label>
+                            <InputDate class="form-control" @bind-Value="_formModel.EntryDate" />
+                            <ValidationMessage For="() => _formModel.EntryDate" class="text-danger small" />
+                        </div>
                         @if (_isEdit)
                         {
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">@Localizer["UserCreateEditPage_EntryDate"]</label>
-                                <InputDate class="form-control" @bind-Value="_formModel.EntryDate" />
-                            </div>
                             <div class="col-12 col-md-6 d-flex align-items-end">
                                 <div class="form-check">
                                     <input class="form-check-input" id="isActive" type="checkbox" @bind="_formModel.IsActive" />
@@ -231,6 +232,8 @@
                 var creator = await UserService.GetByIdAsync(creatorId);
                 _formModel.CountryId = creator?.CountryId;
             }
+
+            _formModel.EntryDate = DateTime.Today;
         }
 
         _loading = false;
@@ -345,7 +348,8 @@
                     Birthday = birthday,
                     Mobile = string.IsNullOrWhiteSpace(_formModel.Mobile) ? null : _formModel.Mobile,
                     City = string.IsNullOrWhiteSpace(_formModel.City) ? null : _formModel.City,
-                    CountryId = _formModel.CountryId
+                    CountryId = _formModel.CountryId,
+                    EntryDate = _formModel.EntryDate
                 });
 
                 userId = createdUser.Id;

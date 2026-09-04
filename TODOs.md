@@ -7,8 +7,6 @@ General
 
 Bugs / Changes
 ---
-- [ ] User / Create User: SuperAdmin creates a new user and clicks on 'Verify'. Mail is displayed in browser in dev environment. When clicking the link, the user is shown as 'Email verified: Yes', but has no entry date.
-- [ ] User: when will Entry date be set?!
 - [ ] date format on user detail page
 
 
@@ -109,6 +107,8 @@ Done - Tasks
 - [X] Location / New Location: Country has 'Country - Code'. Change to show only country name.
 - [X] User / Create User: pre select country and set it to the country of the signed in user.
 - [X] User / Create User: Groups are shown even country is not selected. I should only see groups from the selected country.
+- [X] User / Create User: SuperAdmin creates a new user and clicks on 'Verify'. Mail is displayed in browser in dev environment. When clicking the link, the user is shown as 'Email verified: Yes', but has no entry date.
+- [X] User: when will Entry date be set?!
 
 
 Notes

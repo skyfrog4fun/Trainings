@@ -38,6 +38,7 @@ public class CreateUserDto
     public string? Mobile { get; set; }
     public string? City { get; set; }
     public int? CountryId { get; set; }
+    public DateTime? EntryDate { get; set; }
 }
 
 public class UpdateUserDto

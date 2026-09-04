@@ -61,6 +61,19 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task CreateAsyncSetsEntryDateWhenProvided()
+    {
+        _hasherMock.Setup(h => h.Hash("Password1!")).Returns("hashed");
+        _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+        var entryDate = new DateTime(2026, 9, 4);
+        var dto = new CreateUserDto { FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", Password = "Password1!", Role = UserRole.User, EntryDate = entryDate };
+        var result = await _service.CreateAsync(dto);
+
+        result.EntryDate.Should().Be(entryDate);
+    }
+
+    [Fact]
     public async Task CreateAsyncThrowsForWeakPasswordWithoutTouchingRepository()
     {
         var dto = new CreateUserDto { FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", Password = "weak", Role = UserRole.User };

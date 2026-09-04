@@ -70,6 +70,11 @@ public class UserFormModel : IValidatableObject
         {
             yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_CountryRequired"), [nameof(CountryId)]);
         }
+
+        if (EntryDate is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_EntryDateRequired"), [nameof(EntryDate)]);
+        }
     }
 
     private static string GetMessage(IStringLocalizer<SharedResources>? localizer, string key) => localizer is null ? key : localizer[key].Value;

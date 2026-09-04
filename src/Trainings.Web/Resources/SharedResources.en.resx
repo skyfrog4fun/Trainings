@@ -1272,6 +1272,9 @@
   <data name="UserCreateEditPage_EntryDate" xml:space="preserve">
     <value>Entry Date</value>
   </data>
+  <data name="UserCreateEditPage_EntryDateRequired" xml:space="preserve">
+    <value>Please select an entry date.</value>
+  </data>
   <data name="UserCreateEditPage_FirstName" xml:space="preserve">
     <value>First Name</value>
   </data>
