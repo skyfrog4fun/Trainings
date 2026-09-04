@@ -228,12 +228,6 @@
   <data name="Enum_GroupMembershipStatus_Approved" xml:space="preserve">
     <value>Genehmigt</value>
   </data>
-  <data name="Enum_RegistrationStatus_Registered" xml:space="preserve">
-    <value>Angemeldet</value>
-  </data>
-  <data name="Enum_RegistrationStatus_Cancelled" xml:space="preserve">
-    <value>Storniert</value>
-  </data>
   <data name="Enum_GroupMembershipStatus_Declined" xml:space="preserve">
     <value>Abgelehnt</value>
   </data>
@@ -1038,9 +1032,6 @@
   <data name="UserDetailPage_NoMemberships" xml:space="preserve">
     <value>Keine Mitgliedschaften.</value>
   </data>
-  <data name="UserDetailPage_RegistrationsTitle" xml:space="preserve">
-    <value>Registrierungen</value>
-  </data>
   <data name="UserDetailPage_NoRegistrations" xml:space="preserve">
     <value>Noch keine Anmeldungen.</value>
   </data>
@@ -1297,7 +1288,7 @@
     <value>Rolle</value>
   </data>
   <data name="UserCreateEditPage_SelectCountry" xml:space="preserve">
-    <value>Land auswaehlen</value>
+    <value>Land auswählen</value>
   </data>
   <data name="UserCreateEditPage_SetNewPasswordLeaveBlank" xml:space="preserve">
     <value>Neues Passwort setzen (leer lassen, um das aktuelle Passwort zu behalten)</value>
@@ -1812,9 +1803,6 @@
   <data name="UserDetailPage_NoEmailModePreviewShown" xml:space="preserve">
     <value>Der Kein-E-Mail-Modus ist aktiv. Die Konto-E-Mail fuer {0} wird unten angezeigt.</value>
   </data>
-  <data name="UserDetailPage_Verify" xml:space="preserve">
-    <value>Verifizieren</value>
-  </data>
   <data name="UserDetailPage_DeleteConfirmTitle" xml:space="preserve">
     <value>Benutzer löschen</value>
   </data>
@@ -1940,5 +1928,26 @@
   </data>
   <data name="RegisterPage_PasswordRequired" xml:space="preserve">
     <value>Passwort ist erforderlich.</value>
+  </data>
+  <data name="Enum_RegistrationStatus_Registered" xml:space="preserve">
+    <value>Angemeldet</value>
+  </data>
+  <data name="Enum_RegistrationStatus_Cancelled" xml:space="preserve">
+    <value>Storniert</value>
+  </data>
+  <data name="UserDetailPage_RegistrationsTitle" xml:space="preserve">
+    <value>Registrierungen</value>
+  </data>
+  <data name="UserDetailPage_Verify" xml:space="preserve">
+    <value>Verifizieren</value>
+  </data>
+  <data name="UserCreateEditPage_CountryRequired" xml:space="preserve">
+    <value>Bitte wähle ein Land aus.</value>
+  </data>
+  <data name="UserCreateEditPage_GroupMembership_SelectCountryFirst" xml:space="preserve">
+    <value>Bitte wähle zuerst ein Land aus, um verfügbare Gruppen zu sehen.</value>
+  </data>
+  <data name="UserCreateEditPage_GroupMembership_NoGroupsForCountry" xml:space="preserve">
+    <value>Für dieses Land gibt es keine Gruppen.</value>
   </data>
 </root>

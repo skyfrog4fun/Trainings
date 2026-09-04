@@ -65,6 +65,11 @@ public class UserFormModel : IValidatableObject
         {
             yield return new ValidationResult(GetMessage(localizer, PasswordPolicyLocalization.GetResourceKey(newPasswordError)), [nameof(NewPassword)]);
         }
+
+        if (CountryId is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "UserCreateEditPage_CountryRequired"), [nameof(CountryId)]);
+        }
     }
 
     private static string GetMessage(IStringLocalizer<SharedResources>? localizer, string key) => localizer is null ? key : localizer[key].Value;

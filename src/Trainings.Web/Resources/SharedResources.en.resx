@@ -1248,6 +1248,15 @@
   <data name="UserCreateEditPage_Country" xml:space="preserve">
     <value>Country</value>
   </data>
+  <data name="UserCreateEditPage_CountryRequired" xml:space="preserve">
+    <value>Please select a country.</value>
+  </data>
+  <data name="UserCreateEditPage_GroupMembership_SelectCountryFirst" xml:space="preserve">
+    <value>First select a country to see available groups.</value>
+  </data>
+  <data name="UserCreateEditPage_GroupMembership_NoGroupsForCountry" xml:space="preserve">
+    <value>There are no groups for this country.</value>
+  </data>
   <data name="UserCreateEditPage_CreateUser" xml:space="preserve">
     <value>Create User</value>
   </data>

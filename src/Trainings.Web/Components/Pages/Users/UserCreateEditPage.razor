@@ -97,18 +97,31 @@
                             <label class="form-label">@Localizer["UserCreateEditPage_Country"]</label>
                             <SelectDropdownComponent TItem="CountryDto" TValue="int?"
                                                      @bind-Value="_formModel.CountryId"
+                                                     @bind-Value:after="OnCountryChanged"
                                                      Items="_countries"
                                                      ValueSelector="c => (int?)c.Id"
                                                      TextSelector="c => c.Name"
                                                      PlaceholderText="@Localizer["UserCreateEditPage_SelectCountry"]" />
+                            <ValidationMessage For="() => _formModel.CountryId" class="text-danger small" />
                         </div>
                         <div class="col-12">
                             <label class="form-label">@(_isSuperAdmin ? Localizer["UserCreateEditPage_Groups"] : Localizer["UserCreateEditPage_ManagedGroups"])</label>
-                            <GroupCheckboxListComponent Groups="_availableGroups"
-                                                         SelectedGroupIds="_selectedGroupIds"
-                                                         IdPrefix="user-group"
-                                                         ListCssClass="scroll-container-sm"
-                                                         EmptyText="@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]" />
+                            @if (_formModel.CountryId is null)
+                            {
+                                <div class="alert alert-info mb-0">@Localizer["UserCreateEditPage_GroupMembership_SelectCountryFirst"]</div>
+                            }
+                            else if (!GroupsForSelectedCountry.Any())
+                            {
+                                <div class="alert alert-info mb-0">@Localizer["UserCreateEditPage_GroupMembership_NoGroupsForCountry"]</div>
+                            }
+                            else
+                            {
+                                <GroupCheckboxListComponent Groups="GroupsForSelectedCountry"
+                                                             SelectedGroupIds="_selectedGroupIds"
+                                                             IdPrefix="user-group"
+                                                             ListCssClass="scroll-container-sm"
+                                                             EmptyText="@Localizer["UserCreateEditPage_NoGroupsAvailableForAssignment"]" />
+                            }
                         </div>
                         @if (_isEdit)
                         {
@@ -210,8 +223,43 @@
         {
             await LoadForEditAsync();
         }
+        else
+        {
+            var creatorIdClaim = currentUser.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(creatorIdClaim, out var creatorId))
+            {
+                var creator = await UserService.GetByIdAsync(creatorId);
+                _formModel.CountryId = creator?.CountryId;
+            }
+        }
 
         _loading = false;
+    }
+
+    private List<GroupDto> GroupsForSelectedCountry => _formModel.CountryId is null
+        ? []
+        : [.. _availableGroups.Where(g => IsGroupAvailableForCountry(g, _formModel.CountryId.Value))];
+
+    private bool IsGroupAvailableForCountry(GroupDto group, int countryId)
+    {
+        if (group.CountryId is null)
+        {
+            return true;
+        }
+
+        var country = _countries.FirstOrDefault(c => c.Id == group.CountryId);
+        if (country is null || !country.IsRealCountry)
+        {
+            return true;
+        }
+
+        return country.Id == countryId;
+    }
+
+    private void OnCountryChanged()
+    {
+        var visibleGroupIds = GroupsForSelectedCountry.Select(g => g.Id).ToHashSet();
+        _selectedGroupIds.RemoveWhere(id => !visibleGroupIds.Contains(id));
     }
 
     private async Task LoadForEditAsync()
