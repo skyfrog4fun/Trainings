@@ -228,6 +228,12 @@
   <data name="Enum_GroupMembershipStatus_Approved" xml:space="preserve">
     <value>Genehmigt</value>
   </data>
+  <data name="Enum_RegistrationStatus_Registered" xml:space="preserve">
+    <value>Angemeldet</value>
+  </data>
+  <data name="Enum_RegistrationStatus_Cancelled" xml:space="preserve">
+    <value>Storniert</value>
+  </data>
   <data name="Enum_GroupMembershipStatus_Declined" xml:space="preserve">
     <value>Abgelehnt</value>
   </data>
@@ -990,9 +996,6 @@
   <data name="UserDetailPage_UserNotFound" xml:space="preserve">
     <value>Benutzer nicht gefunden.</value>
   </data>
-  <data name="UserDetailPage_Inactive" xml:space="preserve">
-    <value>Inaktiv</value>
-  </data>
   <data name="UserDetailPage_ProfileTitle" xml:space="preserve">
     <value>Profil</value>
   </data>
@@ -1032,20 +1035,11 @@
   <data name="UserDetailPage_GroupNumberFallback" xml:space="preserve">
     <value>Gruppe #{0}</value>
   </data>
-  <data name="UserDetailPage_Joined" xml:space="preserve">
-    <value>Beigetreten</value>
-  </data>
   <data name="UserDetailPage_NoMemberships" xml:space="preserve">
     <value>Keine Mitgliedschaften.</value>
   </data>
-  <data name="UserDetailPage_RegistrationHistoryTitle" xml:space="preserve">
-    <value>Anmeldeverlauf</value>
-  </data>
-  <data name="UserDetailPage_Registered" xml:space="preserve">
-    <value>Angemeldet</value>
-  </data>
-  <data name="UserDetailPage_ViewTraining" xml:space="preserve">
-    <value>Training ansehen</value>
+  <data name="UserDetailPage_RegistrationsTitle" xml:space="preserve">
+    <value>Registrierungen</value>
   </data>
   <data name="UserDetailPage_NoRegistrations" xml:space="preserve">
     <value>Noch keine Anmeldungen.</value>
@@ -1319,9 +1313,6 @@
   </data>
   <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
     <value>Willkommensnachricht</value>
-  </data>
-  <data name="UserDetailPage_Training" xml:space="preserve">
-    <value>Training</value>
   </data>
   <data name="LoginPage_PageTitle" xml:space="preserve">
     <value>Anmelden</value>
@@ -1821,7 +1812,7 @@
   <data name="UserDetailPage_NoEmailModePreviewShown" xml:space="preserve">
     <value>Der Kein-E-Mail-Modus ist aktiv. Die Konto-E-Mail fuer {0} wird unten angezeigt.</value>
   </data>
-  <data name="UserDetailPage_SendAccountMail" xml:space="preserve">
+  <data name="UserDetailPage_Verify" xml:space="preserve">
     <value>Verifizieren</value>
   </data>
   <data name="UserDetailPage_DeleteConfirmTitle" xml:space="preserve">

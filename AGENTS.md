@@ -94,6 +94,10 @@ Trainings.Web             <- Blazor Server UI and DI composition root
 
 - Do not commit secrets, credentials, or connection strings.
 - Do not suppress build warnings globally.
+- Never delete, drop, or reset a database — including the local/dev SQLite database file
+  (e.g. `trainings.db*`) — without asking the user first and getting explicit confirmation,
+  even while operating autonomously (e.g. autopilot mode). This gives the user a chance to
+  back up the dev database before it is dropped.
 
 ## Authoritative References
 

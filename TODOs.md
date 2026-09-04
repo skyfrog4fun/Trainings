@@ -5,33 +5,35 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
+Bugs / Changes
+---
+- [ ] Location / New Location: Country has 'Country - Code'. Change to show only country name.
+- [ ] User / Create User: pre select country and set it to the country of the signed in user.
+- [ ] User / Create User: Groups are shown even country is not selected. I should only see groups from the selected country.
+- [ ] User / Create User: SuperAdmin creates a new user and clicks on 'Verify'. Mail is displayed in browser in dev environment. When clicking the link, the user is shown as 'Email verified: Yes', but has no entry date.
+
+
+
+
 User Information
 ---
-- [X] UserInformation: Reworked
-- [X] User Detail (/users/{id}) - Admin View: rework
-- [X] User Edit (/users/{id}/edit) - Admin View: rework
-- [X] Back button on 'Create User' has a strange green when pressed and hold
-- [X] Method 'ValidatePassword' still used on UserInformationPage?
-- [X] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
-- [X] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
-- [X] UserInformationPage: Gender has no German translation
-- [X] UserInformationPage: fix localization in Group Memberships section (EN/DE)
-- [X] Registration: Send mail to GroupAdmin for new registrations
-- [X] User Overview (/users) - Admin View: rework
-- [ ] Search for users: add search by email, first name, last name, username, etc. (currently only by name) on page /users (UsersPage)
 - [ ] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
 
 
 Design User Pages
 ---
 - [ ] Users: sorting (by name?), searching (by name?), paging (10, 20, 50, 100)
-- [ ] Edit User: visually style the form to make it more user-friendly and intuitive. (Issue: Dark Mode color of placeholder)
 - [ ] Selection Color is blue, but it shouldn't. Compare with Location page.
 - [ ] ...
 
 
 Design Group Pages
 ---
+- [ ] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
+- [ ] Group / New Group: remove Localized time below 'Start' and 'End'
+- [ ] Group / New Group: Country list should show name only, remove 'Country - Code'
+- [ ] Group / New Group: select country first (pre select from XY) and then show only locations from that country
+- [ ] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
 - [ ] Rework the idea how to navigate inside the groups
     - [ ] all pages uses {slug} for navigation
     - [ ] overview (list) -> new | details of group -> edit | add member | delete
@@ -64,7 +66,9 @@ Others
 
 Ideas
 ---
+- [ ] Search for users on page /users: add search by email, first name, last name, username, etc.
 - [ ] Overview: Create an overview documentation that shows what page links to what other pages. This will help developers understand the navigation flow and dependencies between pages.
+- [ ] Documentation: create an authorization overview. What role can do what
 - [ ] How can a user request to participate in a new group? [UserInformation -> extend section 'Group Memberships']
 
 
@@ -76,13 +80,10 @@ Done - Reworked Sections
 - [X] User Information
 - [ ] Users (List, Details, Edit/New)
 
-Done - General
+Done - Tasks
 ---
 - [X] Navigation: When user is not signed in (in /register), the navigation shows "dashboard", "user information" and "logout" links. These should not be visible when the user is not signed in.
 - [X] Version number: fix the version number on /login page.
-
-Done - Localization
----
 - [X] Localizer: Localizer is part of _Imports.razor. We should remove it from each page since it is already imported globally.
 - [X] Ressources: Rework the resources by adding [Page]_[Resource] naming convention to avoid conflicts and improve organization.
 - [X] Replace all text on all pages with a created from the resx file.
@@ -95,6 +96,18 @@ Done - Localization
 - [X] LocationsPage: Group Assignment (Access): in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
 - [X] LocationsPage: Visualization: in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
 - [X] LocationsPage: Visualization of dropdown fixed (coloring, etc...)
+- [X] Edit User: visually style the form to make it more user-friendly and intuitive. (Issue: Dark Mode color of placeholder)
+- [X] UserInformation: Reworked
+- [X] User Detail (/users/{id}) - Admin View: rework
+- [X] User Edit (/users/{id}/edit) - Admin View: rework
+- [X] Back button on 'Create User' has a strange green when pressed and hold
+- [X] Method 'ValidatePassword' still used on UserInformationPage?
+- [X] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
+- [X] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
+- [X] UserInformationPage: Gender has no German translation
+- [X] UserInformationPage: fix localization in Group Memberships section (EN/DE)
+- [X] Registration: Send mail to GroupAdmin for new registrations
+- [X] User Overview (/users) - Admin View: rework
 
 
 Notes

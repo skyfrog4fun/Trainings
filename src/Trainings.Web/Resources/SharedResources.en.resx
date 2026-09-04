@@ -228,6 +228,12 @@
   <data name="Enum_GroupMembershipStatus_Approved" xml:space="preserve">
     <value>Approved</value>
   </data>
+  <data name="Enum_RegistrationStatus_Registered" xml:space="preserve">
+    <value>Registered</value>
+  </data>
+  <data name="Enum_RegistrationStatus_Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
   <data name="Enum_GroupMembershipStatus_Declined" xml:space="preserve">
     <value>Declined</value>
   </data>
@@ -990,9 +996,6 @@
   <data name="UserDetailPage_UserNotFound" xml:space="preserve">
     <value>User not found.</value>
   </data>
-  <data name="UserDetailPage_Inactive" xml:space="preserve">
-    <value>Inactive</value>
-  </data>
   <data name="UserDetailPage_ProfileTitle" xml:space="preserve">
     <value>Profile</value>
   </data>
@@ -1032,20 +1035,11 @@
   <data name="UserDetailPage_GroupNumberFallback" xml:space="preserve">
     <value>Group #{0}</value>
   </data>
-  <data name="UserDetailPage_Joined" xml:space="preserve">
-    <value>Joined</value>
-  </data>
   <data name="UserDetailPage_NoMemberships" xml:space="preserve">
     <value>No memberships.</value>
   </data>
-  <data name="UserDetailPage_RegistrationHistoryTitle" xml:space="preserve">
-    <value>Registration history</value>
-  </data>
-  <data name="UserDetailPage_Registered" xml:space="preserve">
-    <value>Registered</value>
-  </data>
-  <data name="UserDetailPage_ViewTraining" xml:space="preserve">
-    <value>View training</value>
+  <data name="UserDetailPage_RegistrationsTitle" xml:space="preserve">
+    <value>Registrations</value>
   </data>
   <data name="UserDetailPage_NoRegistrations" xml:space="preserve">
     <value>No registrations yet.</value>
@@ -1319,9 +1313,6 @@
   </data>
   <data name="UserCreateEditPage_WelcomeMessage" xml:space="preserve">
     <value>Welcome Message</value>
-  </data>
-  <data name="UserDetailPage_Training" xml:space="preserve">
-    <value>Training</value>
   </data>
   <data name="LoginPage_PageTitle" xml:space="preserve">
     <value>Login</value>
@@ -1821,7 +1812,7 @@
   <data name="UserDetailPage_NoEmailModePreviewShown" xml:space="preserve">
     <value>No E-Mail mode is active. The account email for {0} is shown below.</value>
   </data>
-  <data name="UserDetailPage_SendAccountMail" xml:space="preserve">
+  <data name="UserDetailPage_Verify" xml:space="preserve">
     <value>Verify</value>
   </data>
   <data name="UserDetailPage_DeleteConfirmTitle" xml:space="preserve">

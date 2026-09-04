@@ -483,6 +483,12 @@ main {
     box-shadow: none;
   }
 
+.card-header.collapsible-card-toggle {
+  display: flex;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
 .collapsible-card-meta {
   display: inline-flex;
   align-items: center;
