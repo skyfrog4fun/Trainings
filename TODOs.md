@@ -7,7 +7,6 @@ General
 
 Bugs / Changes
 ---
-- [ ] Location / New Location: Country has 'Country - Code'. Change to show only country name.
 - [ ] User / Create User: pre select country and set it to the country of the signed in user.
 - [ ] User / Create User: Groups are shown even country is not selected. I should only see groups from the selected country.
 - [ ] User / Create User: SuperAdmin creates a new user and clicks on 'Verify'. Mail is displayed in browser in dev environment. When clicking the link, the user is shown as 'Email verified: Yes', but has no entry date.
@@ -108,6 +107,7 @@ Done - Tasks
 - [X] UserInformationPage: fix localization in Group Memberships section (EN/DE)
 - [X] Registration: Send mail to GroupAdmin for new registrations
 - [X] User Overview (/users) - Admin View: rework
+- [X] Location / New Location: Country has 'Country - Code'. Change to show only country name.
 
 
 Notes

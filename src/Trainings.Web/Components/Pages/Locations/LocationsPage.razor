@@ -46,7 +46,7 @@
                                                      @bind-Value="_formModel.CountryId"
                                                      Items="_countries"
                                                      ValueSelector="c => (int?)c.Id"
-                                                     TextSelector="@(c => $"{c.Code} — {c.Name}")"
+                                                     TextSelector="@(c => c.Name)"
                                                      PlaceholderText="@Localizer["LocationsPage_SelectCountry"]" />
                         </div>
                         <div class="col-@(_editId != 0 ? 9 : 12) mt-3 d-flex">
