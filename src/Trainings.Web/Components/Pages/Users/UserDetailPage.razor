@@ -278,17 +278,13 @@
         return string.IsNullOrWhiteSpace(countryCode) ? "-" : countryCode;
     }
 
-    private static string FormatDate(DateOnly? date) =>
-        date.HasValue ? date.Value.ToString("yyyy-MM-dd") : "-";
+    private static string FormatDate(DateOnly? date) => date.HasValue ? date.Value.ToString("dd.MM.yyyy") : "-";
 
-    private static string FormatEntryDate(DateTime? dateTime) =>
-        dateTime.HasValue ? dateTime.Value.ToString("dd.MM.yyyy") : "-";
+    private static string FormatEntryDate(DateTime? dateTime) => dateTime.HasValue ? dateTime.Value.ToString("dd.MM.yyyy") : "-";
 
-    private static string FormatDateTime(DateTime? dateTime) =>
-        dateTime.HasValue ? dateTime.Value.ToString("yyyy-MM-dd HH:mm") : "-";
+    private static string FormatDateTime(DateTime? dateTime) => dateTime.HasValue ? dateTime.Value.ToString("dd.MM.yyyy") : "-";
 
-    private static string FormatText(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? "-" : value;
+    private static string FormatText(string? value) => string.IsNullOrWhiteSpace(value) ? "-" : value;
 
     private async Task SendAccountMail()
     {

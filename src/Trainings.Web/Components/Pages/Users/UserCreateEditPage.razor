@@ -83,7 +83,7 @@
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label">@Localizer["UserCreateEditPage_Birthday"]</label>
-                            <InputDate class="form-control" @bind-Value="_formModel.Birthday" />
+                            <InputDate class="@($"form-control {(_formModel.Birthday is null ? "is-placeholder" : "")}")" @bind-Value="_formModel.Birthday" />
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_Mobile"]</label>
@@ -125,7 +125,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["UserCreateEditPage_EntryDate"]</label>
-                            <InputDate class="form-control" @bind-Value="_formModel.EntryDate" />
+                            <InputDate class="@($"form-control {(_formModel.EntryDate is null ? "is-placeholder" : "")}")" @bind-Value="_formModel.EntryDate" />
                             <ValidationMessage For="() => _formModel.EntryDate" class="text-danger small" />
                         </div>
                         @if (_isEdit)

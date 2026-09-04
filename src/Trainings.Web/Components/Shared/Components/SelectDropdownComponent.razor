@@ -7,7 +7,7 @@
             @onclick="ToggleOpen"
             aria-haspopup="listbox"
             aria-expanded="@(_isOpen ? "true" : "false")">
-        <span class="app-select-toggle-label">@CurrentLabel</span>
+        <span class="app-select-toggle-label @(IsShowingPlaceholder ? "is-placeholder" : "")">@CurrentLabel</span>
     </button>
     @if (_isOpen)
     {
@@ -62,6 +62,9 @@
             return PlaceholderText ?? string.Empty;
         }
     }
+
+    private bool IsShowingPlaceholder => PlaceholderText is not null
+        && !Items.Any(item => EqualityComparer<TValue>.Default.Equals(ValueSelector(item), Value));
 
     private void ToggleOpen() => _isOpen = !_isOpen;
 

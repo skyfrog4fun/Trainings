@@ -99,7 +99,7 @@
                                     <a href="/users/@row.UserId" class="app-overview-main text-decoration-none text-reset">
                                         <div class="app-overview-title text-break">@row.DisplayName</div>
                                         <div class="app-overview-meta text-break mt-1"><i class="@AppIcons.UserGroup me-1" aria-hidden="true"></i>@row.GroupName</div>
-                                        <div class="app-overview-meta mt-1"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@Localizer["UsersPage_RequestDate"]: @row.RequestedAt.ToString("yyyy-MM-dd")</div>
+                                        <div class="app-overview-meta mt-1"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@Localizer["UsersPage_RequestDate"]: @row.RequestedAt.ToString("dd.MM.yyyy")</div>
                                     </a>
                                     <div class="app-overview-actions">
                                         <button type="button" class="btn btn-success" title="@Localizer["UsersPage_ApproveMembership"]" aria-label="@Localizer["UsersPage_ApproveMembership"]" disabled="@IsWriteBlocked" @onclick="() => ApproveRow(row)">

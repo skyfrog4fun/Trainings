@@ -81,7 +81,7 @@
                                     <td>@m.UserDisplayName</td>
                                     <td class="text-muted small">@m.UserEmail</td>
                                     <td><span class="badge bg-secondary">@m.Role</span></td>
-                                    <td class="small">@m.RequestedAt.ToString("MMM d, yyyy")</td>
+                                    <td class="small">@m.RequestedAt.ToString("dd.MM.yyyy")</td>
                                     <td>
                                         <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveMember(m)"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_ApproveButton"]</button>
                                         <button class="btn btn-sm btn-danger" @onclick="() => DeclineMember(m)"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_DeclineButton"]</button>
@@ -195,7 +195,7 @@
                                     <i class="@AppIcons.XMark text-danger" aria-hidden="true"></i>
                                 }
                             </td>
-                            <td class="small">@m.JoinedAt.ToString("MMM d, yyyy")</td>
+                            <td class="small">@m.JoinedAt.ToString("dd.MM.yyyy")</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveMember(m)"><i class="@AppIcons.UserMinus me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_RemoveButton"]</button>
                             </td>

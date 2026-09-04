@@ -5,24 +5,6 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
-Bugs / Changes
----
-- [ ] date format on user detail page
-
-
-
-User Information
----
-- [ ] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
-
-
-Design User Pages
----
-- [ ] Users: sorting (by name?), searching (by name?), paging (10, 20, 50, 100)
-- [ ] Selection Color is blue, but it shouldn't. Compare with Location page.
-- [ ] ...
-
-
 Design Group Pages
 ---
 - [ ] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
@@ -39,6 +21,12 @@ Design Group Pages
 - [ ] Create Group (/groups/new):
 - [ ] Edit Group (/groups/2/edit):
 - [ ] Group Members (/groups/{slug}/members):
+
+
+
+Design User Pages
+---
+- [ ] Users: sorting (by name?), searching (by name?), paging (10, 20, 50, 100)
 
 Mail
 ---
@@ -109,6 +97,8 @@ Done - Tasks
 - [X] User / Create User: Groups are shown even country is not selected. I should only see groups from the selected country.
 - [X] User / Create User: SuperAdmin creates a new user and clicks on 'Verify'. Mail is displayed in browser in dev environment. When clicking the link, the user is shown as 'Email verified: Yes', but has no entry date.
 - [X] User: when will Entry date be set?!
+- [X] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
+- [X] date format on user detail page
 
 
 Notes

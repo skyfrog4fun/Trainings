@@ -430,6 +430,20 @@ h1:focus {
   opacity: 1;
 }
 
+/* Native date/time inputs render their empty-state format hint (e.g.
+   dd.mm.yyyy) as regular text; there is no ::placeholder support for it.
+   Callers toggle this class based on whether the bound value is null so the
+   hint matches the muted placeholder color used everywhere else. */
+.form-control.is-placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Placeholder text rendered by SelectDropdownComponent's toggle label when
+   no real value is selected yet (see IsShowingPlaceholder in the component). */
+.app-select-toggle-label.is-placeholder {
+  color: var(--color-text-muted);
+}
+
 .form-floating > .form-control-plaintext::placeholder,
 .form-floating > .form-control::placeholder {
   text-align: end;
