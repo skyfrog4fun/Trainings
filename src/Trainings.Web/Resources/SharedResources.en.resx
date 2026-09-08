@@ -1506,9 +1506,6 @@
   <data name="GroupCreateEditPage_Name" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="GroupCreateEditPage_GroupNamePlaceholder" xml:space="preserve">
-    <value>Enter group name</value>
-  </data>
   <data name="GroupCreateEditPage_Slug" xml:space="preserve">
     <value>Slug</value>
   </data>
@@ -1523,9 +1520,6 @@
   </data>
   <data name="GroupCreateEditPage_Location" xml:space="preserve">
     <value>Location</value>
-  </data>
-  <data name="GroupCreateEditPage_SelectLocation" xml:space="preserve">
-    <value>Select location</value>
   </data>
   <data name="GroupCreateEditPage_MaxParticipants" xml:space="preserve">
     <value>Max Participants</value>
@@ -1545,20 +1539,29 @@
   <data name="GroupCreateEditPage_End" xml:space="preserve">
     <value>End</value>
   </data>
-  <data name="GroupCreateEditPage_Localized" xml:space="preserve">
-    <value>Localized</value>
-  </data>
   <data name="GroupCreateEditPage_Country" xml:space="preserve">
     <value>Country</value>
-  </data>
-  <data name="GroupCreateEditPage_SelectCountry" xml:space="preserve">
-    <value>Select country</value>
   </data>
   <data name="GroupCreateEditPage_GroupNotFound" xml:space="preserve">
     <value>Group not found.</value>
   </data>
   <data name="GroupCreateEditPage_NameRequired" xml:space="preserve">
     <value>Name is required.</value>
+  </data>
+  <data name="GroupCreateEditPage_SlugRequired" xml:space="preserve">
+    <value>Slug is required.</value>
+  </data>
+  <data name="GroupCreateEditPage_CountryRequired" xml:space="preserve">
+    <value>Country is required.</value>
+  </data>
+  <data name="GroupCreateEditPage_LocationRequired" xml:space="preserve">
+    <value>Location is required.</value>
+  </data>
+  <data name="GroupCreateEditPage_WeekdayRequired" xml:space="preserve">
+    <value>Weekday is required.</value>
+  </data>
+  <data name="GroupCreateEditPage_StartTimeRequired" xml:space="preserve">
+    <value>Start time is required.</value>
   </data>
   <data name="GroupCreateEditPage_MaxParticipantsInvalid" xml:space="preserve">
     <value>Max participants must be greater than 0.</value>

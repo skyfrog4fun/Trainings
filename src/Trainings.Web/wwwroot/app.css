@@ -225,6 +225,9 @@ h1:focus {
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1 1 auto;
+  /* Guarantee a line box even when no option is selected (empty label text),
+     so the toggle height stays equal to other form controls. */
+  min-height: 1.5em;
 }
 
 .app-select-toggle::after {

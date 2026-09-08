@@ -14,7 +14,7 @@ public class GroupFormModel : IValidatableObject
     public int? LocationId { get; set; }
     public TimeOnly? StartTime { get; set; } = new(19, 0);
     public int? DurationMinutes { get; set; } = 90;
-    public int? MaxParticipants { get; set; } = 10;
+    public int? MaxParticipants { get; set; }
     public int? CountryId { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -26,12 +26,37 @@ public class GroupFormModel : IValidatableObject
             yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_NameRequired"), [nameof(Name)]);
         }
 
-        if (MaxParticipants is <= 0)
+        if (string.IsNullOrWhiteSpace(Slug))
+        {
+            yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_SlugRequired"), [nameof(Slug)]);
+        }
+
+        if (CountryId is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_CountryRequired"), [nameof(CountryId)]);
+        }
+
+        if (LocationId is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_LocationRequired"), [nameof(LocationId)]);
+        }
+
+        if (Weekday is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_WeekdayRequired"), [nameof(Weekday)]);
+        }
+
+        if (StartTime is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_StartTimeRequired"), [nameof(StartTime)]);
+        }
+
+        if (MaxParticipants is null or <= 0)
         {
             yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_MaxParticipantsInvalid"), [nameof(MaxParticipants)]);
         }
 
-        if (DurationMinutes is <= 0)
+        if (DurationMinutes is null or <= 0)
         {
             yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_DurationMinutesInvalid"), [nameof(DurationMinutes)]);
         }

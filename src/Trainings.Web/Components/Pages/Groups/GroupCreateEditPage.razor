@@ -8,7 +8,8 @@
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject ICountryService CountryService
-@inject IDateTimeFormatService DateTimeFormatService
+@inject IUserService UserService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</PageTitle>
 
@@ -28,22 +29,39 @@
                 <Title>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</Title>
                 <Body>
                     <div class="row g-2">
-                        <div class="col-12 col-md-4">
-                            <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
-                            <InputText class="form-control" @bind-Value="_formModel.Name" placeholder='@Localizer["GroupCreateEditPage_GroupNamePlaceholder"]' />
-                            <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
-                            <InputText class="form-control" @bind-Value="_formModel.Slug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="form-check mt-2">
-                                <InputCheckbox class="form-check-input" @bind-Value="_formModel.IsActive" id="grpActive" />
-                                <label class="form-check-label" for="grpActive">@Localizer["GroupCreateEditPage_Active"]</label>
+                        @if (_isEdit)
+                        {
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Name" />
+                                <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
                             </div>
-                        </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Slug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
+                                <ValidationMessage For="() => _formModel.Slug" class="text-danger small" />
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label d-none d-md-block">&nbsp;</label>
+                                <div class="form-check mt-md-2">
+                                    <InputCheckbox class="form-check-input" @bind-Value="_formModel.IsActive" id="grpActive" />
+                                    <label class="form-check-label" for="grpActive">@Localizer["GroupCreateEditPage_Active"]</label>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Name" />
+                                <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Slug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
+                                <ValidationMessage For="() => _formModel.Slug" class="text-danger small" />
+                            </div>
+                        }
 
                         <div class="col-12">
                             <label class="form-label">@Localizer["GroupCreateEditPage_Description"]</label>
@@ -51,14 +69,26 @@
                         </div>
 
                         <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_Country"]</label>
+                            <SelectDropdownComponent TItem="CountryDto" TValue="int?"
+                                                     @bind-Value="_formModel.CountryId"
+                                                     @bind-Value:after="OnCountryChanged"
+                                                     Items="_countries"
+                                                     ValueSelector="c => (int?)c.Id"
+                                                     TextSelector="@(c => c.Name)" />
+                            <ValidationMessage For="() => _formModel.CountryId" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["GroupCreateEditPage_Location"]</label>
                             <SelectDropdownComponent TItem="LocationDto" TValue="int?"
                                                      @bind-Value="_formModel.LocationId"
-                                                     Items="_locations"
+                                                     Items="FilteredLocations"
                                                      ValueSelector="l => (int?)l.Id"
-                                                     TextSelector="@(l => string.IsNullOrWhiteSpace(l.CityName) ? l.Name : $"{l.Name} – {l.CityName}")"
-                                                     PlaceholderText="@Localizer["GroupCreateEditPage_SelectLocation"]" />
+                                                     TextSelector="@(l => l.Name)"
+                                                     SubTextSelector="@(l => l.CityName)" />
+                            <ValidationMessage For="() => _formModel.LocationId" class="text-danger small" />
                         </div>
+
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["GroupCreateEditPage_MaxParticipants"]</label>
                             <InputNumber class="form-control" @bind-Value="_formModel.MaxParticipants" />
@@ -74,11 +104,12 @@
                                                      ValueSelector="d => (DayOfWeek?)d"
                                                      TextSelector="@GetWeekdayLabel"
                                                      PlaceholderText="@Localizer["GroupCreateEditPage_SelectDay"]" />
+                            <ValidationMessage For="() => _formModel.Weekday" class="text-danger small" />
                         </div>
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["GroupCreateEditPage_Start"]</label>
                             <input class="form-control" type="time" @bind="_formModel.StartTime" @bind:after="CalculateGroupEndTime" />
-                            <div class="form-text">@Localizer["GroupCreateEditPage_Localized"]: @FormatLocalizedTime(_formModel.StartTime)</div>
+                            <ValidationMessage For="() => _formModel.StartTime" class="text-danger small" />
                         </div>
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["GroupCreateEditPage_DurationMinutes"]</label>
@@ -88,17 +119,6 @@
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["GroupCreateEditPage_End"]</label>
                             <input class="form-control" type="time" value="@_formEndTime" readonly />
-                            <div class="form-text">@Localizer["GroupCreateEditPage_Localized"]: @FormatLocalizedEndTime()</div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["GroupCreateEditPage_Country"]</label>
-                            <SelectDropdownComponent TItem="CountryDto" TValue="int?"
-                                                     @bind-Value="_formModel.CountryId"
-                                                     Items="_countries"
-                                                     ValueSelector="c => (int?)c.Id"
-                                                     TextSelector="@(c => $"{c.Code} - {c.Name}")"
-                                                     PlaceholderText="@Localizer["GroupCreateEditPage_SelectCountry"]" />
                         </div>
                     </div>
                 </Body>
@@ -129,6 +149,10 @@
 
     private bool _isEdit => Id.HasValue;
 
+    private List<LocationDto> FilteredLocations => _formModel.CountryId is null
+        ? new List<LocationDto>()
+        : _locations.Where(l => l.CountryId == _formModel.CountryId).ToList();
+
     protected override async Task OnInitializedAsync()
     {
         _locations = (await LocationService.GetAllAsync())
@@ -143,10 +167,32 @@
         }
         else
         {
+            _formModel.CountryId = await GetCurrentUserCountryIdAsync();
             CalculateGroupEndTime();
         }
 
         _loading = false;
+    }
+
+    private async Task<int?> GetCurrentUserCountryIdAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        if (userId <= 0)
+        {
+            return null;
+        }
+
+        var user = await UserService.GetByIdAsync(userId);
+        return user?.CountryId;
+    }
+
+    private void OnCountryChanged()
+    {
+        if (_formModel.LocationId is not null && !FilteredLocations.Any(l => l.Id == _formModel.LocationId))
+        {
+            _formModel.LocationId = null;
+        }
     }
 
     private async Task LoadForEditAsync()
@@ -193,29 +239,6 @@
     }
 
     private static string GetWeekdayLabel(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);
-
-    private CultureInfo GetSelectedGroupCulture()
-    {
-        var countryCode = _countries.FirstOrDefault(c => c.Id == _formModel.CountryId)?.Code
-            ?? DateTimeFormatService.GetDefaultCountry();
-        return DateTimeFormatService.GetCultureForCountry(countryCode);
-    }
-
-    private string FormatLocalizedTime(TimeOnly? value)
-    {
-        var time = value ?? new TimeOnly(19, 0);
-        return time.ToString("t", GetSelectedGroupCulture());
-    }
-
-    private string FormatLocalizedEndTime()
-    {
-        if (!TimeOnly.TryParse(_formEndTime, out var parsed))
-        {
-            return _formEndTime;
-        }
-
-        return parsed.ToString("t", GetSelectedGroupCulture());
-    }
 
     private void GoBack() => NavigationManager.NavigateTo(_isEdit ? $"/groups/{_formModel.Slug}" : "/groups");
 
