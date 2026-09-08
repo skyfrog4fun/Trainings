@@ -516,12 +516,6 @@
   <data name="AttendancePage_FinalizeAttendance" xml:space="preserve">
     <value>Anwesenheit finalisieren</value>
   </data>
-  <data name="GroupMembersPage_PageTitle" xml:space="preserve">
-    <value>Gruppenmitglieder</value>
-  </data>
-  <data name="GroupMembersPage_Back" xml:space="preserve">
-    <value>Zurück</value>
-  </data>
   <data name="GroupMembersPage_AddMemberTitle" xml:space="preserve">
     <value>Mitglied hinzufügen</value>
   </data>
@@ -543,26 +537,17 @@
   <data name="GroupMembersPage_CancelButton" xml:space="preserve">
     <value>Abbrechen</value>
   </data>
-  <data name="GroupMembersPage_MembersHeading" xml:space="preserve">
-    <value>Mitglieder ({0} bestätigt)</value>
+  <data name="GroupDetailPage_PendingRequestsTitle" xml:space="preserve">
+    <value>Ausstehende Anfragen</value>
   </data>
-  <data name="GroupMembersPage_PendingRequests" xml:space="preserve">
-    <value>Ausstehende Anfragen ({0})</value>
+  <data name="GroupDetailPage_AdminsTitle" xml:space="preserve">
+    <value>Admins</value>
   </data>
-  <data name="GroupMembersPage_ColName" xml:space="preserve">
-    <value>Name</value>
+  <data name="GroupDetailPage_TrainersTitle" xml:space="preserve">
+    <value>Trainer</value>
   </data>
-  <data name="GroupMembersPage_ColEmail" xml:space="preserve">
-    <value>E-Mail</value>
-  </data>
-  <data name="GroupMembersPage_ColRole" xml:space="preserve">
-    <value>Rolle</value>
-  </data>
-  <data name="GroupMembersPage_ColRequested" xml:space="preserve">
-    <value>Angefragt</value>
-  </data>
-  <data name="GroupMembersPage_ColActions" xml:space="preserve">
-    <value>Aktionen</value>
+  <data name="GroupDetailPage_ParticipantsTitle" xml:space="preserve">
+    <value>Teilnehmer</value>
   </data>
   <data name="GroupMembersPage_ApproveButton" xml:space="preserve">
     <value>Genehmigen</value>
@@ -570,23 +555,8 @@
   <data name="GroupMembersPage_DeclineButton" xml:space="preserve">
     <value>Ablehnen</value>
   </data>
-  <data name="GroupMembersPage_Admins" xml:space="preserve">
-    <value>Admins ({0})</value>
-  </data>
-  <data name="GroupMembersPage_Trainers" xml:space="preserve">
-    <value>Trainer ({0})</value>
-  </data>
-  <data name="GroupMembersPage_Participants" xml:space="preserve">
-    <value>Teilnehmer ({0})</value>
-  </data>
   <data name="GroupMembersPage_NoMembers" xml:space="preserve">
     <value>Noch keine Mitglieder.</value>
-  </data>
-  <data name="GroupMembersPage_ColActive" xml:space="preserve">
-    <value>Aktiv</value>
-  </data>
-  <data name="GroupMembersPage_ColJoined" xml:space="preserve">
-    <value>Beigetreten</value>
   </data>
   <data name="GroupMembersPage_RemoveButton" xml:space="preserve">
     <value>Entfernen</value>
@@ -852,10 +822,10 @@
   <data name="MyRegistrationsPage_BrowseTrainings" xml:space="preserve">
     <value>Trainings durchsuchen</value>
   </data>
-  <data name="NotFound_Heading" xml:space="preserve">
+  <data name="NotFoundPage_Heading" xml:space="preserve">
     <value>Nicht gefunden</value>
   </data>
-  <data name="NotFound_Message" xml:space="preserve">
+  <data name="NotFoundPage_Message" xml:space="preserve">
     <value>Der gesuchte Inhalt existiert leider nicht.</value>
   </data>
   <data name="AttendancePage_DraftSaved" xml:space="preserve">
@@ -869,9 +839,6 @@
   </data>
   <data name="AttendancePage_AttendanceForAriaLabel" xml:space="preserve">
     <value>Anwesenheit für {0}</value>
-  </data>
-  <data name="GroupMembersPage_MembersOfGroup" xml:space="preserve">
-    <value>{0} – Mitglieder</value>
   </data>
   <data name="GroupMembersPage_SelectUserError" xml:space="preserve">
     <value>Bitte wähle einen Benutzer aus.</value>
@@ -1590,6 +1557,90 @@
   <data name="GroupCreateEditPage_GroupNotFound" xml:space="preserve">
     <value>Gruppe nicht gefunden.</value>
   </data>
+  <data name="GroupCreateEditPage_NameRequired" xml:space="preserve">
+    <value>Name ist erforderlich.</value>
+  </data>
+  <data name="GroupCreateEditPage_MaxParticipantsInvalid" xml:space="preserve">
+    <value>Die maximale Teilnehmerzahl muss größer als 0 sein.</value>
+  </data>
+  <data name="GroupCreateEditPage_DurationMinutesInvalid" xml:space="preserve">
+    <value>Die Dauer muss größer als 0 Minuten sein.</value>
+  </data>
+  <data name="GroupsPage_AllStatuses" xml:space="preserve">
+    <value>Alle Status</value>
+  </data>
+  <data name="GroupsPage_Inactive" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+  <data name="GroupsPage_AllCountries" xml:space="preserve">
+    <value>Alle Länder</value>
+  </data>
+  <data name="GroupsPage_AllLocations" xml:space="preserve">
+    <value>Alle Standorte</value>
+  </data>
+  <data name="GroupDetailPage_PageTitle" xml:space="preserve">
+    <value>Gruppendetails</value>
+  </data>
+  <data name="GroupDetailPage_GroupNotFound" xml:space="preserve">
+    <value>Gruppe nicht gefunden.</value>
+  </data>
+  <data name="GroupDetailPage_InfoTitle" xml:space="preserve">
+    <value>Gruppeninformationen</value>
+  </data>
+  <data name="GroupDetailPage_SlugLabel" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="GroupDetailPage_DescriptionLabel" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="GroupDetailPage_LocationLabel" xml:space="preserve">
+    <value>Standort</value>
+  </data>
+  <data name="GroupDetailPage_AllowedLocationsLabel" xml:space="preserve">
+    <value>Erlaubte Standorte</value>
+  </data>
+  <data name="GroupDetailPage_ScheduleLabel" xml:space="preserve">
+    <value>Termin</value>
+  </data>
+  <data name="GroupDetailPage_MaxParticipantsLabel" xml:space="preserve">
+    <value>Maximale Teilnehmerzahl</value>
+  </data>
+  <data name="GroupDetailPage_CountryLabel" xml:space="preserve">
+    <value>Land</value>
+  </data>
+  <data name="GroupDetailPage_MemberCountLabel" xml:space="preserve">
+    <value>Mitglieder</value>
+  </data>
+  <data name="GroupDetailPage_CreatedLabel" xml:space="preserve">
+    <value>Erstellt</value>
+  </data>
+  <data name="GroupDetailPage_MembersTitle" xml:space="preserve">
+    <value>Mitgliederverwaltung</value>
+  </data>
+  <data name="GroupDetailPage_DeleteConfirmTitle" xml:space="preserve">
+    <value>Gruppe löschen</value>
+  </data>
+  <data name="GroupDetailPage_DeleteConfirmMessage" xml:space="preserve">
+    <value>Möchten Sie diese Gruppe wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="GroupDetailPage_DeleteBlockedActiveMembers" xml:space="preserve">
+    <value>Diese Gruppe kann nicht gelöscht werden, da sie noch aktive Mitglieder hat. Entfernen Sie zuerst alle Mitglieder.</value>
+  </data>
+  <data name="GroupDetailPage_DeleteBlockedScheduledTrainings" xml:space="preserve">
+    <value>Diese Gruppe kann nicht gelöscht werden, da sie noch geplante Trainings in der Zukunft hat.</value>
+  </data>
+  <data name="GroupDetailPage_DeleteBlockedBoth" xml:space="preserve">
+    <value>Diese Gruppe kann nicht gelöscht werden, da sie noch aktive Mitglieder und geplante Trainings in der Zukunft hat.</value>
+  </data>
+  <data name="GroupDetailPage_FailedMessage" xml:space="preserve">
+    <value>Aktion fehlgeschlagen: {0}</value>
+  </data>
+  <data name="GroupDetailPage_MemberAddedToast" xml:space="preserve">
+    <value>{0} wurde der Gruppe hinzugefügt.</value>
+  </data>
+  <data name="GroupDetailPage_MemberRemovedToast" xml:space="preserve">
+    <value>{0} wurde aus der Gruppe entfernt.</value>
+  </data>
   <data name="TrainingsPage_Available" xml:space="preserve">
     <value>Verfügbar</value>
   </data>
@@ -1952,5 +2003,8 @@
   </data>
   <data name="UserCreateEditPage_GroupMembership_NoGroupsForCountry" xml:space="preserve">
     <value>Für dieses Land gibt es keine Gruppen.</value>
+  </data>
+  <data name="GroupsPage_AllDays" xml:space="preserve">
+    <value>Alle Tage</value>
   </data>
 </root>

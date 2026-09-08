@@ -273,6 +273,18 @@ h1:focus {
   cursor: pointer;
 }
 
+/* Two-line option layout (e.g. location name + city) used when SelectDropdownComponent
+   is given a SubTextSelector, so the sub value is visually separated from the main label. */
+.app-select-option-text {
+  line-height: 1.2;
+}
+
+.app-select-option-subtext {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
 .app-select-option:hover {
   background-color: var(--brand-community-80);
 }
@@ -856,6 +868,17 @@ main {
 .app-overview-meta {
   color: var(--color-text-muted);
   font-size: 0.875rem;
+}
+
+/* Reserves a constant two-line block for variable-length text (e.g. group descriptions)
+   so cards in the same overview grid share the same height, truncating longer text. */
+.app-overview-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.4em;
+  line-height: 1.2em;
 }
 
 .app-overview-actions {

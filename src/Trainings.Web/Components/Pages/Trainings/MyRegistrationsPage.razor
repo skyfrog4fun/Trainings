@@ -13,48 +13,38 @@
 <PageTitle>@Localizer["MyRegistrationsPage_PageTitle"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
-        <h2 class="mb-0">@Localizer["MyRegistrationsPage_Heading"]</h2>
-        <button type="button" class="btn btn-app-outline" @onclick="ToggleFilter">
-            <i class="@AppIcons.Filter" aria-hidden="true"></i>
-        </button>
-    </div>
-
-    @if (_showFilter)
-    {
-        <div class="row g-2 mb-3">
-            <div class="col-12 col-md-4">
-                <select class="form-select" @bind="_filterGroupName">
-                    <option value="">@Localizer["MyRegistrationsPage_AllGroups"]</option>
-                    @foreach (var group in _filterGroups)
-                    {
-                        <option value="@group">@group</option>
-                    }
-                </select>
+    <PageTitleComponent Icon="@AppIcons.ClipboardList" Text="@Localizer["MyRegistrationsPage_Heading"]"
+                        ShowFilterButton="true" OnApplyFilters="ApplyFilters" OnClearFilters="ClearFilters">
+        <Filter>
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingGroupName">
+                        <option value="">@Localizer["MyRegistrationsPage_AllGroups"]</option>
+                        @foreach (var group in _filterGroups)
+                        {
+                            <option value="@group">@group</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingTrainerName">
+                        <option value="">@Localizer["MyRegistrationsPage_AllTrainers"]</option>
+                        @foreach (var trainer in _filterTrainers)
+                        {
+                            <option value="@trainer">@trainer</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingAvailability">
+                        <option value="all">@Localizer["MyRegistrationsPage_FilterAll"]</option>
+                        <option value="available">@Localizer["MyRegistrationsPage_FilterAvailable"]</option>
+                        <option value="full">@Localizer["MyRegistrationsPage_FilterFull"]</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-12 col-md-3">
-                <select class="form-select" @bind="_filterTrainerName">
-                    <option value="">@Localizer["MyRegistrationsPage_AllTrainers"]</option>
-                    @foreach (var trainer in _filterTrainers)
-                    {
-                        <option value="@trainer">@trainer</option>
-                    }
-                </select>
-            </div>
-            <div class="col-12 col-md-3">
-                <select class="form-select" @bind="_filterAvailability">
-                    <option value="all">@Localizer["MyRegistrationsPage_FilterAll"]</option>
-                    <option value="available">@Localizer["MyRegistrationsPage_FilterAvailable"]</option>
-                    <option value="full">@Localizer["MyRegistrationsPage_FilterFull"]</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-2 d-grid">
-                <button type="button" class="btn btn-app-outline btn-filter-clear" @onclick="ClearFilters">
-                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>@Localizer["MyRegistrationsPage_ClearFilters"]
-                </button>
-            </div>
-        </div>
-    }
+        </Filter>
+    </PageTitleComponent>
 
     @if (_loading)
     {
@@ -109,9 +99,11 @@
     private List<string> _filterGroups = new();
     private List<string> _filterTrainers = new();
     private bool _loading = true;
-    private bool _showFilter;
     private int _userId;
     private string _userCountry = "CH";
+    private string _pendingGroupName = string.Empty;
+    private string _pendingTrainerName = string.Empty;
+    private string _pendingAvailability = "all";
     private string _filterGroupName = string.Empty;
     private string _filterTrainerName = string.Empty;
     private string _filterAvailability = "all";
@@ -199,13 +191,18 @@
     private string FormatDuration(int? durationMinutes) =>
         durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Shared_MinutesUnit"]}" : "-";
 
-    private void ToggleFilter()
+    private void ApplyFilters()
     {
-        _showFilter = !_showFilter;
+        _filterGroupName = _pendingGroupName;
+        _filterTrainerName = _pendingTrainerName;
+        _filterAvailability = _pendingAvailability;
     }
 
     private void ClearFilters()
     {
+        _pendingGroupName = string.Empty;
+        _pendingTrainerName = string.Empty;
+        _pendingAvailability = "all";
         _filterGroupName = string.Empty;
         _filterTrainerName = string.Empty;
         _filterAvailability = "all";

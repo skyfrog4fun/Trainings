@@ -5,65 +5,134 @@
 @attribute [Authorize(Policy = "GroupAdmin")]
 
 @inject IGroupService GroupService
+@inject ILocationService LocationService
+@inject ICountryService CountryService
 
 <PageTitle>@Localizer["Shared_Groups"]</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <PageHeader Title='@Localizer["Shared_Groups"]'>
-        <Actions>
-            <a href="/groups/new" class="btn btn-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Shared_Add"]</a>
-        </Actions>
-    </PageHeader>
+    <PageTitleComponent Icon="@AppIcons.Group" Text="@Localizer["Shared_Groups"]"
+                        ButtonText="@Localizer["Shared_Add"].Value" ButtonIcon="@AppIcons.Plus" OnButtonClick="GoToCreateGroup"
+                        ShowFilterButton="true" OnApplyFilters="ApplyFilters" OnClearFilters="ClearFilters">
+        <Filter>
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-3">
+                    <SelectDropdownComponent TItem="(string Value, string Label)" TValue="string"
+                                             @bind-Value="_pendingStatus"
+                                             Items="_statusOptions"
+                                             ValueSelector="o => o.Value"
+                                             TextSelector="@(o => Localizer[o.Label].Value)" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <SelectDropdownComponent TItem="CountryDto" TValue="int?"
+                                             @bind-Value="_pendingCountryId"
+                                             Items="_countries"
+                                             ValueSelector="c => (int?)c.Id"
+                                             TextSelector="@(c => c.Name)"
+                                             PlaceholderText="@Localizer["GroupsPage_AllCountries"]" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <SelectDropdownComponent TItem="LocationDto" TValue="int?"
+                                             @bind-Value="_pendingLocationId"
+                                             Items="_locations"
+                                             ValueSelector="l => (int?)l.Id"
+                                             TextSelector="@(l => l.Name)"
+                                             SubTextSelector="@(l => l.CityName)"
+                                             PlaceholderText="@Localizer["GroupsPage_AllLocations"]" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <SelectDropdownComponent TItem="DayOfWeek" TValue="DayOfWeek?"
+                                             @bind-Value="_pendingWeekday"
+                                             Items="_availableWeekdays"
+                                             ValueSelector="d => (DayOfWeek?)d"
+                                             TextSelector="@GetWeekdayLabel"
+                                             PlaceholderText="@Localizer["GroupsPage_AllDays"]" />
+                </div>
+            </div>
+        </Filter>
+    </PageTitleComponent>
 
     @if (_loading)
     {
         <LoadingSpinner />
     }
+    else if (FilteredGroups.Count == 0)
+    {
+        <div class="alert alert-info">@Localizer["GroupsPage_NoGroupsYet"]</div>
+    }
     else
     {
         <div class="app-overview-grid">
-            @foreach (var group in _groups)
+            @foreach (var group in FilteredGroups)
             {
-                <div class="app-overview-card">
+                <a href="/groups/@group.Slug" class="app-overview-card app-overview-card-link text-decoration-none text-reset">
                     <div class="app-overview-main">
                         <div class="app-overview-title text-break">@group.Name</div>
-                        <div class="app-overview-meta">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
-                        <div class="app-overview-meta mt-1">
-                            <span class="me-3"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</span>
-                            @if (group.IsActive)
-                            {
-                                <span><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Active"]</span>
-                            }
-                            else
-                            {
-                                <span><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Enum_Decision_No"]</span>
-                            }
-                        </div>
+                        <div class="app-overview-meta app-overview-description text-break mt-1">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
+                        <div class="app-overview-meta mt-1"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</div>
                     </div>
                     <div class="app-overview-actions">
-                        <a href="/groups/@group.Slug/members" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
-                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
-                        </a>
-                        <a href="/groups/@group.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
-                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                        </a>
-                        <button class="btn btn-sm btn-app-icon btn-app-outline-danger" title='@Localizer["Shared_Delete"]' aria-label='@Localizer["Shared_Delete"]' @onclick="() => DeleteGroup(group)">
-                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                        </button>
+                        <BadgeStatusComponent IsActive="group.IsActive" />
                     </div>
-                </div>
+                </a>
             }
         </div>
-        @if (!_groups.Any())
-        {
-            <div class="alert alert-info">@Localizer["GroupsPage_NoGroupsYet"]</div>
-        }
     }
 </div>
 
 @code {
     private List<GroupDto> _groups = new();
+    private List<CountryDto> _countries = new();
+    private List<LocationDto> _locations = new();
+    private List<DayOfWeek> _availableWeekdays = new();
     private bool _loading = true;
+
+    private readonly List<(string Value, string Label)> _statusOptions = new()
+    {
+        ("", "GroupsPage_AllStatuses"),
+        ("Active", "Shared_Active"),
+        ("Inactive", "GroupsPage_Inactive")
+    };
+
+    private string _pendingStatus = string.Empty;
+    private int? _pendingCountryId;
+    private int? _pendingLocationId;
+    private DayOfWeek? _pendingWeekday;
+    private string _appliedStatus = string.Empty;
+    private int? _appliedCountryId;
+    private int? _appliedLocationId;
+    private DayOfWeek? _appliedWeekday;
+
+    private List<GroupDto> FilteredGroups
+    {
+        get
+        {
+            IEnumerable<GroupDto> query = _groups;
+
+            if (!string.IsNullOrEmpty(_appliedStatus))
+            {
+                var wantActive = _appliedStatus == "Active";
+                query = query.Where(g => g.IsActive == wantActive);
+            }
+
+            if (_appliedCountryId is not null)
+            {
+                query = query.Where(g => g.CountryId == _appliedCountryId);
+            }
+
+            if (_appliedLocationId is not null)
+            {
+                query = query.Where(g => g.LocationId == _appliedLocationId);
+            }
+
+            if (_appliedWeekday is not null)
+            {
+                query = query.Where(g => g.Weekday == _appliedWeekday);
+            }
+
+            return query.ToList();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,13 +142,39 @@
     private async Task LoadGroups()
     {
         _loading = true;
-        _groups = (await GroupService.GetAllAsync()).ToList();
+        _groups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
+        _countries = (await CountryService.GetAllAsync()).ToList();
+        _locations = (await LocationService.GetAllAsync()).Where(l => l.IsActive && !l.IsSystemWide).OrderBy(l => l.Name).ToList();
+        _availableWeekdays = _groups
+            .Where(g => g.Weekday.HasValue)
+            .Select(g => g.Weekday!.Value)
+            .Distinct()
+            .OrderBy(d => ((int)d + 6) % 7)
+            .ToList();
         _loading = false;
     }
 
-    private async Task DeleteGroup(GroupDto group)
+    private static string GetWeekdayLabel(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);
+
+    private void GoToCreateGroup() => NavigationManager.NavigateTo("/groups/new");
+
+    private void ApplyFilters()
     {
-        await GroupService.DeleteAsync(group.Id);
-        await LoadGroups();
+        _appliedStatus = _pendingStatus;
+        _appliedCountryId = _pendingCountryId;
+        _appliedLocationId = _pendingLocationId;
+        _appliedWeekday = _pendingWeekday;
+    }
+
+    private void ClearFilters()
+    {
+        _pendingStatus = string.Empty;
+        _pendingCountryId = null;
+        _pendingLocationId = null;
+        _pendingWeekday = null;
+        _appliedStatus = string.Empty;
+        _appliedCountryId = null;
+        _appliedLocationId = null;
+        _appliedWeekday = null;
     }
 }

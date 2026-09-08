@@ -16,54 +16,38 @@
 <ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
 
 <div class="container px-2 px-md-4">
-    <PageTitleComponent Icon="@AppIcons.Users"
-                        Text="@Localizer["Shared_Users"]"
-                        ButtonText="@(_canManage ? Localizer["Shared_Add"].Value : null)"
-                        ButtonIcon="@AppIcons.Plus"
-                        ButtonDisabled="@IsWriteBlocked"
-                        OnButtonClick="GoToCreateUser"
-                        ShowFilterButton="true"
-                        OnFilterButtonClick="ToggleFilter">
+    <PageTitleComponent Icon="@AppIcons.Users" Text="@Localizer["Shared_Users"]" ButtonText="@(_canManage ? Localizer["Shared_Add"].Value : null)"
+                        ButtonIcon="@AppIcons.Plus" ButtonDisabled="@IsWriteBlocked" OnButtonClick="GoToCreateUser"
+                        ShowFilterButton="true"OnApplyFilters="ApplyFilters" OnClearFilters="ClearFilters">
         <Filter>
-            @if (_showFilter)
-            {
-                <div class="row g-2 mb-3">
-                    <div class="col-12 col-md-4">
-                        <select class="form-select" @bind="_pendingGroupId">
-                            <option value="">@Localizer["UsersPage_AllGroups"]</option>
-                            <option value="none">@Localizer["UsersPage_NoGroup"]</option>
-                            @foreach (var group in _availableGroups)
-                            {
-                                <option value="@group.Id">@group.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <select class="form-select" @bind="_pendingRole">
-                            <option value="">@Localizer["UsersPage_AllRoles"]</option>
-                            <option value="SuperAdmin">@Localizer["Enum_Role_SuperAdmin"]</option>
-                            <option value="GroupAdmin">@Localizer["Enum_Role_GroupAdmin"]</option>
-                            <option value="Trainer">@Localizer["Enum_Role_Trainer"]</option>
-                            <option value="User">@Localizer["Enum_Role_User"]</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <select class="form-select" @bind="_pendingStatus">
-                            <option value="">@Localizer["UsersPage_AllStatuses"]</option>
-                            <option value="Active">@Localizer["Shared_Active"]</option>
-                            <option value="Inactive">@Localizer["UsersPage_Inactive"]</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-2 d-flex gap-2">
-                        <button type="button" class="btn btn-primary flex-fill" @onclick="ApplyFilters">
-                            <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Apply"]
-                        </button>
-                        <button type="button" class="btn btn-app-outline btn-filter-clear" @onclick="ClearFilters" title="@Localizer["Shared_ClearFilters"]" aria-label="@Localizer["Shared_ClearFilters"]">
-                            <i class="@AppIcons.FilterClear" aria-hidden="true"></i>
-                        </button>
-                    </div>
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingGroupId">
+                        <option value="">@Localizer["UsersPage_AllGroups"]</option>
+                        <option value="none">@Localizer["UsersPage_NoGroup"]</option>
+                        @foreach (var group in _availableGroups)
+                        {
+                            <option value="@group.Id">@group.Name</option>
+                        }
+                    </select>
                 </div>
-            }
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingRole">
+                        <option value="">@Localizer["UsersPage_AllRoles"]</option>
+                        <option value="SuperAdmin">@Localizer["Enum_Role_SuperAdmin"]</option>
+                        <option value="GroupAdmin">@Localizer["Enum_Role_GroupAdmin"]</option>
+                        <option value="Trainer">@Localizer["Enum_Role_Trainer"]</option>
+                        <option value="User">@Localizer["Enum_Role_User"]</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingStatus">
+                        <option value="">@Localizer["UsersPage_AllStatuses"]</option>
+                        <option value="Active">@Localizer["Shared_Active"]</option>
+                        <option value="Inactive">@Localizer["UsersPage_Inactive"]</option>
+                    </select>
+                </div>
+            </div>
         </Filter>
     </PageTitleComponent>
 
@@ -157,7 +141,6 @@
     private bool _loading = true;
     private ToastComponent? _toast;
 
-    private bool _showFilter;
     private string _pendingGroupId = string.Empty;
     private string _pendingRole = string.Empty;
     private string _pendingStatus = string.Empty;
@@ -284,11 +267,6 @@
         {
             NavigationManager.NavigateTo("/users/new");
         }
-    }
-
-    private void ToggleFilter()
-    {
-        _showFilter = !_showFilter;
     }
 
     private void ApplyFilters()

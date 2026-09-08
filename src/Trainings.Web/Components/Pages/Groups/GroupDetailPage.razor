@@ -1,0 +1,400 @@
+@page "/groups/{Slug}"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "GroupAdmin")]
+
+@inject IGroupService GroupService
+@inject IUserService UserService
+@inject ILocationService LocationService
+
+<PageTitle>@Localizer["GroupDetailPage_PageTitle"]</PageTitle>
+
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
+<div class="container px-2 px-md-4">
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (_group is null)
+    {
+        <div class="alert alert-danger">@Localizer["GroupDetailPage_GroupNotFound"]</div>
+    }
+    else
+    {
+        <PageTitleComponent Icon="@AppIcons.Group" Text="@_group.Name" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
+
+        <CardComponent Collapsed="false" ShowFooter="true">
+            <Title>@Localizer["GroupDetailPage_InfoTitle"]</Title>
+            <TitleMeta><BadgeStatusComponent IsActive="_group.IsActive" /></TitleMeta>
+            <Body>
+                <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_SlugLabel"]</th><td class="text-end">@_group.Slug</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_DescriptionLabel"]</th><td class="text-end">@FormatText(_group.Description)</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_LocationLabel"]</th><td class="text-end">@FormatText(_group.LocationName)</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_AllowedLocationsLabel"]</th><td class="text-end">@FormatAllowedLocations()</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_ScheduleLabel"]</th><td class="text-end">@FormatSchedule()</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_MaxParticipantsLabel"]</th><td class="text-end">@(_group.MaxParticipants?.ToString() ?? "-")</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_CountryLabel"]</th><td class="text-end">@FormatText(_group.CountryCode)</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_MemberCountLabel"]</th><td class="text-end">@_group.MemberCount</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_CreatedLabel"]</th><td class="text-end">@_group.CreatedAt.ToString("dd.MM.yyyy")</td></tr>
+                    </tbody>
+                </table>
+            </Body>
+            <Footer>
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <a href="/groups/@_group.Id/edit" class="btn btn-sm btn-primary">
+                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="PromptDelete" disabled="@_deleting">
+                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
+                    </button>
+                </div>
+            </Footer>
+        </CardComponent>
+
+        <CardComponent Collapsed="false">
+            <Title>@Localizer["GroupDetailPage_MembersTitle"]</Title>
+            <TitleMeta>@_approvedMembers.Count</TitleMeta>
+            <Body>
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-success btn-sm" @onclick="() => _showAddForm = !_showAddForm">
+                        <i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_AddMemberTitle"]
+                    </button>
+                </div>
+
+                @if (_showAddForm)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-12 col-md-6">
+                                    <SelectDropdownComponent TItem="UserDto" TValue="int?"
+                                                             @bind-Value="_addUserId"
+                                                             Items="_allUsers"
+                                                             ValueSelector="u => (int?)u.Id"
+                                                             TextSelector="@(u => $"{u.DisplayName} ({u.Email})")"
+                                                             PlaceholderText="@Localizer["GroupMembersPage_SelectUser"]" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <SelectDropdownComponent TItem="(GroupMemberRole Value, string Label)" TValue="GroupMemberRole"
+                                                             @bind-Value="_addRole"
+                                                             Items="_roleOptions"
+                                                             ValueSelector="o => o.Value"
+                                                             TextSelector="o => o.Label" />
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-primary btn-sm me-2" @onclick="AddMember">@Localizer["GroupMembersPage_AddButton"]</button>
+                                <button class="btn btn-secondary btn-sm" @onclick="() => _showAddForm = false">@Localizer["GroupMembersPage_CancelButton"]</button>
+                            </div>
+                            <div class="mt-2">
+                                <ActionAlert IsSuccess="false" Message="@_addError" />
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (_pendingMembers.Count > 0)
+                {
+                    <CardComponent Collapsed="false" HeaderCssClass="border-warning">
+                        <Title>@Localizer["GroupDetailPage_PendingRequestsTitle"]</Title>
+                        <TitleMeta>@_pendingMembers.Count</TitleMeta>
+                        <Body>
+                            <div class="app-overview-grid">
+                                @foreach (var m in _pendingMembers)
+                                {
+                                    <div class="app-overview-card">
+                                        <div class="app-overview-main w-100 d-flex flex-column gap-1">
+                                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                                <div class="app-overview-title text-break">@m.UserDisplayName</div>
+                                                <div class="fw-semibold text-nowrap">@m.Role.Localize(Localizer)</div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                                <div class="app-overview-meta">@m.UserEmail</div>
+                                                <div class="app-overview-meta">@m.RequestedAt.ToString("dd.MM.yyyy")</div>
+                                            </div>
+                                        </div>
+                                        <div class="app-overview-actions">
+                                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="@Localizer["GroupMembersPage_ApproveButton"]" aria-label="@Localizer["GroupMembersPage_ApproveButton"]" @onclick="() => ApproveMember(m)">
+                                                <i class="@AppIcons.Check" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title="@Localizer["GroupMembersPage_DeclineButton"]" aria-label="@Localizer["GroupMembersPage_DeclineButton"]" @onclick="() => DeclineMember(m)">
+                                                <i class="@AppIcons.XMark" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </Body>
+                    </CardComponent>
+                }
+
+                @RenderMemberGroup(Localizer["GroupDetailPage_AdminsTitle"], _adminMembers)
+                @RenderMemberGroup(Localizer["GroupDetailPage_TrainersTitle"], _trainerMembers)
+                @RenderMemberGroup(Localizer["GroupDetailPage_ParticipantsTitle"], _participantMembers)
+
+                @if (_approvedMembers.Count == 0 && _pendingMembers.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">@Localizer["GroupMembersPage_NoMembers"]</div>
+                }
+            </Body>
+        </CardComponent>
+    }
+</div>
+
+<ConfirmDialogComponent IsVisible="_showDeleteConfirm"
+                        Title="@Localizer["GroupDetailPage_DeleteConfirmTitle"]"
+                        Message="@Localizer["GroupDetailPage_DeleteConfirmMessage"]"
+                        ConfirmText="@Localizer["Shared_Delete"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="ConfirmDeleteAsync"
+                        OnCancel="CancelDelete" />
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+
+    private GroupDto? _group;
+    private Dictionary<int, string> _locationNameById = new();
+    private List<GroupMembershipDto> _allMembers = new();
+    private List<GroupMembershipDto> _pendingMembers = new();
+    private List<GroupMembershipDto> _approvedMembers = new();
+    private List<GroupMembershipDto> _adminMembers = new();
+    private List<GroupMembershipDto> _trainerMembers = new();
+    private List<GroupMembershipDto> _participantMembers = new();
+    private List<UserDto> _allUsers = new();
+    private readonly List<(GroupMemberRole Value, string Label)> _roleOptions = new()
+    {
+        (GroupMemberRole.Participant, "GroupMembersPage_RoleParticipant"),
+        (GroupMemberRole.Trainer, "GroupMembersPage_RoleTrainer"),
+        (GroupMemberRole.Admin, "GroupMembersPage_RoleAdmin")
+    };
+    private bool _loading = true;
+    private bool _showAddForm;
+    private int? _addUserId;
+    private GroupMemberRole _addRole = GroupMemberRole.Participant;
+    private string? _addError;
+    private bool _showDeleteConfirm;
+    private bool _deleting;
+    private ToastComponent? _toast;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+
+        _group = await GroupService.GetBySlugAsync(Slug);
+        if (_group is null)
+        {
+            _loading = false;
+            return;
+        }
+
+        var locations = await LocationService.GetAllAsync();
+        _locationNameById = locations.ToDictionary(l => l.Id, l => l.Name);
+
+        _allUsers = (await UserService.GetAllAsync()).Where(u => u.IsActive).OrderBy(u => u.DisplayName).ToList();
+
+        await LoadMembersAsync();
+
+        _loading = false;
+    }
+
+    private async Task LoadMembersAsync()
+    {
+        if (_group is null)
+        {
+            return;
+        }
+
+        _allMembers = (await GroupService.GetMembersAsync(_group.Id)).ToList();
+        _pendingMembers = _allMembers.Where(m => m.Status == GroupMembershipStatus.Pending).ToList();
+        _approvedMembers = _allMembers.Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive).ToList();
+        _adminMembers = _approvedMembers.Where(m => m.Role == GroupMemberRole.Admin).ToList();
+        _trainerMembers = _approvedMembers.Where(m => m.Role == GroupMemberRole.Trainer).ToList();
+        _participantMembers = _approvedMembers.Where(m => m.Role == GroupMemberRole.Participant).ToList();
+    }
+
+    private RenderFragment RenderMemberGroup(string title, List<GroupMembershipDto> members) => __builder =>
+    {
+        if (members.Count == 0)
+        {
+            return;
+        }
+
+        <CardComponent Collapsed="false">
+            <Title>@title</Title>
+            <TitleMeta>@members.Count</TitleMeta>
+            <Body>
+                <div class="app-overview-grid">
+                    @foreach (var m in members)
+                    {
+                        <div class="app-overview-card">
+                            <div class="app-overview-main w-100 d-flex flex-column gap-1">
+                                <div class="d-flex justify-content-between align-items-center gap-2">
+                                    <div class="app-overview-title text-break">@m.UserDisplayName</div>
+                                    <div class="app-overview-meta text-nowrap">@m.JoinedAt.ToString("dd.MM.yyyy")</div>
+                                </div>
+                                <div class="app-overview-meta">@m.UserEmail</div>
+                            </div>
+                            <div class="app-overview-actions">
+                                <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title="@Localizer["GroupMembersPage_RemoveButton"]" aria-label="@Localizer["GroupMembersPage_RemoveButton"]" @onclick="() => RemoveMember(m)">
+                                    <i class="@AppIcons.UserMinus" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </Body>
+        </CardComponent>
+    };
+
+    private static string FormatText(string? value) => string.IsNullOrWhiteSpace(value) ? "-" : value;
+
+    private string FormatAllowedLocations()
+    {
+        if (_group is null || _group.AllowedLocationIds.Count == 0)
+        {
+            return "-";
+        }
+
+        var names = _group.AllowedLocationIds
+            .Select(id => _locationNameById.TryGetValue(id, out var name) ? name : $"#{id}")
+            .ToList();
+        return string.Join(", ", names);
+    }
+
+    private string FormatSchedule()
+    {
+        if (_group is null || (!_group.Weekday.HasValue && !_group.StartTime.HasValue))
+        {
+            return "-";
+        }
+
+        var weekdayPart = _group.Weekday.HasValue
+            ? System.Globalization.CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(_group.Weekday.Value)
+            : string.Empty;
+        var startPart = _group.StartTime.HasValue ? _group.StartTime.Value.ToString("HH:mm") : string.Empty;
+        var endPart = _group is { StartTime: not null, DurationMinutes: not null }
+            ? _group.StartTime.Value.AddMinutes(_group.DurationMinutes.Value).ToString("HH:mm")
+            : string.Empty;
+        var timePart = string.IsNullOrEmpty(startPart) ? string.Empty : $"{startPart}–{endPart}";
+        return string.Join(" ", new[] { weekdayPart, timePart }.Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
+    private void GoBack() => NavigationManager.NavigateTo("/groups");
+
+    private async Task AddMember()
+    {
+        _addError = null;
+
+        if (_group is null || _addUserId is null)
+        {
+            _addError = Localizer["GroupMembersPage_SelectUserError"];
+            return;
+        }
+
+        try
+        {
+            var addedUser = _allUsers.FirstOrDefault(u => u.Id == _addUserId);
+            await GroupService.AddMemberAsync(new AddGroupMemberDto
+            {
+                GroupId = _group.Id,
+                UserId = _addUserId.Value,
+                Role = _addRole
+            });
+            _showAddForm = false;
+            _addUserId = null;
+            await LoadMembersAsync();
+            await ShowToastAsync(string.Format(Localizer["GroupDetailPage_MemberAddedToast"].Value, addedUser?.DisplayName ?? string.Empty), ToastComponent.ToastVariant.Success);
+        }
+        catch (Exception ex)
+        {
+            _addError = ex.Message;
+        }
+    }
+
+    private async Task ApproveMember(GroupMembershipDto m)
+    {
+        try
+        {
+            await GroupService.ApproveMemberAsync(m.Id);
+            await LoadMembersAsync();
+            await ShowToastAsync(string.Format(Localizer["GroupMembersPage_ApprovedMessage"].Value, m.UserDisplayName), ToastComponent.ToastVariant.Success);
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(string.Format(Localizer["GroupMembersPage_FailedMessage"].Value, ex.Message), ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task DeclineMember(GroupMembershipDto m)
+    {
+        try
+        {
+            await GroupService.DeclineMemberAsync(m.Id);
+            await LoadMembersAsync();
+            await ShowToastAsync(string.Format(Localizer["GroupMembersPage_DeclinedMessage"].Value, m.UserDisplayName), ToastComponent.ToastVariant.Info);
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(string.Format(Localizer["GroupMembersPage_FailedMessage"].Value, ex.Message), ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task RemoveMember(GroupMembershipDto m)
+    {
+        await GroupService.RemoveMemberAsync(m.Id);
+        await LoadMembersAsync();
+        await ShowToastAsync(string.Format(Localizer["GroupDetailPage_MemberRemovedToast"].Value, m.UserDisplayName), ToastComponent.ToastVariant.Info);
+    }
+
+    private void PromptDelete() => _showDeleteConfirm = true;
+
+    private void CancelDelete() => _showDeleteConfirm = false;
+
+    private async Task ConfirmDeleteAsync()
+    {
+        _showDeleteConfirm = false;
+
+        if (_group is null)
+        {
+            return;
+        }
+
+        _deleting = true;
+
+        try
+        {
+            await GroupService.DeleteAsync(_group.Id);
+            NavigationManager.NavigateTo("/groups");
+        }
+        catch (GroupDeletionBlockedException ex)
+        {
+            var key = GroupDeletionBlockLocalization.GetResourceKey(ex.Reason);
+            await ShowToastAsync(Localizer[key], ToastComponent.ToastVariant.Danger);
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(string.Format(Localizer["GroupDetailPage_FailedMessage"].Value, ex.Message), ToastComponent.ToastVariant.Danger);
+        }
+        finally
+        {
+            _deleting = false;
+        }
+    }
+
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
+        }
+    }
+}

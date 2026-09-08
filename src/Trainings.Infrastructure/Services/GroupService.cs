@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
+using Trainings.Application.Exceptions;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
@@ -149,11 +150,28 @@ public class GroupService(
         _appRuntimeModeService.EnsureWriteAllowed();
 
         var group = await _context.Groups.FindAsync([id], ct);
-        if (group != null)
+        if (group == null)
         {
-            _context.Groups.Remove(group);
-            await _context.SaveChangesAsync(ct);
+            return;
         }
+
+        var hasActiveMembers = await _context.GroupMemberships
+            .AnyAsync(gm => gm.GroupId == id && gm.Status == GroupMembershipStatus.Approved && gm.IsActive, ct);
+        var hasScheduledTrainings = await _context.Trainings
+            .AnyAsync(t => t.GroupId == id && t.DateTime > DateTime.UtcNow, ct);
+
+        if (hasActiveMembers || hasScheduledTrainings)
+        {
+            var reason = hasActiveMembers && hasScheduledTrainings
+                ? GroupDeletionBlockReason.Both
+                : hasActiveMembers
+                    ? GroupDeletionBlockReason.HasActiveMembers
+                    : GroupDeletionBlockReason.HasScheduledTrainings;
+            throw new GroupDeletionBlockedException(reason, $"Group {id} cannot be deleted: {reason}.");
+        }
+
+        _context.Groups.Remove(group);
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task UpdateAllowedGroupsForLocationAsync(int locationId, List<int> groupIds, CancellationToken ct = default)

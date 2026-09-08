@@ -12,57 +12,47 @@
 @inject IUserService UserService
 @inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationService AuthorizationService
 
 <PageTitle>@Localizer["Shared_Trainings"]</PageTitle>
 
 <div class="container-fluid px-2 px-md-4">
-    <div class="d-flex justify-content-between align-items-center my-3 gap-2 flex-wrap">
-        <h2 class="mb-0">@Localizer["Shared_Trainings"]</h2>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-app-outline" @onclick="ToggleFilter">
-                <i class="@AppIcons.Filter" aria-hidden="true"></i>
-            </button>
-            <AuthorizeView Policy="GroupTrainer">
-                <a href="/trainings/create" class="btn btn-app-primary"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["Shared_Add"]</a>
-            </AuthorizeView>
-        </div>
-    </div>
+    <PageTitleComponent Icon="@AppIcons.Fire" Text="@Localizer["Shared_Trainings"]"
+                        ButtonText="@(_canCreateTraining ? Localizer["Shared_Add"].Value : null)"
+                        ButtonIcon="@AppIcons.Plus" OnButtonClick="GoToCreateTraining"
+                        ShowFilterButton="true" @bind-FilterOpen="_showFilter"
+                        OnApplyFilters="ApplyFilters" OnClearFilters="ClearFilters">
+        <Filter>
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingGroupId">
+                        <option value="">@Localizer["TrainingsPage_AllGroups"]</option>
+                        @foreach (var group in _filterGroups)
+                        {
+                            <option value="@group.Id">@group.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingTrainerId">
+                        <option value="">@Localizer["TrainingsPage_AllTrainers"]</option>
+                        @foreach (var trainer in _filterTrainers)
+                        {
+                            <option value="@trainer.Id">@trainer.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select class="form-select" @bind="_pendingAvailability">
+                        <option value="all">@Localizer["TrainingsPage_All"]</option>
+                        <option value="available">@Localizer["TrainingsPage_Available"]</option>
+                        <option value="full">@Localizer["TrainingsPage_Full"]</option>
+                    </select>
+                </div>
+            </div>
+        </Filter>
+    </PageTitleComponent>
 
-    @if (_showFilter)
-    {
-        <div class="row g-2 mb-3">
-            <div class="col-12 col-md-4">
-                <select class="form-select" @bind="_filterGroupId">
-                    <option value="">@Localizer["TrainingsPage_AllGroups"]</option>
-                    @foreach (var group in _filterGroups)
-                    {
-                        <option value="@group.Id">@group.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-12 col-md-3">
-                <select class="form-select" @bind="_filterTrainerId">
-                    <option value="">@Localizer["TrainingsPage_AllTrainers"]</option>
-                    @foreach (var trainer in _filterTrainers)
-                    {
-                        <option value="@trainer.Id">@trainer.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-12 col-md-3">
-                <select class="form-select" @bind="_filterAvailability">
-                    <option value="all">@Localizer["TrainingsPage_All"]</option>
-                    <option value="available">@Localizer["TrainingsPage_Available"]</option>
-                    <option value="full">@Localizer["TrainingsPage_Full"]</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-2 d-grid">
-                <button type="button" class="btn btn-app-outline btn-filter-clear" @onclick="ClearFilters">
-                    <i class="@AppIcons.FilterClear me-1" aria-hidden="true"></i>@Localizer["Shared_ClearFilters"]
-                </button>
-            </div>
-        </div>
-    }
 
     @if (_actionMessage is not null)
     {
@@ -237,11 +227,15 @@
     private HashSet<int> _adminGroupIds = new();
     private bool _loading = true;
     private bool _isSuperAdmin;
+    private bool _canCreateTraining;
     private bool _archivedTrainingsExpanded;
     private bool _showFilter;
     private bool _deleteInProgress;
     private int _userId;
     private int? _pendingDeleteTrainingId;
+    private int? _pendingGroupId;
+    private int? _pendingTrainerId;
+    private string _pendingAvailability = "all";
     private int? _filterGroupId;
     private int? _filterTrainerId;
     private string _filterAvailability = "all";
@@ -263,6 +257,7 @@
 
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
         _isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
+        _canCreateTraining = (await AuthorizationService.AuthorizeAsync(auth.User, "GroupTrainer")).Succeeded;
         _accessibleGroupIds = auth.User.Claims
             .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal))
             .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
@@ -376,13 +371,20 @@
         }
     }
 
-    private void ToggleFilter()
+    private void GoToCreateTraining() => NavigationManager.NavigateTo("/trainings/create");
+
+    private void ApplyFilters()
     {
-        _showFilter = !_showFilter;
+        _filterGroupId = _pendingGroupId;
+        _filterTrainerId = _pendingTrainerId;
+        _filterAvailability = _pendingAvailability;
     }
 
     private void ClearFilters()
     {
+        _pendingGroupId = null;
+        _pendingTrainerId = null;
+        _pendingAvailability = "all";
         _filterGroupId = null;
         _filterTrainerId = null;
         _filterAvailability = "all";

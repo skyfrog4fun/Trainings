@@ -25,10 +25,19 @@
             {
                 var itemValue = ValueSelector(item);
                 var isSelected = EqualityComparer<TValue>.Default.Equals(itemValue, Value);
+                var subText = SubTextSelector?.Invoke(item);
                 <li class="app-select-option @(isSelected ? "selected" : "")" role="option" aria-selected="@(isSelected ? "true" : "false")"
                     @onmousedown="() => SelectValue(itemValue)"
                     @onmousedown:preventDefault="true">
-                    @TextSelector(item)
+                    @if (string.IsNullOrWhiteSpace(subText))
+                    {
+                        @TextSelector(item)
+                    }
+                    else
+                    {
+                        <div class="app-select-option-text">@TextSelector(item)</div>
+                        <div class="app-select-option-subtext">@subText</div>
+                    }
                 </li>
             }
         </ul>
@@ -41,6 +50,7 @@
     [Parameter] public IReadOnlyList<TItem> Items { get; set; } = Array.Empty<TItem>();
     [Parameter, EditorRequired] public Func<TItem, TValue> ValueSelector { get; set; } = default!;
     [Parameter, EditorRequired] public Func<TItem, string> TextSelector { get; set; } = default!;
+    [Parameter] public Func<TItem, string?>? SubTextSelector { get; set; }
     [Parameter] public string? PlaceholderText { get; set; }
     [Parameter] public TValue PlaceholderValue { get; set; } = default!;
     [Parameter] public string? CssClass { get; set; }

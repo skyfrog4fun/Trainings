@@ -89,6 +89,10 @@ Trainings.Web             <- Blazor Server UI and DI composition root
   (`IValidatableObject`) belong in `src/Trainings.Web/Models/`.
 - Prefer the shared `SelectDropdownComponent` over raw `<select>` elements for dropdowns
   (role, gender, country, and similar option lists).
+- Reuse existing shared components instead of duplicating markup/logic across pages. If the
+  same UI pattern would be implemented a third time (i.e. it already exists in two places),
+  stop and ask the user whether it should be extracted into a shared component before
+  implementing it again — never decide this silently.
 
 ## Security and Safety Rules
 

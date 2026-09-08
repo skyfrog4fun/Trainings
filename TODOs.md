@@ -7,6 +7,7 @@ General
 
 Design Group Pages
 ---
+
 - [ ] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
 - [ ] Group / New Group: remove Localized time below 'Start' and 'End'
 - [ ] Group / New Group: Country list should show name only, remove 'Country - Code'
@@ -62,7 +63,8 @@ Ideas
 Done - Reworked Sections
 - [X] Locations
 - [X] User Information
-- [ ] Users (List, Details, Edit/New)
+- [X] Users (List, Details, Edit/New)
+- [ ] Groups (List, Details, Edit/New, Members)
 
 Done - Tasks
 ---
@@ -99,6 +101,13 @@ Done - Tasks
 - [X] User: when will Entry date be set?!
 - [X] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
 - [X] date format on user detail page
+- [X] Fix: Filter Country List -> Name only
+- [X] Fix: Filter Locations -> "Dorfmatt - Halle 1 - Rotkreuz" -> better separation of location name and city (city => subtext?)
+- [X] Fix: Filter days => rename to all day or every day ... could be a group on Saturday (which is not weekday)
+- [X] Fix: Align Filter buttons (apply, clear) on /users & /groups => apply on left, clear on right (like on /locations)
+- [X] Group: fix heigth -> truncate description if too big
+- [X] Bug: missing Text?! on /groups (as Trainer) -> redirects to /Account/AccessDenied and NotFoundPage_heading / NotFoundPage_message not found
+- [X] Check last changes (GIT changes from 07.09.2026)
 
 
 Notes

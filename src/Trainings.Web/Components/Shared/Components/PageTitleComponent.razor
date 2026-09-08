@@ -14,9 +14,20 @@
     </div>
 </div>
 
-@if (Filter is not null)
+@if (Filter is not null && _filterOpen)
 {
     @Filter
+
+    <div class="row g-2 mb-3">
+        <div class="col-12 d-flex gap-2">
+            <button type="button" class="btn btn-primary" @onclick="HandleApplyFilters">
+                <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["Shared_Apply"]
+            </button>
+            <button type="button" class="btn btn-app-outline btn-filter-clear ms-auto" @onclick="HandleClearFilters" title="@Localizer["Shared_ClearFilters"]" aria-label="@Localizer["Shared_ClearFilters"]">
+                <i class="@AppIcons.FilterClear" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
 }
 
 @code {
@@ -28,9 +39,35 @@
     [Parameter] public EventCallback OnButtonClick { get; set; }
 
     [Parameter] public bool ShowFilterButton { get; set; }
-    [Parameter] public EventCallback OnFilterButtonClick { get; set; }
     [Parameter] public RenderFragment? Filter { get; set; }
+    [Parameter] public bool FilterOpen { get; set; }
+    [Parameter] public EventCallback<bool> FilterOpenChanged { get; set; }
+    [Parameter] public EventCallback OnApplyFilters { get; set; }
+    [Parameter] public EventCallback OnClearFilters { get; set; }
+
+    private bool _filterOpen;
+
+    protected override void OnParametersSet()
+    {
+        _filterOpen = FilterOpen;
+    }
 
     private Task HandleButtonClick() => OnButtonClick.InvokeAsync();
-    private Task HandleFilterButtonClick() => OnFilterButtonClick.InvokeAsync();
+
+    private Task HandleFilterButtonClick() => SetFilterOpen(!_filterOpen);
+
+    private Task HandleApplyFilters() => OnApplyFilters.InvokeAsync();
+
+    private async Task HandleClearFilters()
+    {
+        await OnClearFilters.InvokeAsync();
+        await SetFilterOpen(false);
+    }
+
+    private async Task SetFilterOpen(bool open)
+    {
+        _filterOpen = open;
+        FilterOpen = open;
+        await FilterOpenChanged.InvokeAsync(open);
+    }
 }
