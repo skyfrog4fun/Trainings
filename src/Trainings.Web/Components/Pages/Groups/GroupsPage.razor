@@ -65,14 +65,15 @@
         <div class="app-overview-grid">
             @foreach (var group in FilteredGroups)
             {
-                <a href="/groups/@group.Slug" class="app-overview-card app-overview-card-link text-decoration-none text-reset">
-                    <div class="app-overview-main">
+                <a href="/groups/@group.Slug" class="app-overview-card app-overview-card-stacked app-overview-card-link text-decoration-none text-reset">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
                         <div class="app-overview-title text-break">@group.Name</div>
-                        <div class="app-overview-meta app-overview-description text-break mt-1">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
-                        <div class="app-overview-meta mt-1"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</div>
-                    </div>
-                    <div class="app-overview-actions">
                         <BadgeStatusComponent IsActive="group.IsActive" />
+                    </div>
+                    <div class="app-overview-meta app-overview-description text-break">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
+                    <div class="app-overview-meta mt-auto d-flex justify-content-between align-items-center gap-2">
+                        <span class="text-truncate">@FormatScheduleSummary(group)</span>
+                        <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</span>
                     </div>
                 </a>
             }
@@ -155,6 +156,20 @@
     }
 
     private static string GetWeekdayLabel(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);
+
+    private static string FormatScheduleSummary(GroupDto group)
+    {
+        var weekday = group.Weekday.HasValue ? GetWeekdayLabel(group.Weekday.Value) : null;
+        var location = string.IsNullOrWhiteSpace(group.LocationName) ? null : group.LocationName;
+
+        return (weekday, location) switch
+        {
+            (not null, not null) => $"{weekday} | {location}",
+            (not null, null) => weekday,
+            (null, not null) => location,
+            _ => "-"
+        };
+    }
 
     private void GoToCreateGroup() => NavigationManager.NavigateTo("/groups/new");
 

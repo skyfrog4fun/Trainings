@@ -852,12 +852,26 @@ main {
   padding: 0.85rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.85rem;
+}
+
+/* Modifier for cards that stack their rows full-width (title+badge, then description,
+   then a meta row) instead of the default main/actions side-by-side split, so every
+   row - including the description and the trailing meta row - spans the full card width. */
+.app-overview-card-stacked {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-overview-card-stacked > * {
+  min-width: 0;
 }
 
 .app-overview-main {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-overview-title {
@@ -882,6 +896,7 @@ main {
 }
 
 .app-overview-actions {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
