@@ -128,8 +128,10 @@
                     </div>
                 </Body>
                 <Footer>
-                    <button type="submit" class="btn btn-primary me-2" disabled="@_saving"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
-                    <button type="button" class="btn btn-secondary" @onclick="GoBack"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</button>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary" disabled="@_saving"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
+                        <button type="button" class="btn btn-secondary" @onclick="GoBack"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</button>
+                    </div>
                 </Footer>
             </CardComponent>
         </EditForm>
