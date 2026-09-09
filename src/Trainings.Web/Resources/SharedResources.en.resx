@@ -1542,6 +1542,9 @@
   <data name="GroupCreateEditPage_Country" xml:space="preserve">
     <value>Country</value>
   </data>
+  <data name="GroupCreateEditPage_AccessDenied" xml:space="preserve">
+    <value>Access denied.</value>
+  </data>
   <data name="GroupCreateEditPage_GroupNotFound" xml:space="preserve">
     <value>Group not found.</value>
   </data>

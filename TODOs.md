@@ -8,11 +8,11 @@ General
 Design Group Pages
 ---
 
-- [ ] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
-- [ ] Group / New Group: remove Localized time below 'Start' and 'End'
-- [ ] Group / New Group: Country list should show name only, remove 'Country - Code'
-- [ ] Group / New Group: select country first (pre select from XY) and then show only locations from that country
-- [ ] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
+- [X] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
+- [X] Group / New Group: remove Localized time below 'Start' and 'End'
+- [X] Group / New Group: Country list should show name only, remove 'Country - Code'
+- [X] Group / New Group: select country first (pre select from XY) and then show only locations from that country
+- [X] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
 - [ ] Rework the idea how to navigate inside the groups
     - [ ] all pages uses {slug} for navigation
     - [ ] overview (list) -> new | details of group -> edit | add member | delete

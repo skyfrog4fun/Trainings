@@ -10,6 +10,7 @@
 @inject ICountryService CountryService
 @inject IUserService UserService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</PageTitle>
 
@@ -17,6 +18,10 @@
     @if (_loading)
     {
         <LoadingSpinner />
+    }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">@Localizer["GroupCreateEditPage_AccessDenied"]</div>
     }
     else
     {
@@ -143,6 +148,7 @@
     private List<int> _allowedLocationIds = new();
     private bool _loading = true;
     private bool _saving;
+    private bool _isAccessDenied;
     private string _formEndTime = "20:30";
     private string? _formError;
     private GroupFormModel _formModel = new();
@@ -155,6 +161,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (!_isEdit && !AuthorizationHelper.IsSuperAdmin(authState.User))
+        {
+            _isAccessDenied = true;
+            _loading = false;
+            return;
+        }
+
         _locations = (await LocationService.GetAllAsync())
             .Where(l => l.IsActive && !l.IsSystemWide)
             .OrderBy(l => l.Name)
