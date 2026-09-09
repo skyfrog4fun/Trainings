@@ -164,7 +164,11 @@
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (!_isEdit && !AuthorizationHelper.IsSuperAdmin(authState.User))
+        var isAuthorized = _isEdit
+            ? AuthorizationHelper.IsGroupAdmin(authState.User, Id!.Value)
+            : AuthorizationHelper.IsSuperAdmin(authState.User);
+
+        if (!isAuthorized)
         {
             _isAccessDenied = true;
             _loading = false;

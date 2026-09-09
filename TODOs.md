@@ -8,11 +8,9 @@ General
 Design Group Pages
 ---
 
-- [X] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
-- [X] Group / New Group: remove Localized time below 'Start' and 'End'
-- [X] Group / New Group: Country list should show name only, remove 'Country - Code'
-- [X] Group / New Group: select country first (pre select from XY) and then show only locations from that country
-- [X] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
+- [ ] Continue to rework Group Detail
+- [ ] Edit Group Page: use slug in URL (take care of linking from other pages
+
 - [ ] Rework the idea how to navigate inside the groups
     - [ ] all pages uses {slug} for navigation
     - [ ] overview (list) -> new | details of group -> edit | add member | delete
@@ -108,6 +106,11 @@ Done - Tasks
 - [X] Group: fix heigth -> truncate description if too big
 - [X] Bug: missing Text?! on /groups (as Trainer) -> redirects to /Account/AccessDenied and NotFoundPage_heading / NotFoundPage_message not found
 - [X] Check last changes (GIT changes from 07.09.2026)
+- [X] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
+- [X] Group / New Group: remove Localized time below 'Start' and 'End'
+- [X] Group / New Group: Country list should show name only, remove 'Country - Code'
+- [X] Group / New Group: select country first (pre select from XY) and then show only locations from that country
+- [X] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
 
 
 Notes

@@ -1590,6 +1590,9 @@
   <data name="GroupDetailPage_GroupNotFound" xml:space="preserve">
     <value>Group not found.</value>
   </data>
+  <data name="GroupDetailPage_AccessDenied" xml:space="preserve">
+    <value>You do not have access to this group.</value>
+  </data>
   <data name="GroupDetailPage_InfoTitle" xml:space="preserve">
     <value>Group Information</value>
   </data>

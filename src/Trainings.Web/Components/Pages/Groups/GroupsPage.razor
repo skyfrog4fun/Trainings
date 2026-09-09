@@ -2,7 +2,7 @@
 
 @rendermode InteractiveServer
 
-@attribute [Authorize(Policy = "GroupAdmin")]
+@attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject IGroupService GroupService
 @inject ILocationService LocationService
@@ -90,6 +90,7 @@
     private List<DayOfWeek> _availableWeekdays = new();
     private bool _loading = true;
     private bool _isSuperAdmin;
+    private HashSet<int> _accessibleGroupIds = new();
 
     private readonly List<(string Value, string Label)> _statusOptions = new()
     {
@@ -143,13 +144,23 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _isSuperAdmin = AuthorizationHelper.IsSuperAdmin(authState.User);
 
+        if (!_isSuperAdmin)
+        {
+            _accessibleGroupIds = AuthorizationHelper.GetGroupIdsForRole(authState.User, "Admin")
+                .Concat(AuthorizationHelper.GetGroupIdsForRole(authState.User, "Trainer"))
+                .ToHashSet();
+        }
+
         await LoadGroups();
     }
 
     private async Task LoadGroups()
     {
         _loading = true;
-        _groups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name).ToList();
+        var allGroups = (await GroupService.GetAllAsync()).OrderBy(g => g.Name);
+        _groups = _isSuperAdmin
+            ? allGroups.ToList()
+            : allGroups.Where(g => _accessibleGroupIds.Contains(g.Id)).ToList();
         _countries = (await CountryService.GetAllAsync()).ToList();
         _locations = (await LocationService.GetAllAsync()).Where(l => l.IsActive && !l.IsSystemWide).OrderBy(l => l.Name).ToList();
         _availableWeekdays = _groups

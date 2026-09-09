@@ -2,11 +2,13 @@
 
 @rendermode InteractiveServer
 
-@attribute [Authorize(Policy = "GroupAdmin")]
+@attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject IGroupService GroupService
 @inject IUserService UserService
 @inject ILocationService LocationService
+@inject IAuthorizationHelper AuthorizationHelper
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>@Localizer["GroupDetailPage_PageTitle"]</PageTitle>
 
@@ -21,11 +23,15 @@
     {
         <div class="alert alert-danger">@Localizer["GroupDetailPage_GroupNotFound"]</div>
     }
+    else if (!_isGroupTrainer)
+    {
+        <div class="alert alert-danger">@Localizer["GroupDetailPage_AccessDenied"]</div>
+    }
     else
     {
         <PageTitleComponent Icon="@AppIcons.Group" Text="@_group.Name" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
 
-        <CardComponent Collapsed="false" ShowFooter="true">
+        <CardComponent Collapsed="false" ShowFooter="@_isGroupAdmin">
             <Title>@Localizer["GroupDetailPage_InfoTitle"]</Title>
             <TitleMeta><BadgeStatusComponent IsActive="_group.IsActive" /></TitleMeta>
             <Body>
@@ -45,12 +51,15 @@
             </Body>
             <Footer>
                 <div class="d-flex justify-content-between flex-wrap gap-2">
-                    <a href="/groups/@_group.Id/edit" class="btn btn-sm btn-primary">
-                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
-                    </a>
-                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="PromptDelete" disabled="@_deleting">
-                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
-                    </button>
+                    @if (_isGroupAdmin)
+                    {
+                        <a href="/groups/@_group.Id/edit" class="btn btn-sm btn-primary">
+                            <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger" @onclick="PromptDelete" disabled="@_deleting">
+                            <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
+                        </button>
+                    }
                 </div>
             </Footer>
         </CardComponent>
@@ -59,13 +68,16 @@
             <Title>@Localizer["GroupDetailPage_MembersTitle"]</Title>
             <TitleMeta>@_approvedMembers.Count</TitleMeta>
             <Body>
-                <div class="d-flex justify-content-end mb-3">
-                    <button type="button" class="btn btn-success btn-sm" @onclick="() => _showAddForm = !_showAddForm">
-                        <i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_AddMemberTitle"]
-                    </button>
-                </div>
+                @if (_isGroupAdmin)
+                {
+                    <div class="d-flex justify-content-end mb-3">
+                        <button type="button" class="btn btn-success btn-sm" @onclick="() => _showAddForm = !_showAddForm">
+                            <i class="@AppIcons.Plus me-1" aria-hidden="true"></i>@Localizer["GroupMembersPage_AddMemberTitle"]
+                        </button>
+                    </div>
+                }
 
-                @if (_showAddForm)
+                @if (_isGroupAdmin && _showAddForm)
                 {
                     <div class="card mb-3">
                         <div class="card-body">
@@ -118,12 +130,15 @@
                                             </div>
                                         </div>
                                         <div class="app-overview-actions">
-                                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="@Localizer["GroupMembersPage_ApproveButton"]" aria-label="@Localizer["GroupMembersPage_ApproveButton"]" @onclick="() => ApproveMember(m)">
-                                                <i class="@AppIcons.Check" aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title="@Localizer["GroupMembersPage_DeclineButton"]" aria-label="@Localizer["GroupMembersPage_DeclineButton"]" @onclick="() => DeclineMember(m)">
-                                                <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                                            </button>
+                                            @if (_isGroupAdmin)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-primary" title="@Localizer["GroupMembersPage_ApproveButton"]" aria-label="@Localizer["GroupMembersPage_ApproveButton"]" @onclick="() => ApproveMember(m)">
+                                                    <i class="@AppIcons.Check" aria-hidden="true"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title="@Localizer["GroupMembersPage_DeclineButton"]" aria-label="@Localizer["GroupMembersPage_DeclineButton"]" @onclick="() => DeclineMember(m)">
+                                                    <i class="@AppIcons.XMark" aria-hidden="true"></i>
+                                                </button>
+                                            }
                                         </div>
                                     </div>
                                 }
@@ -178,6 +193,8 @@
     private string? _addError;
     private bool _showDeleteConfirm;
     private bool _deleting;
+    private bool _isGroupAdmin;
+    private bool _isGroupTrainer;
     private ToastComponent? _toast;
 
     protected override async Task OnInitializedAsync()
@@ -191,6 +208,16 @@
 
         _group = await GroupService.GetBySlugAsync(Slug);
         if (_group is null)
+        {
+            _loading = false;
+            return;
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _isGroupAdmin = AuthorizationHelper.IsGroupAdmin(authState.User, _group.Id);
+        _isGroupTrainer = AuthorizationHelper.IsGroupTrainer(authState.User, _group.Id);
+
+        if (!_isGroupTrainer)
         {
             _loading = false;
             return;
@@ -244,9 +271,12 @@
                                 <div class="app-overview-meta">@m.UserEmail</div>
                             </div>
                             <div class="app-overview-actions">
-                                <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title="@Localizer["GroupMembersPage_RemoveButton"]" aria-label="@Localizer["GroupMembersPage_RemoveButton"]" @onclick="() => RemoveMember(m)">
-                                    <i class="@AppIcons.UserMinus" aria-hidden="true"></i>
-                                </button>
+                                @if (_isGroupAdmin)
+                                {
+                                    <button type="button" class="btn btn-sm btn-app-icon btn-app-outline-danger" title="@Localizer["GroupMembersPage_RemoveButton"]" aria-label="@Localizer["GroupMembersPage_RemoveButton"]" @onclick="() => RemoveMember(m)">
+                                        <i class="@AppIcons.UserMinus" aria-hidden="true"></i>
+                                    </button>
+                                }
                             </div>
                         </div>
                     }
@@ -294,7 +324,7 @@
     {
         _addError = null;
 
-        if (_group is null || _addUserId is null)
+        if (!_isGroupAdmin || _group is null || _addUserId is null)
         {
             _addError = Localizer["GroupMembersPage_SelectUserError"];
             return;
@@ -322,6 +352,11 @@
 
     private async Task ApproveMember(GroupMembershipDto m)
     {
+        if (!_isGroupAdmin)
+        {
+            return;
+        }
+
         try
         {
             await GroupService.ApproveMemberAsync(m.Id);
@@ -336,6 +371,11 @@
 
     private async Task DeclineMember(GroupMembershipDto m)
     {
+        if (!_isGroupAdmin)
+        {
+            return;
+        }
+
         try
         {
             await GroupService.DeclineMemberAsync(m.Id);
@@ -350,12 +390,23 @@
 
     private async Task RemoveMember(GroupMembershipDto m)
     {
+        if (!_isGroupAdmin)
+        {
+            return;
+        }
+
         await GroupService.RemoveMemberAsync(m.Id);
         await LoadMembersAsync();
         await ShowToastAsync(string.Format(Localizer["GroupDetailPage_MemberRemovedToast"].Value, m.UserDisplayName), ToastComponent.ToastVariant.Info);
     }
 
-    private void PromptDelete() => _showDeleteConfirm = true;
+    private void PromptDelete()
+    {
+        if (_isGroupAdmin)
+        {
+            _showDeleteConfirm = true;
+        }
+    }
 
     private void CancelDelete() => _showDeleteConfirm = false;
 
@@ -363,7 +414,7 @@
     {
         _showDeleteConfirm = false;
 
-        if (_group is null)
+        if (!_isGroupAdmin || _group is null)
         {
             return;
         }
