@@ -528,6 +528,18 @@
   <data name="GroupMembersPage_SelectUser" xml:space="preserve">
     <value>-- Select User --</value>
   </data>
+  <data name="GroupMembersPage_SearchUserPlaceholder" xml:space="preserve">
+    <value>Search by name or email…</value>
+  </data>
+  <data name="GroupMembersPage_NoUsersFound" xml:space="preserve">
+    <value>No users found.</value>
+  </data>
+  <data name="GroupMembersPage_NoEligibleUsers" xml:space="preserve">
+    <value>All users are already assigned this role.</value>
+  </data>
+  <data name="GroupMembersPage_DuplicateRoleToast" xml:space="preserve">
+    <value>{0} is already assigned as {1} in this group.</value>
+  </data>
   <data name="GroupMembersPage_RoleParticipant" xml:space="preserve">
     <value>Participant</value>
   </data>
@@ -1628,6 +1640,12 @@
   </data>
   <data name="GroupDetailPage_DeleteConfirmMessage" xml:space="preserve">
     <value>Are you sure you want to delete this group? This action cannot be undone.</value>
+  </data>
+  <data name="GroupDetailPage_DeclineConfirmTitle" xml:space="preserve">
+    <value>Decline Request</value>
+  </data>
+  <data name="GroupDetailPage_DeclineConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to decline the membership request from {0}?</value>
   </data>
   <data name="GroupDetailPage_DeleteBlockedActiveMembers" xml:space="preserve">
     <value>This group cannot be deleted because it still has active members. Remove all members first.</value>

@@ -528,6 +528,18 @@
   <data name="GroupMembersPage_SelectUser" xml:space="preserve">
     <value>-- Benutzer auswählen --</value>
   </data>
+  <data name="GroupMembersPage_SearchUserPlaceholder" xml:space="preserve">
+    <value>Nach Name oder E-Mail suchen…</value>
+  </data>
+  <data name="GroupMembersPage_NoUsersFound" xml:space="preserve">
+    <value>Keine Benutzer gefunden.</value>
+  </data>
+  <data name="GroupMembersPage_NoEligibleUsers" xml:space="preserve">
+    <value>Alle Benutzer sind dieser Rolle bereits zugewiesen.</value>
+  </data>
+  <data name="GroupMembersPage_DuplicateRoleToast" xml:space="preserve">
+    <value>{0} ist in dieser Gruppe bereits als {1} zugewiesen.</value>
+  </data>
   <data name="GroupMembersPage_RoleParticipant" xml:space="preserve">
     <value>Teilnehmer</value>
   </data>
@@ -1628,6 +1640,12 @@
   </data>
   <data name="GroupDetailPage_DeleteConfirmMessage" xml:space="preserve">
     <value>Möchten Sie diese Gruppe wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="GroupDetailPage_DeclineConfirmTitle" xml:space="preserve">
+    <value>Anfrage ablehnen</value>
+  </data>
+  <data name="GroupDetailPage_DeclineConfirmMessage" xml:space="preserve">
+    <value>Möchten Sie die Mitgliedschaftsanfrage von {0} wirklich ablehnen?</value>
   </data>
   <data name="GroupDetailPage_DeleteBlockedActiveMembers" xml:space="preserve">
     <value>Diese Gruppe kann nicht gelöscht werden, da sie noch aktive Mitglieder hat. Entfernen Sie zuerst alle Mitglieder.</value>

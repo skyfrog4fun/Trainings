@@ -253,22 +253,40 @@ h1:focus {
   outline: none;
 }
 
-.app-select-menu {
+.app-select-menu-wrapper {
   position: absolute;
   z-index: 1050;
   top: calc(100% + 0.25rem);
   left: 0;
   right: 0;
-  margin: 0;
-  padding: 0.25rem 0;
-  list-style: none;
   background-color: var(--color-surface);
   color: var(--color-text);
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.app-select-search {
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-select-menu {
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
   max-height: 16rem;
   overflow-y: auto;
+}
+
+.app-select-option-empty {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.app-select-option-empty:hover {
+  background-color: transparent;
 }
 
 .app-select-option {
@@ -907,6 +925,18 @@ main {
   justify-content: flex-end;
 }
 
+/* Modifier for action groups that should be vertically centered against the card's
+   text instead of anchored to the top (e.g. group member management rows). */
+.app-overview-actions-center {
+  align-self: center;
+}
+
+/* Modifier that widens the gap between action buttons so destructive/confirming
+   actions placed next to each other (e.g. Approve/Decline) aren't easy to mis-click. */
+.app-overview-actions-spaced {
+  gap: 0.75rem;
+}
+
 .app-overview-card-link {
   transition: background-color 0.15s ease-in-out;
 }
@@ -934,6 +964,14 @@ main {
   --bs-btn-hover-color: var(--brand-white);
   --bs-btn-hover-bg: var(--color-primary);
   --bs-btn-hover-border-color: var(--color-primary);
+}
+
+.btn-app-outline-success {
+  --bs-btn-color: var(--color-success);
+  --bs-btn-border-color: var(--color-success);
+  --bs-btn-hover-color: var(--brand-white);
+  --bs-btn-hover-bg: var(--color-success);
+  --bs-btn-hover-border-color: var(--color-success);
 }
 
 .btn-app-outline-secondary {

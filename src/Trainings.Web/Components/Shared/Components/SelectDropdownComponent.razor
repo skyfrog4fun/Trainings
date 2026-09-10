@@ -1,7 +1,7 @@
 @typeparam TItem
 @typeparam TValue
 
-<div class="app-select @CssClass" tabindex="0" @onfocusout="Close">
+<div class="app-select @CssClass" tabindex="0" @onfocusout="HandleFocusOut" @onfocusin="HandleFocusIn">
     <button type="button"
             class="app-select-toggle form-select"
             @onclick="ToggleOpen"
@@ -11,36 +11,52 @@
     </button>
     @if (_isOpen)
     {
-        <ul class="app-select-menu" role="listbox">
-            @if (PlaceholderText is not null)
+        <div class="app-select-menu-wrapper">
+            @if (Searchable)
             {
-                var isPlaceholderSelected = EqualityComparer<TValue>.Default.Equals(PlaceholderValue, Value);
-                <li class="app-select-option @(isPlaceholderSelected ? "selected" : "")" role="option" aria-selected="@(isPlaceholderSelected ? "true" : "false")"
-                    @onmousedown="() => SelectValue(PlaceholderValue!)"
-                    @onmousedown:preventDefault="true">
-                    @PlaceholderText
-                </li>
+                <div class="app-select-search">
+                    <input type="text"
+                           class="form-control form-control-sm"
+                           @bind="_searchText"
+                           @bind:event="oninput"
+                           placeholder="@SearchPlaceholder" />
+                </div>
             }
-            @foreach (var item in Items)
-            {
-                var itemValue = ValueSelector(item);
-                var isSelected = EqualityComparer<TValue>.Default.Equals(itemValue, Value);
-                var subText = SubTextSelector?.Invoke(item);
-                <li class="app-select-option @(isSelected ? "selected" : "")" role="option" aria-selected="@(isSelected ? "true" : "false")"
-                    @onmousedown="() => SelectValue(itemValue)"
-                    @onmousedown:preventDefault="true">
-                    @if (string.IsNullOrWhiteSpace(subText))
-                    {
-                        @TextSelector(item)
-                    }
-                    else
-                    {
-                        <div class="app-select-option-text">@TextSelector(item)</div>
-                        <div class="app-select-option-subtext">@subText</div>
-                    }
-                </li>
-            }
-        </ul>
+            <ul class="app-select-menu" role="listbox">
+                @if (PlaceholderText is not null)
+                {
+                    var isPlaceholderSelected = EqualityComparer<TValue>.Default.Equals(PlaceholderValue, Value);
+                    <li class="app-select-option @(isPlaceholderSelected ? "selected" : "")" role="option" aria-selected="@(isPlaceholderSelected ? "true" : "false")"
+                        @onmousedown="() => SelectValue(PlaceholderValue!)"
+                        @onmousedown:preventDefault="true">
+                        @PlaceholderText
+                    </li>
+                }
+                @foreach (var item in FilteredItems)
+                {
+                    var itemValue = ValueSelector(item);
+                    var isSelected = EqualityComparer<TValue>.Default.Equals(itemValue, Value);
+                    var subText = SubTextSelector?.Invoke(item);
+                    <li class="app-select-option @(isSelected ? "selected" : "")" role="option" aria-selected="@(isSelected ? "true" : "false")"
+                        @onmousedown="() => SelectValue(itemValue)"
+                        @onmousedown:preventDefault="true">
+                        @if (string.IsNullOrWhiteSpace(subText))
+                        {
+                            @TextSelector(item)
+                        }
+                        else
+                        {
+                            <div class="app-select-option-text">@TextSelector(item)</div>
+                            <div class="app-select-option-subtext">@subText</div>
+                        }
+                    </li>
+                }
+                @if (Searchable && !FilteredItems.Any() && !string.IsNullOrWhiteSpace(_searchText))
+                {
+                    <li class="app-select-option app-select-option-empty">@NoResultsText</li>
+                }
+            </ul>
+        </div>
     }
 </div>
 
@@ -54,8 +70,27 @@
     [Parameter] public string? PlaceholderText { get; set; }
     [Parameter] public TValue PlaceholderValue { get; set; } = default!;
     [Parameter] public string? CssClass { get; set; }
+    [Parameter] public bool Searchable { get; set; }
+    [Parameter] public string SearchPlaceholder { get; set; } = string.Empty;
+    [Parameter] public string NoResultsText { get; set; } = string.Empty;
 
     private bool _isOpen;
+    private string _searchText = string.Empty;
+
+    private IEnumerable<TItem> FilteredItems
+    {
+        get
+        {
+            if (!Searchable || string.IsNullOrWhiteSpace(_searchText))
+            {
+                return Items;
+            }
+
+            return Items.Where(item =>
+                TextSelector(item).Contains(_searchText, StringComparison.OrdinalIgnoreCase)
+                || (SubTextSelector?.Invoke(item)?.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+    }
 
     private string CurrentLabel
     {
@@ -76,13 +111,39 @@
     private bool IsShowingPlaceholder => PlaceholderText is not null
         && !Items.Any(item => EqualityComparer<TValue>.Default.Equals(ValueSelector(item), Value));
 
-    private void ToggleOpen() => _isOpen = !_isOpen;
+    private void ToggleOpen()
+    {
+        _isOpen = !_isOpen;
+        if (_isOpen)
+        {
+            _searchText = string.Empty;
+        }
+    }
 
-    private void Close() => _isOpen = false;
+    private bool _closePending;
+
+    private void HandleFocusIn() => _closePending = false;
+
+    // Focus can legitimately move between the toggle button, the search input, and (in theory)
+    // other focusable elements within this widget without the user intending to close it. A plain
+    // @onfocusout would treat any such internal focus shift as "left the widget" and close it
+    // immediately (e.g. clicking the search box would blur the toggle button and instantly close
+    // the list). Deferring the close lets a follow-up focusin from within the widget cancel it.
+    private async Task HandleFocusOut()
+    {
+        _closePending = true;
+        await Task.Delay(150);
+        if (_closePending)
+        {
+            _isOpen = false;
+            StateHasChanged();
+        }
+    }
 
     private async Task SelectValue(TValue value)
     {
         _isOpen = false;
+        _searchText = string.Empty;
         if (!EqualityComparer<TValue>.Default.Equals(value, Value))
         {
             Value = value;
