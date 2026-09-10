@@ -6,7 +6,6 @@
 
 @inject IGroupService GroupService
 @inject IUserService UserService
-@inject ILocationService LocationService
 @inject IAuthorizationHelper AuthorizationHelper
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -38,16 +37,23 @@
                 <table class="table table-sm table-borderless mb-0">
                     <tbody>
                         <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_SlugLabel"]</th><td class="text-end">@_group.Slug</td></tr>
-                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_DescriptionLabel"]</th><td class="text-end">@FormatText(_group.Description)</td></tr>
-                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_LocationLabel"]</th><td class="text-end">@FormatText(_group.LocationName)</td></tr>
-                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_AllowedLocationsLabel"]</th><td class="text-end">@FormatAllowedLocations()</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_LocationLabel"]</th><td class="text-end">@FormatLocation()</td></tr>
                         <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_ScheduleLabel"]</th><td class="text-end">@FormatSchedule()</td></tr>
-                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_MaxParticipantsLabel"]</th><td class="text-end">@(_group.MaxParticipants?.ToString() ?? "-")</td></tr>
-                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_CountryLabel"]</th><td class="text-end">@FormatText(_group.CountryCode)</td></tr>
-                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_MemberCountLabel"]</th><td class="text-end">@_group.MemberCount</td></tr>
+                        <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_MemberCountLabel"]</th><td class="text-end">@FormatMembers()</td></tr>
                         <tr><th class="text-muted fw-normal">@Localizer["GroupDetailPage_CreatedLabel"]</th><td class="text-end">@_group.CreatedAt.ToString("dd.MM.yyyy")</td></tr>
                     </tbody>
                 </table>
+                @if (!string.IsNullOrWhiteSpace(_group.Description))
+                {
+                    <div class="mt-3">
+                        <div class="text-muted fw-normal mb-1">@Localizer["GroupDetailPage_DescriptionLabel"]</div>
+                        <ExpandableTextComponent Text="@_group.Description"
+                                                  MaxLines="3"
+                                                  StartCollapsed="true"
+                                                  ShowMoreLabel="@Localizer["Shared_ShowMore"]"
+                                                  ShowLessLabel="@Localizer["Shared_ShowLess"]" />
+                    </div>
+                }
             </Body>
             <Footer>
                 <div class="d-flex justify-content-between flex-wrap gap-2">
@@ -172,7 +178,6 @@
     [Parameter] public string Slug { get; set; } = string.Empty;
 
     private GroupDto? _group;
-    private Dictionary<int, string> _locationNameById = new();
     private List<GroupMembershipDto> _allMembers = new();
     private List<GroupMembershipDto> _pendingMembers = new();
     private List<GroupMembershipDto> _approvedMembers = new();
@@ -222,9 +227,6 @@
             _loading = false;
             return;
         }
-
-        var locations = await LocationService.GetAllAsync();
-        _locationNameById = locations.ToDictionary(l => l.Id, l => l.Name);
 
         _allUsers = (await UserService.GetAllAsync()).Where(u => u.IsActive).OrderBy(u => u.DisplayName).ToList();
 
@@ -285,19 +287,27 @@
         </CardComponent>
     };
 
-    private static string FormatText(string? value) => string.IsNullOrWhiteSpace(value) ? "-" : value;
-
-    private string FormatAllowedLocations()
+    private string FormatLocation()
     {
-        if (_group is null || _group.AllowedLocationIds.Count == 0)
+        if (_group is null || string.IsNullOrWhiteSpace(_group.LocationName))
         {
             return "-";
         }
 
-        var names = _group.AllowedLocationIds
-            .Select(id => _locationNameById.TryGetValue(id, out var name) ? name : $"#{id}")
-            .ToList();
-        return string.Join(", ", names);
+        return string.IsNullOrWhiteSpace(_group.CountryCode)
+            ? _group.LocationName
+            : $"{_group.LocationName} [{_group.CountryCode}]";
+    }
+
+    private string FormatMembers()
+    {
+        if (_group is null)
+        {
+            return "-";
+        }
+
+        var max = _group.MaxParticipants?.ToString() ?? "∞";
+        return $"{_group.MemberCount} / {max}";
     }
 
     private string FormatSchedule()

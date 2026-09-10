@@ -1,0 +1,43 @@
+@* Displays long text clamped to a fixed number of lines with a fade-out edge,
+   and a "Show more / Show less" link to expand or collapse it. *@
+
+<div class="expandable-text">
+    <div class="expandable-text-content @(_collapsed ? "expandable-text-collapsed" : "expandable-text-expanded")"
+         style="--expandable-text-max-lines: @MaxLines;">
+        @Text
+    </div>
+    <button type="button" class="btn btn-link btn-sm expandable-text-toggle p-0" @onclick="Toggle">
+        @if (_collapsed)
+        {
+            <span>@ShowMoreLabel</span>
+            <i class="@AppIcons.ChevronDown ms-1" aria-hidden="true"></i>
+        }
+        else
+        {
+            <span>@ShowLessLabel</span>
+            <i class="@AppIcons.ChevronUp ms-1" aria-hidden="true"></i>
+        }
+    </button>
+</div>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public int MaxLines { get; set; } = 3;
+    [Parameter] public bool StartCollapsed { get; set; } = true;
+    [Parameter] public string ShowMoreLabel { get; set; } = "Show more";
+    [Parameter] public string ShowLessLabel { get; set; } = "Show less";
+
+    private bool _initialized;
+    private bool _collapsed;
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized)
+        {
+            _collapsed = StartCollapsed;
+            _initialized = true;
+        }
+    }
+
+    private void Toggle() => _collapsed = !_collapsed;
+}

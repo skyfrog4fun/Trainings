@@ -369,6 +369,12 @@
   <data name="Shared_SelectCountry" xml:space="preserve">
     <value>Select Country</value>
   </data>
+  <data name="Shared_ShowLess" xml:space="preserve">
+    <value>Show less</value>
+  </data>
+  <data name="Shared_ShowMore" xml:space="preserve">
+    <value>Show more</value>
+  </data>
   <data name="Shared_Status" xml:space="preserve">
     <value>Status</value>
   </data>
@@ -1605,17 +1611,8 @@
   <data name="GroupDetailPage_LocationLabel" xml:space="preserve">
     <value>Location</value>
   </data>
-  <data name="GroupDetailPage_AllowedLocationsLabel" xml:space="preserve">
-    <value>Allowed Locations</value>
-  </data>
   <data name="GroupDetailPage_ScheduleLabel" xml:space="preserve">
     <value>Schedule</value>
-  </data>
-  <data name="GroupDetailPage_MaxParticipantsLabel" xml:space="preserve">
-    <value>Max Participants</value>
-  </data>
-  <data name="GroupDetailPage_CountryLabel" xml:space="preserve">
-    <value>Country</value>
   </data>
   <data name="GroupDetailPage_MemberCountLabel" xml:space="preserve">
     <value>Members</value>

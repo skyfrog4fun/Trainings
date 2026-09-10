@@ -1023,6 +1023,36 @@ main {
   --bs-btn-active-border-color: var(--brand-accent-40);
 }
 
+/* === Expandable Text === */
+.expandable-text-content {
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.25s ease;
+  line-height: 1.5rem;
+}
+
+.expandable-text-collapsed {
+  max-height: calc(1.5rem * var(--expandable-text-max-lines, 3));
+}
+
+  .expandable-text-collapsed::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1.5rem;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--bs-body-bg, #fff));
+    pointer-events: none;
+  }
+
+.expandable-text-expanded {
+  max-height: 100rem;
+}
+
+.expandable-text-toggle {
+  margin-top: 0.25rem;
+  text-decoration: none;
+}
+
 /* === Navbar & Layout === */
 .app-navbar {
   background: var(--color-header-bg);
