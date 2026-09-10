@@ -72,7 +72,7 @@
 
         <CardComponent Collapsed="false">
             <Title>@Localizer["GroupDetailPage_MembersTitle"]</Title>
-            <TitleMeta>@_approvedMembers.Count</TitleMeta>
+            <TitleMeta>@FormatMemberCount()</TitleMeta>
             <Body>
                 @if (_isGroupAdmin)
                 {
@@ -362,6 +362,10 @@
         var max = _group.MaxParticipants?.ToString() ?? "∞";
         return $"{_group.MemberCount} / {max}";
     }
+
+    private string FormatMemberCount() => _pendingMembers.Count > 0
+        ? $"{_approvedMembers.Count} (+{_pendingMembers.Count})"
+        : $"{_approvedMembers.Count}";
 
     private string FormatSchedule()
     {
