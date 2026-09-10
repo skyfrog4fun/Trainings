@@ -59,7 +59,7 @@
                 <div class="d-flex justify-content-between flex-wrap gap-2">
                     @if (_isGroupAdmin)
                     {
-                        <a href="/groups/@_group.Id/edit" class="btn btn-sm btn-primary">
+                        <a href="/groups/@_group.Slug/edit" class="btn btn-sm btn-primary">
                             <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
                         </a>
                         <button type="button" class="btn btn-sm btn-outline-danger" @onclick="PromptDelete" disabled="@_deleting">

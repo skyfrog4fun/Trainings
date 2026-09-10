@@ -1,5 +1,5 @@
 @page "/groups/new"
-@page "/groups/{Id:int}/edit"
+@page "/groups/{Slug}/edit"
 
 @rendermode InteractiveServer
 
@@ -142,7 +142,7 @@
 </div>
 
 @code {
-    [Parameter] public int? Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
 
     private List<LocationDto> _locations = new();
     private List<CountryDto> _countries = new();
@@ -154,8 +154,9 @@
     private string _formEndTime = "20:30";
     private string? _formError;
     private GroupFormModel _formModel = new();
+    private int _groupId;
 
-    private bool _isEdit => Id.HasValue;
+    private bool _isEdit => !string.IsNullOrEmpty(Slug);
 
     private List<LocationDto> FilteredLocations => _formModel.CountryId is null
         ? new List<LocationDto>()
@@ -164,29 +165,49 @@
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var isAuthorized = _isEdit
-            ? AuthorizationHelper.IsGroupAdmin(authState.User, Id!.Value)
-            : AuthorizationHelper.IsSuperAdmin(authState.User);
-
-        if (!isAuthorized)
-        {
-            _isAccessDenied = true;
-            _loading = false;
-            return;
-        }
-
-        _locations = (await LocationService.GetAllAsync())
-            .Where(l => l.IsActive && !l.IsSystemWide)
-            .OrderBy(l => l.Name)
-            .ToList();
-        _countries = (await CountryService.GetAllAsync()).ToList();
 
         if (_isEdit)
         {
-            await LoadForEditAsync();
+            var group = await GroupService.GetBySlugAsync(Slug!);
+            if (group is null)
+            {
+                _formError = Localizer["GroupCreateEditPage_GroupNotFound"];
+                _loading = false;
+                return;
+            }
+
+            _groupId = group.Id;
+
+            if (!AuthorizationHelper.IsGroupAdmin(authState.User, _groupId))
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            _locations = (await LocationService.GetAllAsync())
+                .Where(l => l.IsActive && !l.IsSystemWide)
+                .OrderBy(l => l.Name)
+                .ToList();
+            _countries = (await CountryService.GetAllAsync()).ToList();
+
+            LoadForEdit(group);
         }
         else
         {
+            if (!AuthorizationHelper.IsSuperAdmin(authState.User))
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            _locations = (await LocationService.GetAllAsync())
+                .Where(l => l.IsActive && !l.IsSystemWide)
+                .OrderBy(l => l.Name)
+                .ToList();
+            _countries = (await CountryService.GetAllAsync()).ToList();
+
             _formModel.CountryId = await GetCurrentUserCountryIdAsync();
             CalculateGroupEndTime();
         }
@@ -215,20 +236,8 @@
         }
     }
 
-    private async Task LoadForEditAsync()
+    private void LoadForEdit(GroupDto group)
     {
-        if (!Id.HasValue)
-        {
-            return;
-        }
-
-        var group = await GroupService.GetByIdAsync(Id.Value);
-        if (group is null)
-        {
-            _formError = Localizer["GroupCreateEditPage_GroupNotFound"];
-            return;
-        }
-
         _formModel = new GroupFormModel
         {
             Name = group.Name,
@@ -290,7 +299,7 @@
             {
                 await GroupService.UpdateAsync(new UpdateGroupDto
                 {
-                    Id = Id!.Value,
+                    Id = _groupId,
                     Name = _formModel.Name,
                     Slug = string.IsNullOrWhiteSpace(_formModel.Slug) ? null : _formModel.Slug,
                     Description = string.IsNullOrWhiteSpace(_formModel.Description) ? null : _formModel.Description,
@@ -303,7 +312,7 @@
                     AllowedLocationIds = _allowedLocationIds,
                     IsActive = _formModel.IsActive
                 });
-                savedGroup = (await GroupService.GetByIdAsync(Id!.Value))!;
+                savedGroup = (await GroupService.GetByIdAsync(_groupId))!;
             }
 
             NavigationManager.NavigateTo($"/groups/{savedGroup.Slug}");

@@ -5,23 +5,6 @@ General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
 
-Design Group Pages
----
-
-- [X] Continue to rework Group Detail
-- [ ] Group Detail: rework Member Management
-- [ ] Edit Group Page: use slug in URL (take care of linking from other pages
-
-- [ ] Rework the idea how to navigate inside the groups
-    - [ ] all pages uses {slug} for navigation
-    - [ ] overview (list) -> new | details of group -> edit | add member | delete
-        - [ ] overview (/groups): list of groups (only possibility to go into details (/groups/{slug}) => see detail at end of this file
-- [ ] 
-- [ ] Groups (/groups):
-- [ ] Create Group (/groups/new):
-- [ ] Edit Group (/groups/2/edit):
-- [ ] Group Members (/groups/{slug}/members):
-
 
 
 Design User Pages
@@ -60,10 +43,14 @@ Ideas
 ---
 
 Done - Reworked Sections
+---
 - [X] Locations
 - [X] User Information
 - [X] Users (List, Details, Edit/New)
-- [ ] Groups (List, Details, Edit/New, Members)
+- [X] Groups (List, Details, Edit/New, Members)
+- [ ] Plan a Training -> Create / Assign / Plan (who does what?)
+
+
 
 Done - Tasks
 ---
@@ -112,6 +99,10 @@ Done - Tasks
 - [X] Group / New Group: Country list should show name only, remove 'Country - Code'
 - [X] Group / New Group: select country first (pre select from XY) and then show only locations from that country
 - [X] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
+- [X] Continue to rework Group Detail
+- [X] Group Detail: rework Member Management
+- [X] Edit Group Page: use slug in URL (take care of linking from other pages
+- [X] Rework the idea how to navigate inside the groups
 
 
 Notes
@@ -126,9 +117,9 @@ Example on how to structure the navigation for copilot chat?!
   └── Group detail
        └── /groups/{slug}
               ├── Update
-              │    └── /groups/{slug}/update
+              │    └── /groups/{slug}/edit
               │    
               ├── Delete
               │
               └── Manage Members
-                   └── /groups/{slug}/members
+                   └── on page
