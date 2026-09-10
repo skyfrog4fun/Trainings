@@ -75,7 +75,7 @@
                     <div class="app-overview-meta app-overview-description text-break">@(string.IsNullOrWhiteSpace(group.Description) ? "-" : group.Description)</div>
                     <div class="app-overview-meta mt-auto d-flex justify-content-between align-items-center gap-2">
                         <span class="text-truncate">@FormatScheduleSummary(group)</span>
-                        <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@group.MemberCount</span>
+                        <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@FormatMemberCount(group)</span>
                     </div>
                 </a>
             }
@@ -173,6 +173,10 @@
     }
 
     private static string GetWeekdayLabel(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);
+
+    private static string FormatMemberCount(GroupDto group) => group.PendingRequestCount > 0
+        ? $"{group.MemberCount} (+{group.PendingRequestCount})"
+        : $"{group.MemberCount}";
 
     private static string FormatScheduleSummary(GroupDto group)
     {

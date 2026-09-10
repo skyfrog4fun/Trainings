@@ -391,7 +391,8 @@ public class GroupService(
         AllowedLocationIds = [.. group.AllowedLocations.Select(x => x.LocationId)],
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,
-        MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved)
+        MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved),
+        PendingRequestCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Pending)
     };
 
     private static GroupMembershipDto MapMembershipToDto(GroupMembership gm) => new()
