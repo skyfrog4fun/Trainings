@@ -1,23 +1,39 @@
 @* Displays long text clamped to a fixed number of lines with a fade-out edge,
-   and a "Show more / Show less" link to expand or collapse it. *@
+   and a "Show more / Show less" link to expand or collapse it. The toggle link is only
+   rendered when the text actually overflows the clamped area, measured via a small
+   hidden probe element and JS interop (see wwwroot/js/expandableText.js). *@
+
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <div class="expandable-text">
-    <div class="expandable-text-content @(_collapsed ? "expandable-text-collapsed" : "expandable-text-expanded")"
+    <div class="expandable-text-content @(_collapsed ? "expandable-text-collapsed" : "expandable-text-expanded") @(_collapsed && _hasOverflow ? "expandable-text-fade" : "")"
          style="--expandable-text-max-lines: @MaxLines;">
         @Text
     </div>
-    <button type="button" class="btn btn-link btn-sm expandable-text-toggle p-0" @onclick="Toggle">
-        @if (_collapsed)
-        {
-            <span>@ShowMoreLabel</span>
-            <i class="@AppIcons.ChevronDown ms-1" aria-hidden="true"></i>
-        }
-        else
-        {
-            <span>@ShowLessLabel</span>
-            <i class="@AppIcons.ChevronUp ms-1" aria-hidden="true"></i>
-        }
-    </button>
+    @* Hidden probe: always clamped, regardless of the visible state above, so overflow
+       detection is correct even when StartCollapsed="false". *@
+    <div @ref="_probeRef"
+         class="expandable-text-content expandable-text-collapsed expandable-text-probe"
+         style="--expandable-text-max-lines: @MaxLines;"
+         aria-hidden="true">
+        @Text
+    </div>
+    @if (_hasOverflow)
+    {
+        <button type="button" class="btn btn-link btn-sm expandable-text-toggle p-0" @onclick="Toggle">
+            @if (_collapsed)
+            {
+                <span>@ShowMoreLabel</span>
+                <i class="@AppIcons.ChevronDown ms-1" aria-hidden="true"></i>
+            }
+            else
+            {
+                <span>@ShowLessLabel</span>
+                <i class="@AppIcons.ChevronUp ms-1" aria-hidden="true"></i>
+            }
+        </button>
+    }
 </div>
 
 @code {
@@ -29,6 +45,11 @@
 
     private bool _initialized;
     private bool _collapsed;
+    private bool _hasOverflow;
+    private bool _needsMeasure;
+    private string? _measuredText;
+    private ElementReference _probeRef;
+    private IJSObjectReference? _module;
 
     protected override void OnParametersSet()
     {
@@ -37,7 +58,42 @@
             _collapsed = StartCollapsed;
             _initialized = true;
         }
+
+        if (Text != _measuredText)
+        {
+            _needsMeasure = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_needsMeasure)
+        {
+            return;
+        }
+
+        _needsMeasure = false;
+        _measuredText = Text;
+
+        if (string.IsNullOrEmpty(Text))
+        {
+            _hasOverflow = false;
+            StateHasChanged();
+            return;
+        }
+
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/expandableText.js");
+        _hasOverflow = await _module.InvokeAsync<bool>("hasOverflow", _probeRef);
+        StateHasChanged();
     }
 
     private void Toggle() => _collapsed = !_collapsed;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            await _module.DisposeAsync();
+        }
+    }
 }

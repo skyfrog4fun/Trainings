@@ -8,7 +8,8 @@ General
 Design Group Pages
 ---
 
-- [ ] Continue to rework Group Detail
+- [X] Continue to rework Group Detail
+- [ ] Group Detail: rework Member Management
 - [ ] Edit Group Page: use slug in URL (take care of linking from other pages
 
 - [ ] Rework the idea how to navigate inside the groups

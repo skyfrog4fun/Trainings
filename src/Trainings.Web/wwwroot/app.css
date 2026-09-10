@@ -1024,6 +1024,10 @@ main {
 }
 
 /* === Expandable Text === */
+.expandable-text {
+  position: relative;
+}
+
 .expandable-text-content {
   overflow: hidden;
   position: relative;
@@ -1035,23 +1039,35 @@ main {
   max-height: calc(1.5rem * var(--expandable-text-max-lines, 3));
 }
 
-  .expandable-text-collapsed::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 1.5rem;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--bs-body-bg, #fff));
-    pointer-events: none;
-  }
+/* Applied together with .expandable-text-collapsed only when the text actually overflows,
+   so short text that already fits within the clamp shows no fade-out edge. */
+.expandable-text-fade::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1.5rem;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--bs-body-bg, #fff));
+  pointer-events: none;
+}
 
 .expandable-text-expanded {
   max-height: 100rem;
+}
+
+/* Off-screen clamped copy used only to measure whether the text overflows (see
+   ExpandableTextComponent), independent of the visible expanded/collapsed state. */
+.expandable-text-probe {
+  position: absolute;
+  inset: 0 0 auto 0;
+  visibility: hidden;
+  z-index: -1;
 }
 
 .expandable-text-toggle {
   margin-top: 0.25rem;
   text-decoration: none;
 }
+
 
 /* === Navbar & Layout === */
 .app-navbar {
