@@ -7,6 +7,9 @@ Trainings
 - [ ] Assign Trainer to training
 - [ ] Trainer takes training
 
+- [ ] TrainingsPage: red eye button to make green!
+- [ ] TrainingsPage: 'Take' button move to right side of card footer
+
 - [ ] Align all edit buttons => style: icon: fa-solid fa-pen-to-square / class: btn btn-sm btn-primary
     - [ ] change on /config/locations
     - [ ] change on /trainings/{group-slug}/{id}
