@@ -1,4 +1,5 @@
 @page "/trainings/{Id:int}"
+@page "/trainings/{Slug}/{Id:int}"
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -77,28 +78,55 @@
                         <span class="text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@FormatDuration(_training.DurationMinutes)</span>
                     </div>
                     <div class="mb-2"><i class="@AppIcons.Location me-1" aria-hidden="true"></i>@(_training.LocationName ?? "-")</div>
-                    @if (!string.IsNullOrWhiteSpace(_training.SpecialLocationDescription))
+                    @if (_fullDetailAllowed && !string.IsNullOrWhiteSpace(_training.SpecialLocationDescription))
                     {
                         <div class="mb-2"><i class="@AppIcons.LocationCrosshairs me-1" aria-hidden="true"></i>@_training.SpecialLocationDescription</div>
                     }
-                    @if (!string.IsNullOrWhiteSpace(_training.MeetingPoint))
+                    @if (_fullDetailAllowed && !string.IsNullOrWhiteSpace(_training.MeetingPoint))
                     {
                         <div class="mb-2"><i class="@AppIcons.MapPin me-1" aria-hidden="true"></i>@_training.MeetingPoint</div>
                     }
-                    <div class="mb-2"><i class="@AppIcons.User me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainingDetailPage_TrainerLabel"].Value, _training.TrainerName)</div>
+                    <div class="mb-2">
+                        <i class="@AppIcons.User me-1" aria-hidden="true"></i>
+                        @(_training.TrainerId.HasValue ? string.Format(Localizer["TrainingDetailPage_TrainerLabel"].Value, _training.TrainerName) : Localizer["TrainingDetailPage_Unassigned"].Value)
+                    </div>
+                    <div class="mb-2"><span class="badge @GetStatusBadgeClass(_training.Status)">@_training.Status</span></div>
                     <div><i class="@AppIcons.Users me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainingDetailPage_RegisteredCount"].Value, _training.RegisteredCount, _training.Capacity)</div>
                 </div>
 
-                <p class="mb-4">@_training.Description</p>
-
-                @if (_isTrainer && _training.TrainerId == _userId)
+                @if (!_fullDetailAllowed)
                 {
-                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                        <a href="/trainings/@_training.Id/run" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_RunTraining"]</a>
-                        <a href="/trainings/@_training.Id/attendance" class="btn btn-primary">@Localizer["TrainingDetailPage_RecordAttendance"]</a>
-                        <a href="/trainings/@_training.Id/edit" class="btn btn-outline-secondary">@Localizer["Shared_Edit"]</a>
-                    </div>
+                    <div class="alert alert-info mb-0">@Localizer["TrainingDetailPage_LimitedPreviewNotice"]</div>
                 }
+                else
+                {
+                    <p class="mb-4">@_training.Description</p>
+                }
+
+                <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+                    @if (_canTake)
+                    {
+                        <button type="button" class="btn btn-success" @onclick="TakeTraining">
+                            <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Take"]
+                        </button>
+                    }
+                    @if (_isTrainer && _training.TrainerId == _userId)
+                    {
+                        @if (_training.Status is TrainingStatus.Planned or TrainingStatus.InProgress or TrainingStatus.Done)
+                        {
+                            <a href="@TrainingRunUrl()" class="btn btn-success"><i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_RunTraining"]</a>
+                        }
+                        @if (_training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
+                        {
+                            <a href="@TrainingAttendanceUrl()" class="btn btn-primary">@Localizer["TrainingDetailPage_RecordAttendance"]</a>
+                        }
+                        <a href="@TrainingEditUrl()" class="btn btn-outline-secondary">@Localizer["Shared_Edit"]</a>
+                    }
+                    else if (_isAdmin)
+                    {
+                        <a href="@TrainingEditUrl()" class="btn btn-outline-secondary">@Localizer["Shared_Edit"]</a>
+                    }
+                </div>
             </div>
             @if (_canRegister)
             {
@@ -140,7 +168,7 @@
             <div class="alert @(_isError ? "alert-danger" : "alert-success") mt-3">@_message</div>
         }
 
-        @if (_training.Blocks.Any())
+        @if (_fullDetailAllowed && _training.Blocks.Any())
         {
             <h4>@string.Format(Localizer["TrainingDetailPage_TrainingBlocksHeading"].Value, _training.Blocks.Count)</h4>
             <div class="row g-3 mb-4">
@@ -179,6 +207,8 @@
             </div>
         }
 
+        @if (_fullDetailAllowed)
+        {
         <div class="card shadow mb-4">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center gap-2">
@@ -234,6 +264,7 @@
                 }
             </div>
         </div>
+        }
     }
 </div>
 
@@ -249,6 +280,7 @@
     private static readonly TimeSpan RegistrationStatusDisplayDuration = TimeSpan.FromSeconds(7);
 
     [Parameter] public int Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
 
     private TrainingDto? _training;
     private bool _loading = true;
@@ -256,6 +288,8 @@
     private bool _isTrainer;
     private bool _isAdmin;
     private bool _canRegister;
+    private bool _canTake;
+    private bool _fullDetailAllowed;
     private bool _showDeleteConfirm;
     private bool _deleteInProgress;
     private int _userId;
@@ -314,6 +348,9 @@
             claim.Type == AppClaimTypes.GroupRole(_training.GroupId.Value) &&
             (claim.Value == "Participant" || claim.Value == "Trainer" || claim.Value == "Admin")));
 
+        _fullDetailAllowed = _isTrainer || _isAdmin || _training.Status >= TrainingStatus.Planned;
+        _canTake = _isTrainer && !_training.TrainerId.HasValue && _training.Status == TrainingStatus.New;
+
         if (_canRegister && _userId > 0)
         {
             _isRegistered = await RegistrationService.IsRegisteredAsync(_userId, Id);
@@ -337,6 +374,22 @@
             _registrationFooterState = RegistrationFooterState.RegisteredSuccess;
             _ = ScheduleRegistrationFooterResetAsync(RegistrationFooterState.RegisteredSuccess);
             _message = null;
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = ex.Message;
+            _isError = true;
+        }
+    }
+
+    private async Task TakeTraining()
+    {
+        try
+        {
+            await TrainingService.TakeAsync(Id, _userId);
+            await LoadAsync();
+            _message = Localizer["TrainingDetailPage_TakeSuccess"];
             _isError = false;
         }
         catch (Exception ex)
@@ -503,6 +556,27 @@
 
     private string FormatDuration(int? durationMinutes) =>
         durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Shared_MinutesUnit"]}" : "-";
+
+    private string TrainingEditUrl() => string.IsNullOrWhiteSpace(_training?.GroupSlug)
+        ? $"/trainings/{_training?.Id}/edit"
+        : $"/trainings/{_training!.GroupSlug}/{_training.Id}/edit";
+
+    private string TrainingRunUrl() => string.IsNullOrWhiteSpace(_training?.GroupSlug)
+        ? $"/trainings/{_training?.Id}/run"
+        : $"/trainings/{_training!.GroupSlug}/{_training.Id}/run";
+
+    private string TrainingAttendanceUrl() => string.IsNullOrWhiteSpace(_training?.GroupSlug)
+        ? $"/trainings/{_training?.Id}/attendance"
+        : $"/trainings/{_training!.GroupSlug}/{_training.Id}/attendance";
+
+    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
+    {
+        TrainingStatus.Planned => "bg-success",
+        TrainingStatus.InPlanning => "bg-warning text-dark",
+        TrainingStatus.InProgress => "bg-primary",
+        TrainingStatus.Done => "bg-secondary",
+        _ => "bg-light text-dark border"
+    };
 
     private bool CanActOnParticipant(RegistrationDto registration) =>
         _isTrainer || _isAdmin || registration.UserId == _userId;

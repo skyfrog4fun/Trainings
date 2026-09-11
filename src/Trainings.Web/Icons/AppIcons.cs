@@ -50,6 +50,7 @@ public static class AppIcons
     public const string Wand = "fa-solid fa-wand-magic-sparkles";
     public const string Eye = "fa-solid fa-eye";
     public const string EyeSlash = "fa-solid fa-eye-slash";
+    public const string Bed = "fa-solid fa-bed";
 
     public static IReadOnlyList<AppIconDefinition> All { get; } =
     [
@@ -99,7 +100,8 @@ public static class AppIcons
         new("Group Access", Access),
         new("Generate Password", Wand),
         new("Show Password", Eye),
-        new("Hide Password", EyeSlash)
+        new("Hide Password", EyeSlash),
+        new("Not Registered", Bed)
     ];
 }
 

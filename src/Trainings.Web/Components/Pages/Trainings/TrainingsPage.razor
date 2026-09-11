@@ -12,9 +12,10 @@
 @inject IUserService UserService
 @inject IGroupService GroupService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IAuthorizationService AuthorizationService
 
 <PageTitle>@Localizer["Shared_Trainings"]</PageTitle>
+
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
 
 <div class="container-fluid px-2 px-md-4">
     <PageTitleComponent Icon="@AppIcons.Fire" Text="@Localizer["Shared_Trainings"]"
@@ -24,7 +25,7 @@
                         OnApplyFilters="ApplyFilters" OnClearFilters="ClearFilters">
         <Filter>
             <div class="row g-2 mb-3">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-6">
                     <select class="form-select" @bind="_pendingGroupId">
                         <option value="">@Localizer["TrainingsPage_AllGroups"]</option>
                         @foreach (var group in _filterGroups)
@@ -33,31 +34,20 @@
                         }
                     </select>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-6">
                     <select class="form-select" @bind="_pendingTrainerId">
                         <option value="">@Localizer["TrainingsPage_AllTrainers"]</option>
+                        <option value="-1">@Localizer["TrainingList_Unassigned"]</option>
                         @foreach (var trainer in _filterTrainers)
                         {
                             <option value="@trainer.Id">@trainer.Name</option>
                         }
                     </select>
                 </div>
-                <div class="col-12 col-md-4">
-                    <select class="form-select" @bind="_pendingAvailability">
-                        <option value="all">@Localizer["TrainingsPage_All"]</option>
-                        <option value="available">@Localizer["TrainingsPage_Available"]</option>
-                        <option value="full">@Localizer["TrainingsPage_Full"]</option>
-                    </select>
-                </div>
             </div>
         </Filter>
     </PageTitleComponent>
 
-
-    @if (_actionMessage is not null)
-    {
-        <div class="alert @(_actionIsError ? "alert-danger" : "alert-success")">@_actionMessage</div>
-    }
 
     @if (_loading)
     {
@@ -67,54 +57,25 @@
     {
         @if (FilteredRecentTrainings.Any())
         {
-            <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry">
+            <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry" RegisteredTrainingIds="_registeredTrainingIds">
                 <Actions Context="training">
                     <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
-                        <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        <i class="@AppIcons.Eye" aria-hidden="true"></i>
                     </a>
-                    @if (CanDeleteTraining(training))
+                    @if (CanTake(training))
                     {
-                        <a href="/trainings/@training.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
-                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                        </a>
-                    }
-                    @if (CanDeleteTraining(training))
-                    {
-                        @if (_pendingDeleteTrainingId == training.Id)
-                        {
-                            <button type="button"
-                                    class="btn btn-sm btn-app-icon btn-app-outline"
-                                    @onclick="CancelDeleteTraining"
-                                    disabled="@_deleteInProgress"
-                                    title='@Localizer["Shared_Cancel"]'
-                                    aria-label='@Localizer["Shared_Cancel"]'>
-                                <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                            </button>
-                            <button type="button"
-                                    class="btn btn-sm btn-app-icon btn-app-outline-danger"
-                                    @onclick="() => ConfirmDeleteTrainingAsync(training)"
-                                    disabled="@_deleteInProgress"
-                                    title='@Localizer["Shared_Delete"]'
-                                    aria-label='@Localizer["Shared_Delete"]'>
-                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button"
-                                    class="btn btn-sm btn-app-icon btn-app-outline-danger"
-                                    @onclick="() => PromptDeleteTraining(training)"
-                                    disabled="@_deleteInProgress"
-                                    title='@Localizer["Shared_Delete"]'
-                                    aria-label='@Localizer["Shared_Delete"]'>
-                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                            </button>
-                        }
+                        <button type="button"
+                                class="btn btn-sm btn-app-outline-success"
+                                @onclick="() => TakeTrainingAsync(training)"
+                                title='@Localizer["TrainingsPage_Take"]'
+                                aria-label='@Localizer["TrainingsPage_Take"]'>
+                            <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingsPage_Take"]
+                        </button>
                     }
                     @if (CanRegister(training))
                     {
                         <button type="button"
-                                class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-outline-danger" : "btn-app-primary") ms-auto"
+                                class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-danger" : "btn-app-success") ms-auto"
                                 @onclick="() => ToggleRegistrationAsync(training)"
                                 disabled="@IsRegistrationDisabled(training)">
                             <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? Localizer["Shared_Unregister"] : Localizer["Shared_Register"])
@@ -153,54 +114,15 @@
                 @if (_archivedTrainingsExpanded)
                 {
                     <div class="card-body">
-                        <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry">
+                        <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry" RegisteredTrainingIds="_registeredTrainingIds">
                             <Actions Context="training">
                                 <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
-                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                                    <i class="@AppIcons.Eye" aria-hidden="true"></i>
                                 </a>
-                                @if (CanDeleteTraining(training))
-                                {
-                                    <a href="/trainings/@training.Id/edit" class="btn btn-sm btn-app-icon btn-app-outline-secondary" title='@Localizer["Shared_Edit"]' aria-label='@Localizer["Shared_Edit"]'>
-                                        <i class="fa-solid fa-pen" aria-hidden="true"></i>
-                                    </a>
-                                }
-                                @if (CanDeleteTraining(training))
-                                {
-                                    @if (_pendingDeleteTrainingId == training.Id)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-app-icon btn-app-outline"
-                                                @onclick="CancelDeleteTraining"
-                                                disabled="@_deleteInProgress"
-                                                title='@Localizer["Shared_Cancel"]'
-                                                aria-label='@Localizer["Shared_Cancel"]'>
-                                            <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button"
-                                                class="btn btn-sm btn-app-icon btn-app-outline-danger"
-                                                @onclick="() => ConfirmDeleteTrainingAsync(training)"
-                                                disabled="@_deleteInProgress"
-                                                title='@Localizer["Shared_Delete"]'
-                                                aria-label='@Localizer["Shared_Delete"]'>
-                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-app-icon btn-app-outline-danger"
-                                                @onclick="() => PromptDeleteTraining(training)"
-                                                disabled="@_deleteInProgress"
-                                                title='@Localizer["Shared_Delete"]'
-                                                aria-label='@Localizer["Shared_Delete"]'>
-                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                                        </button>
-                                    }
-                                }
                                 @if (CanRegister(training))
                                 {
                                     <button type="button"
-                                            class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-outline-danger" : "btn-app-primary") ms-auto"
+                                            class="btn btn-sm @(_registeredTrainingIds.Contains(training.Id) ? "btn-app-danger" : "btn-app-success") ms-auto"
                                             @onclick="() => ToggleRegistrationAsync(training)"
                                             disabled="@IsRegistrationDisabled(training)">
                                         <i class="@(_registeredTrainingIds.Contains(training.Id) ? AppIcons.Unregister : AppIcons.Register) me-1" aria-hidden="true"></i>@(_registeredTrainingIds.Contains(training.Id) ? Localizer["Shared_Unregister"] : Localizer["Shared_Register"])
@@ -225,23 +147,19 @@
     private HashSet<int> _registeredTrainingIds = new();
     private HashSet<int> _accessibleGroupIds = new();
     private HashSet<int> _adminGroupIds = new();
+    private HashSet<int> _trainerGroupIds = new();
     private bool _loading = true;
     private bool _isSuperAdmin;
     private bool _canCreateTraining;
     private bool _archivedTrainingsExpanded;
     private bool _showFilter;
-    private bool _deleteInProgress;
     private int _userId;
-    private int? _pendingDeleteTrainingId;
     private int? _pendingGroupId;
     private int? _pendingTrainerId;
-    private string _pendingAvailability = "all";
     private int? _filterGroupId;
     private int? _filterTrainerId;
-    private string _filterAvailability = "all";
     private string _userCountry = "CH";
-    private string? _actionMessage;
-    private bool _actionIsError;
+    private ToastComponent? _toast;
 
     private List<TrainingDto> FilteredRecentTrainings => ApplyFilters(_recentTrainings);
     private List<TrainingDto> FilteredArchivedTrainings => ApplyFilters(_archivedTrainings);
@@ -257,7 +175,6 @@
 
         var auth = await AuthStateProvider.GetAuthenticationStateAsync();
         _isSuperAdmin = auth.User.HasClaim(AppClaimTypes.SuperAdmin, "true");
-        _canCreateTraining = (await AuthorizationService.AuthorizeAsync(auth.User, "GroupTrainer")).Succeeded;
         _accessibleGroupIds = auth.User.Claims
             .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal))
             .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
@@ -268,6 +185,12 @@
             .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
             .Where(groupId => groupId > 0)
             .ToHashSet();
+        _trainerGroupIds = auth.User.Claims
+            .Where(c => c.Type.StartsWith(AppClaimTypes.GroupRolePrefix, StringComparison.Ordinal) && c.Value == "Trainer")
+            .Select(c => int.TryParse(c.Type[AppClaimTypes.GroupRolePrefix.Length..], out var groupId) ? groupId : 0)
+            .Where(groupId => groupId > 0)
+            .ToHashSet();
+        _canCreateTraining = _isSuperAdmin || _adminGroupIds.Count > 0;
 
         _userId = int.TryParse(auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
         if (_userId > 0)
@@ -298,15 +221,15 @@
             .ToList();
 
         _filterTrainers = trainings
+            .Where(training => training.TrainerId.HasValue)
             .DistinctBy(training => training.TrainerId)
-            .Select(training => new FilterOption(training.TrainerId, training.TrainerName))
+            .Select(training => new FilterOption(training.TrainerId!.Value, training.TrainerName))
             .OrderBy(trainer => trainer.Name)
             .ToList();
 
         var archiveThreshold = DateTime.Now.AddDays(-14);
         _recentTrainings = trainings.Where(t => t.DateTime >= archiveThreshold).ToList();
         _archivedTrainings = trainings.Where(t => t.DateTime < archiveThreshold).ToList();
-        _pendingDeleteTrainingId = null;
         _loading = false;
     }
 
@@ -321,15 +244,10 @@
 
         if (_filterTrainerId.HasValue)
         {
-            query = query.Where(training => training.TrainerId == _filterTrainerId.Value);
+            query = _filterTrainerId.Value == -1
+                ? query.Where(training => !training.TrainerId.HasValue)
+                : query.Where(training => training.TrainerId == _filterTrainerId.Value);
         }
-
-        query = _filterAvailability switch
-        {
-            "available" => query.Where(training => training.RegisteredCount < training.Capacity),
-            "full" => query.Where(training => training.RegisteredCount >= training.Capacity),
-            _ => query
-        };
 
         return query.ToList();
     }
@@ -337,37 +255,55 @@
     private bool CanRegister(TrainingDto training) =>
         _isSuperAdmin || (training.GroupId.HasValue && _accessibleGroupIds.Contains(training.GroupId.Value));
 
-    private bool CanDeleteTraining(TrainingDto training) =>
-        _isSuperAdmin || (training.GroupId.HasValue && _adminGroupIds.Contains(training.GroupId.Value));
+    private bool CanTake(TrainingDto training) =>
+        !training.TrainerId.HasValue && training.Status == TrainingStatus.New &&
+        (_isSuperAdmin || (training.GroupId.HasValue && (_trainerGroupIds.Contains(training.GroupId.Value) || _adminGroupIds.Contains(training.GroupId.Value))));
+
+    private async Task TakeTrainingAsync(TrainingDto training)
+    {
+        try
+        {
+            await TrainingService.TakeAsync(training.Id, _userId);
+            await ShowToastAsync(Localizer["TrainingsPage_TakeSuccess"], ToastComponent.ToastVariant.Success);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
+        }
+    }
 
     private bool IsRegistrationDisabled(TrainingDto training) =>
         !_registeredTrainingIds.Contains(training.Id) && training.RegisteredCount >= training.Capacity;
 
     private async Task ToggleRegistrationAsync(TrainingDto training)
     {
-        _actionMessage = null;
-
         try
         {
             if (_registeredTrainingIds.Contains(training.Id))
             {
                 await RegistrationService.CancelAsync(_userId, training.Id);
-                _actionIsError = false;
-                _actionMessage = Localizer["TrainingsPage_RegistrationCancelled"];
+                await ShowToastAsync(Localizer["TrainingsPage_RegistrationCancelled"], ToastComponent.ToastVariant.Info);
             }
             else
             {
                 await RegistrationService.RegisterAsync(_userId, training.Id);
-                _actionIsError = false;
-                _actionMessage = Localizer["TrainingsPage_SuccessfullyRegistered"];
+                await ShowToastAsync(Localizer["TrainingsPage_SuccessfullyRegistered"], ToastComponent.ToastVariant.Success);
             }
 
             await LoadAsync();
         }
         catch (Exception ex)
         {
-            _actionIsError = true;
-            _actionMessage = ex.Message;
+            await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
         }
     }
 
@@ -377,59 +313,18 @@
     {
         _filterGroupId = _pendingGroupId;
         _filterTrainerId = _pendingTrainerId;
-        _filterAvailability = _pendingAvailability;
     }
 
     private void ClearFilters()
     {
         _pendingGroupId = null;
         _pendingTrainerId = null;
-        _pendingAvailability = "all";
         _filterGroupId = null;
         _filterTrainerId = null;
-        _filterAvailability = "all";
     }
 
     private void ToggleArchivedTrainings()
     {
         _archivedTrainingsExpanded = !_archivedTrainingsExpanded;
-    }
-
-    private void PromptDeleteTraining(TrainingDto training)
-    {
-        _actionMessage = null;
-        _pendingDeleteTrainingId = training.Id;
-    }
-
-    private void CancelDeleteTraining()
-    {
-        _pendingDeleteTrainingId = null;
-    }
-
-    private async Task ConfirmDeleteTrainingAsync(TrainingDto training)
-    {
-        if (_pendingDeleteTrainingId != training.Id)
-        {
-            return;
-        }
-
-        try
-        {
-            _deleteInProgress = true;
-            await TrainingService.DeleteAsync(training.Id);
-            _actionIsError = false;
-            _actionMessage = Localizer["TrainingsPage_TrainingDeleted"];
-            await LoadAsync();
-        }
-        catch (Exception ex)
-        {
-            _actionIsError = true;
-            _actionMessage = ex.Message;
-        }
-        finally
-        {
-            _deleteInProgress = false;
-            _pendingDeleteTrainingId = null;
-        }
     }
 }

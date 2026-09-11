@@ -1,22 +1,19 @@
-@inject IDateTimeFormatService DateTimeFormatService
-
 <div class="row g-3">
     @foreach (var training in Trainings)
     {
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="card shadow-sm @CardCssClass">
-                <div class="card-header collapsible-card-header p-0">
+            <div class="card shadow-sm training-list-card @CardCssClass">
+                <div class="card-header collapsible-card-header p-0 @(IsRegistered(training) ? "training-card-header-registered" : "training-card-header-unregistered")">
                     <button type="button" class="btn btn-link collapsible-card-toggle training-card-toggle" @onclick="() => ToggleCollapsed(training.Id)">
-                            @if (string.IsNullOrWhiteSpace(training.Title))
-                            {
-                                <span class="training-card-header-title text-muted fst-italic text-truncate">@Localizer["TrainingList_InPlanning"]</span>
-                            }
-                            else
-                            {
-                                <span class="training-card-header-title text-truncate">@training.Title</span>
-                            }
-                        <span class="training-card-header-date text-nowrap">
-                            <i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@training.DateTime.ToString("dd.MM.yy")
+                        <span class="d-inline-flex align-items-center text-truncate">
+                            <i class="@(IsRegistered(training) ? AppIcons.CalendarCheck : AppIcons.Bed)" aria-hidden="true"></i>
+                            <span class="training-card-header-title text-truncate ps-1">@training.Title</span>
+                        </span>
+                        <span class="d-inline-flex align-items-center gap-2 ms-auto">
+                            <TrainingStatusComponent Status="training.Status" />
+                            <span class="training-card-header-date text-nowrap">
+                                <i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@training.DateTime.ToString("dd.MM.yy")
+                            </span>
                         </span>
                     </button>
                 </div>
@@ -32,7 +29,7 @@
                             <span class="text-truncate text-end"><i class="@AppIcons.Location me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
-                            <span class="text-truncate"><i class="@AppIcons.Trainer me-1" aria-hidden="true"></i>@training.TrainerName</span>
+                            <span class="text-truncate"><i class="@AppIcons.Trainer me-1" aria-hidden="true"></i>@(training.TrainerId.HasValue ? training.TrainerName : Localizer["TrainingList_Unassigned"].Value)</span>
                             <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@training.RegisteredCount/@training.Capacity</span>
                         </div>
                         <div class="small text-muted text-truncate mt-2">@training.Description</div>
@@ -54,13 +51,31 @@
     [Parameter] public string UserCountry { get; set; } = "CH";
     [Parameter] public string CardCssClass { get; set; } = string.Empty;
     [Parameter] public RenderFragment<TrainingDto>? Actions { get; set; }
+    [Parameter] public HashSet<int> RegisteredTrainingIds { get; set; } = [];
 
     private readonly HashSet<int> _collapsedTrainingIds = [];
+    private readonly HashSet<int> _initializedTrainingIds = [];
+
+    protected override void OnParametersSet()
+    {
+        foreach (var training in Trainings)
+        {
+            if (_initializedTrainingIds.Add(training.Id) && training.DateTime < DateTime.Now)
+            {
+                _collapsedTrainingIds.Add(training.Id);
+            }
+        }
+    }
+
+    private bool IsRegistered(TrainingDto training) => RegisteredTrainingIds.Contains(training.Id);
 
     private string FormatTrainingDate(TrainingDto training)
     {
-        var culture = DateTimeFormatService.GetCultureForCountry(training.GroupCountry ?? UserCountry);
-        return training.DateTime.ToString("g", culture);
+        var start = training.DateTime;
+        var end = training.DurationMinutes.HasValue ? start.AddMinutes(training.DurationMinutes.Value) : (DateTime?)null;
+        return end.HasValue
+            ? $"{start:dd.MM.yyyy HH:mm} - {end.Value:HH:mm}"
+            : start.ToString("dd.MM.yyyy HH:mm");
     }
 
     private string FormatDuration(int? durationMinutes) =>

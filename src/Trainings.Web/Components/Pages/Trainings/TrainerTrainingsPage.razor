@@ -82,7 +82,7 @@
     private static string GetStatusBadgeClass(TrainingStatus status) => status switch
     {
         TrainingStatus.Planned => "bg-success",
-        TrainingStatus.Planning => "bg-warning text-dark",
+        TrainingStatus.InPlanning => "bg-warning text-dark",
         _ => "bg-secondary"
     };
 }

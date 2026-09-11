@@ -570,6 +570,10 @@ main {
   background-color: var(--brand-tradition-80);
 }
 
+[data-theme="dark"] .training-list-card > .card-footer {
+  background-color: var(--brand-tradition-80);
+}
+
 .card-list-row {
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--bs-border-color);
@@ -799,8 +803,50 @@ main {
 }
 
 .training-card-header-date {
-  color: var(--color-text-muted);
   font-size: 0.875rem;
+}
+
+.training-card-header-registered {
+  background-color: var(--brand-community-40);
+  color: var(--brand-tradition);
+}
+
+  .training-card-header-registered .collapsible-card-toggle {
+    color: var(--brand-tradition);
+  }
+
+.training-card-header-unregistered {
+  background-color: var(--brand-tradition-60);
+  color: var(--brand-white);
+}
+
+  .training-card-header-unregistered .collapsible-card-toggle {
+    color: var(--brand-white);
+  }
+
+.badge-status-new {
+  background-color: var(--brand-accent-40);
+  color: var(--brand-tradition);
+}
+
+.badge-status-inplanning {
+  background-color: var(--brand-community-80);
+  color: var(--brand-tradition);
+}
+
+.badge-status-planned {
+  background-color: var(--brand-community);
+  color: var(--brand-tradition);
+}
+
+.badge-status-inprogress {
+  background-color: var(--brand-innovation);
+  color: var(--brand-tradition);
+}
+
+.badge-status-done {
+  background-color: var(--brand-tradition);
+  color: var(--brand-white);
 }
 
 .training-card-status-cancelled {
@@ -988,6 +1034,42 @@ main {
   --bs-btn-hover-color: var(--brand-white);
   --bs-btn-hover-bg: var(--color-danger);
   --bs-btn-hover-border-color: var(--color-danger);
+}
+
+.btn-app-primary {
+  --bs-btn-color: var(--brand-white);
+  --bs-btn-bg: var(--color-primary);
+  --bs-btn-border-color: var(--color-primary);
+  --bs-btn-hover-color: var(--brand-white);
+  --bs-btn-hover-bg: var(--color-primary-hover);
+  --bs-btn-hover-border-color: var(--color-primary-hover);
+  --bs-btn-active-color: var(--brand-white);
+  --bs-btn-active-bg: var(--color-primary-hover);
+  --bs-btn-active-border-color: var(--color-primary-hover);
+}
+
+.btn-app-success {
+  --bs-btn-color: var(--brand-white);
+  --bs-btn-bg: var(--color-success);
+  --bs-btn-border-color: var(--color-success);
+  --bs-btn-hover-color: var(--brand-white);
+  --bs-btn-hover-bg: var(--brand-community-80);
+  --bs-btn-hover-border-color: var(--brand-community-80);
+  --bs-btn-active-color: var(--brand-white);
+  --bs-btn-active-bg: var(--brand-community-80);
+  --bs-btn-active-border-color: var(--brand-community-80);
+}
+
+.btn-app-danger {
+  --bs-btn-color: var(--brand-white);
+  --bs-btn-bg: var(--color-danger);
+  --bs-btn-border-color: var(--color-danger);
+  --bs-btn-hover-color: var(--brand-white);
+  --bs-btn-hover-bg: var(--brand-accent-80);
+  --bs-btn-hover-border-color: var(--brand-accent-80);
+  --bs-btn-active-color: var(--brand-white);
+  --bs-btn-active-bg: var(--brand-accent-80);
+  --bs-btn-active-border-color: var(--brand-accent-80);
 }
 
 .btn-app-icon {

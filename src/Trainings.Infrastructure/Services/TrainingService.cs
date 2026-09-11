@@ -8,11 +8,12 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : ITrainingService
+public class TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService, IDateTimeFormatService dateTimeFormatService) : ITrainingService
 {
     private readonly ITrainingRepository _trainingRepository = trainingRepository;
     private readonly ApplicationDbContext _context = context;
     private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IDateTimeFormatService _dateTimeFormatService = dateTimeFormatService;
 
     public async Task<TrainingDto?> GetByIdAsync(int id)
     {
@@ -46,9 +47,19 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
             throw new InvalidOperationException("A training group must be selected.");
         }
 
+        string title = dto.Title;
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            var group = await _context.Groups
+                .Include(g => g.Country)
+                .FirstOrDefaultAsync(g => g.Id == dto.GroupId.Value);
+            var culture = _dateTimeFormatService.GetCultureForCountry(group?.Country?.Code);
+            title = $"Training of {dto.DateTime.ToString("d", culture)}";
+        }
+
         var training = new Training
         {
-            Title = dto.Title,
+            Title = title,
             Description = dto.Description,
             LocationId = dto.LocationId,
             SpecialLocationDescription = dto.SpecialLocationDescription,
@@ -58,7 +69,7 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
             Capacity = dto.Capacity,
             TrainerId = dto.TrainerId,
             GroupId = dto.GroupId,
-            Status = TrainingStatus.New
+            Status = dto.TrainerId.HasValue ? TrainingStatus.InPlanning : TrainingStatus.New
         };
         await _trainingRepository.AddAsync(training);
         return MapToDto(training);
@@ -237,6 +248,109 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
             ?? throw new InvalidOperationException($"Training {trainingId} not found.");
         training.AttendanceLocked = true;
         training.AttendanceLockedAt = DateTime.UtcNow;
+        training.Status = TrainingStatus.Done;
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task<TrainingDto> TakeAsync(int trainingId, int trainerId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _trainingRepository.GetByIdAsync(trainingId)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.TrainerId.HasValue)
+        {
+            throw new InvalidOperationException("This training already has a trainer assigned.");
+        }
+        if (training.Status != TrainingStatus.New)
+        {
+            throw new InvalidOperationException("Only an unassigned training can be taken.");
+        }
+
+        training.TrainerId = trainerId;
+        training.Status = TrainingStatus.InPlanning;
+        await _trainingRepository.UpdateAsync(training);
+        return MapToDto(training);
+    }
+
+    public async Task ReleaseTrainerAsync(int trainingId, int requestingUserId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.TrainerId != requestingUserId)
+        {
+            throw new InvalidOperationException("Only the assigned trainer can release this training.");
+        }
+        if (training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
+        {
+            throw new InvalidOperationException("A training that is in progress or already done cannot be released.");
+        }
+
+        training.TrainerId = null;
+        training.Status = TrainingStatus.New;
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task ReassignTrainerAsync(int trainingId, int? newTrainerId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
+        {
+            throw new InvalidOperationException("The trainer cannot be changed once the training has started.");
+        }
+
+        training.TrainerId = newTrainerId;
+        training.Status = newTrainerId.HasValue
+            ? (training.Status == TrainingStatus.New ? TrainingStatus.InPlanning : training.Status)
+            : TrainingStatus.New;
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task ConfirmPlannedAsync(int trainingId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (!training.TrainerId.HasValue)
+        {
+            throw new InvalidOperationException("A trainer must be assigned before the training can be confirmed as planned.");
+        }
+        if (training.Status != TrainingStatus.InPlanning)
+        {
+            throw new InvalidOperationException("Only a training that is in planning can be confirmed as planned.");
+        }
+
+        training.Status = TrainingStatus.Planned;
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task StartAsync(int trainingId, int requestingTrainerId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.TrainerId != requestingTrainerId)
+        {
+            throw new InvalidOperationException("Only the assigned trainer can start this training.");
+        }
+        if (training.Status != TrainingStatus.Planned)
+        {
+            throw new InvalidOperationException("Only a planned training can be started.");
+        }
+
+        training.Status = TrainingStatus.InProgress;
         await _context.SaveChangesAsync(ct);
     }
 
@@ -289,6 +403,7 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
         RegisteredCount = t.Registrations?.Count(r => r.Status == Domain.Enums.RegistrationStatus.Registered) ?? 0,
         GroupId = t.GroupId,
         GroupName = t.Group?.Name,
+        GroupSlug = t.Group?.Slug,
         GroupCountry = t.Group?.Country?.Code,
         AttendanceLocked = t.AttendanceLocked,
         AttendanceLockedAt = t.AttendanceLockedAt,

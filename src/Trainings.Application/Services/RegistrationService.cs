@@ -31,10 +31,7 @@ public class RegistrationService(IRegistrationRepository registrationRepository,
         var training = await _trainingRepository.GetByIdAsync(trainingId)
             ?? throw new InvalidOperationException("Training not found.");
 
-        var now = DateTime.UtcNow;
-        bool isOpen = training.Status == TrainingStatus.Planned
-            ? training.DateTime >= now && training.DateTime <= now.AddDays(28)
-            : training.DateTime >= now && training.DateTime <= now.AddDays(4);
+        bool isOpen = training.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned;
         if (!isOpen)
         {
             throw new InvalidOperationException("Registration is not open for this training.");
@@ -74,7 +71,7 @@ public class RegistrationService(IRegistrationRepository registrationRepository,
         var training = await _trainingRepository.GetByIdAsync(trainingId)
             ?? throw new InvalidOperationException("Training not found.");
 
-        if (training.AttendanceLocked || training.DateTime < DateTime.UtcNow)
+        if (training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
         {
             throw new InvalidOperationException("Registration changes are no longer allowed for this training.");
         }

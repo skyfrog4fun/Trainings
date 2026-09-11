@@ -1,6 +1,25 @@
 TODOs
 ---
 
+Trainings
+---
+- [X] Create first training.
+- [ ] Assign Trainer to training
+- [ ] Trainer takes training
+
+- [ ] Align all edit buttons => style: icon: fa-solid fa-pen-to-square / class: btn btn-sm btn-primary
+    - [ ] change on /config/locations
+    - [ ] change on /trainings/{group-slug}/{id}
+
+- [ ] LocationsPage: URL /config/locations -> change to /locations
+- [ ] TrainingsPage: URL use single URL (1x create / 1x edit)
+- [ ] TrainingDetailPage: single URL -> use: /trainings/{group-slug}/{id}
+
+- [ ] Rework TrainingsDetailPage
+- [ ] Rework TrainingsEdit -> CreateEditTrainingPage (also used for New Training)
+- [ ] Rework other pages TrainerTrainingsPage, TrainerRunPage, AttendancePage (rename to TrainingAttendancePage)
+
+
 General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)

@@ -24,6 +24,7 @@
                         <a class="btn btn-link text-start w-100" href="#forms">Forms</a>
                         <a class="btn btn-link text-start w-100" href="#tables">Tables</a>
                         <a class="btn btn-link text-start w-100" href="#alerts-spinners">Alerts and Spinners</a>
+                        <a class="btn btn-link text-start w-100" href="#status-badges">Status Badges</a>
                         <a class="btn btn-link text-start w-100" href="#shared-components">Shared Components</a>
                         <a class="btn btn-link text-start w-100" href="#dashboard-widgets">Dashboard Widgets</a>
                         <a class="btn btn-link text-start w-100" href="#icons">Icons</a>
@@ -78,16 +79,14 @@
                                 Title="Upcoming Trainings"
                                 Value="12"
                                 Subtitle="Next 30 days"
-                                IconClass="@AppIcons.Calendar"
-                                BadgeToneClass="dashboard-icon-badge-success" />
+                                Icon="@AppIcons.Calendar" />
                         </div>
                         <div class="col-12 col-md-6 col-xl-4">
                             <DashboardFigureComponent
                                 Title="Participants"
                                 Value="84"
                                 Subtitle="Active members"
-                                IconClass="@AppIcons.Users"
-                                BadgeToneClass="dashboard-icon-badge-secondary" />
+                                Icon="@AppIcons.Users" />
                         </div>
                     </div>
                 </div>
@@ -173,6 +172,21 @@
                         <LoadingSpinner Inline="true" Label="Inline loading" />
                     </div>
                     <LoadingSpinner Label="Centered loading" />
+                </div>
+            </article>
+
+            <article id="status-badges" class="card shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Status Badges</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">All <code>TrainingStatus</code> values with their current badge style, shown side by side for comparison.</p>
+                    <div class="d-flex flex-wrap gap-3 align-items-center fs-6">
+                        @foreach (var status in Enum.GetValues<TrainingStatus>())
+                        {
+                            <TrainingStatusComponent Status="status" />
+                        }
+                    </div>
                 </div>
             </article>
 
@@ -307,7 +321,7 @@
                     DateTime = DateTime.Today.AddDays(5).AddHours(19),
                     LocationName = "Studio 2",
                     TrainerName = "Robin Allen",
-                    Status = TrainingStatus.Planning,
+                    Status = TrainingStatus.InPlanning,
                     GroupCountry = "CH"
                 }
             ]
@@ -316,4 +330,5 @@
     private static Task OnDashboardToggle() => Task.CompletedTask;
 
     private static Task OnDashboardReset() => Task.CompletedTask;
+
 }

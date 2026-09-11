@@ -43,6 +43,7 @@ All other role distinctions (Admin, Trainer, Participant) are per-group via `Gro
 | `UserRole`                 | `SuperAdmin`, `User`                          | **Changed:** removed Admin, Trainer, Participant — those are now per-group roles |
 | `GroupMemberRole`          | `Admin`, `Trainer`, `Participant`              | Unchanged; represents a user's role within a specific group |
 | `GroupMembershipStatus`    | `Pending`, `Approved`, `Declined`              | **New:** lifecycle status of a group membership request |
+| `TrainingStatus`           | `New`, `InPlanning`, `Planned`, `InProgress`, `Done` | **Changed:** full training lifecycle (see below); replaces the earlier two-state `New`/`Planned` model |
 | `RegistrationStatus`       | `Registered`, `Cancelled`                      | Unchanged |
 | `AttendanceStatus`         | `Present`, `Absent`                            | Unchanged |
 | `Gender`                   | `Male`, `Female`, `Other`                      | Unchanged |
@@ -89,12 +90,43 @@ The separate `PendingGroupRequest` entity is **removed**. Its lifecycle is now h
 
 #### `Training` — Changes
 
-| Field     | Change | Detail |
-|-----------|--------|--------|
-| `GroupId` | **Now required** | Every training belongs to exactly one group. `int` (non-nullable FK → Group). |
-| `Status`  | **New** | `TrainingStatus` lifecycle with `New`, `Planning`, and `Planned`. New trainings start as `New`; moving to `Planned` is an explicit trainer/admin action. |
+| Field       | Change | Detail |
+|-------------|--------|--------|
+| `GroupId`   | **Now required** | Every training belongs to exactly one group. `int` (non-nullable FK → Group). |
+| `TrainerId` | **Now nullable** | A training can exist with no trainer assigned yet (`Status = New`). `int?` (nullable FK → User). |
+| `Status`    | **Changed** | `TrainingStatus` lifecycle: `New` → `InPlanning` → `Planned` → `InProgress` → `Done` (see lifecycle below). |
 
-> A trainer who wants the same training in two groups must create it separately for each group (copy is out of scope). Registration opens up to 4 weeks ahead for `Planned` trainings, and only within 4 days of the start time for `New` or `Planning` trainings.
+##### Training lifecycle
+
+```
+New ──(Trainer takes it)──► InPlanning ──(Trainer confirms)──► Planned ──(Trainer starts)──► InProgress ──(Attendance finalized/locked)──► Done
+ ▲                               │
+ └────(Trainer/Admin releases────┘
+       or reassigns trainer)
+```
+
+| Status       | Meaning | Who moves it here |
+|--------------|---------|--------------------|
+| `New`        | Created by a GroupAdmin (or SuperAdmin), no trainer assigned yet, or a trainer released themselves. | `CreateAsync` (no trainer given) / `ReleaseTrainerAsync` / `ReassignTrainerAsync(null)` |
+| `InPlanning` | A trainer has taken (or been assigned) the training and is preparing it (blocks, details, location, etc.). | `TakeAsync` / `ReassignTrainerAsync` (trainer set) / `CreateAsync` (trainer pre-assigned) |
+| `Planned`    | The assigned trainer confirmed the training is ready. | `ConfirmPlannedAsync` |
+| `InProgress` | The assigned trainer manually started the session; registration/cancellation is closed. | `StartAsync` |
+| `Done`       | Attendance has been finalized and locked; no further changes to registrations or attendance are allowed. | `LockAttendanceAsync` |
+
+- **Creation (`CreateAsync`)**: A GroupAdmin (or SuperAdmin) creates a training specifying `Group`, `Date`/`Start`, `Location`, and `MaxParticipants` as mandatory fields (`Start`, `Duration`, `End` default from the Group's settings). `Trainer`, `Title`, and `Description` may be left blank — an unspecified `Title` is auto-generated (e.g. `"Training of 10.09.2026"`). If no `Trainer` is given the training starts at `New`; if a `Trainer` is pre-assigned it starts at `InPlanning`.
+- **Take (`TakeAsync`)**: Any Trainer of the training's group can self-assign to an unassigned (`New`) training, moving it to `InPlanning`.
+- **Release (`ReleaseTrainerAsync`)**: The currently assigned trainer can un-assign themselves while `InPlanning` or `Planned`, moving the training back to `New`. Not allowed once `InProgress` or `Done`.
+- **Reassign (`ReassignTrainerAsync`)**: GroupAdmin/SuperAdmin can assign, change, or clear the trainer at any time before `InProgress`/`Done`.
+- **Confirm Planned (`ConfirmPlannedAsync`)**: The assigned trainer (or GroupAdmin/SuperAdmin) confirms planning is complete, moving `InPlanning` → `Planned`.
+- **Start (`StartAsync`)**: Only the assigned trainer can manually start the training, moving `Planned` → `InProgress` and closing registration/cancellation.
+- **Lock attendance (`LockAttendanceAsync`)**: Only allowed once `InProgress`; finalizing attendance moves the training to `Done`, after which no registrations, attendance changes, or edits are permitted.
+
+> A trainer who wants the same training in two groups must create it separately for each group (copy is out of scope). Registration/cancellation is open while `Status` is `New`, `InPlanning`, or `Planned`, and closed once `InProgress` or `Done` — the previous date-window-based rule (4 weeks / 4 days) was removed in favor of a purely status-based rule.
+
+##### Visibility while unplanned
+
+- A participant of an accepted group sees a training in their list **as soon as it is created** by the GroupAdmin (even while `New`/unassigned), and **can register** for it while registration is open (`New`/`InPlanning`/`Planned`).
+- However, the **full detail view** (description, training blocks, participant list) is only shown once the training reaches `Planned` or later, or to the assigned Trainer / GroupAdmin / SuperAdmin at any status. Other viewers see a limited preview (title, group, date/time, location, status) until planning is finished.
 
 #### `MailConfiguration` — **New Entity**
 
@@ -285,19 +317,28 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 - **Postcondition:** User record persisted; password stored as bcrypt hash.
 - **Visual indicator:** Show whether the user has verified their email and/or reset their password.
 
-### UC-04 — Manage Training Sessions (Trainer / Admin)
+### UC-04 — Manage Training Sessions (GroupAdmin / Trainer / SuperAdmin)
 
-- **Actor:** Group Trainer or Group Admin or SuperAdmin
+- **Actor:** Group Admin or SuperAdmin (create); Group Trainer, the assigned Trainer, Group Admin, or SuperAdmin (edit/lifecycle actions)
 - **Steps:**
-  1. Create a training with `Title`, `Description`, `Location`, `DateTime`, `Capacity`, assigned to a specific `Group` (required).
-  2. Trainer can only create trainings for groups where they hold the `Trainer` or `Admin` role.
-  3. Edit or deactivate an existing training.
+  1. GroupAdmin (or SuperAdmin) creates a training with `Group`, `Location`, `Date` (mandatory); `Start`, `Duration`, `End` default from the Group; `Trainer`, `Title`, `Description` are optional.
+  2. Any Trainer of the group can **Take** an unassigned training (`New` → `InPlanning`).
+  3. The assigned Trainer edits the training while planning (`Trainer`, `Title`, `Description`, `MaxParticipants`, `Start`/`Duration`/`End`, `Location` restricted to the group's allowed locations including "Other").
+  4. The assigned Trainer (or GroupAdmin/SuperAdmin) **releases** the trainer assignment (`InPlanning`/`Planned` → `New`) or GroupAdmin/SuperAdmin **reassigns** the trainer directly.
+  5. The assigned Trainer **confirms planning is done** (`InPlanning` → `Planned`).
+  6. The assigned Trainer **starts** the training on the day (`Planned` → `InProgress`), closing registration.
 - **Business Rules:**
   - `GroupId` is required — every training belongs to exactly one group.
-  - A Trainer may only manage trainings in their own group(s).
-  - `Capacity` must be ≥ 1.
-  - `DateTime` must be strictly in the future at creation time.
+  - Only GroupAdmin/SuperAdmin can create a training; a Trainer cannot access the create page.
+  - A Trainer may only take/edit trainings in their own group(s), and only the currently assigned Trainer (or GroupAdmin/SuperAdmin) may edit a training once assigned.
+  - `MaxParticipants` (Capacity) must be ≥ 1.
+  - `Date`/`Start` must be strictly in the future at creation time.
+  - No changes are allowed once `Status = Done`.
   - Copying a training across groups is supported via block-library and cross-training copy features.
+
+### UC-04a — Training Lifecycle Actions (Trainer / GroupAdmin / SuperAdmin)
+
+See the **Training lifecycle** table above (`New → InPlanning → Planned → InProgress → Done`) for the full state machine and the actions (`TakeAsync`, `ReleaseTrainerAsync`, `ReassignTrainerAsync`, `ConfirmPlannedAsync`, `StartAsync`, `LockAttendanceAsync`) that transition it.
 
 ### UC-05 — Manage Training Blocks (Trainer / Admin)
 
@@ -313,13 +354,14 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 
 - **Actor:** Group Participant (with `Status = Approved` in the group)
 - **Steps:**
-  1. Browse active trainings **of their accepted groups only**. No other trainings are visible.
-  2. Register for a training that has available capacity.
+  1. Browse active trainings **of their accepted groups only**. No other trainings are visible; trainings appear as soon as the GroupAdmin creates them, regardless of trainer assignment/planning state.
+  2. Register for a training that has available capacity and open registration.
 - **Business Rules:**
   - A participant cannot register for the same training twice.
   - Registration is not allowed when `RegisteredCount >= Capacity`.
   - Only users with `GroupMembership.Status = Approved` in the training's group can see or register.
-  - Registration windows depend on training lifecycle: `Planned` trainings open up to 4 weeks before start; `New` and `Planning` trainings open only within 4 days before start.
+  - Registration/cancellation is open while `Status` is `New`, `InPlanning`, or `Planned`; closed once `InProgress` or `Done`. Registering is allowed even before a trainer is assigned or planning is finished.
+  - The full detail page (description, blocks, participant list) is only visible once `Status >= Planned`, or at any status to the assigned Trainer / GroupAdmin / SuperAdmin; other viewers see a limited preview.
 
 ### UC-07 — Cancel Registration (Participant)
 
@@ -333,13 +375,14 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 
 - **Actor:** Group Trainer or Group Admin or SuperAdmin
 - **Steps:**
-  1. Select a training session.
+  1. Select a training session (only reachable once the assigned Trainer has started it, i.e. `Status = InProgress`).
   2. For each registered participant, mark `Present` or `Absent`.
+  3. Finalize the attendance sheet, locking it and moving the training to `Status = Done`.
 - **Business Rules:**
   - Only users with an active `Registered` registration may have attendance recorded.
-  - The trainer recording attendance must be the trainer of that session (or a group Admin / SuperAdmin).
-  - Attendance drafts may be saved before the training starts.
-  - Final attendance can only be finalized and locked once `Training.DateTime <= DateTime.UtcNow`.
+  - The trainer recording attendance must be the assigned trainer of that session (or a group Admin / SuperAdmin).
+  - Attendance drafts may be saved any time while `Status = InProgress`.
+  - Finalizing attendance requires `Status = InProgress`; once finalized the training becomes `Done` and no further attendance or registration changes are allowed.
 
 ### UC-09 — View Attendance Report (Trainer / Admin)
 
@@ -552,6 +595,15 @@ ITrainingService
   Task<TrainingDto>                    CreateAsync(CreateTrainingDto dto, CancellationToken ct)
   Task                                 UpdateAsync(UpdateTrainingDto dto, CancellationToken ct)
   Task                                 DeleteAsync(int id, CancellationToken ct)
+  // Lifecycle actions (see Training lifecycle table above)
+  Task<TrainingDto>                    TakeAsync(int trainingId, int trainerId, CancellationToken ct)
+  Task                                 ReleaseTrainerAsync(int trainingId, int requestingUserId, CancellationToken ct)
+  Task                                 ReassignTrainerAsync(int trainingId, int? newTrainerId, CancellationToken ct)
+  Task                                 ConfirmPlannedAsync(int trainingId, CancellationToken ct)
+  Task                                 StartAsync(int trainingId, int requestingTrainerId, CancellationToken ct)
+  Task                                 SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct)
+  Task                                 LockAttendanceAsync(int trainingId, CancellationToken ct)
+    // Marks attendance locked and moves Status to Done
   // Training blocks
   Task<IEnumerable<TrainingBlockDto>>  GetBlocksAsync(int trainingId, CancellationToken ct)
   Task<TrainingBlockDto>               AddBlockAsync(CreateTrainingBlockDto dto, CancellationToken ct)
@@ -758,6 +810,48 @@ rules:
     trigger: RegisterAsync
     condition: "User does not have GroupMembership.Status == Approved in training.GroupId"
     action: throw UnauthorizedAccessException("User can only register for trainings in their accepted groups.")
+
+  - id: BR-017
+    entity: Registration
+    trigger: RegisterAsync | CancelAsync
+    condition: "training.Status == InProgress OR training.Status == Done"
+    action: throw InvalidOperationException("Registration is closed for this training.")
+
+  - id: BR-018
+    entity: Training
+    trigger: TakeAsync
+    condition: "training.Status != New OR training.TrainerId != null"
+    action: throw InvalidOperationException("Only an unassigned New training can be taken.")
+
+  - id: BR-019
+    entity: Training
+    trigger: ReleaseTrainerAsync
+    condition: "training.Status == InProgress OR training.Status == Done OR requestingUserId != training.TrainerId"
+    action: throw InvalidOperationException/UnauthorizedAccessException("Only the assigned trainer may release, and only before the training starts.")
+
+  - id: BR-020
+    entity: Training
+    trigger: ReassignTrainerAsync
+    condition: "training.Status == InProgress OR training.Status == Done"
+    action: throw InvalidOperationException("Trainer cannot be reassigned once the training is in progress or done.")
+
+  - id: BR-021
+    entity: Training
+    trigger: ConfirmPlannedAsync
+    condition: "training.Status != InPlanning OR training.TrainerId == null"
+    action: throw InvalidOperationException("A trainer must be assigned and planning must be in progress to confirm.")
+
+  - id: BR-022
+    entity: Training
+    trigger: StartAsync
+    condition: "training.Status != Planned OR training.TrainerId != requestingTrainerId"
+    action: throw InvalidOperationException/UnauthorizedAccessException("Only the assigned trainer may start a Planned training.")
+
+  - id: BR-023
+    entity: Attendance
+    trigger: LockAttendanceAsync
+    condition: "training.Status != InProgress"
+    action: throw InvalidOperationException("Attendance can only be finalized while the training is in progress.")
 ```
 
 ---

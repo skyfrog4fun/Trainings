@@ -65,6 +65,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(t => t.Trainer)
                 .WithMany(u => u.TrainingsAsTrainer)
                 .HasForeignKey(t => t.TrainerId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(t => t.Group)
                 .WithMany(g => g.Trainings)

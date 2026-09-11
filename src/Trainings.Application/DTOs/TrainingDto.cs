@@ -15,11 +15,12 @@ public class TrainingDto
     public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
     public TrainingStatus Status { get; set; }
-    public int TrainerId { get; set; }
+    public int? TrainerId { get; set; }
     public string TrainerName { get; set; } = string.Empty;
     public int RegisteredCount { get; set; }
     public int? GroupId { get; set; }
     public string? GroupName { get; set; }
+    public string? GroupSlug { get; set; }
     public string? GroupCountry { get; set; }
     public bool AttendanceLocked { get; set; }
     public DateTime? AttendanceLockedAt { get; set; }
@@ -36,7 +37,7 @@ public class CreateTrainingDto
     public DateTime DateTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
-    public int TrainerId { get; set; }
+    public int? TrainerId { get; set; }
     public int? GroupId { get; set; }
 }
 
@@ -52,6 +53,6 @@ public class UpdateTrainingDto
     public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
     public TrainingStatus Status { get; set; }
-    public int TrainerId { get; set; }
+    public int? TrainerId { get; set; }
     public int? GroupId { get; set; }
 }

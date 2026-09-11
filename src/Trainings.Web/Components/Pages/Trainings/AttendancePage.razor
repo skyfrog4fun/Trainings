@@ -1,4 +1,5 @@
 @page "/trainings/{TrainingId:int}/attendance"
+@page "/trainings/{Slug}/{TrainingId:int}/attendance"
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -11,6 +12,7 @@
 @inject IUserService UserService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@Localizer["AttendancePage_PageTitle"]</PageTitle>
 
@@ -18,6 +20,17 @@
     <div class="my-3">
         <BackButton Href="@($"/trainings/{TrainingId}")" />
     </div>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">@Localizer["AttendancePage_AccessDenied"]</div>
+    }
+    else
+    {
 
     @if (_training != null)
     {
@@ -29,7 +42,7 @@
                 <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@string.Format(Localizer["AttendancePage_FinalizedOn"].Value, FormatAttendanceLockedAt(_training))
             </div>
         }
-        else if (_training.DateTime > DateTime.UtcNow)
+        else if (_training.Status != TrainingStatus.InProgress)
         {
             <div class="alert alert-info py-2">
                 <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@Localizer["AttendancePage_NotStartedAlert"]
@@ -37,76 +50,71 @@
         }
     }
 
-    @if (_loading)
+    @if (_message != null)
     {
-        <LoadingSpinner />
+        <div class="alert @(_messageIsError ? "alert-danger" : "alert-success")">@_message</div>
     }
-    else
-    {
-        @if (_message != null)
-        {
-            <div class="alert @(_messageIsError ? "alert-danger" : "alert-success")">@_message</div>
-        }
 
-        <div class="list-group mt-3">
-            @foreach (var member in _participants)
-            {
-                var status = _attendanceMap.TryGetValue(member.UserId, out var s) ? s : (AttendanceStatus?)null;
-                var isRegistered = _registeredUserIds.Contains(member.UserId);
-                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">@member.UserDisplayName</span>
-                        @if (isRegistered)
-                        {
-                            <i class="@AppIcons.ClipboardCheck text-success small" title="@Localizer["AttendancePage_PreRegistered"]" aria-label="@Localizer["AttendancePage_PreRegistered"]"></i>
-                        }
-                    </div>
-                    <div class="btn-group btn-group-sm" role="group" aria-label="@string.Format(Localizer["AttendancePage_AttendanceForAriaLabel"].Value, member.UserDisplayName)">
-                        <button type="button"
-                                class="btn @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-secondary")"
-                                title="@Localizer["AttendancePage_Present"]"
-                                @onclick="() => SetAttendance(member.UserId, AttendanceStatus.Present)">
-                            <i class="@AppIcons.Check" aria-hidden="true"></i><i class="@AppIcons.Check" aria-hidden="true"></i>
-                        </button>
-                        <button type="button"
-                                class="btn @(status == AttendanceStatus.PartiallyPresent ? "btn-warning" : "btn-outline-secondary")"
-                                title="@Localizer["AttendancePage_PartiallyPresent"]"
-                                @onclick="() => SetAttendance(member.UserId, AttendanceStatus.PartiallyPresent)">
-                            <i class="@AppIcons.Check" aria-hidden="true"></i>
-                        </button>
-                        <button type="button"
-                                class="btn @(status == AttendanceStatus.Absent ? "btn-danger" : "btn-outline-secondary")"
-                                title="@Localizer["AttendancePage_Absent"]"
-                                @onclick="() => SetAttendance(member.UserId, AttendanceStatus.Absent)">
-                            <i class="@AppIcons.XMark" aria-hidden="true"></i>
-                        </button>
-                    </div>
+    <div class="list-group mt-3">
+        @foreach (var member in _participants)
+        {
+            var status = _attendanceMap.TryGetValue(member.UserId, out var s) ? s : (AttendanceStatus?)null;
+            var isRegistered = _registeredUserIds.Contains(member.UserId);
+            <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold">@member.UserDisplayName</span>
+                    @if (isRegistered)
+                    {
+                        <i class="@AppIcons.ClipboardCheck text-success small" title="@Localizer["AttendancePage_PreRegistered"]" aria-label="@Localizer["AttendancePage_PreRegistered"]"></i>
+                    }
                 </div>
-            }
-        </div>
-
-        @if (!_participants.Any())
-        {
-            <div class="alert alert-info mt-3">@Localizer["AttendancePage_NoGroupMembers"]</div>
-        }
-
-        @if (_participants.Any())
-        {
-            <div class="mt-3 d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-primary" @onclick="SaveDraftAsync" disabled="@(_saving || (_training?.AttendanceLocked ?? false))">
-                    <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@(_saving ? Localizer["AttendancePage_Saving"] : Localizer["AttendancePage_SaveDraft"])
-                </button>
-                <button type="button" class="btn btn-primary" @onclick="FinalizeAttendanceAsync"
-                        disabled="@(_saving || (_training?.AttendanceLocked ?? false) || (_training?.DateTime > DateTime.UtcNow))">
-                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@(_saving ? Localizer["AttendancePage_Saving"] : Localizer["AttendancePage_FinalizeAttendance"])
-                </button>
+                <div class="btn-group btn-group-sm" role="group" aria-label="@string.Format(Localizer["AttendancePage_AttendanceForAriaLabel"].Value, member.UserDisplayName)">
+                    <button type="button"
+                            class="btn @(status == AttendanceStatus.Present ? "btn-success" : "btn-outline-secondary")"
+                            title="@Localizer["AttendancePage_Present"]"
+                            @onclick="() => SetAttendance(member.UserId, AttendanceStatus.Present)">
+                        <i class="@AppIcons.Check" aria-hidden="true"></i><i class="@AppIcons.Check" aria-hidden="true"></i>
+                    </button>
+                    <button type="button"
+                            class="btn @(status == AttendanceStatus.PartiallyPresent ? "btn-warning" : "btn-outline-secondary")"
+                            title="@Localizer["AttendancePage_PartiallyPresent"]"
+                            @onclick="() => SetAttendance(member.UserId, AttendanceStatus.PartiallyPresent)">
+                        <i class="@AppIcons.Check" aria-hidden="true"></i>
+                    </button>
+                    <button type="button"
+                            class="btn @(status == AttendanceStatus.Absent ? "btn-danger" : "btn-outline-secondary")"
+                            title="@Localizer["AttendancePage_Absent"]"
+                            @onclick="() => SetAttendance(member.UserId, AttendanceStatus.Absent)">
+                        <i class="@AppIcons.XMark" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         }
+    </div>
+
+    @if (!_participants.Any())
+    {
+        <div class="alert alert-info mt-3">@Localizer["AttendancePage_NoGroupMembers"]</div>
+    }
+
+    @if (_participants.Any())
+    {
+        <div class="mt-3 d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary" @onclick="SaveDraftAsync" disabled="@(_saving || (_training?.AttendanceLocked ?? false))">
+                <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@(_saving ? Localizer["AttendancePage_Saving"] : Localizer["AttendancePage_SaveDraft"])
+            </button>
+            <button type="button" class="btn btn-primary" @onclick="FinalizeAttendanceAsync"
+                    disabled="@(_saving || (_training?.AttendanceLocked ?? false) || _training?.Status != TrainingStatus.InProgress)">
+                <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@(_saving ? Localizer["AttendancePage_Saving"] : Localizer["AttendancePage_FinalizeAttendance"])
+            </button>
+        </div>
+    }
     }
 </div>
 
 @code {
     [Parameter] public int TrainingId { get; set; }
+    [Parameter] public string? Slug { get; set; }
 
     private TrainingDto? _training;
     private List<GroupMembershipDto> _participants = new();
@@ -114,6 +122,7 @@
     private Dictionary<int, AttendanceStatus> _attendanceMap = new();
     private bool _loading = true;
     private bool _saving;
+    private bool _isAccessDenied;
     private int _trainerId;
     private string? _message;
     private bool _messageIsError;
@@ -128,7 +137,21 @@
             _userCountry = (await UserService.GetByIdAsync(_trainerId))?.CountryCode ?? DateTimeFormatService.GetDefaultCountry();
         }
 
+
         _training = await TrainingService.GetByIdAsync(TrainingId);
+
+        if (_training != null)
+        {
+            var user = authState.User;
+            bool isAssignedTrainer = _training.TrainerId == _trainerId;
+            bool isGroupAdmin = _training.GroupId.HasValue && AuthorizationHelper.IsGroupAdmin(user, _training.GroupId.Value);
+            if (!isAssignedTrainer && !isGroupAdmin)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+        }
 
         if (_training?.GroupId is { } groupId)
         {
@@ -183,7 +206,7 @@
 
     private async Task FinalizeAttendanceAsync()
     {
-        if (_training?.DateTime > DateTime.UtcNow)
+        if (_training?.Status != TrainingStatus.InProgress)
         {
             _message = Localizer["AttendancePage_FinalizeBeforeStartError"];
             _messageIsError = true;

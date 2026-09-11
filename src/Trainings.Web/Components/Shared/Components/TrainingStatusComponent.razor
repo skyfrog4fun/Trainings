@@ -1,0 +1,27 @@
+@* Renders the localized status badge for a training, keeping the CSS class mapping and
+   short status text in a single location so callers don't need to duplicate this logic. *@
+<span class="badge @GetStatusBadgeClass(Status)">@GetStatusText(Status)</span>
+
+@code {
+    [Parameter] public TrainingStatus Status { get; set; }
+
+    private string GetStatusText(TrainingStatus status) => status switch
+    {
+        TrainingStatus.New => Localizer["Enum_TrainingStatus_New"],
+        TrainingStatus.InPlanning => Localizer["Enum_TrainingStatus_InPlanning"],
+        TrainingStatus.Planned => Localizer["Enum_TrainingStatus_Planned"],
+        TrainingStatus.InProgress => Localizer["Enum_TrainingStatus_InProgress"],
+        TrainingStatus.Done => Localizer["Enum_TrainingStatus_Done"],
+        _ => status.ToString()
+    };
+
+    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
+    {
+        TrainingStatus.New => "badge-status-new",
+        TrainingStatus.InPlanning => "badge-status-inplanning",
+        TrainingStatus.Planned => "badge-status-planned",
+        TrainingStatus.InProgress => "badge-status-inprogress",
+        TrainingStatus.Done => "badge-status-done",
+        _ => "bg-light text-dark border"
+    };
+}

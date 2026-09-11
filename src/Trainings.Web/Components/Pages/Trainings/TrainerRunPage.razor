@@ -1,4 +1,5 @@
 @page "/trainings/{Id:int}/run"
+@page "/trainings/{Slug}/{Id:int}/run"
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -7,6 +8,7 @@
 
 @inject ITrainingService TrainingService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@Localizer["TrainerRunPage_PageTitle"]</PageTitle>
 
@@ -14,6 +16,10 @@
     @if (_loading)
     {
         <LoadingSpinner />
+    }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">@Localizer["TrainerRunPage_AccessDenied"]</div>
     }
     else if (_training == null)
     {
@@ -25,6 +31,31 @@
             <BackButton Href="@($"/trainings/{Id}")" />
         </div>
         <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NoBlocksWarning"] <a href="/trainings/@Id/edit">@Localizer["TrainerRunPage_AddBlocksFirst"]</a></div>
+    }
+    else if (_training.Status is TrainingStatus.New or TrainingStatus.InPlanning)
+    {
+        <div class="my-3">
+            <BackButton Href="@($"/trainings/{Id}")" />
+        </div>
+        <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NotPlannedYet"]</div>
+    }
+    else if (_training.Status == TrainingStatus.Planned)
+    {
+        <div class="my-3">
+            <BackButton Href="@($"/trainings/{Id}")" />
+        </div>
+        <div class="card shadow-lg text-center">
+            <div class="card-body py-5">
+                <h4 class="mb-3">@Localizer["TrainerRunPage_ReadyToStart"]</h4>
+                <button type="button" class="btn btn-success btn-lg" @onclick="StartTrainingAsync" disabled="@_starting">
+                    @if (_starting) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
+                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_StartTraining"]
+                </button>
+                <div class="mt-2">
+                    <ActionAlert IsSuccess="false" Message="@_startError" />
+                </div>
+            </div>
+        </div>
     }
     else if (_phase == "complete")
     {
@@ -124,21 +155,63 @@
 
 @code {
     [Parameter] public int Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
 
     private TrainingDto? _training;
     private List<TrainingBlockDto> _blocks = new();
     private int _currentIndex;
     private string _phase = "running";
     private bool _loading = true, _saving, _saved;
+    private bool _isAccessDenied;
+    private bool _starting;
+    private string? _startError;
+    private int _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         _training = await TrainingService.GetByIdAsync(Id);
         if (_training != null)
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            _currentUserId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+            bool isAssignedTrainer = _training.TrainerId == _currentUserId;
+            bool isGroupAdmin = _training.GroupId.HasValue && AuthorizationHelper.IsGroupAdmin(user, _training.GroupId.Value);
+            if (!isAssignedTrainer && !isGroupAdmin)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
             _blocks = _training.Blocks.OrderBy(b => b.OrderIndex).ToList();
         }
         _loading = false;
+    }
+
+    private async Task StartTrainingAsync()
+    {
+        if (_training == null)
+        {
+            return;
+        }
+
+        _starting = true;
+        _startError = null;
+        try
+        {
+            await TrainingService.StartAsync(_training.Id, _currentUserId);
+            _training = await TrainingService.GetByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            _startError = ex.Message;
+        }
+        finally
+        {
+            _starting = false;
+        }
     }
 
     private void NextBlock()
