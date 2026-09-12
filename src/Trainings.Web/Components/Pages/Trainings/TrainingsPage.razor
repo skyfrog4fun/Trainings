@@ -59,7 +59,7 @@
         {
             <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry" RegisteredTrainingIds="_registeredTrainingIds">
                 <Actions Context="training">
-                    <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
+                    <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-success" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
                         <i class="@AppIcons.Eye" aria-hidden="true"></i>
                     </a>
                     @if (CanTake(training))
@@ -116,7 +116,7 @@
                     <div class="card-body">
                         <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry" RegisteredTrainingIds="_registeredTrainingIds">
                             <Actions Context="training">
-                                <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-primary" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
+                                <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-success" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
                                     <i class="@AppIcons.Eye" aria-hidden="true"></i>
                                 </a>
                                 @if (CanRegister(training))
