@@ -84,6 +84,10 @@
      it (e.g. .form-control::placeholder) adapts correctly, including in dark
      mode. */
   --bs-secondary-color: var(--color-text-muted);
+  /* Bootstrap's own --bs-border-color defaults to a fixed gray that isn't
+     theme-aware. Re-point it at our themed border token so components relying
+     on it (tables, modals, etc.) stay visible in dark mode. */
+  --bs-border-color: var(--color-border);
 }
 
 [data-theme="dark"] {
@@ -137,6 +141,18 @@ h1:focus {
 
 .validation-message {
   color: var(--color-danger);
+}
+
+/* Bootstrap's .card sets --bs-card-border-color to a translucent black by
+   default, which is nearly invisible against a dark background. Re-point it
+   at our themed border token, and use a brighter brand-tradition shade in
+   dark mode so card borders stay clearly visible against the dark surface. */
+.card {
+  --bs-card-border-color: var(--color-border);
+}
+
+[data-theme="dark"] .card {
+  --bs-card-border-color: var(--brand-tradition-40);
 }
 
 .blazor-error-boundary {
