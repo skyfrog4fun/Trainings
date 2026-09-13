@@ -426,9 +426,6 @@
   <data name="Shared_MyRegistrations" xml:space="preserve">
     <value>Meine Anmeldungen</value>
   </data>
-  <data name="Shared_PlanTraining" xml:space="preserve">
-    <value>Training planen</value>
-  </data>
   <data name="Shared_Statistics" xml:space="preserve">
     <value>Statistiken</value>
   </data>
@@ -1056,21 +1053,6 @@
   <data name="ErrorPage_DevelopmentModeWarning" xml:space="preserve">
     <value>Die Umgebung {0} sollte für bereitgestellte Anwendungen nicht aktiviert werden. Dies kann dazu führen, dass vertrauliche Informationen aus Ausnahmen an Endbenutzer angezeigt werden. Für lokales Debugging aktiviere die Umgebung {0}, indem du die Umgebungsvariable {1} auf {0} setzt und die App neu startest.</value>
   </data>
-  <data name="TrainerTrainingsPage_PageTitle" xml:space="preserve">
-    <value>Trainingsplanung</value>
-  </data>
-  <data name="TrainerTrainingsPage_New" xml:space="preserve">
-    <value>Neu</value>
-  </data>
-  <data name="TrainerTrainingsPage_Attendance" xml:space="preserve">
-    <value>Anwesenheit</value>
-  </data>
-  <data name="TrainerTrainingsPage_NoTrainingsYet" xml:space="preserve">
-    <value>Noch keine Trainings.</value>
-  </data>
-  <data name="TrainerTrainingsPage_CreateOne" xml:space="preserve">
-    <value>Erstelle eines!</value>
-  </data>
   <data name="TrainerRunPage_PageTitle" xml:space="preserve">
     <value>Training durchführen</value>
   </data>
@@ -1560,9 +1542,6 @@
   <data name="GroupCreateEditPage_Slug" xml:space="preserve">
     <value>Slug</value>
   </data>
-  <data name="GroupCreateEditPage_SlugPlaceholder" xml:space="preserve">
-    <value>gruppen-slug</value>
-  </data>
   <data name="GroupCreateEditPage_Active" xml:space="preserve">
     <value>Aktiv</value>
   </data>
@@ -1833,6 +1812,9 @@
   <data name="CreateEditTrainingPage_DurationRequired" xml:space="preserve">
     <value>Bitte gib eine gültige Dauer ein.</value>
   </data>
+  <data name="CreateEditTrainingPage_EndTimeMismatch" xml:space="preserve">
+    <value>Startzeit, Dauer und Endzeit stimmen nicht überein. Bitte überprüfe die Zeiten.</value>
+  </data>
   <data name="CreateEditTrainingPage_UpdatedSuccess" xml:space="preserve">
     <value>Training erfolgreich aktualisiert.</value>
   </data>
@@ -1847,12 +1829,6 @@
   </data>
   <data name="CreateEditTrainingPage_ReleaseTrainerSuccess" xml:space="preserve">
     <value>Du hast dich selbst als Trainer dieses Trainings freigegeben.</value>
-  </data>
-  <data name="TrainerTrainingsPage_View" xml:space="preserve">
-    <value>Anzeigen</value>
-  </data>
-  <data name="TrainerTrainingsPage_Edit" xml:space="preserve">
-    <value>Bearbeiten</value>
   </data>
   <data name="TrainingDetailPage_Register" xml:space="preserve">
     <value>Anmelden</value>
@@ -2055,21 +2031,6 @@
   <data name="Enum_RegistrationStatus_Cancelled" xml:space="preserve">
     <value>Storniert</value>
   </data>
-  <data name="Enum_TrainingStatus_New" xml:space="preserve">
-    <value>Neu</value>
-  </data>
-  <data name="Enum_TrainingStatus_InPlanning" xml:space="preserve">
-    <value>Planung</value>
-  </data>
-  <data name="Enum_TrainingStatus_Planned" xml:space="preserve">
-    <value>Geplant</value>
-  </data>
-  <data name="Enum_TrainingStatus_InProgress" xml:space="preserve">
-    <value>Läuft</value>
-  </data>
-  <data name="Enum_TrainingStatus_Done" xml:space="preserve">
-    <value>Abgeschlossen</value>
-  </data>
   <data name="UserDetailPage_RegistrationsTitle" xml:space="preserve">
     <value>Registrierungen</value>
   </data>
@@ -2087,5 +2048,32 @@
   </data>
   <data name="GroupsPage_AllDays" xml:space="preserve">
     <value>Alle Tage</value>
+  </data>
+  <data name="Enum_TrainingStatus_New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="Enum_TrainingStatus_InPlanning" xml:space="preserve">
+    <value>Planung</value>
+  </data>
+  <data name="Enum_TrainingStatus_Planned" xml:space="preserve">
+    <value>Geplant</value>
+  </data>
+  <data name="Enum_TrainingStatus_InProgress" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="Enum_TrainingStatus_Done" xml:space="preserve">
+    <value>Abgeschlossen</value>
+  </data>
+  <data name="GroupCreateEditPage_SuggestSlug" xml:space="preserve">
+    <value>Slug aus Name vorschlagen</value>
+  </data>
+  <data name="TrainingDetailPage_DeleteConfirmTitle" xml:space="preserve">
+    <value>Training löschen</value>
+  </data>
+  <data name="TrainingDetailPage_DeleteConfirmMessage" xml:space="preserve">
+    <value>Möchtest du dieses Training wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="TrainingDetailPage_DeleteConfirmMessageWithParticipants" xml:space="preserve">
+    <value>Für dieses Training sind {0} Teilnehmer registriert. Möchtest du es wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.</value>
   </data>
 </root>

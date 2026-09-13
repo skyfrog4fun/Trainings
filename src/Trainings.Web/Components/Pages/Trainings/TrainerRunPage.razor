@@ -1,5 +1,5 @@
-@page "/trainings/{Id:int}/run"
 @page "/trainings/{Slug}/{Id:int}/run"
+
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -28,21 +28,21 @@
     else if (!_blocks.Any())
     {
         <div class="my-3">
-            <BackButton Href="@($"/trainings/{Id}")" />
+            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
         </div>
-        <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NoBlocksWarning"] <a href="/trainings/@Id/edit">@Localizer["TrainerRunPage_AddBlocksFirst"]</a></div>
+        <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NoBlocksWarning"] <a href="/trainings/@Slug/@Id/edit">@Localizer["TrainerRunPage_AddBlocksFirst"]</a></div>
     }
     else if (_training.Status is TrainingStatus.New or TrainingStatus.InPlanning)
     {
         <div class="my-3">
-            <BackButton Href="@($"/trainings/{Id}")" />
+            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
         </div>
         <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NotPlannedYet"]</div>
     }
     else if (_training.Status == TrainingStatus.Planned)
     {
         <div class="my-3">
-            <BackButton Href="@($"/trainings/{Id}")" />
+            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
         </div>
         <div class="card shadow-lg text-center">
             <div class="card-body py-5">
@@ -60,7 +60,7 @@
     else if (_phase == "complete")
     {
         <div class="my-3">
-            <BackButton Href="@($"/trainings/{Id}")" />
+            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
         </div>
         <div class="alert alert-success mt-3 text-center">
             <h4>@Localizer["TrainerRunPage_TrainingComplete"]</h4>
@@ -105,7 +105,7 @@
             <Actions>
                 <div class="d-flex align-items-center gap-2">
                     <small class="text-muted">@string.Format(Localizer["TrainerRunPage_BlockOfCount"].Value, _currentIndex + 1, _blocks.Count)</small>
-                    <BackButton Href="@($"/trainings/{Id}")" />
+                    <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
                 </div>
             </Actions>
         </PageHeader>
@@ -177,7 +177,7 @@
             _currentUserId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
 
             bool isAssignedTrainer = _training.TrainerId == _currentUserId;
-            bool isGroupAdmin = _training.GroupId.HasValue && AuthorizationHelper.IsGroupAdmin(user, _training.GroupId.Value);
+            bool isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, _training.GroupId);
             if (!isAssignedTrainer && !isGroupAdmin)
             {
                 _isAccessDenied = true;

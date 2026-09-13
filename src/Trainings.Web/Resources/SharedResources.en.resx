@@ -426,9 +426,6 @@
   <data name="Shared_MyRegistrations" xml:space="preserve">
     <value>My Registrations</value>
   </data>
-  <data name="Shared_PlanTraining" xml:space="preserve">
-    <value>Plan Training</value>
-  </data>
   <data name="Shared_Statistics" xml:space="preserve">
     <value>Statistics</value>
   </data>
@@ -1056,21 +1053,6 @@
   <data name="ErrorPage_DevelopmentModeWarning" xml:space="preserve">
     <value>The Development environment shouldn't be enabled for deployed applications. It can result in displaying sensitive information from exceptions to end users. For local debugging, enable the {0} environment by setting the {1} environment variable to {0} and restarting the app.</value>
   </data>
-  <data name="TrainerTrainingsPage_PageTitle" xml:space="preserve">
-    <value>Training Planning</value>
-  </data>
-  <data name="TrainerTrainingsPage_New" xml:space="preserve">
-    <value>New</value>
-  </data>
-  <data name="TrainerTrainingsPage_Attendance" xml:space="preserve">
-    <value>Attendance</value>
-  </data>
-  <data name="TrainerTrainingsPage_NoTrainingsYet" xml:space="preserve">
-    <value>No trainings yet.</value>
-  </data>
-  <data name="TrainerTrainingsPage_CreateOne" xml:space="preserve">
-    <value>Create one!</value>
-  </data>
   <data name="TrainerRunPage_PageTitle" xml:space="preserve">
     <value>Run Training</value>
   </data>
@@ -1560,9 +1542,6 @@
   <data name="GroupCreateEditPage_Slug" xml:space="preserve">
     <value>Slug</value>
   </data>
-  <data name="GroupCreateEditPage_SlugPlaceholder" xml:space="preserve">
-    <value>group-slug</value>
-  </data>
   <data name="GroupCreateEditPage_Active" xml:space="preserve">
     <value>Active</value>
   </data>
@@ -1833,6 +1812,9 @@
   <data name="CreateEditTrainingPage_DurationRequired" xml:space="preserve">
     <value>Please enter a valid duration.</value>
   </data>
+  <data name="CreateEditTrainingPage_EndTimeMismatch" xml:space="preserve">
+    <value>Start time, duration, and end time do not match. Please review the times.</value>
+  </data>
   <data name="CreateEditTrainingPage_UpdatedSuccess" xml:space="preserve">
     <value>Training updated successfully.</value>
   </data>
@@ -1847,12 +1829,6 @@
   </data>
   <data name="CreateEditTrainingPage_ReleaseTrainerSuccess" xml:space="preserve">
     <value>You have released yourself as the trainer of this training.</value>
-  </data>
-  <data name="TrainerTrainingsPage_View" xml:space="preserve">
-    <value>View</value>
-  </data>
-  <data name="TrainerTrainingsPage_Edit" xml:space="preserve">
-    <value>Edit</value>
   </data>
   <data name="TrainingDetailPage_Register" xml:space="preserve">
     <value>Register</value>
@@ -2055,21 +2031,6 @@
   <data name="Enum_RegistrationStatus_Cancelled" xml:space="preserve">
     <value>Cancelled</value>
   </data>
-  <data name="Enum_TrainingStatus_New" xml:space="preserve">
-    <value>New</value>
-  </data>
-  <data name="Enum_TrainingStatus_InPlanning" xml:space="preserve">
-    <value>Planning</value>
-  </data>
-  <data name="Enum_TrainingStatus_Planned" xml:space="preserve">
-    <value>Planned</value>
-  </data>
-  <data name="Enum_TrainingStatus_InProgress" xml:space="preserve">
-    <value>Running</value>
-  </data>
-  <data name="Enum_TrainingStatus_Done" xml:space="preserve">
-    <value>Done</value>
-  </data>
   <data name="UserDetailPage_RegistrationsTitle" xml:space="preserve">
     <value>Registrations</value>
   </data>
@@ -2087,5 +2048,32 @@
   </data>
   <data name="GroupsPage_AllDays" xml:space="preserve">
     <value>All days</value>
+  </data>
+  <data name="Enum_TrainingStatus_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Enum_TrainingStatus_InPlanning" xml:space="preserve">
+    <value>Planning</value>
+  </data>
+  <data name="Enum_TrainingStatus_Planned" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="Enum_TrainingStatus_InProgress" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Enum_TrainingStatus_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="GroupCreateEditPage_SuggestSlug" xml:space="preserve">
+    <value>Suggest slug from name</value>
+  </data>
+  <data name="TrainingDetailPage_DeleteConfirmTitle" xml:space="preserve">
+    <value>Delete Training</value>
+  </data>
+  <data name="TrainingDetailPage_DeleteConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this training? This action cannot be undone.</value>
+  </data>
+  <data name="TrainingDetailPage_DeleteConfirmMessageWithParticipants" xml:space="preserve">
+    <value>This training has {0} registered participant(s). Are you sure you want to delete it? This action cannot be undone.</value>
   </data>
 </root>

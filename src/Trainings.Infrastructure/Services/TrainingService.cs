@@ -42,17 +42,13 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
     public async Task<TrainingDto> CreateAsync(CreateTrainingDto dto)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
-        if (!dto.GroupId.HasValue)
-        {
-            throw new InvalidOperationException("A training group must be selected.");
-        }
 
         string title = dto.Title;
         if (string.IsNullOrWhiteSpace(title))
         {
             var group = await _context.Groups
                 .Include(g => g.Country)
-                .FirstOrDefaultAsync(g => g.Id == dto.GroupId.Value);
+                .FirstOrDefaultAsync(g => g.Id == dto.GroupId);
             var culture = _dateTimeFormatService.GetCultureForCountry(group?.Country?.Code);
             title = $"Training of {dto.DateTime.ToString("d", culture)}";
         }
@@ -78,10 +74,6 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
     public async Task UpdateAsync(UpdateTrainingDto dto)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
-        if (!dto.GroupId.HasValue)
-        {
-            throw new InvalidOperationException("A training group must be selected.");
-        }
 
         var training = await _trainingRepository.GetByIdAsync(dto.Id)
             ?? throw new InvalidOperationException($"Training {dto.Id} not found.");

@@ -43,7 +43,12 @@
                             </div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
-                                <InputText class="form-control" @bind-Value="_formModel.Slug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
+                                <div class="input-group">
+                                    <InputText class="form-control" @bind-Value="_formModel.Slug" />
+                                    <button type="button" class="btn btn-outline-secondary" title="@Localizer["GroupCreateEditPage_SuggestSlug"]" @onclick="SuggestSlug">
+                                        <i class="@AppIcons.CreateSlug" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                                 <ValidationMessage For="() => _formModel.Slug" class="text-danger small" />
                             </div>
                             <div class="col-12 col-md-4">
@@ -63,7 +68,12 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
-                                <InputText class="form-control" @bind-Value="_formModel.Slug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
+                                <div class="input-group">
+                                    <InputText class="form-control" @bind-Value="_formModel.Slug" />
+                                    <button type="button" class="btn btn-outline-secondary" title="@Localizer["GroupCreateEditPage_SuggestSlug"]" @onclick="SuggestSlug">
+                                        <i class="@AppIcons.CreateSlug" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                                 <ValidationMessage For="() => _formModel.Slug" class="text-danger small" />
                             </div>
                         }
@@ -226,6 +236,42 @@
 
         var user = await UserService.GetByIdAsync(userId);
         return user?.CountryId;
+    }
+
+    private void SuggestSlug()
+    {
+        _formModel.Slug = GenerateSlugPreview(_formModel.Name);
+    }
+
+    private static string GenerateSlugPreview(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return string.Empty;
+        }
+
+        string slug = name.ToLowerInvariant().Replace("ä", "ae").Replace("ö", "oe").Replace("ü", "ue").Replace("ß", "ss");
+
+        var builder = new System.Text.StringBuilder(slug.Length);
+        foreach (char c in slug)
+        {
+            if (char.IsLetterOrDigit(c))
+            {
+                builder.Append(c);
+            }
+            else
+            {
+                builder.Append('-');
+            }
+        }
+        slug = builder.ToString();
+
+        while (slug.Contains("--"))
+        {
+            slug = slug.Replace("--", "-");
+        }
+
+        return slug.Trim('-');
     }
 
     private void OnCountryChanged()

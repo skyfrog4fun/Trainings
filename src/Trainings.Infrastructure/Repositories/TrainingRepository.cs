@@ -37,7 +37,6 @@ public class TrainingRepository(ApplicationDbContext context) : ITrainingReposit
             .Include(t => t.Group)
                 .ThenInclude(g => g!.Country)
             .Include(t => t.Location)
-            .Where(t => t.GroupId != null)
             .OrderBy(t => t.DateTime)
             .ToListAsync();
 

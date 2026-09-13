@@ -59,7 +59,7 @@
         {
             <TrainingList Trainings="FilteredRecentTrainings" UserCountry="_userCountry" RegisteredTrainingIds="_registeredTrainingIds">
                 <Actions Context="training">
-                    <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-success" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
+                    <a href="/trainings/@training.GroupSlug/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-success" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
                         <i class="@AppIcons.Eye" aria-hidden="true"></i>
                     </a>
                     @if (CanTake(training))
@@ -116,7 +116,7 @@
                     <div class="card-body">
                         <TrainingList Trainings="FilteredArchivedTrainings" UserCountry="_userCountry" RegisteredTrainingIds="_registeredTrainingIds">
                             <Actions Context="training">
-                                <a href="/trainings/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-success" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
+                                <a href="/trainings/@training.GroupSlug/@training.Id" class="btn btn-sm btn-app-icon btn-app-outline-success" title='@Localizer["Shared_View"]' aria-label='@Localizer["Shared_View"]'>
                                     <i class="@AppIcons.Eye" aria-hidden="true"></i>
                                 </a>
                                 @if (CanRegister(training))
@@ -216,7 +216,7 @@
             .ToList();
 
         var trainings = (await TrainingService.GetActiveAsync())
-            .Where(t => _isSuperAdmin || (t.GroupId.HasValue && _accessibleGroupIds.Contains(t.GroupId.Value)))
+            .Where(t => _isSuperAdmin || _accessibleGroupIds.Contains(t.GroupId))
             .OrderByDescending(t => t.DateTime)
             .ToList();
 
@@ -253,11 +253,11 @@
     }
 
     private bool CanRegister(TrainingDto training) =>
-        _isSuperAdmin || (training.GroupId.HasValue && _accessibleGroupIds.Contains(training.GroupId.Value));
+        _isSuperAdmin || _accessibleGroupIds.Contains(training.GroupId);
 
     private bool CanTake(TrainingDto training) =>
         !training.TrainerId.HasValue && training.Status == TrainingStatus.New &&
-        (_isSuperAdmin || (training.GroupId.HasValue && (_trainerGroupIds.Contains(training.GroupId.Value) || _adminGroupIds.Contains(training.GroupId.Value))));
+        (_isSuperAdmin || _trainerGroupIds.Contains(training.GroupId) || _adminGroupIds.Contains(training.GroupId));
 
     private async Task TakeTrainingAsync(TrainingDto training)
     {

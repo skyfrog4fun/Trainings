@@ -1,5 +1,5 @@
-@page "/trainings/{TrainingId:int}/attendance"
 @page "/trainings/{Slug}/{TrainingId:int}/attendance"
+
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -18,7 +18,7 @@
 
 <div class="container px-2 px-md-4">
     <div class="my-3">
-        <BackButton Href="@($"/trainings/{TrainingId}")" />
+        <BackButton Href="@($"/trainings/{Slug}/{TrainingId}")" />
     </div>
 
     @if (_loading)
@@ -144,7 +144,7 @@
         {
             var user = authState.User;
             bool isAssignedTrainer = _training.TrainerId == _trainerId;
-            bool isGroupAdmin = _training.GroupId.HasValue && AuthorizationHelper.IsGroupAdmin(user, _training.GroupId.Value);
+            bool isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, _training.GroupId);
             if (!isAssignedTrainer && !isGroupAdmin)
             {
                 _isAccessDenied = true;

@@ -33,7 +33,7 @@
                                         <td class="small">@training.TrainerName</td>
                                         <td><span class="badge @GetStatusBadgeClass(training.Status)">@training.Status</span></td>
                                         <td class="text-end">
-                                            <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id">
+                                            <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.GroupSlug/@training.Id">
                                                 <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                                             </a>
                                         </td>

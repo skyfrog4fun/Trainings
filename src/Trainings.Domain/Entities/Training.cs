@@ -18,7 +18,7 @@ public class Training
     public bool IsActive { get; set; } = true;
     public int? TrainerId { get; set; }
     public User? Trainer { get; set; }
-    public int? GroupId { get; set; }
+    public int GroupId { get; set; }
     public Group? Group { get; set; }
     public bool AttendanceLocked { get; set; }
     public DateTime? AttendanceLockedAt { get; set; }

@@ -69,7 +69,7 @@
                             <p class="dashboard-upcoming-title mb-0">@training.Title</p>
                             <p class="dashboard-upcoming-meta mb-0">@FormatDashboardDateTime(training) - @(training.GroupName ?? "-")</p>
                         </div>
-                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id" title='@Localizer["HomePage_OpenTrainingDetails"]'>
+                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.GroupSlug/@training.Id" title='@Localizer["HomePage_OpenTrainingDetails"]'>
                             <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                         </a>
                     </article>
@@ -117,7 +117,7 @@
                                             <td class="small">@(training.GroupName ?? "-")</td>
                                             <td>@training.Title</td>
                                             <td class="text-end">
-                                                <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.Id" title='@Localizer["HomePage_OpenTrainingDetails"]'>
+                                                <a class="btn btn-sm btn-outline-primary me-2" href="/trainings/@training.GroupSlug/@training.Id" title='@Localizer["HomePage_OpenTrainingDetails"]'>
                                                     <i class="@AppIcons.CircleInfo" aria-hidden="true"></i>
                                                 </a>
                                                 <button type="button"
@@ -164,13 +164,13 @@
                                             <span class="me-2">@training.DateTime.ToString("ddd dd.MM. HH:mm")</span>
                                             <span class="text-muted small">@(training.LocationName ?? "-")</span>
                                         </div>
-                                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.Id/edit">
+                                        <a class="btn btn-sm btn-outline-primary" href="/trainings/@training.GroupSlug/@training.Id/edit">
                                             <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["HomePage_Plan"]
                                         </a>
                                     </li>
                                 }
                             </ul>
-                            <a href="/plan-training" class="btn btn-sm btn-primary mt-3">@Localizer["HomePage_AllTrainings"]</a>
+                            <a href="/trainings" class="btn btn-sm btn-primary mt-3">@Localizer["HomePage_AllTrainings"]</a>
                         }
                         else
                         {
@@ -357,7 +357,7 @@
             ? allActiveTrainings
                 .Where(t =>
                     !myRegistrationIds.Contains(t.Id) &&
-                    (_isSuperAdmin || (t.GroupId.HasValue && accessibleGroupIds.Contains(t.GroupId.Value))) &&
+                    (_isSuperAdmin || accessibleGroupIds.Contains(t.GroupId)) &&
                     (t.Status == TrainingStatus.Planned
                         ? t.DateTime <= now.AddDays(28)
                         : t.DateTime <= now.AddDays(4)))
@@ -375,8 +375,7 @@
 
             _planningOverviewByGroup = planningOverviewTrainings
                 .Where(t => t.DateTime.Date >= startOfWeek &&
-                            t.GroupId.HasValue &&
-                            (_isSuperAdmin || accessibleGroupIds.Contains(t.GroupId.Value)))
+                            (_isSuperAdmin || accessibleGroupIds.Contains(t.GroupId)))
                 .OrderBy(t => t.DateTime)
                 .GroupBy(t => t.GroupName ?? Localizer["HomePage_UnknownGroup"])
                 .ToDictionary(g => g.Key, g => g.ToList());

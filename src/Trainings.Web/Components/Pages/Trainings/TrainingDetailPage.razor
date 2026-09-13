@@ -1,5 +1,5 @@
-@page "/trainings/{Id:int}"
 @page "/trainings/{Slug}/{Id:int}"
+
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -40,24 +40,6 @@
                 </button>
             }
         </div>
-        @if (_showDeleteConfirm)
-        {
-            <div class="confirmation-panel confirmation-panel-danger mb-3">
-                <div class="fw-semibold mb-2">@Localizer["TrainingDetailPage_AreYouSure"]</div>
-                <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelDeleteTraining" disabled="@_deleteInProgress">@Localizer["Shared_Cancel"]</button>
-                    <button type="button" class="btn btn-sm btn-danger" @onclick="DeleteTraining" disabled="@_deleteInProgress">
-                        <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
-                    </button>
-                    @if (HasRegisteredParticipants)
-                    {
-                        <button type="button" class="btn btn-sm btn-danger" @onclick="NotifyAndDeleteTraining" disabled="@_deleteInProgress">
-                            <i class="@AppIcons.Envelope me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_NotifyAndDelete"]
-                        </button>
-                    }
-                </div>
-            </div>
-        }
         <div class="card shadow mb-4">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center gap-2">
@@ -268,6 +250,17 @@
     }
 </div>
 
+<ConfirmDialogComponent IsVisible="_showDeleteConfirm"
+                        Title="@Localizer["TrainingDetailPage_DeleteConfirmTitle"]"
+                        Message="@FormatDeleteConfirmMessage()"
+                        ConfirmText="@Localizer["Shared_Delete"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        SecondaryConfirmText="@(HasRegisteredParticipants ? Localizer["TrainingDetailPage_NotifyAndDelete"].Value : null)"
+                        IsBusy="_deleteInProgress"
+                        OnConfirm="DeleteTraining"
+                        OnCancel="CancelDeleteTraining"
+                        OnSecondaryConfirm="NotifyAndDeleteTraining" />
+
 @code {
     private enum RegistrationFooterState
     {
@@ -342,11 +335,11 @@
             return;
         }
 
-        _isAdmin = isSuperAdmin || (_training.GroupId.HasValue && user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId.Value), "Admin"));
-        _isTrainer = _isAdmin || (_training.GroupId.HasValue && user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId.Value), "Trainer"));
-        _canRegister = isSuperAdmin || (_training.GroupId.HasValue && user.Claims.Any(claim =>
-            claim.Type == AppClaimTypes.GroupRole(_training.GroupId.Value) &&
-            (claim.Value == "Participant" || claim.Value == "Trainer" || claim.Value == "Admin")));
+        _isAdmin = isSuperAdmin || user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Admin");
+        _isTrainer = _isAdmin || user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Trainer");
+        _canRegister = isSuperAdmin || user.Claims.Any(claim =>
+            claim.Type == AppClaimTypes.GroupRole(_training.GroupId) &&
+            (claim.Value == "Participant" || claim.Value == "Trainer" || claim.Value == "Admin"));
 
         _fullDetailAllowed = _isTrainer || _isAdmin || _training.Status >= TrainingStatus.Planned;
         _canTake = _isTrainer && !_training.TrainerId.HasValue && _training.Status == TrainingStatus.New;
@@ -487,6 +480,10 @@
         _showDeleteConfirm = true;
     }
 
+    private string FormatDeleteConfirmMessage() => HasRegisteredParticipants
+        ? string.Format(Localizer["TrainingDetailPage_DeleteConfirmMessageWithParticipants"].Value, RegisteredParticipants.Count)
+        : Localizer["TrainingDetailPage_DeleteConfirmMessage"].Value;
+
     private void CancelDeleteTraining()
     {
         _showDeleteConfirm = false;
@@ -557,17 +554,11 @@
     private string FormatDuration(int? durationMinutes) =>
         durationMinutes.HasValue ? $"{durationMinutes.Value} {Localizer["Shared_MinutesUnit"]}" : "-";
 
-    private string TrainingEditUrl() => string.IsNullOrWhiteSpace(_training?.GroupSlug)
-        ? $"/trainings/{_training?.Id}/edit"
-        : $"/trainings/{_training!.GroupSlug}/{_training.Id}/edit";
+    private string TrainingEditUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/edit";
 
-    private string TrainingRunUrl() => string.IsNullOrWhiteSpace(_training?.GroupSlug)
-        ? $"/trainings/{_training?.Id}/run"
-        : $"/trainings/{_training!.GroupSlug}/{_training.Id}/run";
+    private string TrainingRunUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/run";
 
-    private string TrainingAttendanceUrl() => string.IsNullOrWhiteSpace(_training?.GroupSlug)
-        ? $"/trainings/{_training?.Id}/attendance"
-        : $"/trainings/{_training!.GroupSlug}/{_training.Id}/attendance";
+    private string TrainingAttendanceUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/attendance";
 
     private static string GetStatusBadgeClass(TrainingStatus status) => status switch
     {

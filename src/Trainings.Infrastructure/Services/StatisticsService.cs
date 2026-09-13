@@ -69,7 +69,7 @@ public class StatisticsService(ApplicationDbContext context) : IStatisticsServic
         }
 
         var trainingsInScope = await _context.Trainings
-            .Where(t => t.GroupId.HasValue && scopedGroupIds.Contains(t.GroupId.Value))
+            .Where(t => scopedGroupIds.Contains(t.GroupId))
             .Select(t => new { t.Id, t.DateTime })
             .ToListAsync(ct);
 

@@ -1,7 +1,6 @@
 @page "/trainings/create"
-@page "/trainings/{Id:int}/edit"
-@page "/trainings/{Slug}/create"
 @page "/trainings/{Slug}/{Id:int}/edit"
+
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -93,7 +92,7 @@
 
                     <div class="col-12 col-md-3">
                         <label class="form-label">@Localizer["CreateEditTrainingPage_StartLabel"]</label>
-                        <input class="form-control" type="time" @bind="_startTime" @bind:after="CalculateEndTime" />
+                        <input class="form-control" type="time" @bind="_startTime" @bind:after="OnStartTimeChanged" />
                     </div>
 
                     <div class="col-12 col-md-3">
@@ -103,7 +102,7 @@
 
                     <div class="col-12 col-md-3">
                         <label class="form-label">@Localizer["CreateEditTrainingPage_EndLabel"]</label>
-                        <input class="form-control" type="time" value="@_endTime" readonly />
+                        <input class="form-control" type="time" @bind="_endTime" @bind:after="OnEndTimeChanged" />
                     </div>
 
                     @if (_isEdit)
@@ -181,11 +180,12 @@
 
     private string _title = string.Empty;
     private string _description = string.Empty;
-    private int? _capacity = 10;
-    private DateTime? _date = DateTime.Today.AddDays(7);
-    private TimeOnly? _startTime = new(19, 0);
-    private int? _durationMinutes = 90;
-    private string _endTime = "20:30";
+    private int? _capacity;
+    private DateTime? _date;
+    private TimeOnly? _startTime;
+    private int? _durationMinutes;
+    private TimeOnly? _endTime;
+    private bool _durationDrivesEnd = true;
     private TrainingStatus _status = TrainingStatus.New;
     private string? _error;
     private int _trainerId;
@@ -207,9 +207,7 @@
             (x.Name.Equals("Special", StringComparison.OrdinalIgnoreCase) ||
              x.Name.Equals("Outside", StringComparison.OrdinalIgnoreCase)));
 
-    private string BackHref => _isEdit
-        ? (string.IsNullOrWhiteSpace(Slug) ? $"/trainings/{Id}" : $"/trainings/{Slug}/{Id}")
-        : "/trainings";
+    private string BackHref => _isEdit ? $"/trainings/{Slug}/{Id}" : "/trainings";
 
     private int? DurationMinutesValue
     {
@@ -240,7 +238,7 @@
             }
 
             bool isAssignedTrainer = training.TrainerId == _currentUserId;
-            bool isGroupAdmin = training.GroupId.HasValue && AuthorizationHelper.IsGroupAdmin(user, training.GroupId.Value);
+            bool isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, training.GroupId);
             if (!_isSuperAdmin && !isGroupAdmin && !isAssignedTrainer)
             {
                 _isAccessDenied = true;
@@ -384,11 +382,54 @@
 
     private void CalculateEndTime()
     {
-        var start = _startTime ?? new TimeOnly(19, 0);
-        var duration = _durationMinutes ?? 0;
+        _durationDrivesEnd = true;
+        RecomputeEndFromDuration();
+    }
 
-        var end = start.AddMinutes(duration <= 0 ? 1 : duration);
-        _endTime = end.ToString("HH:mm");
+    private void RecomputeEndFromDuration()
+    {
+        if (!_startTime.HasValue || !_durationMinutes.HasValue || _durationMinutes.Value <= 0)
+        {
+            _endTime = null;
+            return;
+        }
+
+        _endTime = _startTime.Value.AddMinutes(_durationMinutes.Value);
+    }
+
+    private void OnStartTimeChanged()
+    {
+        if (_durationDrivesEnd)
+        {
+            RecomputeEndFromDuration();
+        }
+        else
+        {
+            RecomputeDurationFromEnd();
+        }
+    }
+
+    private void OnEndTimeChanged()
+    {
+        _durationDrivesEnd = false;
+        RecomputeDurationFromEnd();
+    }
+
+    private void RecomputeDurationFromEnd()
+    {
+        if (!_startTime.HasValue || !_endTime.HasValue)
+        {
+            _durationMinutes = null;
+            return;
+        }
+
+        var minutes = (_endTime.Value.ToTimeSpan() - _startTime.Value.ToTimeSpan()).TotalMinutes;
+        if (minutes <= 0)
+        {
+            minutes += 24 * 60; // end time crosses midnight relative to start
+        }
+
+        _durationMinutes = (int)minutes;
     }
 
     private static string GetStatusBadgeClass(TrainingStatus status) => status switch
@@ -409,12 +450,7 @@
 
     private string FormatLocalizedEndTime()
     {
-        if (!TimeOnly.TryParse(_endTime, out var parsed))
-        {
-            return _endTime;
-        }
-
-        return parsed.ToString("t", _groupCulture);
+        return _endTime.HasValue ? _endTime.Value.ToString("t", _groupCulture) : string.Empty;
     }
 
     private async Task Save()
@@ -458,6 +494,12 @@
             return;
         }
 
+        if (!_endTime.HasValue || _endTime.Value != _startTime.Value.AddMinutes(_durationMinutes.Value))
+        {
+            _error = Localizer["CreateEditTrainingPage_EndTimeMismatch"];
+            return;
+        }
+
         var start = _startTime.Value;
 
         try
@@ -480,7 +522,7 @@
                     DurationMinutes = _durationMinutes,
                     Status = _status,
                     TrainerId = _originalTrainerId,
-                    GroupId = _groupId
+                    GroupId = _groupId.Value
                 });
 
                 if (newTrainerId != _originalTrainerId)
@@ -511,7 +553,7 @@
                     DateTime = dateTime,
                     DurationMinutes = _durationMinutes,
                     TrainerId = newTrainerId,
-                    GroupId = _groupId
+                    GroupId = _groupId.Value
                 });
 
                 _persistedTrainingId = created.Id;

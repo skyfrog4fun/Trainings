@@ -130,7 +130,7 @@
                     <div class="app-overview-grid">
                         @foreach (var registration in _registrations)
                         {
-                            <a href="/trainings/@registration.TrainingId" class="app-overview-card app-overview-card-link text-decoration-none text-reset">
+                            <a href="/trainings/@registration.TrainingGroupSlug/@registration.TrainingId" class="app-overview-card app-overview-card-link text-decoration-none text-reset">
                                 <div class="app-overview-main w-100 d-flex flex-column gap-1">
                                     <div class="d-flex justify-content-between align-items-center gap-2">
                                         <div class="app-overview-title text-break">@registration.TrainingTitle</div>

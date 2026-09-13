@@ -11,6 +11,7 @@ public class RegistrationDto
     public string TrainingTitle { get; set; } = string.Empty;
     public DateTime TrainingDateTime { get; set; }
     public string? TrainingGroupName { get; set; }
+    public string? TrainingGroupSlug { get; set; }
     public string? TrainingTrainerName { get; set; }
     public string? TrainingLocationName { get; set; }
     public int? TrainingDurationMinutes { get; set; }

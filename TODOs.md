@@ -7,8 +7,24 @@ Trainings
 - [ ] Assign Trainer to training
 - [ ] Trainer takes training
 
-- [ ] TrainingsPage: red eye button to make green!
-- [ ] TrainingsPage: 'Take' button move to right side of card footer
+- Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
+
+- [X] TrainingsPage@
+  - [ ] Date / Time not equal font color like Group, Trainer, Location, ... 
+
+- [ ] TrainingDetailPage
+  - [X] URL (only one URL for create and edit)
+  - [ ] Header: [ same as in overview: Participation Status, Title   -  Training Status / Date ] --> should Participation Status be a component?
+  - [ ] Details: Gruop, Title, Location, Date/Start/End/Duration, Trainier, Status, Description, Participants 0/x (think about the order of the details)
+  - [ ] Footer: [Edit    - Take / Register]
+  - [ ] Edit -> only SuperAdmin, GroupAdmin and assigned Trainer can edit the training (validate if that is the case)
+
+- [ ] Edit Training
+  - [ ] Move Training Details into collapsible card -> when blocks are added, it does not consume too much space
+
+- [ ] Edit Training / Add Block
+  - [ ] Duration and Tag on same line
+  - [ ] Rework Tags (which one are really used?!) -> delete the unused once. Put them into enumeration and have resx file trainslation to have it in DE/EN. Add a new Tag 'Other' for blocks that do not fit into any of the other tags.
 
 - [ ] Align all edit buttons => style: icon: fa-solid fa-pen-to-square / class: btn btn-sm btn-primary
     - [ ] change on /config/locations

@@ -47,7 +47,8 @@ public static class AppIcons
     public const string ChevronUp = "fa-solid fa-chevron-up";
     public const string ChevronDown = "fa-solid fa-chevron-down";
     public const string Access = "fa-solid fa-key";
-    public const string Wand = "fa-solid fa-wand-magic-sparkles";
+    public const string CreatePassword = "fa-solid fa-wand-magic-sparkles";
+    public const string CreateSlug = "fa-solid fa-wand-magic-sparkles";
     public const string Eye = "fa-solid fa-eye";
     public const string EyeSlash = "fa-solid fa-eye-slash";
     public const string Bed = "fa-solid fa-bed";
@@ -98,7 +99,8 @@ public static class AppIcons
         new("Expand", ChevronDown),
         new("Collapse", ChevronUp),
         new("Group Access", Access),
-        new("Generate Password", Wand),
+        new("Generate Password", CreatePassword),
+        new("Suggest Slug", CreateSlug),
         new("Show Password", Eye),
         new("Hide Password", EyeSlash),
         new("Not Registered", Bed)

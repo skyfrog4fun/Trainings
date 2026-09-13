@@ -70,8 +70,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(t => t.Group)
                 .WithMany(g => g.Trainings)
                 .HasForeignKey(t => t.GroupId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.SetNull);
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
             entity.Property(t => t.SpecialLocationDescription).HasMaxLength(500);
             entity.Property(t => t.MeetingPoint).HasMaxLength(500);
             entity.HasOne(t => t.Location)
