@@ -14,12 +14,6 @@ Trainings
     - [ ] change on /trainings/{group-slug}/{id}
 
 - [ ] LocationsPage: URL /config/locations -> change to /locations
-- [ ] TrainingsPage: URL use single URL (1x create / 1x edit)
-- [ ] TrainingDetailPage: single URL -> use: /trainings/{group-slug}/{id}
-
-- [ ] Rework TrainingsDetailPage
-- [ ] Rework TrainingsEdit -> CreateEditTrainingPage (also used for New Training)
-- [ ] Rework other pages TrainerTrainingsPage, TrainerRunPage, AttendancePage (rename to TrainingAttendancePage)
 
 - [ ] Overbooking vs. Waiting list? ... GroupAdmin should be able to overbook a training / Participants should add themself to a waiting list [Future Requirement]
 
@@ -61,6 +55,7 @@ Others
 Ideas
 ---
 - [ ] Search for users on page /users: add search by email, first name, last name, username, etc.
+- [ ] Search for trainings on page /trainings: add search by title, group, trainer, location, date, etc.
 - [ ] Overview: Create an overview documentation that shows what page links to what other pages. This will help developers understand the navigation flow and dependencies between pages.
 - [ ] Documentation: create an authorization overview. What role can do what
 - [ ] How can a user request to participate in a new group? [UserInformation -> extend section 'Group Memberships']
@@ -77,6 +72,8 @@ Done - Reworked Sections
 - [X] Groups (List, Details, Edit/New, Members)
 - [X] Trainings (List, Details, Edit/New)
 - [ ] Trainings Plan (Plan the blocks, etc..)
+- [ ] Trainings Run
+- [ ] Trainings Attendance
 - [ ] My Registrations (from the Users point of view!?) -> maybe integrate that to Trainings Page (List with filter?!)
 - [ ] Dashbaord - User
 - [ ] Dashbaord - Trainer

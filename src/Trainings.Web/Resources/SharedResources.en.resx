@@ -1236,6 +1236,12 @@
   <data name="TrainingDetailPage_UnregisterNotAllowed" xml:space="preserve">
     <value>Access denied. Only the assigned trainer or a group admin can unregister other participants.</value>
   </data>
+  <data name="TrainingDetailPage_TrainerCannotUnregisterTitle" xml:space="preserve">
+    <value>Cannot unregister</value>
+  </data>
+  <data name="TrainingDetailPage_TrainerCannotUnregisterMessage" xml:space="preserve">
+    <value>You are the trainer of this training and cannot unregister as long as you remain assigned as its trainer.</value>
+  </data>
   <data name="TrainingDetailPage_FailedMessage" xml:space="preserve">
     <value>Failed: {0}</value>
   </data>

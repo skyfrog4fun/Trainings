@@ -1236,6 +1236,12 @@
   <data name="TrainingDetailPage_UnregisterNotAllowed" xml:space="preserve">
     <value>Zugriff verweigert. Nur der zugewiesene Trainer oder ein Gruppenadministrator kann andere Teilnehmer abmelden.</value>
   </data>
+  <data name="TrainingDetailPage_TrainerCannotUnregisterTitle" xml:space="preserve">
+    <value>Abmelden nicht möglich</value>
+  </data>
+  <data name="TrainingDetailPage_TrainerCannotUnregisterMessage" xml:space="preserve">
+    <value>Du bist der Trainer dieses Trainings und kannst dich nicht abmelden, solange du als Trainer zugewiesen bist.</value>
+  </data>
   <data name="TrainingDetailPage_FailedMessage" xml:space="preserve">
     <value>Fehlgeschlagen: {0}</value>
   </data>

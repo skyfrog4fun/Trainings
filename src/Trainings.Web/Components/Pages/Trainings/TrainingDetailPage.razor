@@ -293,6 +293,14 @@
                         OnConfirm="ConfirmUnregisterAsync"
                         OnCancel="CancelUnregisterConfirm" />
 
+<ConfirmDialogComponent IsVisible="_showTrainerCannotUnregisterDialog"
+                        Title="@Localizer["TrainingDetailPage_TrainerCannotUnregisterTitle"]"
+                        Message="@Localizer["TrainingDetailPage_TrainerCannotUnregisterMessage"]"
+                        ConfirmText="@Localizer["Shared_Close"]"
+                        ConfirmButtonCssClass="btn-primary"
+                        OnConfirm="CloseTrainerCannotUnregisterDialog"
+                        OnCancel="CloseTrainerCannotUnregisterDialog" />
+
 @code {
     [Parameter] public int Id { get; set; }
     [Parameter] public string? Slug { get; set; }
@@ -315,6 +323,7 @@
     private bool _showAddParticipantForm;
     private int? _addParticipantUserId;
     private bool _showUnregisterConfirm;
+    private bool _showTrainerCannotUnregisterDialog;
     private int? _pendingUnregisterUserId;
     private string? _pendingUnregisterUserName;
     private string? _message;
@@ -350,6 +359,7 @@
         _loading = true;
         _showDeleteConfirm = false;
         _showUnregisterConfirm = false;
+        _showTrainerCannotUnregisterDialog = false;
 
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -495,10 +505,23 @@
 
     private void PromptParticipantUnregister(RegistrationDto registration)
     {
+        if (registration.UserId == _userId && _isAssignedTrainer)
+        {
+            _showDeleteConfirm = false;
+            _showUnregisterConfirm = false;
+            _showTrainerCannotUnregisterDialog = true;
+            return;
+        }
+
         _showDeleteConfirm = false;
         _pendingUnregisterUserId = registration.UserId;
         _pendingUnregisterUserName = registration.UserName;
         _showUnregisterConfirm = true;
+    }
+
+    private void CloseTrainerCannotUnregisterDialog()
+    {
+        _showTrainerCannotUnregisterDialog = false;
     }
 
     private string FormatUnregisterConfirmMessage() =>
