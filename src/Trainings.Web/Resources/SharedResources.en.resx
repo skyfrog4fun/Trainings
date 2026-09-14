@@ -1128,6 +1128,9 @@
   <data name="TrainingDetailPage_NotifyAndDelete" xml:space="preserve">
     <value>Notify &amp; Delete</value>
   </data>
+  <data name="TrainingDetailPage_InfoTitle" xml:space="preserve">
+    <value>Training Information</value>
+  </data>
   <data name="TrainingDetailPage_TrainerLabel" xml:space="preserve">
     <value>Trainer: {0}</value>
   </data>
@@ -1179,11 +1182,62 @@
   <data name="TrainingDetailPage_RegisteredParticipants" xml:space="preserve">
     <value>Registered Participants</value>
   </data>
+  <data name="TrainingDetailPage_DescriptionLabel" xml:space="preserve">
+    <value>Description</value>
+  </data>
   <data name="TrainingDetailPage_NoOneSignedUpYet" xml:space="preserve">
     <value>No one has signed up yet — this training is currently winning the hide-and-seek championship.</value>
   </data>
   <data name="TrainingDetailPage_FailedToNotify" xml:space="preserve">
     <value>Failed to notify {0}.</value>
+  </data>
+  <data name="TrainingDetailPage_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="TrainingDetailPage_Attendance" xml:space="preserve">
+    <value>Attendance</value>
+  </data>
+  <data name="TrainingDetailPage_AddParticipant" xml:space="preserve">
+    <value>Add Participant</value>
+  </data>
+  <data name="TrainingDetailPage_SelectParticipant" xml:space="preserve">
+    <value>-- Select User --</value>
+  </data>
+  <data name="TrainingDetailPage_SearchParticipantPlaceholder" xml:space="preserve">
+    <value>Search by name or email…</value>
+  </data>
+  <data name="TrainingDetailPage_NoParticipantsFound" xml:space="preserve">
+    <value>No users found.</value>
+  </data>
+  <data name="TrainingDetailPage_NoEligibleParticipants" xml:space="preserve">
+    <value>All group members are already registered.</value>
+  </data>
+  <data name="TrainingDetailPage_SelectParticipantError" xml:space="preserve">
+    <value>Please select a user.</value>
+  </data>
+  <data name="TrainingDetailPage_AddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="TrainingDetailPage_CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="TrainingDetailPage_ParticipantAddedToast" xml:space="preserve">
+    <value>{0} has been registered.</value>
+  </data>
+  <data name="TrainingDetailPage_ParticipantUnregisteredToast" xml:space="preserve">
+    <value>{0} has been unregistered.</value>
+  </data>
+  <data name="TrainingDetailPage_UnregisterConfirmTitle" xml:space="preserve">
+    <value>Unregister</value>
+  </data>
+  <data name="TrainingDetailPage_UnregisterConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to unregister {0} from this training?</value>
+  </data>
+  <data name="TrainingDetailPage_UnregisterNotAllowed" xml:space="preserve">
+    <value>Access denied. Only the assigned trainer or a group admin can unregister other participants.</value>
+  </data>
+  <data name="TrainingDetailPage_FailedMessage" xml:space="preserve">
+    <value>Failed: {0}</value>
   </data>
   <data name="Shared_Group" xml:space="preserve">
     <value>Group</value>

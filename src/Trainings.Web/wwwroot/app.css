@@ -49,6 +49,7 @@
   /* Special-purpose tokens (direct brand associations without a generic semantic name) */
   --special-secondary-hover: var(--brand-community-80);
   --special-tradition-hover: var(--brand-tradition-80);
+  --special-danger-hover: var(--brand-accent-80);
   --special-warning: var(--brand-innovation-60);
   --special-focus-ring-rgb: var(--brand-community);
   --special-danger-panel-bg: var(--brand-appreciation-40);
@@ -352,8 +353,8 @@ h1:focus {
   --bs-btn-bg: var(--color-danger);
   --bs-btn-border-color: var(--color-danger);
   --bs-btn-hover-color: var(--color-text-on-dark);
-  --bs-btn-hover-bg: var(--special-tradition-hover);
-  --bs-btn-hover-border-color: var(--special-tradition-hover);
+  --bs-btn-hover-bg: var(--special-danger-hover);
+  --bs-btn-hover-border-color: var(--special-danger-hover);
   --bs-btn-active-color: var(--color-text-on-dark);
   --bs-btn-active-bg: var(--color-danger);
   --bs-btn-active-border-color: var(--color-danger);
@@ -881,40 +882,6 @@ main {
   border-left: 4px solid var(--color-secondary);
 }
 
-.confirmation-danger-subtle {
-  background-color: var(--special-danger-panel-bg);
-}
-
-.training-detail-title {
-  max-width: 70%;
-}
-
-.training-detail-registration-footer {
-  min-height: 4rem;
-  display: flex;
-  align-items: center;
-}
-
-.training-detail-footer-content {
-  width: 100%;
-}
-
-.training-detail-footer-confirm {
-  background-color: var(--special-info-panel-bg);
-}
-
-.training-detail-footer-danger {
-  background-color: var(--special-danger-panel-bg);
-}
-
-.training-detail-footer-success {
-  background-color: var(--special-success-panel-bg);
-}
-
-.participants-card-title {
-  max-width: 70%;
-}
-
 .app-overview-grid {
   display: grid;
   gap: 0.75rem;
@@ -1087,20 +1054,6 @@ main {
   border-radius: 0.5rem;
 }
 
-@media (max-width: 430px) {
-  .participant-registered-at {
-    display: none;
-  }
-
-  .participant-action-text {
-    display: none;
-  }
-
-  .participants-card-title {
-    max-width: 55%;
-  }
-}
-
 /* === Utility === */
 /* Debug aid: stop the layout from shrinking past the minimum supported mobile
    width (320px). Below this width the viewport scrolls horizontally instead
@@ -1166,6 +1119,7 @@ html {
   position: relative;
   transition: max-height 0.25s ease;
   line-height: 1.5rem;
+  white-space: pre-wrap;
 }
 
 .expandable-text-collapsed {

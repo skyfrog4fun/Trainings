@@ -3,21 +3,13 @@ TODOs
 
 Trainings
 ---
-- [X] Create first training.
-- [X] Assign Trainer to training
-- [X] Trainer takes training
-
-- [ ] Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
-
-- [X] TrainingsPage@
-  - [ ] Date / Time not equal font color like Group, Trainer, Location, ... 
 
 - [ ] TrainingDetailPage
   - [X] URL (only one URL for create and edit)
-  - [ ] Header: [ same as in overview: Participation Status, Title   -  Training Status / Date ] --> should Participation Status be a component?
-  - [ ] Details: Gruop, Title, Location, Date/Start/End/Duration, Trainier, Status, Description, Participants 0/x (think about the order of the details)
-  - [ ] Footer: [Edit    - Take / Register]
-  - [ ] Edit -> only SuperAdmin, GroupAdmin and assigned Trainer can edit the training (validate if that is the case)
+  - [X] Header: [ same as in overview: Participation Status, Title   -  Training Status / Date ] --> should Participation Status be a component?
+  - [X] Details: Gruop, Title, Location, Date/Start/End/Duration, Trainier, Status, Description, Participants 0/x (think about the order of the details)
+  - [X] Footer: [Edit    - Take / Register]
+  - [X] Edit -> only SuperAdmin, GroupAdmin and assigned Trainer can edit the training (validate if that is the case)
 
 - [ ] Edit Training
   - [ ] Move Training Details into collapsible card -> when blocks are added, it does not consume too much space
@@ -37,6 +29,8 @@ Trainings
 - [ ] Rework TrainingsDetailPage
 - [ ] Rework TrainingsEdit -> CreateEditTrainingPage (also used for New Training)
 - [ ] Rework other pages TrainerTrainingsPage, TrainerRunPage, AttendancePage (rename to TrainingAttendancePage)
+
+- [ ] Overbooking vs. Waiting list? ... GroupAdmin should be able to overbook a training / Participants should add themself to a waiting list [Future Requirement]
 
 
 Dashboard
@@ -92,7 +86,15 @@ Done - Reworked Sections
 - [X] Groups (List, Details, Edit/New, Members)
 - [ ] Trainings (List, Details, Edit/New)
 - [ ] Trainings Plan (Plan the blocks, etc..)
-
+- [ ] My Registrations (from the Users point of view!?) -> maybe integrate that to Trainings Page (List with filter?!)
+- [ ] Dashbaord - User
+- [ ] Dashbaord - Trainer
+- [ ] Dashbaord - GroupAdmin
+- [ ] Dashbaord - SuperAdmin
+- [ ] Statistics - GroupAdmin
+- [ ] Statistics - SuperAdmin
+- [ ] Config
+- [ ] Icon / Hidden Pages (Style) / ???
 
 
 Done - Tasks
@@ -146,23 +148,12 @@ Done - Tasks
 - [X] Group Detail: rework Member Management
 - [X] Edit Group Page: use slug in URL (take care of linking from other pages
 - [X] Rework the idea how to navigate inside the groups
+- [X] Create first training.
+- [X] Assign Trainer to training
+- [X] Trainer takes training
+- [X] Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
+- [X] TrainingsPage: Date / Time not equal font color like Group, Trainer, Location, ... 
 
 
 Notes
 ---
-
-Example on how to structure the navigation for copilot chat?!
-
-/groups
-  ├── New
-  │    └── /groups/new
-  │
-  └── Group detail
-       └── /groups/{slug}
-              ├── Update
-              │    └── /groups/{slug}/edit
-              │    
-              ├── Delete
-              │
-              └── Manage Members
-                   └── on page
