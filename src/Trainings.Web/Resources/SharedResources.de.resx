@@ -1618,7 +1618,7 @@
     <value>Start</value>
   </data>
   <data name="GroupCreateEditPage_DurationMinutes" xml:space="preserve">
-    <value>Dauer (Minuten)</value>
+    <value>Dauer (Min.)</value>
   </data>
   <data name="GroupCreateEditPage_End" xml:space="preserve">
     <value>Ende</value>
@@ -1813,7 +1813,7 @@
     <value>Start *</value>
   </data>
   <data name="CreateEditTrainingPage_DurationLabel" xml:space="preserve">
-    <value>Dauer (Minuten) *</value>
+    <value>Dauer (Min.) *</value>
   </data>
   <data name="CreateEditTrainingPage_EndLabel" xml:space="preserve">
     <value>Ende</value>
@@ -2129,5 +2129,17 @@
   </data>
   <data name="TrainingDetailPage_DeleteConfirmMessageWithParticipants" xml:space="preserve">
     <value>Für dieses Training sind {0} Teilnehmer registriert. Möchtest du es wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="CreateEditTrainingPage_GroupLockedHasParticipants" xml:space="preserve">
+    <value>Dieses Training hat bereits angemeldete Teilnehmer und kann daher nicht in eine andere Gruppe verschoben werden.</value>
+  </data>
+  <data name="CreateEditTrainingPage_GroupLockedNote" xml:space="preserve">
+    <value>Dieses Training hat angemeldete Teilnehmer, daher kann die Gruppe nicht geändert werden.</value>
+  </data>
+  <data name="CreateEditTrainingPage_SpecialLocationRequired" xml:space="preserve">
+    <value>Bitte beschreibe den besonderen Ort.</value>
+  </data>
+  <data name="CreateEditTrainingPage_MeetingPointRequired" xml:space="preserve">
+    <value>Bitte gib einen Treffpunkt ein.</value>
   </data>
 </root>

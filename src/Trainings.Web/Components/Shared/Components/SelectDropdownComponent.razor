@@ -5,6 +5,7 @@
     <button type="button"
             class="app-select-toggle form-select"
             @onclick="ToggleOpen"
+            disabled="@Disabled"
             aria-haspopup="listbox"
             aria-expanded="@(_isOpen ? "true" : "false")">
         <span class="app-select-toggle-label @(IsShowingPlaceholder ? "is-placeholder" : "")">@CurrentLabel</span>
@@ -73,6 +74,7 @@
     [Parameter] public bool Searchable { get; set; }
     [Parameter] public string SearchPlaceholder { get; set; } = string.Empty;
     [Parameter] public string NoResultsText { get; set; } = string.Empty;
+    [Parameter] public bool Disabled { get; set; }
 
     private bool _isOpen;
     private string _searchText = string.Empty;
@@ -113,6 +115,11 @@
 
     private void ToggleOpen()
     {
+        if (Disabled)
+        {
+            return;
+        }
+
         _isOpen = !_isOpen;
         if (_isOpen)
         {

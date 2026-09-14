@@ -4,15 +4,6 @@ TODOs
 Trainings
 ---
 
-- [ ] TrainingDetailPage
-  - [X] URL (only one URL for create and edit)
-  - [X] Header: [ same as in overview: Participation Status, Title   -  Training Status / Date ] --> should Participation Status be a component?
-  - [X] Details: Gruop, Title, Location, Date/Start/End/Duration, Trainier, Status, Description, Participants 0/x (think about the order of the details)
-  - [X] Footer: [Edit    - Take / Register]
-  - [X] Edit -> only SuperAdmin, GroupAdmin and assigned Trainer can edit the training (validate if that is the case)
-
-- [ ] Edit Training
-  - [ ] Move Training Details into collapsible card -> when blocks are added, it does not consume too much space
 
 - [ ] Edit Training / Add Block
   - [ ] Duration and Tag on same line
@@ -84,7 +75,7 @@ Done - Reworked Sections
 - [X] User Information
 - [X] Users (List, Details, Edit/New)
 - [X] Groups (List, Details, Edit/New, Members)
-- [ ] Trainings (List, Details, Edit/New)
+- [X] Trainings (List, Details, Edit/New)
 - [ ] Trainings Plan (Plan the blocks, etc..)
 - [ ] My Registrations (from the Users point of view!?) -> maybe integrate that to Trainings Page (List with filter?!)
 - [ ] Dashbaord - User
@@ -153,7 +144,9 @@ Done - Tasks
 - [X] Trainer takes training
 - [X] Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
 - [X] TrainingsPage: Date / Time not equal font color like Group, Trainer, Location, ... 
-
-
-Notes
----
+- [X] TrainingDetailPage: URL (only one URL for create and edit)
+- [X] TrainingDetailPage: Header: [ same as in overview: Participation Status, Title   -  Training Status / Date ] --> should Participation Status be a component?
+- [X] TrainingDetailPage: Details: Gruop, Title, Location, Date/Start/End/Duration, Trainier, Status, Description, Participants 0/x (think about the order of the details)
+- [X] TrainingDetailPage: Footer: [Edit    - Take / Register]
+- [X] TrainingDetailPage: Edit -> only SuperAdmin, GroupAdmin and assigned Trainer can edit the training (validate if that is the case)
+- [X] Edit Training: Move Training Details into collapsible card -> when blocks are added, it does not consume too much space
