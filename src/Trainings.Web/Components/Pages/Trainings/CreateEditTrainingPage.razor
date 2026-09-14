@@ -219,6 +219,7 @@
     private List<GroupMembershipDto> _groupTrainers = new();
     private List<LocationDto> _availableLocations = new();
     private bool _isSuperAdmin;
+    private bool _isGroupAdmin;
     private int _currentUserId;
     private bool _isAccessDenied;
     private bool _loading = true;
@@ -250,6 +251,12 @@
 
     private string BackHref => _isEdit ? $"/trainings/{Slug}/{Id}" : "/trainings";
 
+    /// <summary>
+    /// True when the current user keeps edit access purely based on being the assigned trainer
+    /// (i.e. not a SuperAdmin nor a GroupAdmin for this training's group).
+    /// </summary>
+    private bool _isOnlyAssignedTrainer => !_isSuperAdmin && !_isGroupAdmin;
+
     protected override async Task OnInitializedAsync()
     {
         _runtimeMode = AppRuntimeModeService.GetCurrent();
@@ -270,8 +277,8 @@
             }
 
             bool isAssignedTrainer = training.TrainerId == _currentUserId;
-            bool isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, training.GroupId);
-            if (!_isSuperAdmin && !isGroupAdmin && !isAssignedTrainer)
+            _isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, training.GroupId);
+            if (!_isSuperAdmin && !_isGroupAdmin && !isAssignedTrainer)
             {
                 _isAccessDenied = true;
                 _loading = false;
@@ -515,6 +522,14 @@
                 }
 
                 await ShowToastAsync(Localizer["CreateEditTrainingPage_UpdatedSuccess"], ToastComponent.ToastVariant.Success);
+
+                if (_isOnlyAssignedTrainer && newTrainerId != _currentUserId)
+                {
+                    // The current user is no longer the assigned trainer and has no admin
+                    // rights on this training, so they lose access to the Edit page.
+                    NavigationManager.NavigateTo(BackHref);
+                    return;
+                }
             }
             else
             {
@@ -620,6 +635,14 @@
             _formModel.TrainerId = 0;
             _originalTrainerId = null;
             await ShowToastAsync(Localizer["CreateEditTrainingPage_ReleaseTrainerSuccess"], ToastComponent.ToastVariant.Success);
+
+            if (_isOnlyAssignedTrainer)
+            {
+                // Releasing themselves means they are no longer the assigned trainer;
+                // without admin rights they lose access to the Edit page.
+                NavigationManager.NavigateTo(BackHref);
+                return;
+            }
         }
         catch (Exception ex)
         {
