@@ -661,8 +661,7 @@
         _ => "bg-light text-dark border"
     };
 
-    private bool CanActOnParticipant(RegistrationDto registration) =>
-        _isAdmin || _isAssignedTrainer || registration.UserId == _userId;
+    private bool CanActOnParticipant(RegistrationDto registration) => _isAdmin;
 
     private void GoBack() => NavigationManager.NavigateTo("/trainings");
 
