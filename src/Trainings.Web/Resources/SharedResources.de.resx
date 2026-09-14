@@ -1138,10 +1138,10 @@
     <value>Trainer: Nicht zugewiesen</value>
   </data>
   <data name="TrainingDetailPage_Take" xml:space="preserve">
-    <value>Training übernehmen</value>
+    <value>Übernehmen</value>
   </data>
   <data name="TrainingDetailPage_TakeSuccess" xml:space="preserve">
-    <value>Du bist nun als Trainer für dieses Training zugewiesen.</value>
+    <value>Du bist Trainer für dieses Training.</value>
   </data>
   <data name="TrainingDetailPage_LimitedPreviewNotice" xml:space="preserve">
     <value>Die vollständigen Details dieses Trainings sind sichtbar, sobald der Trainer die Planung abgeschlossen hat.</value>
@@ -1756,7 +1756,7 @@
     <value>Übernehmen</value>
   </data>
   <data name="TrainingsPage_TakeSuccess" xml:space="preserve">
-    <value>Du bist nun als Trainer für dieses Training zugewiesen.</value>
+    <value>Du bist Trainer für dieses Training.</value>
   </data>
   <data name="TrainingsPage_TrainingDeleted" xml:space="preserve">
     <value>Training gelöscht.</value>
@@ -2141,5 +2141,17 @@
   </data>
   <data name="CreateEditTrainingPage_MeetingPointRequired" xml:space="preserve">
     <value>Bitte gib einen Treffpunkt ein.</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedNoBlocksTitle" xml:space="preserve">
+    <value>Keine Blöcke erstellt</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedNoBlocksMessage" xml:space="preserve">
+    <value>Für dieses Training wurden noch keine Blöcke erstellt. Möchtest du es trotzdem als geplant bestätigen?</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedDurationMismatchTitle" xml:space="preserve">
+    <value>Abweichende Blockdauer</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedDurationMismatchMessage" xml:space="preserve">
+    <value>Die Gesamtdauer aller Blöcke ({0} Min.) stimmt nicht mit der Trainingsdauer ({1} Min.) überein. Möchtest du trotzdem fortfahren?</value>
   </data>
 </root>

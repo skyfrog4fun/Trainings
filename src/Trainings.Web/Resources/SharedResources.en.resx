@@ -1138,10 +1138,10 @@
     <value>Trainer: Unassigned</value>
   </data>
   <data name="TrainingDetailPage_Take" xml:space="preserve">
-    <value>Take this training</value>
+    <value>Take</value>
   </data>
   <data name="TrainingDetailPage_TakeSuccess" xml:space="preserve">
-    <value>You are now assigned as the trainer for this training.</value>
+    <value>You are the trainer for this training.</value>
   </data>
   <data name="TrainingDetailPage_LimitedPreviewNotice" xml:space="preserve">
     <value>The full details of this training will be visible once the trainer has finished planning it.</value>
@@ -1756,7 +1756,7 @@
     <value>Take</value>
   </data>
   <data name="TrainingsPage_TakeSuccess" xml:space="preserve">
-    <value>You are now assigned as the trainer for this training.</value>
+    <value>You are the trainer for this training.</value>
   </data>
   <data name="TrainingsPage_TrainingDeleted" xml:space="preserve">
     <value>Training deleted.</value>
@@ -2141,5 +2141,17 @@
   </data>
   <data name="CreateEditTrainingPage_MeetingPointRequired" xml:space="preserve">
     <value>Please enter a meeting point.</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedNoBlocksTitle" xml:space="preserve">
+    <value>No blocks created</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedNoBlocksMessage" xml:space="preserve">
+    <value>This training has no blocks yet. Do you still want to confirm it as planned?</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedDurationMismatchTitle" xml:space="preserve">
+    <value>Block duration mismatch</value>
+  </data>
+  <data name="CreateEditTrainingPage_ConfirmPlannedDurationMismatchMessage" xml:space="preserve">
+    <value>The total duration of all blocks ({0} min) does not match the training duration ({1} min). Do you want to continue?</value>
   </data>
 </root>

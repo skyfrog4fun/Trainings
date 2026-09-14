@@ -192,6 +192,22 @@
     }
 </div>
 
+<ConfirmDialogComponent IsVisible="_showNoBlocksConfirm"
+                        Title="@Localizer["CreateEditTrainingPage_ConfirmPlannedNoBlocksTitle"]"
+                        Message="@Localizer["CreateEditTrainingPage_ConfirmPlannedNoBlocksMessage"]"
+                        ConfirmText="@Localizer["CreateEditTrainingPage_ConfirmPlanned"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="DoConfirmPlannedAsync"
+                        OnCancel="CancelConfirmPlannedDialog" />
+
+<ConfirmDialogComponent IsVisible="_showDurationMismatchConfirm"
+                        Title="@Localizer["CreateEditTrainingPage_ConfirmPlannedDurationMismatchTitle"]"
+                        Message="@string.Format(Localizer["CreateEditTrainingPage_ConfirmPlannedDurationMismatchMessage"].Value, _blocksSumMinutes, _formModel.DurationMinutes)"
+                        ConfirmText="@Localizer["CreateEditTrainingPage_ConfirmPlanned"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="DoConfirmPlannedAsync"
+                        OnCancel="CancelConfirmPlannedDialog" />
+
 @code {
     [Parameter] public int? Id { get; set; }
     [Parameter] public string? Slug { get; set; }
@@ -209,6 +225,9 @@
     private bool _saving;
     private int _registeredCount;
     private ToastComponent? _toast;
+    private bool _showNoBlocksConfirm;
+    private bool _showDurationMismatchConfirm;
+    private int _blocksSumMinutes;
 
     private TimeOnly? _endTime;
     private bool _durationDrivesEnd = true;
@@ -537,6 +556,40 @@
 
         try
         {
+            var blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
+            if (blocks.Count == 0)
+            {
+                _showNoBlocksConfirm = true;
+                return;
+            }
+
+            _blocksSumMinutes = blocks.Sum(b => b.PlannedDurationMinutes);
+            if (_blocksSumMinutes != _formModel.DurationMinutes)
+            {
+                _showDurationMismatchConfirm = true;
+                return;
+            }
+
+            await DoConfirmPlannedAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task DoConfirmPlannedAsync()
+    {
+        _showNoBlocksConfirm = false;
+        _showDurationMismatchConfirm = false;
+
+        if (!_persistedTrainingId.HasValue)
+        {
+            return;
+        }
+
+        try
+        {
             await TrainingService.ConfirmPlannedAsync(_persistedTrainingId.Value);
             _status = TrainingStatus.Planned;
             await ShowToastAsync(Localizer["CreateEditTrainingPage_ConfirmPlannedSuccess"], ToastComponent.ToastVariant.Success);
@@ -545,6 +598,12 @@
         {
             await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
         }
+    }
+
+    private void CancelConfirmPlannedDialog()
+    {
+        _showNoBlocksConfirm = false;
+        _showDurationMismatchConfirm = false;
     }
 
     private async Task ReleaseTrainerAsync()
