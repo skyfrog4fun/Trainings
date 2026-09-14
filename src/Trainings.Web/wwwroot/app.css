@@ -1102,6 +1102,14 @@ main {
 }
 
 /* === Utility === */
+/* Debug aid: stop the layout from shrinking past the minimum supported mobile
+   width (320px). Below this width the viewport scrolls horizontally instead
+   of squeezing content, making layout breakage obvious during resize testing. */
+html {
+  min-width: 320px;
+  overflow-x: auto;
+}
+
 .icon-display {
   font-size: 3rem;
   line-height: 1;

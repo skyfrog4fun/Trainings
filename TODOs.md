@@ -39,6 +39,10 @@ Trainings
 - [ ] Rework other pages TrainerTrainingsPage, TrainerRunPage, AttendancePage (rename to TrainingAttendancePage)
 
 
+Dashboard
+---
+- [ ] Complete rework of what is shown and displayed.
+
 General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
