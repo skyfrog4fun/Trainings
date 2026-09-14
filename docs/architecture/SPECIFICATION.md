@@ -114,7 +114,7 @@ New ──(Trainer takes it)──► InPlanning ──(Trainer confirms)──�
 | `Done`       | Attendance has been finalized and locked; no further changes to registrations or attendance are allowed. | `LockAttendanceAsync` |
 
 - **Creation (`CreateAsync`)**: A GroupAdmin (or SuperAdmin) creates a training specifying `Group`, `Date`/`Start`, `Location`, and `MaxParticipants` as mandatory fields (`Start`, `Duration`, `End` default from the Group's settings). `Trainer`, `Title`, and `Description` may be left blank — an unspecified `Title` is auto-generated (e.g. `"Training of 10.09.2026"`). If no `Trainer` is given the training starts at `New`; if a `Trainer` is pre-assigned it starts at `InPlanning`.
-- **Take (`TakeAsync`)**: Any Trainer of the training's group can self-assign to an unassigned (`New`) training, moving it to `InPlanning`.
+- **Take (`TakeAsync`)**: Any Trainer of the training's group can self-assign to an unassigned (`New`) training, moving it to `InPlanning`. Because the Trainer takes the training on their own initiative, they are also automatically registered as a participant (unlike `ReassignTrainerAsync`, where a GroupAdmin-assigned Trainer must separately register or unregister themself).
 - **Release (`ReleaseTrainerAsync`)**: The currently assigned trainer can un-assign themselves while `InPlanning` or `Planned`, moving the training back to `New`. Not allowed once `InProgress` or `Done`.
 - **Reassign (`ReassignTrainerAsync`)**: GroupAdmin/SuperAdmin can assign, change, or clear the trainer at any time before `InProgress`/`Done`.
 - **Confirm Planned (`ConfirmPlannedAsync`)**: The assigned trainer (or GroupAdmin/SuperAdmin) confirms planning is complete, moving `InPlanning` → `Planned`.
@@ -322,7 +322,7 @@ All permissions below refer to **per-group roles** from `GroupMembership` unless
 - **Actor:** Group Admin or SuperAdmin (create); Group Trainer, the assigned Trainer, Group Admin, or SuperAdmin (edit/lifecycle actions)
 - **Steps:**
   1. GroupAdmin (or SuperAdmin) creates a training with `Group`, `Location`, `Date` (mandatory); `Start`, `Duration`, `End` default from the Group; `Trainer`, `Title`, `Description` are optional.
-  2. Any Trainer of the group can **Take** an unassigned training (`New` → `InPlanning`).
+  2. Any Trainer of the group can **Take** an unassigned training (`New` → `InPlanning`), which also automatically registers them as a participant.
   3. The assigned Trainer edits the training while planning (`Trainer`, `Title`, `Description`, `MaxParticipants`, `Start`/`Duration`/`End`, `Location` restricted to the group's allowed locations including "Other").
   4. The assigned Trainer (or GroupAdmin/SuperAdmin) **releases** the trainer assignment (`InPlanning`/`Planned` → `New`) or GroupAdmin/SuperAdmin **reassigns** the trainer directly.
   5. The assigned Trainer **confirms planning is done** (`InPlanning` → `Planned`).

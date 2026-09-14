@@ -8,9 +8,10 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class TrainingService(ITrainingRepository trainingRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService, IDateTimeFormatService dateTimeFormatService) : ITrainingService
+public class TrainingService(ITrainingRepository trainingRepository, IRegistrationRepository registrationRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService, IDateTimeFormatService dateTimeFormatService) : ITrainingService
 {
     private readonly ITrainingRepository _trainingRepository = trainingRepository;
+    private readonly IRegistrationRepository _registrationRepository = registrationRepository;
     private readonly ApplicationDbContext _context = context;
     private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
     private readonly IDateTimeFormatService _dateTimeFormatService = dateTimeFormatService;
@@ -263,6 +264,26 @@ public class TrainingService(ITrainingRepository trainingRepository, Application
         training.TrainerId = trainerId;
         training.Status = TrainingStatus.InPlanning;
         await _trainingRepository.UpdateAsync(training);
+
+        // A Trainer taking a training on their own also assigns themself as a participant.
+        var existingRegistration = await _registrationRepository.GetByUserAndTrainingAsync(trainerId, trainingId);
+        if (existingRegistration == null)
+        {
+            await _registrationRepository.AddAsync(new Registration
+            {
+                UserId = trainerId,
+                TrainingId = trainingId,
+                RegisteredAt = DateTime.UtcNow,
+                Status = RegistrationStatus.Registered
+            });
+        }
+        else if (existingRegistration.Status != RegistrationStatus.Registered)
+        {
+            existingRegistration.Status = RegistrationStatus.Registered;
+            existingRegistration.RegisteredAt = DateTime.UtcNow;
+            await _registrationRepository.UpdateAsync(existingRegistration);
+        }
+
         return MapToDto(training);
     }
 

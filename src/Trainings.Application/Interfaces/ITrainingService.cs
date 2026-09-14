@@ -39,7 +39,8 @@ public interface ITrainingService
 
     /// <summary>
     /// A Trainer self-assigns to an unassigned (<see cref="TrainingStatus.New"/>) training,
-    /// moving it to <see cref="TrainingStatus.InPlanning"/>.
+    /// moving it to <see cref="TrainingStatus.InPlanning"/>. Since the Trainer is taking the
+    /// training on their own initiative, they are also automatically registered as a participant.
     /// </summary>
     Task<TrainingDto> TakeAsync(int trainingId, int trainerId, CancellationToken ct = default);
 

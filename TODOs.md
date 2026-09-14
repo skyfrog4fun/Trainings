@@ -4,10 +4,10 @@ TODOs
 Trainings
 ---
 - [X] Create first training.
-- [ ] Assign Trainer to training
-- [ ] Trainer takes training
+- [X] Assign Trainer to training
+- [X] Trainer takes training
 
-- Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
+- [ ] Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
 
 - [X] TrainingsPage@
   - [ ] Date / Time not equal font color like Group, Trainer, Location, ... 
@@ -42,7 +42,7 @@ Trainings
 General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
-
+- [ ] Add 'Profession' to UserInformation and make it only visible to User and SuperAdmin (not to GroupAdmin/Trainer). Make it mandatory and explain in small that 'It is kept private' [Treat other fields like that? Birthday? ...]
 
 
 Design User Pages
@@ -86,7 +86,8 @@ Done - Reworked Sections
 - [X] User Information
 - [X] Users (List, Details, Edit/New)
 - [X] Groups (List, Details, Edit/New, Members)
-- [ ] Plan a Training -> Create / Assign / Plan (who does what?)
+- [ ] Trainings (List, Details, Edit/New)
+- [ ] Trainings Plan (Plan the blocks, etc..)
 
 
 
