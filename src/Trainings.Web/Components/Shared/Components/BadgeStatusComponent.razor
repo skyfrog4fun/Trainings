@@ -1,0 +1,8 @@
+@* Renders the Active/Inactive status badge for a user, taking care of both localization and the correct brand coloring so callers don't need to duplicate this logic. *@
+<span class="badge @(IsActive ? "badge-status-active" : "bg-secondary")">
+    @(IsActive ? Localizer["Shared_Active"] : Localizer["UsersPage_Inactive"])
+</span>
+
+@code {
+    [Parameter] public bool IsActive { get; set; }
+}

@@ -48,18 +48,14 @@
                         <NavLink class="dropdown-item" href="" Match="NavLinkMatch.All"><i class="@AppIcons.Home me-2" aria-hidden="true"></i>@Localizer["Shared_Dashboard"]</NavLink>
                     </li>
 
-                    <AuthorizeView Policy="GroupAdmin">
+                    <AuthorizeView Policy="GroupTrainer">
                         <li>
                             <NavLink class="dropdown-item" href="groups"><i class="@AppIcons.Group me-2" aria-hidden="true"></i>@Localizer["Shared_Groups"]</NavLink>
                         </li>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="GroupAdmin">
                         <li>
                             <NavLink class="dropdown-item" href="users"><i class="@AppIcons.Users me-2" aria-hidden="true"></i>@Localizer["Shared_Users"]</NavLink>
-                        </li>
-                    </AuthorizeView>
-
-                    <AuthorizeView Policy="GroupTrainer">
-                        <li>
-                            <NavLink class="dropdown-item" href="plan-training"><i class="@AppIcons.Fire me-2" aria-hidden="true"></i>@Localizer["Shared_PlanTraining"]</NavLink>
                         </li>
                     </AuthorizeView>
 

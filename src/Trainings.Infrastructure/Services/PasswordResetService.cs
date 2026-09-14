@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
+using Trainings.Application.Services;
 using Trainings.Domain.Entities;
 using Trainings.Infrastructure.Data;
 
@@ -57,6 +58,7 @@ public class PasswordResetService(
     public async Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+        PasswordPolicy.EnsureValid(newPassword, nameof(newPassword));
 
         var resetToken = await _context.PasswordResetTokens
             .Include(t => t.User)

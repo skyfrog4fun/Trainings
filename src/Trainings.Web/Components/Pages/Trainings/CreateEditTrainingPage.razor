@@ -1,5 +1,6 @@
-﻿@page "/trainings/create"
-@page "/trainings/{Id:int}/edit"
+@page "/trainings/create"
+@page "/trainings/{Slug}/{Id:int}/edit"
+
 @namespace Trainings.Web.Components.Pages.TrainingsPages
 
 @rendermode InteractiveServer
@@ -12,170 +13,213 @@
 @inject IAppRuntimeModeService AppRuntimeModeService
 @inject IDateTimeFormatService DateTimeFormatService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
+@inject NavigationManager NavigationManager
 
 <PageTitle>@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_PageTitleNew"])</PageTitle>
 
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
 <div class="container px-2 px-md-4">
-    <div class="my-3">
-        <BackButton Href="/plan-training" />
-    </div>
-
-    <h2>@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_HeadingNew"])</h2>
-
-    @if (IsWriteBlocked)
+    @if (_loading)
     {
-        <div class="alert alert-warning">
-            @Localizer["CreateEditTrainingPage_ReadOnlyAlert"]
-        </div>
+        <LoadingSpinner />
     }
-
-    @if (_detailsCollapsed)
+    else if (_isAccessDenied)
     {
-        <div class="card mb-4">
-            <div class="card-body py-2">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="d-flex flex-wrap gap-3 text-body">
-                        <span><i class="@AppIcons.Users me-1 text-secondary" aria-hidden="true"></i><strong>@SelectedGroupName</strong></span>
-                        <span><i class="@AppIcons.User me-1 text-secondary" aria-hidden="true"></i>@SelectedTrainerName</span>
-                        <span><i class="@AppIcons.Calendar me-1 text-secondary" aria-hidden="true"></i>@FormatLocalizedDate(_date)</span>
-                        <span><i class="@AppIcons.Stopwatch me-1 text-secondary" aria-hidden="true"></i>@_durationMinutes @Localizer["Shared_MinutesUnit"]</span>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _detailsCollapsed = false">
-                        <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_EditDetails"]
-                    </button>
-                </div>
-            </div>
-        </div>
+        <div class="alert alert-danger">@Localizer["CreateEditTrainingPage_AccessDenied"]</div>
     }
     else
     {
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_GroupLabel"]</label>
-                        <select class="form-select" @bind="_groupId" @bind:after="OnGroupChangedAsync">
-                            <option value="">@Localizer["CreateEditTrainingPage_SelectGroup"]</option>
-                            @foreach (var group in _availableGroups)
-                            {
-                                <option value="@group.Id">@group.Name</option>
-                            }
-                        </select>
-                    </div>
+        <PageTitleComponent Icon="@AppIcons.Fire" Text="@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_HeadingNew"])"
+                             ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
 
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_TrainerLabel"]</label>
-                        <select class="form-select" @bind="_trainerId">
-                            <option value="0">@Localizer["CreateEditTrainingPage_SelectTrainer"]</option>
-                            @foreach (var trainer in _groupTrainers)
-                            {
-                                <option value="@trainer.UserId">@trainer.UserDisplayName</option>
-                            }
-                        </select>
-                    </div>
+        @if (IsWriteBlocked)
+        {
+            <div class="alert alert-warning">
+                @Localizer["CreateEditTrainingPage_ReadOnlyAlert"]
+            </div>
+        }
 
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_TitleLabel"]</label>
-                        <input class="form-control" @bind="_title" placeholder="@Localizer["CreateEditTrainingPage_TitlePlaceholder"]" />
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_DateLabel"]</label>
-                        <input class="form-control" type="date" @bind="_date" />
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_LocationLabel"]</label>
-                        <select class="form-select" @bind="_locationId" @bind:after="OnLocationChanged">
-                            <option value="">@Localizer["CreateEditTrainingPage_SelectLocation"]</option>
-                            @foreach (var location in _availableLocations)
-                            {
-                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} â€“ {location.CityName}")</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_MaxParticipantLabel"]</label>
-                        <input class="form-control" type="number" min="1" @bind="_capacity" />
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_StartLabel"]</label>
-                        <input class="form-control" type="time" @bind="_startTime" @bind:after="CalculateEndTime" />
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_DurationLabel"]</label>
-                        <input class="form-control" type="number" min="1" @bind="DurationMinutesValue" />
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_EndLabel"]</label>
-                        <input class="form-control" type="time" value="@_endTime" readonly />
-                    </div>
-
+        <EditForm Model="_formModel" OnValidSubmit="SaveTrainingAsync">
+            <DataAnnotationsValidator />
+            <CardComponent IsCollapsable="true" Collapsed="false" ShowFooter="true" HeaderCssClass="card-header-nowrap">
+                <Title>
                     @if (_isEdit)
                     {
-                        <div class="col-12 col-md-3">
-                            <label class="form-label">@Localizer["CreateEditTrainingPage_StatusLabel"]</label>
-                            <div class="mt-1">
-                                <span class="badge @GetStatusBadgeClass(_status) me-2">@_status</span>
-                                @if (_status != TrainingStatus.Planned)
+                        <span class="card-title-truncate" title="@_savedTitle">@_savedTitle</span>
+                    }
+                    else
+                    {
+                        @Localizer["CreateEditTrainingPage_HeadingNew"]
+                    }
+                </Title>
+                <TitleMeta>
+                    @if (_isEdit)
+                    {
+                        <TrainingStatusComponent Status="_status" />
+                    }
+                </TitleMeta>
+                <Body>
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_GroupLabel"]</label>
+                            <SelectDropdownComponent TItem="GroupDto" TValue="int?"
+                                                      @bind-Value="_formModel.GroupId"
+                                                      @bind-Value:after="OnGroupChangedAsync"
+                                                      Items="_availableGroups"
+                                                      ValueSelector="g => (int?)g.Id"
+                                                      TextSelector="@(g => g.Name)"
+                                                      PlaceholderText="@Localizer["CreateEditTrainingPage_SelectGroup"]"
+                                                      Disabled="@_isGroupLocked" />
+                            <ValidationMessage For="() => _formModel.GroupId" class="text-danger small" />
+                            @if (_isGroupLocked)
+                            {
+                                <div class="form-text">@Localizer["CreateEditTrainingPage_GroupLockedNote"]</div>
+                            }
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_TrainerLabel"]</label>
+                            <SelectDropdownComponent TItem="GroupMembershipDto" TValue="int"
+                                                      @bind-Value="_formModel.TrainerId"
+                                                      Items="_groupTrainers"
+                                                      ValueSelector="t => t.UserId"
+                                                      TextSelector="@(t => t.UserDisplayName)"
+                                                      PlaceholderText="@Localizer["CreateEditTrainingPage_SelectTrainer"]"
+                                                      PlaceholderValue="0" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_TitleLabel"]</label>
+                            <InputText class="form-control" maxlength="64" @bind-Value="_formModel.Title" />
+                        </div>
+
+                        <div class="col-12">
+                            <div class="row g-2">
+                                <div class="col-12 col-md-9 order-1">
+                                    <label class="form-label">@Localizer["CreateEditTrainingPage_LocationLabel"]</label>
+                                    <SelectDropdownComponent TItem="LocationDto" TValue="int?"
+                                                              @bind-Value="_formModel.LocationId"
+                                                              @bind-Value:after="OnLocationChanged"
+                                                              Items="_availableLocations"
+                                                              ValueSelector="l => (int?)l.Id"
+                                                              TextSelector="@(l => l.Name)"
+                                                              SubTextSelector="@(l => l.CityName)"
+                                                              PlaceholderText="@Localizer["CreateEditTrainingPage_SelectLocation"]" />
+                                    <ValidationMessage For="() => _formModel.LocationId" class="text-danger small" />
+                                </div>
+
+                                <div class="col-12 col-md-3 order-4 order-md-2">
+                                    <label class="form-label">@Localizer["CreateEditTrainingPage_MaxParticipantLabel"]</label>
+                                    <InputNumber class="form-control" @bind-Value="_formModel.Capacity" />
+                                    <ValidationMessage For="() => _formModel.Capacity" class="text-danger small" />
+                                </div>
+
+                                @if (_isSpecialLocationSelected)
                                 {
-                                    <button type="button" class="btn btn-sm btn-success" @onclick="MarkAsPlannedAsync" title="@Localizer["CreateEditTrainingPage_MarkAsPlannedTitle"]">
-                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_MarkAsPlanned"]
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="RevertToPlanningAsync" title="@Localizer["CreateEditTrainingPage_RevertToPlanning"]">
-                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_RevertToPlanning"]
-                                    </button>
+                                    <div class="col-12 col-md-6 order-2 order-md-3">
+                                        <label class="form-label">@Localizer["CreateEditTrainingPage_SpecialLocationLabel"]</label>
+                                        <InputText class="form-control" @bind-Value="_formModel.SpecialLocationDescription" />
+                                        <ValidationMessage For="() => _formModel.SpecialLocationDescription" class="text-danger small" />
+                                    </div>
+                                    <div class="col-12 col-md-6 order-3 order-md-4">
+                                        <label class="form-label">@Localizer["CreateEditTrainingPage_MeetingPointLabel"]</label>
+                                        <InputText class="form-control" @bind-Value="_formModel.MeetingPoint" />
+                                        <ValidationMessage For="() => _formModel.MeetingPoint" class="text-danger small" />
+                                    </div>
                                 }
                             </div>
                         </div>
-                    }
 
-                    @if (_isSpecialLocationSelected)
-                    {
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["CreateEditTrainingPage_SpecialLocationLabel"]</label>
-                            <input class="form-control" @bind="_specialLocationDescription" />
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_DateLabel"]</label>
+                            <InputDate class="form-control" @bind-Value="_formModel.Date" />
+                            <ValidationMessage For="() => _formModel.Date" class="text-danger small" />
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">@Localizer["CreateEditTrainingPage_MeetingPointLabel"]</label>
-                            <input class="form-control" @bind="_meetingPoint" />
-                        </div>
-                    }
 
-                    <div class="col-12">
-                        <label class="form-label">@Localizer["CreateEditTrainingPage_DescriptionLabel"]</label>
-                        <textarea class="form-control" rows="3" @bind="_description" placeholder="@Localizer["CreateEditTrainingPage_DescriptionPlaceholder"]"></textarea>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_StartLabel"]</label>
+                            <input class="form-control" type="time" @bind="_formModel.StartTime" @bind:after="OnStartTimeChanged" />
+                            <ValidationMessage For="() => _formModel.StartTime" class="text-danger small" />
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_DurationLabel"]</label>
+                            <InputNumber class="form-control" @bind-Value="_formModel.DurationMinutes" @bind-Value:after="CalculateEndTime" />
+                            <ValidationMessage For="() => _formModel.DurationMinutes" class="text-danger small" />
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_EndLabel"]</label>
+                            <input class="form-control" type="time" @bind="_endTime" @bind:after="OnEndTimeChanged" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["CreateEditTrainingPage_DescriptionLabel"]</label>
+                            <InputTextArea class="form-control" rows="3" maxlength="512" @bind-Value="_formModel.Description" />
+                        </div>
                     </div>
-                </div>
+                </Body>
+                <Footer>
+                    <div class="d-flex flex-column gap-2">
+                        @if (_showConfirmPlanned || _showReleaseTrainer)
+                        {
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                @if (_showConfirmPlanned)
+                                {
+                                    <button type="button" class="btn btn-success" @onclick="ConfirmPlannedAsync" title="@Localizer["CreateEditTrainingPage_ConfirmPlannedTitle"]">
+                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ConfirmPlanned"]
+                                    </button>
+                                }
+                                @if (_showReleaseTrainer)
+                                {
+                                    <button type="button" class="btn btn-outline-secondary ms-auto" @onclick="ReleaseTrainerAsync" title="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]">
+                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ReleaseTrainer"]
+                                    </button>
+                                }
+                            </div>
+                            <hr class="my-1" />
+                        }
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <button type="submit" class="btn btn-primary" disabled="@(_saving || IsWriteBlocked)">
+                                <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                                <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
+                            </button>
+                        </div>
+                    </div>
+                </Footer>
+            </CardComponent>
+        </EditForm>
 
-                <div class="mt-3">
-                    <ActionAlert IsSuccess="false" Message="@_error" />
-                </div>
-
-                <button type="button" class="btn btn-primary btn-lg w-100 mt-3" @onclick="Save" disabled="@IsWriteBlocked">
-                    @(_isEdit ? Localizer["CreateEditTrainingPage_UpdateButton"] : Localizer["CreateEditTrainingPage_CreateButton"])
-                </button>
-            </div>
-        </div>
-    }
-
-    <ActionAlert IsSuccess="@_actionSuccess" Message="@_actionResult" />
-
-    @if (_persistedTrainingId.HasValue)
-    {
-        <TrainingBlockEditor TrainingId="@_persistedTrainingId.Value" IsWriteBlocked="@IsWriteBlocked" />
+        @if (_persistedTrainingId.HasValue)
+        {
+            <TrainingBlockEditor TrainingId="@_persistedTrainingId.Value" IsWriteBlocked="@IsWriteBlocked" />
+        }
     }
 </div>
 
+<ConfirmDialogComponent IsVisible="_showNoBlocksConfirm"
+                        Title="@Localizer["CreateEditTrainingPage_ConfirmPlannedNoBlocksTitle"]"
+                        Message="@Localizer["CreateEditTrainingPage_ConfirmPlannedNoBlocksMessage"]"
+                        ConfirmText="@Localizer["CreateEditTrainingPage_ConfirmPlanned"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="DoConfirmPlannedAsync"
+                        OnCancel="CancelConfirmPlannedDialog" />
+
+<ConfirmDialogComponent IsVisible="_showDurationMismatchConfirm"
+                        Title="@Localizer["CreateEditTrainingPage_ConfirmPlannedDurationMismatchTitle"]"
+                        Message="@string.Format(Localizer["CreateEditTrainingPage_ConfirmPlannedDurationMismatchMessage"].Value, _blocksSumMinutes, _formModel.DurationMinutes)"
+                        ConfirmText="@Localizer["CreateEditTrainingPage_ConfirmPlanned"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        OnConfirm="DoConfirmPlannedAsync"
+                        OnCancel="CancelConfirmPlannedDialog" />
+
 @code {
     [Parameter] public int? Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
 
     private bool _isEdit => Id.HasValue;
     private int? _persistedTrainingId;
@@ -184,48 +228,44 @@
     private List<GroupMembershipDto> _groupTrainers = new();
     private List<LocationDto> _availableLocations = new();
     private bool _isSuperAdmin;
+    private bool _isGroupAdmin;
     private int _currentUserId;
+    private bool _isAccessDenied;
+    private bool _loading = true;
+    private bool _saving;
+    private int _registeredCount;
+    private ToastComponent? _toast;
+    private bool _showNoBlocksConfirm;
+    private bool _showDurationMismatchConfirm;
+    private int _blocksSumMinutes;
 
-    private string _title = string.Empty;
-    private string _description = string.Empty;
-    private int _capacity = 10;
-    private DateTime _date = DateTime.Today.AddDays(7);
-    private TimeOnly? _startTime = new(19, 0);
-    private int _durationMinutes = 90;
-    private string _endTime = "20:30";
+    private TimeOnly? _endTime;
+    private bool _durationDrivesEnd = true;
     private TrainingStatus _status = TrainingStatus.New;
-    private string? _error;
-    private int _trainerId;
-    private int? _groupId;
-    private int? _locationId;
-    private string _specialLocationDescription = string.Empty;
-    private string _meetingPoint = string.Empty;
+    private int? _originalTrainerId;
+    private string _savedTitle = string.Empty;
+    private TrainingFormModel _formModel = new();
 
-    private bool _actionSuccess;
-    private string? _actionResult;
-    private bool _detailsCollapsed;
     private CultureInfo _groupCulture = CultureInfo.InvariantCulture;
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
+    private bool _isGroupLocked => _isEdit && _registeredCount > 0;
+    private bool _showConfirmPlanned => _isEdit && _status == TrainingStatus.InPlanning && _formModel.TrainerId > 0;
+    private bool _showReleaseTrainer => _isEdit && _originalTrainerId == _currentUserId && _status is TrainingStatus.InPlanning or TrainingStatus.Planned;
     private bool _isSpecialLocationSelected =>
-        _locationId.HasValue &&
+        _formModel.LocationId.HasValue &&
         _availableLocations.Any(x =>
-            x.Id == _locationId.Value &&
+            x.Id == _formModel.LocationId.Value &&
             (x.Name.Equals("Special", StringComparison.OrdinalIgnoreCase) ||
              x.Name.Equals("Outside", StringComparison.OrdinalIgnoreCase)));
 
-    private string SelectedGroupName => _availableGroups.FirstOrDefault(g => g.Id == _groupId)?.Name ?? string.Empty;
-    private string SelectedTrainerName => _groupTrainers.FirstOrDefault(t => t.UserId == _trainerId)?.UserDisplayName ?? string.Empty;
+    private string BackHref => _isEdit ? $"/trainings/{Slug}/{Id}" : "/trainings";
 
-    private int DurationMinutesValue
-    {
-        get => _durationMinutes;
-        set
-        {
-            _durationMinutes = value;
-            CalculateEndTime();
-        }
-    }
+    /// <summary>
+    /// True when the current user keeps edit access purely based on being the assigned trainer
+    /// (i.e. not a SuperAdmin nor a GroupAdmin for this training's group).
+    /// </summary>
+    private bool _isOnlyAssignedTrainer => !_isSuperAdmin && !_isGroupAdmin;
 
     protected override async Task OnInitializedAsync()
     {
@@ -234,83 +274,123 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         _currentUserId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
-        _trainerId = _currentUserId;
-        _isSuperAdmin = user.HasClaim("SuperAdmin", "true");
-
-        var managedGroupIds = user.Claims
-            .Where(c => c.Type.StartsWith("GroupRole::", StringComparison.Ordinal) && (c.Value == "Admin" || c.Value == "Trainer"))
-            .Select(c => int.TryParse(c.Type["GroupRole::".Length..], out var groupId) ? groupId : 0)
-            .Where(groupId => groupId > 0)
-            .ToHashSet();
-
-        var groups = await GroupService.GetAllAsync();
-        _availableGroups = _isSuperAdmin
-            ? groups.Where(g => g.IsActive).OrderBy(g => g.Name).ToList()
-            : groups.Where(g => g.IsActive && managedGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
+        _isSuperAdmin = AuthorizationHelper.IsSuperAdmin(user);
 
         if (_isEdit && Id.HasValue)
         {
+            var training = await TrainingService.GetByIdAsync(Id.Value);
+            if (training is null)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            bool isAssignedTrainer = training.TrainerId == _currentUserId;
+            _isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, training.GroupId);
+            if (!_isSuperAdmin && !_isGroupAdmin && !isAssignedTrainer)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            var managedGroupIds = AuthorizationHelper.GetGroupIdsForRole(user, "Admin")
+                .Concat(AuthorizationHelper.GetGroupIdsForRole(user, "Trainer"))
+                .ToHashSet();
+
+            var groups = await GroupService.GetAllAsync();
+            _availableGroups = _isSuperAdmin
+                ? groups.Where(g => g.IsActive).OrderBy(g => g.Name).ToList()
+                : groups.Where(g => g.IsActive && managedGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
+
             _persistedTrainingId = Id.Value;
-            await LoadTraining(Id.Value);
+            await LoadTraining(training);
         }
-        else if (_availableGroups.Count == 1)
+        else
         {
-            _groupId = _availableGroups[0].Id;
-            await OnGroupChangedAsync();
+            // Only a GroupAdmin (or SuperAdmin) may create a training.
+            var adminGroupIds = AuthorizationHelper.GetGroupIdsForRole(user, "Admin").ToHashSet();
+            if (!_isSuperAdmin && adminGroupIds.Count == 0)
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            var groups = await GroupService.GetAllAsync();
+            _availableGroups = _isSuperAdmin
+                ? groups.Where(g => g.IsActive).OrderBy(g => g.Name).ToList()
+                : groups.Where(g => g.IsActive && adminGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
+
+            if (!string.IsNullOrWhiteSpace(Slug))
+            {
+                var slugGroup = _availableGroups.FirstOrDefault(g => string.Equals(g.Slug, Slug, StringComparison.OrdinalIgnoreCase));
+                if (slugGroup != null)
+                {
+                    _formModel.GroupId = slugGroup.Id;
+                    await OnGroupChangedAsync();
+                }
+            }
+            else if (_availableGroups.Count == 1)
+            {
+                _formModel.GroupId = _availableGroups[0].Id;
+                await OnGroupChangedAsync();
+            }
         }
 
         CalculateEndTime();
+        _loading = false;
     }
 
-    private async Task LoadTraining(int id)
+    private async Task LoadTraining(TrainingDto training)
     {
-        var training = await TrainingService.GetByIdAsync(id);
-        if (training is null)
-        {
-            return;
-        }
-
-        _title = training.Title;
-        _description = training.Description;
-        _capacity = training.Capacity;
-        _date = training.DateTime.Date;
-        _startTime = TimeOnly.FromDateTime(training.DateTime);
+        _formModel.Title = training.Title;
+        _savedTitle = training.Title;
+        _formModel.Description = training.Description;
+        _formModel.Capacity = training.Capacity;
+        _formModel.Date = training.DateTime.Date;
+        _formModel.StartTime = TimeOnly.FromDateTime(training.DateTime);
         _status = training.Status;
-        _groupId = training.GroupId;
-        _trainerId = training.TrainerId;
-        _locationId = training.LocationId;
-        _specialLocationDescription = training.SpecialLocationDescription ?? string.Empty;
-        _meetingPoint = training.MeetingPoint ?? string.Empty;
+        _formModel.GroupId = training.GroupId;
+        _formModel.TrainerId = training.TrainerId ?? 0;
+        _originalTrainerId = training.TrainerId;
+        _formModel.LocationId = training.LocationId;
+        _formModel.SpecialLocationDescription = training.SpecialLocationDescription ?? string.Empty;
+        _formModel.MeetingPoint = training.MeetingPoint ?? string.Empty;
+        _registeredCount = training.RegisteredCount;
+        _formModel.HasParticipants = _registeredCount > 0;
+        _formModel.OriginalGroupId = training.GroupId;
 
         await OnGroupChangedAsync();
 
         var selectedGroup = _availableGroups.FirstOrDefault(g => g.Id == training.GroupId);
-        _durationMinutes = training.DurationMinutes ?? selectedGroup?.DurationMinutes ?? 90;
+        _formModel.DurationMinutes = training.DurationMinutes ?? selectedGroup?.DurationMinutes ?? 90;
         CalculateEndTime();
 
     }
 
     private async Task OnGroupChangedAsync()
     {
-        if (!_groupId.HasValue)
+        if (!_formModel.GroupId.HasValue)
         {
             _groupTrainers.Clear();
             _availableLocations.Clear();
-            _locationId = null;
+            _formModel.LocationId = null;
             return;
         }
 
-        var selectedGroup = _availableGroups.FirstOrDefault(g => g.Id == _groupId.Value);
+        var selectedGroup = _availableGroups.FirstOrDefault(g => g.Id == _formModel.GroupId.Value);
         if (selectedGroup is null)
         {
             return;
         }
 
-        _availableLocations = (await LocationService.GetByGroupIdAsync(_groupId.Value))
+        _availableLocations = (await LocationService.GetByGroupIdAsync(_formModel.GroupId.Value))
             .Where(l => l.IsActive)
             .ToList();
 
-        _groupTrainers = (await GroupService.GetMembersAsync(_groupId.Value))
+        _groupTrainers = (await GroupService.GetMembersAsync(_formModel.GroupId.Value))
             .Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive && (m.Role == GroupMemberRole.Trainer || m.Role == GroupMemberRole.Admin))
             .GroupBy(m => m.UserId)
             .Select(x => x.First())
@@ -321,159 +401,180 @@
         {
             if (selectedGroup.Weekday.HasValue)
             {
-                _date = await TrainingService.GetNextAvailableDateForGroupAsync(
+                _formModel.Date = await TrainingService.GetNextAvailableDateForGroupAsync(
                     selectedGroup.Id, selectedGroup.Weekday.Value);
             }
 
             if (selectedGroup.StartTime.HasValue)
             {
-                _startTime = selectedGroup.StartTime.Value;
+                _formModel.StartTime = selectedGroup.StartTime.Value;
             }
 
             if (selectedGroup.DurationMinutes.HasValue)
             {
-                _durationMinutes = selectedGroup.DurationMinutes.Value;
+                _formModel.DurationMinutes = selectedGroup.DurationMinutes.Value;
             }
 
             if (selectedGroup.MaxParticipants.HasValue)
             {
-                _capacity = selectedGroup.MaxParticipants.Value;
+                _formModel.Capacity = selectedGroup.MaxParticipants.Value;
             }
 
-            _locationId = selectedGroup.LocationId ?? _availableLocations.FirstOrDefault()?.Id;
-
-            if (_groupTrainers.Any(t => t.UserId == _currentUserId))
-            {
-                _trainerId = _currentUserId;
-            }
-            else if (_groupTrainers.Any())
-            {
-                _trainerId = _groupTrainers[0].UserId;
-            }
+            _formModel.LocationId = selectedGroup.LocationId ?? _availableLocations.FirstOrDefault()?.Id;
         }
 
         _groupCulture = DateTimeFormatService.GetCultureForCountry(selectedGroup.CountryCode);
+        _formModel.IsSpecialLocationSelected = _isSpecialLocationSelected;
         CalculateEndTime();
     }
 
     private void OnLocationChanged()
     {
+        _formModel.IsSpecialLocationSelected = _isSpecialLocationSelected;
         if (!_isSpecialLocationSelected)
         {
-            _specialLocationDescription = string.Empty;
-            _meetingPoint = string.Empty;
+            _formModel.SpecialLocationDescription = string.Empty;
+            _formModel.MeetingPoint = string.Empty;
         }
     }
 
     private void CalculateEndTime()
     {
-        var start = _startTime ?? new TimeOnly(19, 0);
-
-        var end = start.AddMinutes(_durationMinutes <= 0 ? 1 : _durationMinutes);
-        _endTime = end.ToString("HH:mm");
+        _durationDrivesEnd = true;
+        RecomputeEndFromDuration();
     }
 
-    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
+    private void RecomputeEndFromDuration()
     {
-        TrainingStatus.Planned => "bg-success",
-        TrainingStatus.Planning => "bg-warning text-dark",
-        _ => "bg-secondary"
-    };
-
-    private string FormatLocalizedDate(DateTime value) =>
-        value.ToString("d", _groupCulture);
-
-    private string FormatLocalizedTime(TimeOnly? value)
-    {
-        var time = value ?? new TimeOnly(19, 0);
-        return time.ToString("t", _groupCulture);
-    }
-
-    private string FormatLocalizedEndTime()
-    {
-        if (!TimeOnly.TryParse(_endTime, out var parsed))
+        if (!_formModel.StartTime.HasValue || !_formModel.DurationMinutes.HasValue || _formModel.DurationMinutes.Value <= 0)
         {
-            return _endTime;
-        }
-
-        return parsed.ToString("t", _groupCulture);
-    }
-
-    private async Task Save()
-    {
-        _error = null;
-        _actionResult = null;
-
-        if (!_groupId.HasValue)
-        {
-            _error = Localizer["CreateEditTrainingPage_GroupRequired"];
+            _endTime = null;
             return;
         }
 
-        if (_trainerId <= 0)
+        _endTime = _formModel.StartTime.Value.AddMinutes(_formModel.DurationMinutes.Value);
+    }
+
+    private void OnStartTimeChanged()
+    {
+        if (_durationDrivesEnd)
         {
-            _error = Localizer["CreateEditTrainingPage_TrainerRequired"];
+            RecomputeEndFromDuration();
+        }
+        else
+        {
+            RecomputeDurationFromEnd();
+        }
+    }
+
+    private void OnEndTimeChanged()
+    {
+        _durationDrivesEnd = false;
+        RecomputeDurationFromEnd();
+    }
+
+    private void RecomputeDurationFromEnd()
+    {
+        if (!_formModel.StartTime.HasValue || !_endTime.HasValue)
+        {
+            _formModel.DurationMinutes = null;
             return;
         }
 
-        var start = _startTime ?? new TimeOnly(19, 0);
+        var minutes = (_endTime.Value.ToTimeSpan() - _formModel.StartTime.Value.ToTimeSpan()).TotalMinutes;
+        if (minutes <= 0)
+        {
+            minutes += 24 * 60; // end time crosses midnight relative to start
+        }
+
+        _formModel.DurationMinutes = (int)minutes;
+    }
+
+    private void GoBack() => NavigationManager.NavigateTo(BackHref);
+
+    private async Task SaveTrainingAsync()
+    {
+        _saving = true;
 
         try
         {
-            var dateTime = _date.Date.AddHours(start.Hour).AddMinutes(start.Minute);
+            var start = _formModel.StartTime!.Value;
+            var dateTime = _formModel.Date!.Value.Date.AddHours(start.Hour).AddMinutes(start.Minute);
+            var newTrainerId = _formModel.TrainerId == 0 ? (int?)null : _formModel.TrainerId;
 
             if (_isEdit && Id.HasValue)
             {
                 await TrainingService.UpdateAsync(new UpdateTrainingDto
                 {
                     Id = Id.Value,
-                    Title = _title,
-                    Description = _description,
-                    LocationId = _locationId,
-                    SpecialLocationDescription = string.IsNullOrWhiteSpace(_specialLocationDescription) ? null : _specialLocationDescription,
-                    MeetingPoint = string.IsNullOrWhiteSpace(_meetingPoint) ? null : _meetingPoint,
-                    Capacity = _capacity,
+                    Title = _formModel.Title,
+                    Description = _formModel.Description,
+                    LocationId = _formModel.LocationId,
+                    SpecialLocationDescription = string.IsNullOrWhiteSpace(_formModel.SpecialLocationDescription) ? null : _formModel.SpecialLocationDescription,
+                    MeetingPoint = string.IsNullOrWhiteSpace(_formModel.MeetingPoint) ? null : _formModel.MeetingPoint,
+                    Capacity = _formModel.Capacity!.Value,
                     DateTime = dateTime,
-                    DurationMinutes = _durationMinutes,
+                    DurationMinutes = _formModel.DurationMinutes,
                     Status = _status,
-                    TrainerId = _trainerId,
-                    GroupId = _groupId
+                    TrainerId = _originalTrainerId,
+                    GroupId = _formModel.GroupId!.Value
                 });
-                _actionSuccess = true;
-                _actionResult = Localizer["CreateEditTrainingPage_UpdatedSuccess"];
+
+                if (newTrainerId != _originalTrainerId)
+                {
+                    await TrainingService.ReassignTrainerAsync(Id.Value, newTrainerId);
+                    _originalTrainerId = newTrainerId;
+                }
+
+                var refreshed = await TrainingService.GetByIdAsync(Id.Value);
+                if (refreshed != null)
+                {
+                    _status = refreshed.Status;
+                    _savedTitle = refreshed.Title;
+                }
+
+                await ShowToastAsync(Localizer["CreateEditTrainingPage_UpdatedSuccess"], ToastComponent.ToastVariant.Success);
+
+                if (_isOnlyAssignedTrainer && newTrainerId != _currentUserId)
+                {
+                    // The current user is no longer the assigned trainer and has no admin
+                    // rights on this training, so they lose access to the Edit page.
+                    NavigationManager.NavigateTo(BackHref);
+                    return;
+                }
             }
             else
             {
                 var created = await TrainingService.CreateAsync(new CreateTrainingDto
                 {
-                    Title = _title,
-                    Description = _description,
-                    LocationId = _locationId,
-                    SpecialLocationDescription = string.IsNullOrWhiteSpace(_specialLocationDescription) ? null : _specialLocationDescription,
-                    MeetingPoint = string.IsNullOrWhiteSpace(_meetingPoint) ? null : _meetingPoint,
-                    Capacity = _capacity,
+                    Title = _formModel.Title,
+                    Description = _formModel.Description,
+                    LocationId = _formModel.LocationId,
+                    SpecialLocationDescription = string.IsNullOrWhiteSpace(_formModel.SpecialLocationDescription) ? null : _formModel.SpecialLocationDescription,
+                    MeetingPoint = string.IsNullOrWhiteSpace(_formModel.MeetingPoint) ? null : _formModel.MeetingPoint,
+                    Capacity = _formModel.Capacity!.Value,
                     DateTime = dateTime,
-                    DurationMinutes = _durationMinutes,
-                    TrainerId = _trainerId,
-                    GroupId = _groupId
+                    DurationMinutes = _formModel.DurationMinutes,
+                    TrainerId = newTrainerId,
+                    GroupId = _formModel.GroupId!.Value
                 });
 
                 _persistedTrainingId = created.Id;
-                _detailsCollapsed = true;
-                _actionSuccess = true;
-                _actionResult = Localizer["CreateEditTrainingPage_CreatedSuccess"];
+                NavigationManager.NavigateTo("/trainings");
                 return;
             }
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
-            _actionSuccess = false;
-            _actionResult = string.Format(Localizer["CreateEditTrainingPage_SaveFailed"].Value, ex.Message);
+            await ShowToastAsync(string.Format(Localizer["CreateEditTrainingPage_SaveFailed"].Value, ex.Message), ToastComponent.ToastVariant.Danger);
+        }
+        finally
+        {
+            _saving = false;
         }
     }
 
-    private async Task MarkAsPlannedAsync()
+    private async Task ConfirmPlannedAsync()
     {
         if (!_persistedTrainingId.HasValue)
         {
@@ -482,18 +583,57 @@
 
         try
         {
-            await TrainingService.SetStatusAsync(_persistedTrainingId.Value, TrainingStatus.Planned);
+            var blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
+            if (blocks.Count == 0)
+            {
+                _showNoBlocksConfirm = true;
+                return;
+            }
+
+            _blocksSumMinutes = blocks.Sum(b => b.PlannedDurationMinutes);
+            if (_blocksSumMinutes != _formModel.DurationMinutes)
+            {
+                _showDurationMismatchConfirm = true;
+                return;
+            }
+
+            await DoConfirmPlannedAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
+        }
+    }
+
+    private async Task DoConfirmPlannedAsync()
+    {
+        _showNoBlocksConfirm = false;
+        _showDurationMismatchConfirm = false;
+
+        if (!_persistedTrainingId.HasValue)
+        {
+            return;
+        }
+
+        try
+        {
+            await TrainingService.ConfirmPlannedAsync(_persistedTrainingId.Value);
             _status = TrainingStatus.Planned;
-            _actionSuccess = true;
-            _actionResult = Localizer["CreateEditTrainingPage_MarkedAsPlannedSuccess"];
+            await ShowToastAsync(Localizer["CreateEditTrainingPage_ConfirmPlannedSuccess"], ToastComponent.ToastVariant.Success);
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
+            await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
         }
     }
 
-    private async Task RevertToPlanningAsync()
+    private void CancelConfirmPlannedDialog()
+    {
+        _showNoBlocksConfirm = false;
+        _showDurationMismatchConfirm = false;
+    }
+
+    private async Task ReleaseTrainerAsync()
     {
         if (!_persistedTrainingId.HasValue)
         {
@@ -502,16 +642,31 @@
 
         try
         {
-            await TrainingService.SetStatusAsync(_persistedTrainingId.Value, TrainingStatus.Planning);
-            _status = TrainingStatus.Planning;
-            _actionSuccess = true;
-            _actionResult = Localizer["CreateEditTrainingPage_RevertedToPlanningSuccess"];
+            await TrainingService.ReleaseTrainerAsync(_persistedTrainingId.Value, _currentUserId);
+            _status = TrainingStatus.New;
+            _formModel.TrainerId = 0;
+            _originalTrainerId = null;
+            await ShowToastAsync(Localizer["CreateEditTrainingPage_ReleaseTrainerSuccess"], ToastComponent.ToastVariant.Success);
+
+            if (_isOnlyAssignedTrainer)
+            {
+                // Releasing themselves means they are no longer the assigned trainer;
+                // without admin rights they lose access to the Edit page.
+                NavigationManager.NavigateTo(BackHref);
+                return;
+            }
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
+            await ShowToastAsync(ex.Message, ToastComponent.ToastVariant.Danger);
         }
     }
 
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
+        }
+    }
 }
-

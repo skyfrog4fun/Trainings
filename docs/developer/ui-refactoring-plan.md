@@ -1,5 +1,9 @@
 # UI Refactoring Plan
 
+> Forward-looking structural/behavioral conventions for pages are now documented in
+> `docs/developer/razor-page-style-guide.md`. Use that guide (not this historical log)
+> when refactoring pages going forward.
+
 ## Decisions Made
 
 - All CSS consolidated into a single `app.css`; `MainLayout.razor.css` and `ReconnectModal.razor.css` deleted

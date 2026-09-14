@@ -1,0 +1,54 @@
+@* Renders a checkbox list for assigning/requesting membership in a set of groups. Shared by
+   pages that let a user pick zero or more groups (e.g. user creation/edit, self-registration). *@
+
+@if (Groups.Count == 0)
+{
+    @if (EmptyContent is not null)
+    {
+        @EmptyContent
+    }
+    else
+    {
+        <div class="form-text text-muted">@EmptyText</div>
+    }
+}
+else
+{
+    <div class="border rounded p-2 @ListCssClass">
+        @foreach (var group in Groups)
+        {
+            <div class="form-check d-flex align-items-center gap-2 mb-2">
+                <input class="form-check-input form-check-input-flex flex-shrink-0"
+                       type="checkbox"
+                       id="@(IdPrefix)-@group.Id"
+                       checked="@SelectedGroupIds.Contains(group.Id)"
+                       @onchange="e => ToggleGroupAsync(group.Id, (bool)(e.Value ?? false))" />
+                <label class="form-check-label mb-0" for="@(IdPrefix)-@group.Id">@group.Name</label>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<GroupDto> Groups { get; set; } = Array.Empty<GroupDto>();
+    [Parameter, EditorRequired] public HashSet<int> SelectedGroupIds { get; set; } = new();
+    [Parameter] public EventCallback<HashSet<int>> SelectedGroupIdsChanged { get; set; }
+    [Parameter] public string IdPrefix { get; set; } = "grp";
+    [Parameter] public string? EmptyText { get; set; }
+    [Parameter] public RenderFragment? EmptyContent { get; set; }
+    [Parameter] public string? ListCssClass { get; set; }
+
+    private async Task ToggleGroupAsync(int groupId, bool selected)
+    {
+        if (selected)
+        {
+            SelectedGroupIds.Add(groupId);
+        }
+        else
+        {
+            SelectedGroupIds.Remove(groupId);
+        }
+
+        await SelectedGroupIdsChanged.InvokeAsync(SelectedGroupIds);
+    }
+}

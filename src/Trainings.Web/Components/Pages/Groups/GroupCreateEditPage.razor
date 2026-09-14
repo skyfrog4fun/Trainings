@@ -1,5 +1,5 @@
 @page "/groups/new"
-@page "/groups/{Id:int}/edit"
+@page "/groups/{Slug}/edit"
 
 @rendermode InteractiveServer
 
@@ -8,231 +8,314 @@
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject ICountryService CountryService
-@inject IDateTimeFormatService DateTimeFormatService
+@inject IUserService UserService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
 
 <PageTitle>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</PageTitle>
 
 <div class="container px-2 px-md-4">
-    <div class="my-3">
-        <BackButton Href="/groups" />
-    </div>
-
     @if (_loading)
     {
         <LoadingSpinner />
     }
+    else if (_isAccessDenied)
+    {
+        <div class="alert alert-danger">@Localizer["GroupCreateEditPage_AccessDenied"]</div>
+    }
     else
     {
-        <h2>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</h2>
+        <PageTitleComponent Icon="@AppIcons.Group" Text="@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])"
+                             ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
 
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row g-2">
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
-                        <input class="form-control" @bind="_formName" placeholder='@Localizer["GroupCreateEditPage_GroupNamePlaceholder"]' />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
-                        <input class="form-control" @bind="_formSlug" placeholder='@Localizer["GroupCreateEditPage_SlugPlaceholder"]' />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" @bind="_formIsActive" id="grpActive" />
-                            <label class="form-check-label" for="grpActive">@Localizer["GroupCreateEditPage_Active"]</label>
+        <EditForm Model="_formModel" OnValidSubmit="SaveGroupAsync">
+            <DataAnnotationsValidator />
+            <CardComponent IsCollapsable="false" ShowFooter="true">
+                <Title>@(_isEdit ? Localizer["GroupCreateEditPage_EditGroup"] : Localizer["GroupCreateEditPage_CreateGroup"])</Title>
+                <Body>
+                    <div class="row g-2">
+                        @if (_isEdit)
+                        {
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Name" />
+                                <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
+                                <div class="input-group">
+                                    <InputText class="form-control" @bind-Value="_formModel.Slug" />
+                                    <button type="button" class="btn btn-outline-secondary" title="@Localizer["GroupCreateEditPage_SuggestSlug"]" @onclick="SuggestSlug">
+                                        <i class="@AppIcons.CreateSlug" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <ValidationMessage For="() => _formModel.Slug" class="text-danger small" />
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label d-none d-md-block">&nbsp;</label>
+                                <div class="form-check mt-md-2">
+                                    <InputCheckbox class="form-check-input" @bind-Value="_formModel.IsActive" id="grpActive" />
+                                    <label class="form-check-label" for="grpActive">@Localizer["GroupCreateEditPage_Active"]</label>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Name"]</label>
+                                <InputText class="form-control" @bind-Value="_formModel.Name" />
+                                <ValidationMessage For="() => _formModel.Name" class="text-danger small" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["GroupCreateEditPage_Slug"]</label>
+                                <div class="input-group">
+                                    <InputText class="form-control" @bind-Value="_formModel.Slug" />
+                                    <button type="button" class="btn btn-outline-secondary" title="@Localizer["GroupCreateEditPage_SuggestSlug"]" @onclick="SuggestSlug">
+                                        <i class="@AppIcons.CreateSlug" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <ValidationMessage For="() => _formModel.Slug" class="text-danger small" />
+                            </div>
+                        }
+
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_Description"]</label>
+                            <InputTextArea class="form-control" rows="2" @bind-Value="_formModel.Description" />
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_Country"]</label>
+                            <SelectDropdownComponent TItem="CountryDto" TValue="int?"
+                                                     @bind-Value="_formModel.CountryId"
+                                                     @bind-Value:after="OnCountryChanged"
+                                                     Items="_countries"
+                                                     ValueSelector="c => (int?)c.Id"
+                                                     TextSelector="@(c => c.Name)" />
+                            <ValidationMessage For="() => _formModel.CountryId" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_Location"]</label>
+                            <SelectDropdownComponent TItem="LocationDto" TValue="int?"
+                                                     @bind-Value="_formModel.LocationId"
+                                                     Items="FilteredLocations"
+                                                     ValueSelector="l => (int?)l.Id"
+                                                     TextSelector="@(l => l.Name)"
+                                                     SubTextSelector="@(l => l.CityName)" />
+                            <ValidationMessage For="() => _formModel.LocationId" class="text-danger small" />
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_MaxParticipants"]</label>
+                            <InputNumber class="form-control" @bind-Value="_formModel.MaxParticipants" />
+                            <ValidationMessage For="() => _formModel.MaxParticipants" class="text-danger small" />
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_Weekday"]</label>
+                            <SelectDropdownComponent TItem="DayOfWeek" TValue="DayOfWeek?"
+                                                     @bind-Value="_formModel.Weekday"
+                                                     @bind-Value:after="CalculateGroupEndTime"
+                                                     Items="_weekdays"
+                                                     ValueSelector="d => (DayOfWeek?)d"
+                                                     TextSelector="@GetWeekdayLabel"
+                                                     PlaceholderText="@Localizer["GroupCreateEditPage_SelectDay"]" />
+                            <ValidationMessage For="() => _formModel.Weekday" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_Start"]</label>
+                            <input class="form-control" type="time" @bind="_formModel.StartTime" @bind:after="CalculateGroupEndTime" />
+                            <ValidationMessage For="() => _formModel.StartTime" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_DurationMinutes"]</label>
+                            <InputNumber class="form-control" @bind-Value="_formModel.DurationMinutes" @bind-Value:after="CalculateGroupEndTime" />
+                            <ValidationMessage For="() => _formModel.DurationMinutes" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">@Localizer["GroupCreateEditPage_End"]</label>
+                            <input class="form-control" type="time" value="@_formEndTime" readonly />
                         </div>
                     </div>
-
-                    <div class="col-12">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Description"]</label>
-                        <textarea class="form-control" rows="2" @bind="_formDescription"></textarea>
+                </Body>
+                <Footer>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary" disabled="@_saving"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
+                        <button type="button" class="btn btn-secondary" @onclick="GoBack"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</button>
                     </div>
-
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Location"]</label>
-                        <select class="form-select" @bind="_formLocationId">
-                            <option value="">@Localizer["GroupCreateEditPage_SelectLocation"]</option>
-                            @foreach (var location in _formLocations)
-                            {
-                                <option value="@location.Id">@(string.IsNullOrWhiteSpace(location.CityName) ? location.Name : $"{location.Name} â€“ {location.CityName}")</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_MaxParticipants"]</label>
-                        <input class="form-control" type="number" min="1" @bind="_formMaxParticipants" />
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Weekday"]</label>
-                        <select class="form-select" @bind="_formWeekday" @bind:after="CalculateGroupEndTime">
-                            <option value="">@Localizer["GroupCreateEditPage_SelectDay"]</option>
-                            @foreach (var day in Enum.GetValues<DayOfWeek>())
-                            {
-                                <option value="@day">@day</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Start"]</label>
-                        <input class="form-control" type="time" @bind="_formStartTime" @bind:after="CalculateGroupEndTime" />
-                        <div class="form-text">@Localizer["GroupCreateEditPage_Localized"]: @FormatLocalizedTime(_formStartTime)</div>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_DurationMinutes"]</label>
-                        <input class="form-control" type="number" min="1" @bind="FormDurationMinutesValue" />
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_End"]</label>
-                        <input class="form-control" type="time" value="@_formEndTime" readonly />
-                        <div class="form-text">@Localizer["GroupCreateEditPage_Localized"]: @FormatLocalizedEndTime()</div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">@Localizer["GroupCreateEditPage_Country"]</label>
-                        <select class="form-select" @bind="_formCountryId">
-                            <option value="">@Localizer["GroupCreateEditPage_SelectCountry"]</option>
-                            @foreach (var country in _countries)
-                            {
-                                <option value="@country.Id">@country.Code - @country.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mt-3">
-                    <button class="btn btn-primary me-2" @onclick="SaveGroupAsync" disabled="@_saving"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]</button>
-                    <a href="/groups" class="btn btn-secondary"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]</a>
-                </div>
-                <div class="mt-2">
-                    <ActionAlert IsSuccess="false" Message="@_formError" />
-                </div>
-            </div>
+                </Footer>
+            </CardComponent>
+        </EditForm>
+        <div class="mt-2">
+            <ActionAlert IsSuccess="false" Message="@_formError" />
         </div>
     }
 </div>
 
 @code {
-    [Parameter] public int? Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
 
     private List<LocationDto> _locations = new();
-    private List<LocationDto> _formLocations = new();
     private List<CountryDto> _countries = new();
+    private readonly List<DayOfWeek> _weekdays = Enum.GetValues<DayOfWeek>().ToList();
     private List<int> _allowedLocationIds = new();
     private bool _loading = true;
     private bool _saving;
-    private string _formName = string.Empty;
-    private string _formSlug = string.Empty;
-    private string _formDescription = string.Empty;
-    private bool _formIsActive = true;
-    private DayOfWeek? _formWeekday;
-    private int? _formLocationId;
-    private TimeOnly? _formStartTime = new(19, 0);
-    private int? _formDurationMinutes = 90;
+    private bool _isAccessDenied;
     private string _formEndTime = "20:30";
-    private int? _formMaxParticipants = 10;
-    private int? _formCountryId;
     private string? _formError;
+    private GroupFormModel _formModel = new();
+    private int _groupId;
 
-    private bool _isEdit => Id.HasValue;
+    private bool _isEdit => !string.IsNullOrEmpty(Slug);
 
-    private int? FormDurationMinutesValue
-    {
-        get => _formDurationMinutes;
-        set
-        {
-            _formDurationMinutes = value;
-            CalculateGroupEndTime();
-        }
-    }
+    private List<LocationDto> FilteredLocations => _formModel.CountryId is null
+        ? new List<LocationDto>()
+        : _locations.Where(l => l.CountryId == _formModel.CountryId).ToList();
 
     protected override async Task OnInitializedAsync()
     {
-        _locations = (await LocationService.GetAllAsync())
-            .Where(l => l.IsActive && !l.IsSystemWide)
-            .OrderBy(l => l.Name)
-            .ToList();
-        _countries = (await CountryService.GetAllAsync()).ToList();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
 
         if (_isEdit)
         {
-            await LoadForEditAsync();
+            var group = await GroupService.GetBySlugAsync(Slug!);
+            if (group is null)
+            {
+                _formError = Localizer["GroupCreateEditPage_GroupNotFound"];
+                _loading = false;
+                return;
+            }
+
+            _groupId = group.Id;
+
+            if (!AuthorizationHelper.IsGroupAdmin(authState.User, _groupId))
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            _locations = (await LocationService.GetAllAsync())
+                .Where(l => l.IsActive && !l.IsSystemWide)
+                .OrderBy(l => l.Name)
+                .ToList();
+            _countries = (await CountryService.GetAllAsync()).ToList();
+
+            LoadForEdit(group);
         }
         else
         {
-            _formLocations = _locations;
+            if (!AuthorizationHelper.IsSuperAdmin(authState.User))
+            {
+                _isAccessDenied = true;
+                _loading = false;
+                return;
+            }
+
+            _locations = (await LocationService.GetAllAsync())
+                .Where(l => l.IsActive && !l.IsSystemWide)
+                .OrderBy(l => l.Name)
+                .ToList();
+            _countries = (await CountryService.GetAllAsync()).ToList();
+
+            _formModel.CountryId = await GetCurrentUserCountryIdAsync();
             CalculateGroupEndTime();
         }
 
         _loading = false;
     }
 
-    private async Task LoadForEditAsync()
+    private async Task<int?> GetCurrentUserCountryIdAsync()
     {
-        if (!Id.HasValue)
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = int.TryParse(authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+        if (userId <= 0)
         {
-            return;
+            return null;
         }
 
-        var group = await GroupService.GetByIdAsync(Id.Value);
-        if (group is null)
+        var user = await UserService.GetByIdAsync(userId);
+        return user?.CountryId;
+    }
+
+    private void SuggestSlug()
+    {
+        _formModel.Slug = GenerateSlugPreview(_formModel.Name);
+    }
+
+    private static string GenerateSlugPreview(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
         {
-            _formError = Localizer["GroupCreateEditPage_GroupNotFound"];
-            return;
+            return string.Empty;
         }
 
-        _formName = group.Name;
-        _formSlug = group.Slug;
-        _formDescription = group.Description ?? string.Empty;
-        _formIsActive = group.IsActive;
-        _formWeekday = group.Weekday;
-        _formLocationId = group.LocationId;
-        _formStartTime = group.StartTime ?? new TimeOnly(19, 0);
-        _formDurationMinutes = group.DurationMinutes ?? 90;
-        _formCountryId = group.CountryId;
-        _formMaxParticipants = group.MaxParticipants;
+        string slug = name.ToLowerInvariant().Replace("ä", "ae").Replace("ö", "oe").Replace("ü", "ue").Replace("ß", "ss");
+
+        var builder = new System.Text.StringBuilder(slug.Length);
+        foreach (char c in slug)
+        {
+            if (char.IsLetterOrDigit(c))
+            {
+                builder.Append(c);
+            }
+            else
+            {
+                builder.Append('-');
+            }
+        }
+        slug = builder.ToString();
+
+        while (slug.Contains("--"))
+        {
+            slug = slug.Replace("--", "-");
+        }
+
+        return slug.Trim('-');
+    }
+
+    private void OnCountryChanged()
+    {
+        if (_formModel.LocationId is not null && !FilteredLocations.Any(l => l.Id == _formModel.LocationId))
+        {
+            _formModel.LocationId = null;
+        }
+    }
+
+    private void LoadForEdit(GroupDto group)
+    {
+        _formModel = new GroupFormModel
+        {
+            Name = group.Name,
+            Slug = group.Slug,
+            Description = group.Description ?? string.Empty,
+            IsActive = group.IsActive,
+            Weekday = group.Weekday,
+            LocationId = group.LocationId,
+            StartTime = group.StartTime ?? new TimeOnly(19, 0),
+            DurationMinutes = group.DurationMinutes ?? 90,
+            CountryId = group.CountryId,
+            MaxParticipants = group.MaxParticipants
+        };
         _allowedLocationIds = group.AllowedLocationIds;
-        _formLocations = group.AllowedLocationIds.Count > 0
-            ? _locations.Where(l => group.AllowedLocationIds.Contains(l.Id)).ToList()
-            : _locations;
         CalculateGroupEndTime();
     }
 
     private void CalculateGroupEndTime()
     {
-        var duration = _formDurationMinutes.GetValueOrDefault(0);
+        var duration = _formModel.DurationMinutes.GetValueOrDefault(0);
         if (duration <= 0)
         {
             duration = 1;
         }
 
-        var start = _formStartTime ?? new TimeOnly(19, 0);
+        var start = _formModel.StartTime ?? new TimeOnly(19, 0);
         _formEndTime = start.AddMinutes(duration).ToString("HH:mm");
     }
 
-    private CultureInfo GetSelectedGroupCulture()
-    {
-        var countryCode = _countries.FirstOrDefault(c => c.Id == _formCountryId)?.Code
-            ?? DateTimeFormatService.GetDefaultCountry();
-        return DateTimeFormatService.GetCultureForCountry(countryCode);
-    }
+    private static string GetWeekdayLabel(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);
 
-    private string FormatLocalizedTime(TimeOnly? value)
-    {
-        var time = value ?? new TimeOnly(19, 0);
-        return time.ToString("t", GetSelectedGroupCulture());
-    }
-
-    private string FormatLocalizedEndTime()
-    {
-        if (!TimeOnly.TryParse(_formEndTime, out var parsed))
-        {
-            return _formEndTime;
-        }
-
-        return parsed.ToString("t", GetSelectedGroupCulture());
-    }
+    private void GoBack() => NavigationManager.NavigateTo(_isEdit ? $"/groups/{_formModel.Slug}" : "/groups");
 
     private async Task SaveGroupAsync()
     {
@@ -241,19 +324,20 @@
 
         try
         {
+            GroupDto savedGroup;
             if (!_isEdit)
             {
-                await GroupService.CreateAsync(new CreateGroupDto
+                savedGroup = await GroupService.CreateAsync(new CreateGroupDto
                 {
-                    Name = _formName,
-                    Slug = string.IsNullOrWhiteSpace(_formSlug) ? null : _formSlug,
-                    Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription,
-                    Weekday = _formWeekday,
-                    LocationId = _formLocationId,
-                    StartTime = _formStartTime,
-                    DurationMinutes = _formDurationMinutes,
-                    MaxParticipants = _formMaxParticipants,
-                    CountryId = _formCountryId,
+                    Name = _formModel.Name,
+                    Slug = string.IsNullOrWhiteSpace(_formModel.Slug) ? null : _formModel.Slug,
+                    Description = string.IsNullOrWhiteSpace(_formModel.Description) ? null : _formModel.Description,
+                    Weekday = _formModel.Weekday,
+                    LocationId = _formModel.LocationId,
+                    StartTime = _formModel.StartTime,
+                    DurationMinutes = _formModel.DurationMinutes,
+                    MaxParticipants = _formModel.MaxParticipants,
+                    CountryId = _formModel.CountryId,
                     AllowedLocationIds = []
                 });
             }
@@ -261,22 +345,23 @@
             {
                 await GroupService.UpdateAsync(new UpdateGroupDto
                 {
-                    Id = Id!.Value,
-                    Name = _formName,
-                    Slug = string.IsNullOrWhiteSpace(_formSlug) ? null : _formSlug,
-                    Description = string.IsNullOrWhiteSpace(_formDescription) ? null : _formDescription,
-                    Weekday = _formWeekday,
-                    LocationId = _formLocationId,
-                    StartTime = _formStartTime,
-                    DurationMinutes = _formDurationMinutes,
-                    MaxParticipants = _formMaxParticipants,
-                    CountryId = _formCountryId,
+                    Id = _groupId,
+                    Name = _formModel.Name,
+                    Slug = string.IsNullOrWhiteSpace(_formModel.Slug) ? null : _formModel.Slug,
+                    Description = string.IsNullOrWhiteSpace(_formModel.Description) ? null : _formModel.Description,
+                    Weekday = _formModel.Weekday,
+                    LocationId = _formModel.LocationId,
+                    StartTime = _formModel.StartTime,
+                    DurationMinutes = _formModel.DurationMinutes,
+                    MaxParticipants = _formModel.MaxParticipants,
+                    CountryId = _formModel.CountryId,
                     AllowedLocationIds = _allowedLocationIds,
-                    IsActive = _formIsActive
+                    IsActive = _formModel.IsActive
                 });
+                savedGroup = (await GroupService.GetByIdAsync(_groupId))!;
             }
 
-            NavigationManager.NavigateTo("/groups");
+            NavigationManager.NavigateTo($"/groups/{savedGroup.Slug}");
         }
         catch (Exception ex)
         {

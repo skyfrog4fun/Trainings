@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
+using Trainings.Application.Services;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;
@@ -29,6 +30,7 @@ public class UserRegistrationService(
     public async Task<RegistrationResultDto> RegisterAsync(RegisterRequestDto dto, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+        PasswordPolicy.EnsureValid(dto.Password, nameof(dto.Password));
 
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email, ct))
         {
@@ -46,6 +48,7 @@ public class UserRegistrationService(
             Birthday = dto.Birthday,
             Mobile = dto.Mobile,
             City = dto.City,
+            CountryId = dto.CountryId,
             WelcomeMessage = dto.WelcomeMessage,
             IsActive = true,
             CreationDate = DateTime.UtcNow,
@@ -87,27 +90,65 @@ public class UserRegistrationService(
         string confirmLink = BuildConfirmLink(confirmToken.Token);
         var confirmationEmail = await _emailService.SendEmailConfirmationAsync(user.Email, confirmLink, ct);
 
-        var admins = await _context.Users
+        var superAdminEmails = await _context.Users
             .Where(u => u.Role == UserRole.SuperAdmin)
+            .Select(u => u.Email)
             .ToListAsync(ct);
 
         var requestedGroups = await _context.Groups
             .Where(g => dto.RequestedGroupIds.Contains(g.Id))
-            .Select(g => g.Name)
+            .Select(g => new { g.Id, g.Name })
             .ToListAsync(ct);
-        string requestedGroupsLabel = requestedGroups.Count == 0 ? "No group selected" : string.Join(", ", requestedGroups);
         string userDetailsLink = BuildUserDetailsLink(user.Id);
 
-        foreach (var admin in admins)
+        if (requestedGroups.Count == 0)
         {
-            await _emailService.SendAdminNewParticipantNotificationAsync(
-                admin.Email,
-                user.DisplayName,
-                user.Email,
-                requestedGroupsLabel,
-                userDetailsLink,
-                ct);
+            // No group was requested: notify SuperAdmins only.
+            if (superAdminEmails.Count > 0)
+            {
+                await _emailService.SendSuperAdminNewParticipantNotificationAsync(
+                    superAdminEmails,
+                    user.DisplayName,
+                    user.Email,
+                    userDetailsLink,
+                    ct);
+            }
         }
+        else
+        {
+            foreach (var group in requestedGroups)
+            {
+                var groupAdminEmails = await _context.GroupMemberships
+                    .Where(gm =>
+                        gm.GroupId == group.Id &&
+                        gm.Role == GroupMemberRole.Admin &&
+                        gm.Status == GroupMembershipStatus.Approved &&
+                        gm.IsActive)
+                    .Select(gm => gm.User.Email)
+                    .ToListAsync(ct);
+
+                // If the group has no admins, fall back to notifying SuperAdmins directly
+                // for this group so the registration is not silently unnoticed.
+                var toEmails = groupAdminEmails.Count > 0 ? groupAdminEmails : superAdminEmails;
+                var ccEmails = groupAdminEmails.Count > 0 ? superAdminEmails : [];
+
+                if (toEmails.Count == 0)
+                {
+                    continue;
+                }
+
+                await _emailService.SendGroupAdminNewParticipantNotificationAsync(
+                    toEmails,
+                    ccEmails,
+                    user.DisplayName,
+                    user.Email,
+                    group.Id,
+                    group.Name,
+                    userDetailsLink,
+                    ct);
+            }
+        }
+
 
         return new RegistrationResultDto
         {
@@ -167,7 +208,10 @@ public class UserRegistrationService(
         var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
-        user.EntryDate = DateTime.UtcNow;
+        if (user.EntryDate is null)
+        {
+            user.EntryDate = DateTime.UtcNow;
+        }
 
         var managedGroupIds = GetManagedGroupIds();
         var pendingMemberships = await _context.GroupMemberships

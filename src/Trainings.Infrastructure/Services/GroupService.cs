@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Trainings.Application.DTOs;
+using Trainings.Application.Exceptions;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
@@ -7,10 +10,18 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class GroupService(ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService) : IGroupService
+public class GroupService(
+    ApplicationDbContext context,
+    IAppRuntimeModeService appRuntimeModeService,
+    IEmailService emailService,
+    IHttpContextAccessor httpContextAccessor,
+    IConfiguration configuration) : IGroupService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly string _baseUrl = configuration["App:BaseUrl"]?.TrimEnd('/') ?? string.Empty;
 
     public async Task<IEnumerable<GroupDto>> GetAllAsync(CancellationToken ct = default)
     {
@@ -139,11 +150,28 @@ public class GroupService(ApplicationDbContext context, IAppRuntimeModeService a
         _appRuntimeModeService.EnsureWriteAllowed();
 
         var group = await _context.Groups.FindAsync([id], ct);
-        if (group != null)
+        if (group == null)
         {
-            _context.Groups.Remove(group);
-            await _context.SaveChangesAsync(ct);
+            return;
         }
+
+        var hasActiveMembers = await _context.GroupMemberships
+            .AnyAsync(gm => gm.GroupId == id && gm.Status == GroupMembershipStatus.Approved && gm.IsActive, ct);
+        var hasScheduledTrainings = await _context.Trainings
+            .AnyAsync(t => t.GroupId == id && t.DateTime > DateTime.UtcNow, ct);
+
+        if (hasActiveMembers || hasScheduledTrainings)
+        {
+            var reason = hasActiveMembers && hasScheduledTrainings
+                ? GroupDeletionBlockReason.Both
+                : hasActiveMembers
+                    ? GroupDeletionBlockReason.HasActiveMembers
+                    : GroupDeletionBlockReason.HasScheduledTrainings;
+            throw new GroupDeletionBlockedException(reason, $"Group {id} cannot be deleted: {reason}.");
+        }
+
+        _context.Groups.Remove(group);
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task UpdateAllowedGroupsForLocationAsync(int locationId, List<int> groupIds, CancellationToken ct = default)
@@ -225,24 +253,69 @@ public class GroupService(ApplicationDbContext context, IAppRuntimeModeService a
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
+        var membership = await _context.GroupMemberships
+            .Include(gm => gm.User)
+            .Include(gm => gm.Group)
+            .FirstOrDefaultAsync(gm => gm.Id == membershipId, ct)
             ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
         membership.Status = GroupMembershipStatus.Approved;
         membership.ApprovedAt = DateTime.UtcNow;
         membership.IsActive = true;
+
+        if (membership.User is not null && membership.User.EntryDate is null)
+        {
+            membership.User.EntryDate = DateTime.UtcNow;
+        }
+
         await _context.SaveChangesAsync(ct);
+
+        if (membership.User is not null && membership.Group is not null)
+        {
+            await _emailService.SendGroupMembershipApprovedAsync(
+                membership.User.Email,
+                membership.UserId,
+                membership.GroupId,
+                membership.Group.Name,
+                BuildAppBaseUrl(),
+                ct);
+        }
     }
 
     public async Task DeclineMemberAsync(int membershipId, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
 
-        var membership = await _context.GroupMemberships.FindAsync([membershipId], ct)
+        var membership = await _context.GroupMemberships
+            .Include(gm => gm.User)
+            .Include(gm => gm.Group)
+            .FirstOrDefaultAsync(gm => gm.Id == membershipId, ct)
             ?? throw new InvalidOperationException($"Membership {membershipId} not found.");
         membership.Status = GroupMembershipStatus.Declined;
         membership.DeclinedAt = DateTime.UtcNow;
         membership.IsActive = false;
         await _context.SaveChangesAsync(ct);
+
+        if (membership.User is not null && membership.Group is not null)
+        {
+            await _emailService.SendGroupMembershipDeclinedAsync(
+                membership.User.Email,
+                membership.UserId,
+                membership.GroupId,
+                membership.Group.Name,
+                BuildAppBaseUrl(),
+                ct);
+        }
+    }
+
+    private string BuildAppBaseUrl()
+    {
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is not null && request.Host.HasValue)
+        {
+            return $"{request.Scheme}://{request.Host.Value}";
+        }
+
+        return _baseUrl;
     }
 
     public async Task<IEnumerable<GroupDto>> GetGroupsForUserAsync(int userId, CancellationToken ct = default)
@@ -318,7 +391,8 @@ public class GroupService(ApplicationDbContext context, IAppRuntimeModeService a
         AllowedLocationIds = [.. group.AllowedLocations.Select(x => x.LocationId)],
         IsActive = group.IsActive,
         CreatedAt = group.CreatedAt,
-        MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved)
+        MemberCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Approved),
+        PendingRequestCount = group.Memberships.Count(m => m.Status == GroupMembershipStatus.Pending)
     };
 
     private static GroupMembershipDto MapMembershipToDto(GroupMembership gm) => new()

@@ -1,21 +1,36 @@
 TODOs
 ---
 
+Trainings
+---
+
+
+- [ ] Edit Training / Add Block
+  - [ ] Duration and Tag on same line
+  - [ ] Rework Tags (which one are really used?!) -> delete the unused once. Put them into enumeration and have resx file trainslation to have it in DE/EN. Add a new Tag 'Other' for blocks that do not fit into any of the other tags.
+
+- [ ] Align all edit buttons => style: icon: fa-solid fa-pen-to-square / class: btn btn-sm btn-primary
+    - [ ] change on /config/locations
+    - [ ] change on /trainings/{group-slug}/{id}
+
+- [ ] LocationsPage: URL /config/locations -> change to /locations
+
+- [ ] Overbooking vs. Waiting list? ... GroupAdmin should be able to overbook a training / Participants should add themself to a waiting list [Future Requirement]
+
+
+Dashboard
+---
+- [ ] Complete rework of what is shown and displayed.
+
 General
 ---
 - [ ] Check all pages for wrong texts from Localizer (e.g. in UserInformation, ...)
+- [ ] Add 'Profession' to UserInformation and make it only visible to User and SuperAdmin (not to GroupAdmin/Trainer). Make it mandatory and explain in small that 'It is kept private' [Treat other fields like that? Birthday? ...]
 
-Design Groups Pages
+
+Design User Pages
 ---
-- [ ] Rework the idea how to navigate inside the groups
-    - [ ] all pages uses {slug} for navigation
-    - [ ] overview (list) -> new | details of group -> edit | add member | delete
-        - [ ] overview (/groups): list of groups (only possibility to go into details (/groups/{slug}) => see detail at end of this file
-- [ ] 
-- [ ] Groups (/groups):
-- [ ] Create Group (/groups/new):
-- [ ] Edit Group (/groups/2/edit):
-- [ ] Group Members (/groups/{slug}/members):
+- [ ] Users: sorting (by name?), searching (by name?), paging (10, 20, 50, 100)
 
 Mail
 ---
@@ -39,17 +54,41 @@ Others
 
 Ideas
 ---
+- [ ] Search for users on page /users: add search by email, first name, last name, username, etc.
+- [ ] Search for trainings on page /trainings: add search by title, group, trainer, location, date, etc.
 - [ ] Overview: Create an overview documentation that shows what page links to what other pages. This will help developers understand the navigation flow and dependencies between pages.
+- [ ] Documentation: create an authorization overview. What role can do what
+- [ ] How can a user request to participate in a new group? [UserInformation -> extend section 'Group Memberships']
+
+
 
 ---
 
-Done - General
+Done - Reworked Sections
+---
+- [X] Locations
+- [X] User Information
+- [X] Users (List, Details, Edit/New)
+- [X] Groups (List, Details, Edit/New, Members)
+- [X] Trainings (List, Details, Edit/New)
+- [ ] Trainings Plan (Plan the blocks, etc..)
+- [ ] Trainings Run
+- [ ] Trainings Attendance
+- [ ] My Registrations (from the Users point of view!?) -> maybe integrate that to Trainings Page (List with filter?!)
+- [ ] Dashbaord - User
+- [ ] Dashbaord - Trainer
+- [ ] Dashbaord - GroupAdmin
+- [ ] Dashbaord - SuperAdmin
+- [ ] Statistics - GroupAdmin
+- [ ] Statistics - SuperAdmin
+- [ ] Config
+- [ ] Icon / Hidden Pages (Style) / ???
+
+
+Done - Tasks
 ---
 - [X] Navigation: When user is not signed in (in /register), the navigation shows "dashboard", "user information" and "logout" links. These should not be visible when the user is not signed in.
 - [X] Version number: fix the version number on /login page.
-
-Done - Localization
----
 - [X] Localizer: Localizer is part of _Imports.razor. We should remove it from each page since it is already imported globally.
 - [X] Ressources: Rework the resources by adding [Page]_[Resource] naming convention to avoid conflicts and improve organization.
 - [X] Replace all text on all pages with a created from the resx file.
@@ -59,23 +98,52 @@ Done - Localization
 - [X] Check if all found pattern [Page]_[Resource] on pages are available on RESX files. If not, add them to the RESX file.
 - [X] Remove all text on RESX files that not not match the pattern [Page]_[Resource] and/or are not used on any page.
 - [X] Properly translate all the text on the RESX files from EN to DE.
-
-
-Notes
----
-
-Example on how to structure the navigation for copilot chat?!
-
-/groups
-  ├── New
-  │    └── /groups/new
-  │
-  └── Group detail
-       └── /groups/{slug}
-              ├── Update
-              │    └── /groups/{slug}/update
-              │    
-              ├── Delete
-              │
-              └── Manage Members
-                   └── /groups/{slug}/members
+- [X] LocationsPage: Group Assignment (Access): in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
+- [X] LocationsPage: Visualization: in DE the 'weekdays' are not written in selected language. for DE it shows 'Tuesday'
+- [X] LocationsPage: Visualization of dropdown fixed (coloring, etc...)
+- [X] Edit User: visually style the form to make it more user-friendly and intuitive. (Issue: Dark Mode color of placeholder)
+- [X] UserInformation: Reworked
+- [X] User Detail (/users/{id}) - Admin View: rework
+- [X] User Edit (/users/{id}/edit) - Admin View: rework
+- [X] Back button on 'Create User' has a strange green when pressed and hold
+- [X] Method 'ValidatePassword' still used on UserInformationPage?
+- [X] Is validation redundant? UserFormModel.cs vs. PasswordGenerator.cs
+- [X] Think about: UserFormModel.cs Localization Strings? ... should they come from Shared?!
+- [X] UserInformationPage: Gender has no German translation
+- [X] UserInformationPage: fix localization in Group Memberships section (EN/DE)
+- [X] Registration: Send mail to GroupAdmin for new registrations
+- [X] User Overview (/users) - Admin View: rework
+- [X] Location / New Location: Country has 'Country - Code'. Change to show only country name.
+- [X] User / Create User: pre select country and set it to the country of the signed in user.
+- [X] User / Create User: Groups are shown even country is not selected. I should only see groups from the selected country.
+- [X] User / Create User: SuperAdmin creates a new user and clicks on 'Verify'. Mail is displayed in browser in dev environment. When clicking the link, the user is shown as 'Email verified: Yes', but has no entry date.
+- [X] User: when will Entry date be set?!
+- [X] UserDetailPage: rework the layout of the page to make it more user-friendly and intuitive.
+- [X] date format on user detail page
+- [X] Fix: Filter Country List -> Name only
+- [X] Fix: Filter Locations -> "Dorfmatt - Halle 1 - Rotkreuz" -> better separation of location name and city (city => subtext?)
+- [X] Fix: Filter days => rename to all day or every day ... could be a group on Saturday (which is not weekday)
+- [X] Fix: Align Filter buttons (apply, clear) on /users & /groups => apply on left, clear on right (like on /locations)
+- [X] Group: fix heigth -> truncate description if too big
+- [X] Bug: missing Text?! on /groups (as Trainer) -> redirects to /Account/AccessDenied and NotFoundPage_heading / NotFoundPage_message not found
+- [X] Check last changes (GIT changes from 07.09.2026)
+- [X] Group / New Group: Locations shows strange sign in selection 'Location name â€“ City'
+- [X] Group / New Group: remove Localized time below 'Start' and 'End'
+- [X] Group / New Group: Country list should show name only, remove 'Country - Code'
+- [X] Group / New Group: select country first (pre select from XY) and then show only locations from that country
+- [X] Group / List: large group description needs to be handled better so that each card has equal height and the text is truncated with '...' if it exceeds the card height. This will improve the visual consistency of the group list.
+- [X] Continue to rework Group Detail
+- [X] Group Detail: rework Member Management
+- [X] Edit Group Page: use slug in URL (take care of linking from other pages
+- [X] Rework the idea how to navigate inside the groups
+- [X] Create first training.
+- [X] Assign Trainer to training
+- [X] Trainer takes training
+- [X] Define a min with for all devices / webpage => check iphone 15 ++ what on the android side? ... find a min pixel width for all devices that make sense.
+- [X] TrainingsPage: Date / Time not equal font color like Group, Trainer, Location, ... 
+- [X] TrainingDetailPage: URL (only one URL for create and edit)
+- [X] TrainingDetailPage: Header: [ same as in overview: Participation Status, Title   -  Training Status / Date ] --> should Participation Status be a component?
+- [X] TrainingDetailPage: Details: Gruop, Title, Location, Date/Start/End/Duration, Trainier, Status, Description, Participants 0/x (think about the order of the details)
+- [X] TrainingDetailPage: Footer: [Edit    - Take / Register]
+- [X] TrainingDetailPage: Edit -> only SuperAdmin, GroupAdmin and assigned Trainer can edit the training (validate if that is the case)
+- [X] Edit Training: Move Training Details into collapsible card -> when blocks are added, it does not consume too much space

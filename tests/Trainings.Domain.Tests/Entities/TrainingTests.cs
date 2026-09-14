@@ -50,4 +50,22 @@ public class TrainingTests
         training.AttendanceLocked.Should().BeTrue();
         training.AttendanceLockedAt.Should().Be(new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc));
     }
+
+    [Fact]
+    public void TrainingCanBeCreatedWithoutTrainer()
+    {
+        var training = new Training { TrainerId = null };
+        training.TrainerId.Should().BeNull();
+        training.Trainer.Should().BeNull();
+    }
+
+    [Fact]
+    public void TrainingStatusHasExpectedLifecycleValues()
+    {
+        ((int)TrainingStatus.New).Should().Be(0);
+        ((int)TrainingStatus.InPlanning).Should().Be(1);
+        ((int)TrainingStatus.Planned).Should().Be(2);
+        ((int)TrainingStatus.InProgress).Should().Be(3);
+        ((int)TrainingStatus.Done).Should().Be(4);
+    }
 }

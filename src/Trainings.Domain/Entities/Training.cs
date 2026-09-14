@@ -16,9 +16,9 @@ public class Training
     public int Capacity { get; set; }
     public TrainingStatus Status { get; set; } = TrainingStatus.New;
     public bool IsActive { get; set; } = true;
-    public int TrainerId { get; set; }
-    public User Trainer { get; set; } = null!;
-    public int? GroupId { get; set; }
+    public int? TrainerId { get; set; }
+    public User? Trainer { get; set; }
+    public int GroupId { get; set; }
     public Group? Group { get; set; }
     public bool AttendanceLocked { get; set; }
     public DateTime? AttendanceLockedAt { get; set; }

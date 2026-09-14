@@ -21,6 +21,7 @@ public class GroupDto
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public int MemberCount { get; set; }
+    public int PendingRequestCount { get; set; }
 }
 
 public class CreateGroupDto
