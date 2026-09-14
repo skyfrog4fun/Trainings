@@ -20,16 +20,16 @@
                 @if (!IsCollapsed(training.Id))
                 {
                     <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-center gap-2 text-muted small">
+                        <div class="d-flex justify-content-between align-items-center gap-2 small">
                             <span class="text-truncate"><i class="@AppIcons.Calendar me-1" aria-hidden="true"></i>@FormatTrainingDate(training)</span>
                             <span class="text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@FormatDuration(training.DurationMinutes)</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
                             <span class="text-truncate"><i class="@AppIcons.Group me-1" aria-hidden="true"></i>@(training.GroupName ?? "-")</span>
-                            <span class="text-truncate text-end"><i class="@AppIcons.Location me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")</span>
+                            <span class="text-truncate text-end @(training.TrainerId.HasValue ? "" : "text-muted")"><i class="@AppIcons.Trainer me-1" aria-hidden="true"></i>@(training.TrainerId.HasValue ? training.TrainerName : Localizer["TrainingList_Unassigned"].Value)</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
-                            <span class="text-truncate"><i class="@AppIcons.Trainer me-1" aria-hidden="true"></i>@(training.TrainerId.HasValue ? training.TrainerName : Localizer["TrainingList_Unassigned"].Value)</span>
+                            <span class="text-truncate"><i class="@AppIcons.Location me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")@(string.IsNullOrWhiteSpace(training.LocationCity) ? "" : $", {training.LocationCity}")</span>
                             <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@training.RegisteredCount/@training.Capacity</span>
                         </div>
                         <div class="small text-muted text-truncate mt-2">@training.Description</div>

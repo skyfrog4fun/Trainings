@@ -405,6 +405,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         Description = t.Description,
         LocationId = t.LocationId,
         LocationName = t.Location?.Name,
+        LocationCity = t.Location?.CityName,
         SpecialLocationDescription = t.SpecialLocationDescription,
         MeetingPoint = t.MeetingPoint,
         DateTime = t.DateTime,

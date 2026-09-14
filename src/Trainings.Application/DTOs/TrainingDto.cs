@@ -9,6 +9,7 @@ public class TrainingDto
     public string Description { get; set; } = string.Empty;
     public int? LocationId { get; set; }
     public string? LocationName { get; set; }
+    public string? LocationCity { get; set; }
     public string? SpecialLocationDescription { get; set; }
     public string? MeetingPoint { get; set; }
     public DateTime DateTime { get; set; }
