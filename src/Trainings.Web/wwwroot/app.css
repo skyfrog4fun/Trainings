@@ -1080,6 +1080,36 @@ html {
   line-height: 1;
 }
 
+.card-title-truncate {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Let the icon + title block shrink within the flex header so the title
+   below can actually be constrained and truncated instead of overflowing. */
+.card-component-header > div:first-child {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.card-component-header > div:first-child > .card-title-truncate {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Keep the title (with its ellipsis truncation) and the status badge on the
+   same header row instead of wrapping to a second line on narrow screens. */
+.card-header-nowrap {
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+}
+
 .scroll-container-md {
   max-height: 340px;
   overflow-y: auto;

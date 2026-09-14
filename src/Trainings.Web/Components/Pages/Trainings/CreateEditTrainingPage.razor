@@ -43,8 +43,17 @@
 
         <EditForm Model="_formModel" OnValidSubmit="SaveTrainingAsync">
             <DataAnnotationsValidator />
-            <CardComponent IsCollapsable="true" Collapsed="false" ShowFooter="true">
-                <Title>@(_isEdit ? Localizer["CreateEditTrainingPage_PageTitleEdit"] : Localizer["CreateEditTrainingPage_HeadingNew"])</Title>
+            <CardComponent IsCollapsable="true" Collapsed="false" ShowFooter="true" HeaderCssClass="card-header-nowrap">
+                <Title>
+                    @if (_isEdit)
+                    {
+                        <span class="card-title-truncate" title="@_savedTitle">@_savedTitle</span>
+                    }
+                    else
+                    {
+                        @Localizer["CreateEditTrainingPage_HeadingNew"]
+                    }
+                </Title>
                 <TitleMeta>
                     @if (_isEdit)
                     {
@@ -234,6 +243,7 @@
     private bool _durationDrivesEnd = true;
     private TrainingStatus _status = TrainingStatus.New;
     private int? _originalTrainerId;
+    private string _savedTitle = string.Empty;
     private TrainingFormModel _formModel = new();
 
     private CultureInfo _groupCulture = CultureInfo.InvariantCulture;
@@ -336,6 +346,7 @@
     private async Task LoadTraining(TrainingDto training)
     {
         _formModel.Title = training.Title;
+        _savedTitle = training.Title;
         _formModel.Description = training.Description;
         _formModel.Capacity = training.Capacity;
         _formModel.Date = training.DateTime.Date;
@@ -519,6 +530,7 @@
                 if (refreshed != null)
                 {
                     _status = refreshed.Status;
+                    _savedTitle = refreshed.Title;
                 }
 
                 await ShowToastAsync(Localizer["CreateEditTrainingPage_UpdatedSuccess"], ToastComponent.ToastVariant.Success);
