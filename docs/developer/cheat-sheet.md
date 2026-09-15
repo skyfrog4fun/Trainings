@@ -35,6 +35,39 @@ git branch -d branch-name   # safe delete (warns on unmerged changes)
 git branch -D branch-name   # force delete
 ```
 
+### Full task cycle (create branch → PR → cleanup)
+
+```bash
+# 1. Create the issue (or use the `start-new-task` AI skill)
+gh issue create --title "<title>" --body "<body>"
+
+# 1b. Assign yourself and add label(s)
+gh label list --json name,description   # see available labels
+gh issue edit NN --add-assignee "@me"
+gh issue edit NN --add-label "<label>"
+
+# 2. Sync main and create the feature branch (NN = issue number)
+git checkout main
+git pull origin main
+git checkout -b NN-short-desc
+
+# 3. Work, commit, push
+git add <files>
+git commit -m "<message>"
+git push -u origin NN-short-desc
+
+# 4. Open the PR (or use the `pr-readiness` AI skill, which also
+#    runs the quality gate and an automated review pass first)
+gh pr create --base main --title "<title>" --body "<body>"
+
+# 5. Review + merge happens on GitHub (human approval required)
+
+# 6. After the PR is merged, clean up locally
+git checkout main
+git pull origin main
+git branch -d NN-short-desc
+```
+
 ## Docker
 
 ### Manual publish to NAS
