@@ -18,9 +18,13 @@ and STOP for explicit user approval. Never run these silently, even in autopilot
 mode:
 
 - `git merge`, `git rebase`
-- `git commit`
 - `git push`
 - `gh pr create`
+
+Never run `git add`, `git stage`, or `git commit` yourself, even with approval — staging and
+committing is always a manual step performed by the user after reviewing the diff (see
+`AGENTS.md` § Git Workflow Rules). Propose a commit message and describe what changed, then
+stop and wait for the user to commit before continuing.
 
 Read-only commands (`git status`, `git fetch`, `git log`, `git diff`, `gh auth status`) do not
 require approval.
@@ -82,8 +86,8 @@ them as dotted numeric groups (e.g. `1.4.2` vs `1.4.3`), not as strings.
     separate PR). Do not decide silently.
   - If the user accepts a version, invoke the `version-update` skill
     (`.github/skills/version-update/scripts/bump-version.ps1 -ToVersion "vX.Y.Z"`) to apply it
-    consistently across all tracked references, then show the diff and **ask approval** before
-    committing (per the Fix loop / commit rule below).
+    consistently across all tracked references, then show the diff and stop for the user to
+    review, stage, and commit it themselves (per the Fix loop / commit rule below).
 
 ### 4. Quality gate (CI parity)
 
@@ -114,12 +118,14 @@ If step 4 or step 5 surfaced fixable issues:
 - Propose the fix and show the diff.
 - **Ask approval** before applying.
 - After applying, re-run the affected quality-gate step(s) to confirm the fix.
-- **Ask approval** before committing (`git commit`). Never batch unrelated fixes into one
-  commit without confirming with the user.
+- Do not stage or commit the fix yourself. Propose a commit message, then stop and ask the
+  user to review, stage, and commit it (see `AGENTS.md` § Git Workflow Rules). Wait for
+  confirmation that the commit exists before continuing to step 7.
 
 ### 7. Push
 
-If there are local commits not on the remote (new commits, merge/rebase, or fix commits):
+If there are local commits not on the remote (new commits, merge/rebase, or fix commits the
+user has committed):
 
 - Explain what will be pushed (branch name, commit list, whether `--force-with-lease` is
   needed because of a rebase).

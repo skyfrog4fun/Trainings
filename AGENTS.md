@@ -103,6 +103,17 @@ Trainings.Web             <- Blazor Server UI and DI composition root
   even while operating autonomously (e.g. autopilot mode). This gives the user a chance to
   back up the dev database before it is dropped.
 
+## Git Workflow Rules
+
+- Never run `git add`, `git stage`, or `git commit` on your own, even after the user approved
+  the change content. Staging and committing is always a manual step performed by the user
+  after they have reviewed the diff.
+- You may propose a commit message and show which files/hunks would be included, but stop
+  there and let the user run the actual `git add` / `git commit` commands.
+- Other Git-mutating actions (`git checkout -b`, `git push`, `git merge`, `git rebase`,
+  `gh pr create`, `gh pr merge`) still require explicit user approval before you run them, as
+  described in the relevant skills (`start-new-task`, `pr-readiness`).
+
 ## Authoritative References
 
 - `README.md` for setup and repository navigation.
