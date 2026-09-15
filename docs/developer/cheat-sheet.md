@@ -41,6 +41,11 @@ git branch -D branch-name   # force delete
 # 1. Create the issue (or use the `start-new-task` AI skill)
 gh issue create --title "<title>" --body "<body>"
 
+# 1b. Assign yourself and add label(s)
+gh label list --json name,description   # see available labels
+gh issue edit NN --add-assignee "@me"
+gh issue edit NN --add-label "<label>"
+
 # 2. Sync main and create the feature branch (NN = issue number)
 git checkout main
 git pull origin main

@@ -19,10 +19,12 @@ Review, approval, and the merge itself (stages 6–7) are always done by a human
 ### 1. Create an Issue
 
 - Open a GitHub issue describing the change (bug, feature, improvement).
-- Add relevant labels (e.g. `bug`, `enhancement`, `documentation`).
+- Assign yourself and add relevant labels (e.g. `bug`, `enhancement`, `documentation`).
 - The issue serves as the single source of truth for *why* the change is needed.
 - The `start-new-task` AI skill can drive this step end-to-end: it drafts the issue title/body,
-  creates the issue on confirmation, and can immediately prepare the matching branch (see below).
+  creates the issue on confirmation, suggests fitting labels from the repo's full label list
+  (you approve or pick differently), assigns you, and can immediately prepare the matching
+  branch (see below).
 
 ### 2. Implementation
 

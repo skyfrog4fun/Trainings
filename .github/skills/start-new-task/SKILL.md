@@ -16,6 +16,7 @@ Before running any of the following, print a one-line explanation of exactly wha
 and STOP for explicit user approval. Never run these silently:
 
 - `gh issue create`
+- `gh issue edit` (assignee/label changes)
 - `git checkout -b`
 
 Read-only commands (`git status`, `git branch -vv`, `git fetch`, `gh issue view`) do not
@@ -47,15 +48,36 @@ gh issue create --title "<title>" --body "<body>"
 - Parse the resulting issue number and URL from the command output.
 - Report back clearly: `Issue #NN created: <url>` (title included).
 
-### 4. Ask: branch now, or stop here?
+### 4. Assign and label
+
+- Fetch the full list of labels available in this repo:
+
+```powershell
+gh label list --json name,description
+```
+
+- Suggest the label(s) that best match the issue's topic, based on their descriptions, and
+  show the user the full list so they can pick differently or add more. Let the user simply
+  approve the suggestion if it looks right.
+- Apply the assignee and the chosen label(s) as separate commands (combining
+  `--add-assignee` and `--add-label` in one `gh issue edit` call has been unreliable):
+
+```powershell
+gh issue edit NN --add-assignee "@me"
+gh issue edit NN --add-label "<label>"
+```
+
+- Repeat the `--add-label` call for each additional label the user selected.
+
+### 5. Ask: branch now, or stop here?
 
 Ask the user whether they want to create a branch and start working now, or stop here (issue
 created only, so the idea isn't lost).
 
 - **Stop**: confirm that the issue is filed and end the skill here. No git operations.
-- **Branch now**: continue to step 5.
+- **Branch now**: continue to step 6.
 
-### 5. Prepare the branch
+### 6. Prepare the branch
 
 Explain what will happen (branch name `NN-topic-slug`, created from up-to-date `main`), then
 **ask for approval**. On approval:
@@ -69,7 +91,7 @@ git checkout -b NN-topic-slug
 - Derive `topic-slug` from the issue title (short, kebab-case, a few words).
 - `NN` is the issue number from step 3.
 
-### 6. Verify
+### 7. Verify
 
 ```powershell
 git status
@@ -79,7 +101,7 @@ git branch -vv
 - Confirm the new branch is checked out, clean, and based on the latest `main`.
 - Present the branch list output to the user.
 
-### 7. Final report
+### 8. Final report
 
 End with a message in this style:
 
@@ -90,7 +112,7 @@ End with a message in this style:
 
 - Always report the issue number and URL once created.
 - Never create a branch without explicit approval, even if the user said "yes" to branching
-  earlier in a different context — confirm at step 5 specifically.
+  earlier in a different context — confirm at step 6 specifically.
 - If the user stops after issue creation, do not perform any git operations.
 
 ## References
