@@ -87,7 +87,8 @@ All checks must pass before the PR can be merged.
 
 - Once all checks pass and the PR is approved, it is merged into `main` **on GitHub**
   (review/approve/merge is a deliberate human action, not automated).
-- The feature branch is deleted after merging (on GitHub, or via `gh pr merge --delete-branch`).
+- The feature branch is deleted automatically after merging (`delete_branch_on_merge` repo
+  setting is enabled; see "Branch Protection" below).
 - The linked issue is closed automatically when the PR is merged.
 - Locally, clean up the now-merged branch:
 
@@ -131,6 +132,28 @@ Merged to main → issue closed
     ▼
 Docker image published → deployed to production
 ```
+
+## Branch Protection
+
+`main` is protected by a GitHub **ruleset** ("Main Branch Protection", repo Settings →
+Rules → Rulesets). This is GitHub-side configuration, not part of the repository's tracked
+files — there is no diff/PR history for it, changes are only visible in GitHub's UI/API
+(`gh api repos/skyfrog4fun/Trainings/rulesets`).
+
+Current rules for `main`:
+
+| Rule | Effect |
+|---|---|
+| Require a pull request before merging | No direct pushes to `main`; all changes go through a PR |
+| Require status checks (`Build/Test/Quality Gates`, i.e. PR Guardian) | PR cannot be merged unless CI passes |
+| Block force-pushes (non fast-forward) | History on `main` cannot be rewritten |
+| Block branch deletion | `main` cannot be deleted |
+
+Required approving reviews are set to `0` (solo-maintainer repo) — review still happens, but
+GitHub doesn't block the merge button on it. Revisit if collaborators join.
+
+Repo setting `delete_branch_on_merge` is also enabled, so merging a PR auto-deletes the
+remote feature branch (you still need `git branch -d NN-short-desc` locally, per stage 7).
 
 ## References
 
