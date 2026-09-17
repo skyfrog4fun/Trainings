@@ -34,7 +34,7 @@
 
         <CardComponent Collapsed="false" ShowFooter="@(ShowManagementRow || ShowParticipationRow || ShowTrainerOpsRow)">
             <Title>@Localizer["TrainingDetailPage_InfoTitle"]</Title>
-            <TitleMeta><span class="badge @GetStatusBadgeClass(_training.Status)">@_training.Status</span></TitleMeta>
+            <TitleMeta><TrainingStatusComponent Status="_training.Status" /></TitleMeta>
             <Body>
                 <div class="text-muted mb-3">
                     @if (_training.GroupName != null)
@@ -674,15 +674,6 @@
     private string TrainingRunUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/run";
 
     private string TrainingAttendanceUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/attendance";
-
-    private static string GetStatusBadgeClass(TrainingStatus status) => status switch
-    {
-        TrainingStatus.Planned => "bg-success",
-        TrainingStatus.InPlanning => "bg-warning text-dark",
-        TrainingStatus.InProgress => "bg-primary",
-        TrainingStatus.Done => "bg-secondary",
-        _ => "bg-light text-dark border"
-    };
 
     private bool CanActOnParticipant(RegistrationDto registration) => _isAdmin && IsRegistrationOpen;
 

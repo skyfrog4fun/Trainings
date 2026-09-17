@@ -1,0 +1,10 @@
+@* Renders the localized status badge for a training registration, keeping the CSS class mapping
+   and localized text in a single location so callers don't need to duplicate this logic. *@
+<span class="badge @GetStatusBadgeClass(Status)">@Status.Localize(Localizer)</span>
+
+@code {
+    [Parameter] public RegistrationStatus Status { get; set; }
+
+    private static string GetStatusBadgeClass(RegistrationStatus status) =>
+        status == RegistrationStatus.Registered ? "bg-success" : "bg-secondary";
+}

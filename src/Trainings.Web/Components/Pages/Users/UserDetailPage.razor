@@ -134,7 +134,7 @@
                                 <div class="app-overview-main w-100 d-flex flex-column gap-1">
                                     <div class="d-flex justify-content-between align-items-center gap-2">
                                         <div class="app-overview-title text-break">@registration.TrainingTitle</div>
-                                        <span class="badge @GetRegistrationStatusBadgeClass(registration.Status)">@registration.Status.Localize(Localizer)</span>
+                                        <RegistrationStatusComponent Status="registration.Status" />
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center gap-2">
                                         <div class="app-overview-meta">@FormatText(registration.TrainingGroupName)</div>
@@ -259,9 +259,6 @@
     };
 
     private string GetRoleLabel(UserRole role) => Localizer[$"Enum_Role_{role}"];
-
-    private static string GetRegistrationStatusBadgeClass(RegistrationStatus status) =>
-        status == RegistrationStatus.Registered ? "bg-success" : "bg-secondary";
 
     private void GoBack() => NavigationManager.NavigateTo("/users");
 
