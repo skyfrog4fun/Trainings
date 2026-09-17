@@ -252,8 +252,9 @@
         return query.ToList();
     }
 
-    private bool CanRegister(TrainingDto training) =>
-        _isSuperAdmin || _accessibleGroupIds.Contains(training.GroupId);
+    private static bool IsRegistrationOpen(TrainingDto training) => training.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned;
+
+    private bool CanRegister(TrainingDto training) => (_isSuperAdmin || _accessibleGroupIds.Contains(training.GroupId)) && IsRegistrationOpen(training);
 
     private bool CanTake(TrainingDto training) =>
         !training.TrainerId.HasValue && training.Status == TrainingStatus.New &&

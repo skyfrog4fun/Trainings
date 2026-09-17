@@ -161,7 +161,7 @@
                 <Title>@Localizer["TrainingDetailPage_RegisteredParticipants"]</Title>
                 <TitleMeta>@RegisteredParticipants.Count / @_training.Capacity</TitleMeta>
                 <Body>
-                    @if (_isAdmin)
+                    @if (_isAdmin && IsRegistrationOpen)
                     {
                         <div class="d-flex justify-content-end mb-3">
                             <button type="button" class="btn btn-success btn-sm" @onclick="ToggleAddParticipantForm">
@@ -170,7 +170,7 @@
                         </div>
                     }
 
-                    @if (_isAdmin && _showAddParticipantForm)
+                    @if (_isAdmin && IsRegistrationOpen && _showAddParticipantForm)
                     {
                         <CardComponent Collapsed="false" IsCollapsable="false" ShowFooter="true" CssClass="mb-3">
                             <Title>@Localizer["TrainingDetailPage_AddParticipant"]</Title>
@@ -336,6 +336,8 @@
     private RegistrationDto? OwnRegistration => RegisteredParticipants.FirstOrDefault(r => r.UserId == _userId);
     private bool ShowManagementRow => _isAdmin || _isAssignedTrainer;
     private bool ShowParticipationRow => _canTake || _canRegister;
+    private bool IsRegistrationOpen => _training is not null &&
+        _training.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned;
     private bool ShowTrainerOpsRow => _isAssignedTrainer &&
         _training is not null &&
         _training.Status is TrainingStatus.Planned or TrainingStatus.InProgress or TrainingStatus.Done;
@@ -377,9 +379,7 @@
         _isAdmin = isSuperAdmin || user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Admin");
         _isTrainer = _isAdmin || user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Trainer");
         _isAssignedTrainer = _isTrainer && _training.TrainerId == _userId;
-        _canRegister = isSuperAdmin || user.Claims.Any(claim =>
-            claim.Type == AppClaimTypes.GroupRole(_training.GroupId) &&
-            (claim.Value == "Participant" || claim.Value == "Trainer" || claim.Value == "Admin"));
+        _canRegister = IsRegistrationOpen;
 
         _fullDetailAllowed = _isTrainer || _isAdmin || _training.Status >= TrainingStatus.Planned;
         _canTake = _isTrainer && !_training.TrainerId.HasValue && _training.Status == TrainingStatus.New;
@@ -684,7 +684,7 @@
         _ => "bg-light text-dark border"
     };
 
-    private bool CanActOnParticipant(RegistrationDto registration) => _isAdmin;
+    private bool CanActOnParticipant(RegistrationDto registration) => _isAdmin && IsRegistrationOpen;
 
     private void GoBack() => NavigationManager.NavigateTo("/trainings");
 
