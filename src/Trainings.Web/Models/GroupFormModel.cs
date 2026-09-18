@@ -12,8 +12,15 @@ public class GroupFormModel : IValidatableObject
     public bool IsActive { get; set; } = true;
     public DayOfWeek? Weekday { get; set; }
     public int? LocationId { get; set; }
-    public TimeOnly? StartTime { get; set; } = new(19, 0);
-    public int? DurationMinutes { get; set; } = 90;
+    public TimeOnly? StartTime { get; set; }
+    public int? DurationMinutes { get; set; }
+
+    /// <summary>
+    /// UI-only convenience field (not persisted): derived from/deriving <see cref="StartTime"/>
+    /// and <see cref="DurationMinutes"/> in <c>GroupCreateEditPage</c>. Validated as required here
+    /// so the End input can show its own validation message like Start/Duration.
+    /// </summary>
+    public TimeOnly? EndTime { get; set; }
     public int? MaxParticipants { get; set; }
     public int? CountryId { get; set; }
 
@@ -49,6 +56,11 @@ public class GroupFormModel : IValidatableObject
         if (StartTime is null)
         {
             yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_StartTimeRequired"), [nameof(StartTime)]);
+        }
+
+        if (EndTime is null)
+        {
+            yield return new ValidationResult(GetMessage(localizer, "GroupCreateEditPage_EndTimeRequired"), [nameof(EndTime)]);
         }
 
         if (MaxParticipants is null or <= 0)

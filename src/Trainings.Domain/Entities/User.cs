@@ -35,4 +35,6 @@ public class User
     public ICollection<GroupMembership> GroupMemberships { get; set; } = [];
     public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = [];
     public ICollection<EmailConfirmationToken> EmailConfirmationTokens { get; set; } = [];
+    public ICollection<TrainingBlockDefinition> CreatedTrainingBlockDefinitions { get; set; } = [];
+    public ICollection<Game> CreatedGames { get; set; } = [];
 }

@@ -30,7 +30,14 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center gap-2 small mt-2">
                             <span class="text-truncate"><i class="@AppIcons.Location me-1" aria-hidden="true"></i>@(training.LocationName ?? "-")@(string.IsNullOrWhiteSpace(training.LocationCity) ? "" : $", {training.LocationCity}")</span>
-                            <span class="text-nowrap"><i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@training.RegisteredCount/@training.Capacity</span>
+                            <span class="text-nowrap d-inline-flex align-items-center">
+                                @if (training.Blocks.Count > 0)
+                                {
+                                    <i class="@AppIcons.BookOpen me-1" aria-hidden="true"></i>@training.Blocks.Count
+                                    <span class="training-card-stat-separator mx-2"></span>
+                                }
+                                <i class="@AppIcons.Participants me-1" aria-hidden="true"></i>@training.RegisteredCount/@training.Capacity
+                            </span>
                         </div>
                         <div class="small text-muted text-truncate mt-2">@training.Description</div>
                     </div>

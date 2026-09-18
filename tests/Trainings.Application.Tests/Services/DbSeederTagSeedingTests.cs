@@ -1,102 +1,122 @@
+using System.Reflection;
+
 using FluentAssertions;
+
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+
 using Moq;
+
+using Trainings.Application.Constants;
 using Trainings.Application.Interfaces;
-using Trainings.Domain.Entities;
+using Trainings.Domain.Enums;
 using Trainings.Infrastructure.Data;
-using Trainings.Infrastructure.Services;
-using Xunit;
 
 namespace Trainings.Application.Tests.Services;
 
 public class DbSeederTagSeedingTests
 {
-    private static ApplicationDbContext CreateInMemoryContext()
+    [Fact]
+    public async Task SeedTagAndGameCatalogAsync_SeedsExpectedFixedTags()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlite("DataSource=:memory:")
-            .Options;
-        var ctx = new ApplicationDbContext(options);
-        ctx.Database.OpenConnection();
-        ctx.Database.EnsureCreated();
-        ctx.Database.ExecuteSqlRaw("PRAGMA foreign_keys = OFF");
-        return ctx;
+        await using var scope = await CreateSeederScopeAsync();
+
+        await InvokeSeederAsync(scope.Seeder, "SeedTagsAsync");
+
+        var tags = await scope.Context.Tags.OrderBy(tag => tag.DisplayOrder).ToListAsync();
+        var translations = await scope.Context.Translations.Where(t => t.EntityType == TranslationEntityType.Tag).ToListAsync();
+
+        tags.Should().HaveCount(6);
+        tags.Select(tag => tag.Key).Should().Equal(
+            TrainingBlockCatalog.TagKeys.WarmUp,
+            TrainingBlockCatalog.TagKeys.Fitness,
+            TrainingBlockCatalog.TagKeys.Technique,
+            TrainingBlockCatalog.TagKeys.Game,
+            TrainingBlockCatalog.TagKeys.CoolDown,
+            TrainingBlockCatalog.TagKeys.Other);
+        tags.Select(tag => tag.ColorToken).Should().Equal(
+            TrainingBlockCatalog.ColorTokens.Community,
+            TrainingBlockCatalog.ColorTokens.Accent,
+            TrainingBlockCatalog.ColorTokens.Accent40,
+            TrainingBlockCatalog.ColorTokens.Innovation,
+            TrainingBlockCatalog.ColorTokens.AppreciationDark,
+            TrainingBlockCatalog.ColorTokens.Tradition60);
+        translations.Should().HaveCount(12);
+        translations.Should().Contain(t => t.Culture == "de" && t.Text == "Technik");
     }
 
-    private static readonly string[] _expectedGlobalTags =
-    [
-        "Warm-up", "Stretching", "Strength", "Cardio", "Coordination",
-        "Technique", "Mental", "Game", "Cool-down", "Other"
-    ];
-
-    /// <summary>
-    /// Seeds global tags directly into the context (mirrors DbSeeder.SeedGlobalTagsAsync logic)
-    /// so we can test it in isolation without MigrateAsync.
-    /// </summary>
-    private static async Task SeedGlobalTagsDirectlyAsync(ApplicationDbContext ctx)
+    [Fact]
+    public async Task SeedTagAndGameCatalogAsync_SeedsStarterGamesIncludingFallback()
     {
-        if (await ctx.Tags.AnyAsync(t => t.GroupId == null))
+        await using var scope = await CreateSeederScopeAsync();
+
+        await InvokeSeederAsync(scope.Seeder, "SeedGamesAsync");
+
+        var games = await scope.Context.Games.OrderBy(game => game.Id).ToListAsync();
+        var translations = await scope.Context.Translations.Where(t => t.EntityType == TranslationEntityType.Game).ToListAsync();
+
+        games.Should().HaveCount(9);
+        games.Should().ContainSingle(game => game.IsSystemFallback && game.IsActive && game.IsApproved);
+        translations.Should().Contain(t => t.Culture == "en" && t.Text == "Soccer");
+        translations.Should().Contain(t => t.Culture == "de" && t.Text == "Sonstiges");
+    }
+
+    [Fact]
+    public async Task SeedTagAndGameCatalogAsync_DoesNotDuplicateWhenRunTwice()
+    {
+        await using var scope = await CreateSeederScopeAsync();
+
+        await InvokeSeederAsync(scope.Seeder, "SeedTagsAsync");
+        await InvokeSeederAsync(scope.Seeder, "SeedGamesAsync");
+        await InvokeSeederAsync(scope.Seeder, "SeedTagsAsync");
+        await InvokeSeederAsync(scope.Seeder, "SeedGamesAsync");
+
+        (await scope.Context.Tags.CountAsync()).Should().Be(6);
+        (await scope.Context.Games.CountAsync()).Should().Be(9);
+        (await scope.Context.Translations.CountAsync()).Should().Be(30);
+    }
+
+    private static async Task InvokeSeederAsync(DbSeeder seeder, string methodName)
+    {
+        var method = typeof(DbSeeder).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+        method.Should().NotBeNull();
+
+        var result = method!.Invoke(seeder, null);
+        result.Should().BeAssignableTo<Task>();
+        await (Task)result!;
+    }
+
+    private static async Task<SeederScope> CreateSeederScopeAsync()
+    {
+        var (connection, context) = TrainingBlockTestData.CreateContext();
+        var translationService = TrainingBlockTestData.CreateTranslationService(context);
+
+        var passwordHasherMock = new Mock<IPasswordHasher>();
+        passwordHasherMock.Setup(hasher => hasher.Hash(It.IsAny<string>())).Returns("hash");
+
+        var seeder = new DbSeeder(
+            context,
+            passwordHasherMock.Object,
+            new ConfigurationBuilder().Build(),
+            Mock.Of<ILogger<DbSeeder>>(),
+            translationService);
+
+        await Task.CompletedTask;
+        return new SeederScope(connection, context, seeder);
+    }
+
+    private sealed class SeederScope(SqliteConnection connection, ApplicationDbContext context, DbSeeder seeder) : IAsyncDisposable
+    {
+        public SqliteConnection Connection { get; } = connection;
+        public ApplicationDbContext Context { get; } = context;
+        public DbSeeder Seeder { get; } = seeder;
+
+        public async ValueTask DisposeAsync()
         {
-            return;
+            await Context.DisposeAsync();
+            await Connection.DisposeAsync();
         }
-
-        foreach (string name in _expectedGlobalTags)
-        {
-            ctx.Tags.Add(new Tag { Name = name, GroupId = null });
-        }
-
-        await ctx.SaveChangesAsync();
-    }
-
-    [Fact]
-    public async Task SeedGlobalTagsSeedsExactlyTenGlobalTags()
-    {
-        await using var ctx = CreateInMemoryContext();
-
-        await SeedGlobalTagsDirectlyAsync(ctx);
-
-        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync(TestContext.Current.CancellationToken);
-        globalTags.Should().HaveCount(10);
-    }
-
-    [Fact]
-    public async Task SeedGlobalTagsSeedsAllExpectedNames()
-    {
-        await using var ctx = CreateInMemoryContext();
-
-        await SeedGlobalTagsDirectlyAsync(ctx);
-
-        var names = await ctx.Tags.Where(t => t.GroupId == null).Select(t => t.Name).ToListAsync(TestContext.Current.CancellationToken);
-        names.Should().BeEquivalentTo(_expectedGlobalTags);
-    }
-
-    [Fact]
-    public async Task SeedGlobalTagsDoesNotDuplicateWhenCalledTwice()
-    {
-        await using var ctx = CreateInMemoryContext();
-
-        await SeedGlobalTagsDirectlyAsync(ctx);
-        await SeedGlobalTagsDirectlyAsync(ctx);
-
-        var globalTags = await ctx.Tags.Where(t => t.GroupId == null).ToListAsync(TestContext.Current.CancellationToken);
-        globalTags.Should().HaveCount(10);
-    }
-
-    [Fact]
-    public async Task SeedGlobalTagsDoesNotAffectGroupTags()
-    {
-        await using var ctx = CreateInMemoryContext();
-
-        // Insert a group-scoped tag first
-        ctx.Tags.Add(new Tag { Name = "Custom", GroupId = 1 });
-        await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        await SeedGlobalTagsDirectlyAsync(ctx);
-
-        var groupTags = await ctx.Tags.Where(t => t.GroupId != null).ToListAsync(TestContext.Current.CancellationToken);
-        groupTags.Should().HaveCount(1);
-        groupTags[0].Name.Should().Be("Custom");
     }
 }

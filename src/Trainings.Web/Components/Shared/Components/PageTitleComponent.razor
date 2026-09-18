@@ -7,9 +7,25 @@
                 <i class="@AppIcons.Filter" aria-hidden="true"></i>
             </button>
         }
+        @if (!string.IsNullOrWhiteSpace(SecondaryButtonText))
+        {
+            <button type="button" class="@SecondaryButtonCssClass" @onclick="HandleSecondaryButtonClick" disabled="@SecondaryButtonDisabled">
+                @if (!string.IsNullOrWhiteSpace(SecondaryButtonIcon))
+                {
+                    <i class="@($"{SecondaryButtonIcon} me-1")" aria-hidden="true"></i>
+                }
+                @SecondaryButtonText
+            </button>
+        }
         @if (!string.IsNullOrWhiteSpace(ButtonText))
         {
-            <button type="button" class="btn btn-success" @onclick="HandleButtonClick" disabled="@ButtonDisabled"><i class="@ButtonIcon me-1" aria-hidden="true"></i>@ButtonText</button>
+            <button type="button" class="@ButtonCssClass" @onclick="HandleButtonClick" disabled="@ButtonDisabled">
+                @if (!string.IsNullOrWhiteSpace(ButtonIcon))
+                {
+                    <i class="@($"{ButtonIcon} me-1")" aria-hidden="true"></i>
+                }
+                @ButtonText
+            </button>
         }
     </div>
 </div>
@@ -35,8 +51,14 @@
     [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
     [Parameter] public string? ButtonText { get; set; }
     [Parameter] public string? ButtonIcon { get; set; }
+    [Parameter] public string ButtonCssClass { get; set; } = "btn btn-success";
     [Parameter] public bool ButtonDisabled { get; set; }
     [Parameter] public EventCallback OnButtonClick { get; set; }
+    [Parameter] public string? SecondaryButtonText { get; set; }
+    [Parameter] public string? SecondaryButtonIcon { get; set; }
+    [Parameter] public string SecondaryButtonCssClass { get; set; } = "btn btn-outline-secondary";
+    [Parameter] public bool SecondaryButtonDisabled { get; set; }
+    [Parameter] public EventCallback OnSecondaryButtonClick { get; set; }
 
     [Parameter] public bool ShowFilterButton { get; set; }
     [Parameter] public RenderFragment? Filter { get; set; }
@@ -53,6 +75,8 @@
     }
 
     private Task HandleButtonClick() => OnButtonClick.InvokeAsync();
+
+    private Task HandleSecondaryButtonClick() => OnSecondaryButtonClick.InvokeAsync();
 
     private Task HandleFilterButtonClick() => SetFilterOpen(!_filterOpen);
 

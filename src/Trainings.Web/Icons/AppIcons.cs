@@ -46,12 +46,17 @@ public static class AppIcons
     public const string XMark = "fa-solid fa-xmark";
     public const string ChevronUp = "fa-solid fa-chevron-up";
     public const string ChevronDown = "fa-solid fa-chevron-down";
+    public const string TrainingBlockMoveUp = "fa-solid fa-chevron-up";
+    public const string TrainingBlockMoveDown = "fa-solid fa-chevron-down";
+    public const string TrainingBlockDelete = "fa-solid fa-trash";
+    public const string TrainingBlockAdjust = "fa-solid fa-sliders";
     public const string Access = "fa-solid fa-key";
     public const string CreatePassword = "fa-solid fa-wand-magic-sparkles";
     public const string CreateSlug = "fa-solid fa-wand-magic-sparkles";
     public const string Eye = "fa-solid fa-eye";
     public const string EyeSlash = "fa-solid fa-eye-slash";
     public const string Bed = "fa-solid fa-bed";
+    public const string ReleaseTrainer = "fa-solid fa-trash";
 
     public static IReadOnlyList<AppIconDefinition> All { get; } =
     [
@@ -98,12 +103,17 @@ public static class AppIcons
         new("Close/Cancel", XMark),
         new("Expand", ChevronDown),
         new("Collapse", ChevronUp),
+        new("Training Block Move Up", TrainingBlockMoveUp),
+        new("Training Block Move Down", TrainingBlockMoveDown),
+        new("Training Block Delete", TrainingBlockDelete),
+        new("Training Block Adjust", TrainingBlockAdjust),
         new("Group Access", Access),
         new("Generate Password", CreatePassword),
         new("Suggest Slug", CreateSlug),
         new("Show Password", Eye),
         new("Hide Password", EyeSlash),
-        new("Not Registered", Bed)
+        new("Not Registered", Bed),
+        new("Release Trainer", ReleaseTrainer)
     ];
 }
 

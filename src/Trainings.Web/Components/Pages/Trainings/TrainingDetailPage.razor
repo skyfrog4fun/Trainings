@@ -234,34 +234,31 @@
                     <Title>@string.Format(Localizer["TrainingDetailPage_TrainingBlocksHeading"].Value, _training.Blocks.Count)</Title>
                     <Body>
                         <div class="row g-3">
+                            @{ var blockStart = _training.DateTime; }
                             @for (var i = 0; i < _training.Blocks.Count; i++)
                             {
                                 var block = _training.Blocks[i];
                                 var num = i + 1;
+                                var startTime = blockStart;
+                                blockStart = blockStart.AddMinutes(block.PlannedDurationMinutes);
                                 <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="card h-100">
+                                    <div class="card h-100 tb-card @GetStripeCssClass(block.TagColorToken)">
                                         <div class="card-body">
-                                            <h6 class="card-title">@num. @block.Title</h6>
+                                            <div class="d-flex justify-content-between gap-2 align-items-start">
+                                                <h6 class="card-title mb-0 text-truncate">@num. @block.Title</h6>
+                                                <div class="tb-tag-text text-muted text-end text-nowrap">@FormatBlockType(block)</div>
+                                            </div>
                                             @if (!string.IsNullOrEmpty(block.Description))
                                             {
-                                                <p class="card-text text-muted small">@block.Description</p>
+                                                <p class="card-text text-muted small mt-2 mb-0">@block.Description</p>
                                             }
-                                            <div class="small text-muted">
-                                                <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainingDetailPage_PlannedMinutes"].Value, block.PlannedDurationMinutes)
+                                            <div class="small text-muted mt-2">
+                                                <i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes <em>[@startTime.ToString("HH:mm")]</em>
                                                 @if (block.EffectiveDurationMinutes.HasValue)
                                                 {
                                                     <text> · @string.Format(Localizer["TrainingDetailPage_ActualMinutes"].Value, block.EffectiveDurationMinutes)</text>
                                                 }
                                             </div>
-                                            @if (block.Tags.Any())
-                                            {
-                                                <div class="mt-2">
-                                                    @foreach (var tag in block.Tags)
-                                                    {
-                                                        <span class="badge bg-info text-dark me-1">@tag.Name</span>
-                                                    }
-                                                </div>
-                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -382,7 +379,8 @@
         _canRegister = IsRegistrationOpen;
 
         _fullDetailAllowed = _isTrainer || _isAdmin || _training.Status >= TrainingStatus.Planned;
-        _canTake = _isTrainer && !_training.TrainerId.HasValue && _training.Status == TrainingStatus.New;
+        var isGroupTrainer = user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Trainer");
+        _canTake = isGroupTrainer && !_training.TrainerId.HasValue && _training.Status == TrainingStatus.New;
 
         if (_canRegister && _userId > 0)
         {
@@ -640,6 +638,21 @@
             _deleteInProgress = false;
         }
     }
+
+    private static string FormatBlockType(TrainingBlockDto block)
+        => block.GameDisplayText is null
+            ? block.TagDisplayText
+            : $"{block.TagDisplayText} · {block.GameDisplayText}";
+
+    private static string GetStripeCssClass(string colorToken) => colorToken switch
+    {
+        "--brand-community" => "tb-tag-stripe-community",
+        "--brand-accent" => "tb-tag-stripe-accent",
+        "--brand-accent-40" => "tb-tag-stripe-accent-40",
+        "--brand-innovation" => "tb-tag-stripe-innovation",
+        "--brand-appreciation-dark" => "tb-tag-stripe-appreciation-dark",
+        _ => "tb-tag-stripe-tradition-60"
+    };
 
     private static string FormatTrainingDateRange(TrainingDto training)
     {

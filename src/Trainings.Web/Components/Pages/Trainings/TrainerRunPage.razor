@@ -7,6 +7,7 @@
 @attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject ITrainingService TrainingService
+@inject ITrainingBlockService TrainingBlockService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IAuthorizationHelper AuthorizationHelper
 
@@ -125,15 +126,7 @@
                 <div class="badge bg-light text-dark border fs-6 mb-4">
                     <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainerRunPage_DurationMinutesSuffix"].Value, currentBlock.PlannedDurationMinutes)
                 </div>
-                @if (currentBlock.Tags.Any())
-                {
-                    <div class="mb-3">
-                        @foreach (var tag in currentBlock.Tags)
-                        {
-                            <span class="badge bg-info text-dark me-1">@tag.Name</span>
-                        }
-                    </div>
-                }
+                <div class="mb-3 text-muted small">@FormatBlockType(currentBlock)</div>
             </div>
             <div class="card-footer">
                 @if (_currentIndex < _blocks.Count - 1)
@@ -247,16 +240,16 @@
         {
             foreach (var block in _blocks)
             {
-                await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
+                await TrainingBlockService.UpdateExecutionAsync(new UpdateTrainingBlockExecutionDto
                 {
                     Id = block.Id,
-                    OrderIndex = block.OrderIndex,
                     Title = block.Title,
                     Description = block.Description,
                     PlannedDurationMinutes = block.PlannedDurationMinutes,
+                    MinParticipants = block.MinParticipants,
+                    MaxParticipants = block.MaxParticipants,
                     EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                    TrainerComment = block.TrainerComment,
-                    TagIds = block.Tags.Select(t => t.Id).ToList()
+                    TrainerComment = block.TrainerComment
                 });
             }
             _saved = true;
@@ -266,4 +259,9 @@
             _saving = false;
         }
     }
+
+    private static string FormatBlockType(TrainingBlockDto block)
+        => block.GameDisplayText is null
+            ? block.TagDisplayText
+            : $"{block.TagDisplayText} · {block.GameDisplayText}";
 }

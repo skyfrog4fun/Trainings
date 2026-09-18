@@ -138,7 +138,7 @@ New utility classes added to `app.css` and applied:
 ### 5a. Create `TrainingBlockEditor.razor` ✅
 - **New file:** `src/Trainings.Web/Components/Shared/TrainingBlockEditor.razor`
 - Parameters: `int TrainingId`, `bool IsWriteBlocked`
-- Self-contained: injects `ITrainingService` and `ITagService` directly
+- Self-contained: injects the dedicated training-block services directly
 - Contains: block list, inline block editor, block library panel (~450 lines of markup currently in `CreateEditTrainingPage`)
 
 ### 5b. Simplify `CreateEditTrainingPage.razor` ✅

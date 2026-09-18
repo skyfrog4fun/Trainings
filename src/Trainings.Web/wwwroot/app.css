@@ -21,6 +21,7 @@
   --brand-tradition-20: #d2d4da; /* currently not used */
   /* colors defined by TSV - Ergänzungsfarbe / Wertschätzung*/
   --brand-appreciation: #d8d2cb;
+  --brand-appreciation-dark: #b9ada0;
   --brand-appreciation-80: #dfdbd5; /* currently not used */
   --brand-appreciation-60: #e7e4e0;
   --brand-appreciation-40: #efedea;
@@ -835,6 +836,13 @@ main {
   font-size: 0.875rem;
 }
 
+.training-card-stat-separator {
+  display: inline-block;
+  width: 1px;
+  height: 0.9em;
+  background-color: var(--color-border);
+}
+
 .training-card-header-registered {
   background-color: var(--brand-community-40);
   color: var(--brand-tradition);
@@ -1080,6 +1088,34 @@ html {
   line-height: 1;
 }
 
+/* Allow a flex child to shrink below its content's intrinsic width so
+   text-overflow: ellipsis inside it can actually take effect. */
+.min-w-0 {
+  min-width: 0;
+}
+
+.trainer-select-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.trainer-select-group .app-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.trainer-select-group .app-select-toggle {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.trainer-select-group .trainer-release-btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+}
+
+
 .card-title-truncate {
   display: inline-block;
   max-width: 100%;
@@ -1149,6 +1185,61 @@ html {
   --bs-btn-hover-border-color: var(--brand-accent-40);
   --bs-btn-active-bg: var(--brand-accent-40);
   --bs-btn-active-border-color: var(--brand-accent-40);
+}
+
+.tb-card {
+  border-left-width: 0.35rem;
+  border-left-style: solid;
+}
+
+.tb-card-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.tb-card-action-column {
+  min-width: 4.5rem;
+}
+
+.tb-card-move-buttons {
+  min-width: 2.5rem;
+}
+
+.tb-card-icon-button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.tb-tag-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tb-tag-stripe-community {
+  border-left-color: var(--brand-community);
+}
+
+.tb-tag-stripe-accent {
+  border-left-color: var(--brand-accent);
+}
+
+.tb-tag-stripe-accent-40 {
+  border-left-color: var(--brand-accent-40);
+}
+
+.tb-tag-stripe-innovation {
+  border-left-color: var(--brand-innovation);
+}
+
+.tb-tag-stripe-appreciation-dark {
+  border-left-color: var(--brand-appreciation-dark);
+}
+
+.tb-tag-stripe-tradition-60 {
+  border-left-color: var(--brand-tradition-60);
 }
 
 /* === Expandable Text === */
@@ -1254,8 +1345,13 @@ a.app-navbar-brand:focus {
   border-color: var(--color-border);
 }
 
-  .app-menu-dropdown .dropdown-item {
-    color: var(--color-text);
+  .app-menu-dropdown .dropdown-item,
+  .app-menu-dropdown .dropdown-item:visited {
+    /* Explicitly override the global `a:not(.btn):visited` rule (app.css ~line 123),
+       which otherwise wins on specificity for visited links, so that a never-clicked
+       nav item (e.g. a freshly added menu entry) renders with the same brand-community
+       link color as an already-visited one. */
+    color: var(--bs-link-color);
   }
 
     .app-menu-dropdown .dropdown-item.active,

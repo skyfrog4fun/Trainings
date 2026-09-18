@@ -258,7 +258,7 @@
 
     private bool CanTake(TrainingDto training) =>
         !training.TrainerId.HasValue && training.Status == TrainingStatus.New &&
-        (_isSuperAdmin || _trainerGroupIds.Contains(training.GroupId) || _adminGroupIds.Contains(training.GroupId));
+        _trainerGroupIds.Contains(training.GroupId);
 
     private async Task TakeTrainingAsync(TrainingDto training)
     {

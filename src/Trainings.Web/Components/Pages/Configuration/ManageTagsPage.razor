@@ -1,0 +1,147 @@
+@page "/config/tags"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "SuperAdmin")]
+
+@inject ITagAdminService TagAdminService
+@inject IAppRuntimeModeService AppRuntimeModeService
+
+<PageTitle>@Localizer["ManageTagsPage_PageTitle"]</PageTitle>
+
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
+<div class="container px-2 px-md-4">
+    <PageTitleComponent Icon="@AppIcons.Tag" Text="@Localizer["ManageTagsPage_Heading"]" />
+
+    <p class="text-muted">@Localizer["ManageTagsPage_Description"]</p>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var tag in _tags)
+            {
+                <div class="card tb-card @GetStripeCssClass(tag.ColorToken)">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div>
+                                <div class="fw-semibold">@tag.Key</div>
+                                <div class="text-muted small">@(tag.IsActive ? Localizer["ManageTagsPage_ActiveBadge"] : Localizer["ManageTagsPage_InactiveBadge"])</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveTagAsync(tag)" disabled="@IsWriteBlocked">
+                                    <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => ToggleTagAsync(tag)" disabled="@IsWriteBlocked">
+                                    @(tag.IsActive ? Localizer["ManageTagsPage_DeactivateButton"] : Localizer["ManageTagsPage_ReactivateButton"])
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["ManageTagsPage_EnglishLabel"]</label>
+                                <InputText class="form-control" @bind-Value="tag.EnglishText" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["ManageTagsPage_GermanLabel"]</label>
+                                <InputText class="form-control" @bind-Value="tag.GermanText" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["ManageTagsPage_ColorLabel"]</label>
+                                <SelectDropdownComponent TItem="(string Value, string Label)"
+                                                         TValue="string"
+                                                         @bind-Value="tag.ColorToken"
+                                                         Items="ColorOptions"
+                                                         ValueSelector="option => option.Value"
+                                                         TextSelector="option => option.Label" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["ManageTagsPage_DisplayOrderLabel"]</label>
+                                <InputNumber class="form-control" @bind-Value="tag.DisplayOrder" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly IReadOnlyList<(string Value, string Label)> ColorOptions =
+    [
+        ("--brand-community", "Warm-Up"),
+        ("--brand-accent", "Fitness"),
+        ("--brand-accent-40", "Technique"),
+        ("--brand-innovation", "Game"),
+        ("--brand-appreciation-dark", "Cool-down"),
+        ("--brand-tradition-60", "Other")
+    ];
+
+    private readonly List<TagAdminDto> _tags = [];
+    private ToastComponent? _toast;
+    private AppRuntimeModeDto _runtimeMode = new();
+    private bool _loading = true;
+
+    private bool IsWriteBlocked => _runtimeMode.IsReadOnly;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _tags.Clear();
+        _tags.AddRange(await TagAdminService.GetAllAsync());
+        _loading = false;
+    }
+
+    private async Task SaveTagAsync(TagAdminDto tag)
+    {
+        await TagAdminService.UpdateAsync(tag);
+        await ShowToastAsync(Localizer["ManageTagsPage_TagSavedToast"], ToastComponent.ToastVariant.Success);
+    }
+
+    private async Task ToggleTagAsync(TagAdminDto tag)
+    {
+        if (tag.IsActive)
+        {
+            await TagAdminService.DeactivateAsync(tag.Id);
+        }
+        else
+        {
+            await TagAdminService.ReactivateAsync(tag.Id);
+        }
+
+        tag.IsActive = !tag.IsActive;
+        await ShowToastAsync(
+            tag.IsActive ? Localizer["ManageTagsPage_TagReactivatedToast"] : Localizer["ManageTagsPage_TagDeactivatedToast"],
+            ToastComponent.ToastVariant.Info);
+    }
+
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
+        }
+    }
+
+    private static string GetStripeCssClass(string colorToken) => colorToken switch
+    {
+        "--brand-community" => "tb-tag-stripe-community",
+        "--brand-accent" => "tb-tag-stripe-accent",
+        "--brand-accent-40" => "tb-tag-stripe-accent-40",
+        "--brand-innovation" => "tb-tag-stripe-innovation",
+        "--brand-appreciation-dark" => "tb-tag-stripe-appreciation-dark",
+        _ => "tb-tag-stripe-tradition-60"
+    };
+}

@@ -8,6 +8,7 @@
 @attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject ITrainingService TrainingService
+@inject ITrainingBlockService TrainingBlockService
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject IAppRuntimeModeService AppRuntimeModeService
@@ -81,13 +82,21 @@
 
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_TrainerLabel"]</label>
-                            <SelectDropdownComponent TItem="GroupMembershipDto" TValue="int"
-                                                      @bind-Value="_formModel.TrainerId"
-                                                      Items="_groupTrainers"
-                                                      ValueSelector="t => t.UserId"
-                                                      TextSelector="@(t => t.UserDisplayName)"
-                                                      PlaceholderText="@Localizer["CreateEditTrainingPage_SelectTrainer"]"
-                                                      PlaceholderValue="0" />
+                            <div class="trainer-select-group">
+                                <SelectDropdownComponent TItem="GroupMembershipDto" TValue="int"
+                                                          @bind-Value="_formModel.TrainerId"
+                                                          Items="_groupTrainers"
+                                                          ValueSelector="t => t.UserId"
+                                                          TextSelector="@(t => t.UserDisplayName)"
+                                                          PlaceholderText="@Localizer["CreateEditTrainingPage_SelectTrainer"]"
+                                                          PlaceholderValue="0" />
+                                @if (_showReleaseTrainer)
+                                {
+                                    <button type="button" class="btn btn-outline-danger trainer-release-btn" @onclick="ReleaseTrainerAsync" title="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]" aria-label="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]">
+                                        <i class="@AppIcons.ReleaseTrainer" aria-hidden="true"></i>
+                                    </button>
+                                }
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -162,33 +171,13 @@
                     </div>
                 </Body>
                 <Footer>
-                    <div class="d-flex flex-column gap-2">
-                        @if (_showConfirmPlanned || _showReleaseTrainer)
-                        {
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                @if (_showConfirmPlanned)
-                                {
-                                    <button type="button" class="btn btn-success" @onclick="ConfirmPlannedAsync" title="@Localizer["CreateEditTrainingPage_ConfirmPlannedTitle"]">
-                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ConfirmPlanned"]
-                                    </button>
-                                }
-                                @if (_showReleaseTrainer)
-                                {
-                                    <button type="button" class="btn btn-outline-secondary ms-auto" @onclick="ReleaseTrainerAsync" title="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]">
-                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ReleaseTrainer"]
-                                    </button>
-                                }
-                            </div>
-                            <hr class="my-1" />
-                        }
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <button type="submit" class="btn btn-primary" disabled="@(_saving || IsWriteBlocked)">
-                                <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
-                            </button>
-                            <button type="button" class="btn btn-secondary" @onclick="GoBack">
-                                <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
-                            </button>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary" disabled="@(_saving || IsWriteBlocked)">
+                            <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                        </button>
+                        <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                            <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
+                        </button>
                     </div>
                 </Footer>
             </CardComponent>
@@ -197,6 +186,16 @@
         @if (_persistedTrainingId.HasValue)
         {
             <TrainingBlockEditor TrainingId="@_persistedTrainingId.Value" IsWriteBlocked="@IsWriteBlocked" />
+        }
+
+        @if (_showConfirmPlanned)
+        {
+            <hr class="my-4" />
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-success" @onclick="ConfirmPlannedAsync" title="@Localizer["CreateEditTrainingPage_ConfirmPlannedTitle"]">
+                    <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ConfirmPlanned"]
+                </button>
+            </div>
         }
     }
 </div>
@@ -583,7 +582,7 @@
 
         try
         {
-            var blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
+            var blocks = (await TrainingBlockService.GetExecutionsAsync(_persistedTrainingId.Value)).ToList();
             if (blocks.Count == 0)
             {
                 _showNoBlocksConfirm = true;

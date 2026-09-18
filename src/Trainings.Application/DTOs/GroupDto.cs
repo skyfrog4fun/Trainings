@@ -12,6 +12,7 @@ public class GroupDto
     public DayOfWeek? Weekday { get; set; }
     public int? LocationId { get; set; }
     public string? LocationName { get; set; }
+    public string? LocationCity { get; set; }
     public TimeOnly? StartTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int? MaxParticipants { get; set; }

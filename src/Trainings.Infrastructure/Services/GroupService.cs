@@ -383,6 +383,7 @@ public class GroupService(
         Weekday = group.Weekday,
         LocationId = group.LocationId,
         LocationName = group.Location?.Name,
+        LocationCity = group.Location?.CityName,
         StartTime = group.StartTime,
         DurationMinutes = group.DurationMinutes,
         MaxParticipants = group.MaxParticipants,

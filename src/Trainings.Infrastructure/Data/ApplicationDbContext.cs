@@ -17,8 +17,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<GroupLocation> GroupLocations => Set<GroupLocation>();
     public DbSet<GroupMembership> GroupMemberships => Set<GroupMembership>();
     public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Game> Games => Set<Game>();
+    public DbSet<Translation> Translations => Set<Translation>();
+    public DbSet<TrainingBlockDefinition> TrainingBlockDefinitions => Set<TrainingBlockDefinition>();
     public DbSet<TrainingBlock> TrainingBlocks => Set<TrainingBlock>();
-    public DbSet<TrainingBlockTag> TrainingBlockTags => Set<TrainingBlockTag>();
     public DbSet<MailConfiguration> MailConfigurations => Set<MailConfiguration>();
     public DbSet<GroupMailConfiguration> GroupMailConfigurations => Set<GroupMailConfiguration>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
@@ -191,38 +193,76 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Tag>(entity =>
         {
             entity.HasKey(t => t.Id);
-            entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
-            entity.HasOne(t => t.Group)
-                .WithMany()
-                .HasForeignKey(t => t.GroupId)
+            entity.Property(t => t.Key).IsRequired().HasMaxLength(32);
+            entity.Property(t => t.ColorToken).IsRequired().HasMaxLength(64);
+            entity.HasIndex(t => t.Key).IsUnique();
+            entity.HasIndex(t => t.DisplayOrder).IsUnique();
+        });
+
+        modelBuilder.Entity<Game>(entity =>
+        {
+            entity.HasKey(g => g.Id);
+            entity.HasIndex(g => new { g.IsActive, g.IsApproved });
+            entity.HasOne(g => g.CreatedByUser)
+                .WithMany(u => u.CreatedGames)
+                .HasForeignKey(g => g.CreatedByUserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Translation>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Culture).IsRequired().HasMaxLength(10);
+            entity.Property(t => t.Text).IsRequired().HasMaxLength(128);
+            entity.HasIndex(t => new { t.EntityType, t.EntityId, t.Culture }).IsUnique();
+            entity.HasIndex(t => new { t.EntityType, t.EntityId });
+        });
+
+        modelBuilder.Entity<TrainingBlockDefinition>(entity =>
+        {
+            entity.HasKey(d => d.Id);
+            entity.Property(d => d.Title).IsRequired().HasMaxLength(64);
+            entity.Property(d => d.Description).HasMaxLength(512);
+            entity.HasIndex(d => new { d.GroupId, d.IsActive });
+            entity.HasIndex(d => new { d.IsGlobal, d.IsActive });
+            entity.HasIndex(d => new { d.CreatorId, d.IsActive });
+            entity.HasOne(d => d.Tag)
+                .WithMany(t => t.TrainingBlockDefinitions)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(d => d.Game)
+                .WithMany(g => g.TrainingBlockDefinitions)
+                .HasForeignKey(d => d.GameId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(d => d.Group)
+                .WithMany(g => g.TrainingBlockDefinitions)
+                .HasForeignKey(d => d.GroupId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(d => d.Creator)
+                .WithMany(u => u.CreatedTrainingBlockDefinitions)
+                .HasForeignKey(d => d.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TrainingBlock>(entity =>
         {
             entity.HasKey(b => b.Id);
-            entity.Property(b => b.Title).IsRequired().HasMaxLength(200);
+            entity.Property(b => b.Title).IsRequired().HasMaxLength(64);
+            entity.Property(b => b.Description).HasMaxLength(512);
+            entity.Property(b => b.TrainerComment).HasMaxLength(1000);
+            entity.HasIndex(b => new { b.TrainingId, b.OrderIndex }).IsUnique();
+            entity.HasIndex(b => b.DefinitionId);
             entity.HasOne(b => b.Training)
                 .WithMany(t => t.Blocks)
                 .HasForeignKey(b => b.TrainingId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(b => b.SourceBlock)
-                .WithMany()
-                .HasForeignKey(b => b.SourceBlockId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<TrainingBlockTag>(entity =>
-        {
-            entity.HasKey(bt => new { bt.TrainingBlockId, bt.TagId });
-            entity.HasOne(bt => bt.TrainingBlock)
-                .WithMany(b => b.TrainingBlockTags)
-                .HasForeignKey(bt => bt.TrainingBlockId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(bt => bt.Tag)
-                .WithMany(t => t.TrainingBlockTags)
-                .HasForeignKey(bt => bt.TagId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(b => b.Definition)
+                .WithMany(d => d.Executions)
+                .HasForeignKey(b => b.DefinitionId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<MailConfiguration>(entity =>
@@ -260,20 +300,27 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(nl => nl.User)
                 .WithMany()
                 .HasForeignKey(nl => nl.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(nl => nl.MailConfiguration)
                 .WithMany(mc => mc.NotificationLogs)
                 .HasForeignKey(nl => nl.MailConfigurationId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(nl => nl.Group)
                 .WithMany()
                 .HasForeignKey(nl => nl.GroupId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
+            entity.HasIndex(nl => nl.AttemptId);
+            entity.HasIndex(nl => nl.CreatedAt);
         });
 
         modelBuilder.Entity<NotificationFeedState>(entity =>
         {
             entity.HasKey(nfs => nfs.Id);
+            entity.Property(nfs => nfs.ResetPointerLogId).IsRequired(false);
+            entity.Property(nfs => nfs.UpdatedAt).HasColumnType("TEXT");
         });
 
         modelBuilder.Entity<SlugRedirect>(entity =>

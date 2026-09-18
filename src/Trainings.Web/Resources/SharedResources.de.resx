@@ -1173,9 +1173,6 @@
   <data name="TrainingDetailPage_TrainingBlocksHeading" xml:space="preserve">
     <value>Trainingsblöcke ({0})</value>
   </data>
-  <data name="TrainingDetailPage_PlannedMinutes" xml:space="preserve">
-    <value>Geplant: {0} Min.</value>
-  </data>
   <data name="TrainingDetailPage_ActualMinutes" xml:space="preserve">
     <value>Tatsächlich: {0} Min.</value>
   </data>
@@ -1656,6 +1653,9 @@
   <data name="GroupCreateEditPage_StartTimeRequired" xml:space="preserve">
     <value>Startzeit ist erforderlich.</value>
   </data>
+  <data name="GroupCreateEditPage_EndTimeRequired" xml:space="preserve">
+    <value>Endzeit ist erforderlich.</value>
+  </data>
   <data name="GroupCreateEditPage_MaxParticipantsInvalid" xml:space="preserve">
     <value>Die maximale Teilnehmerzahl muss größer als 0 sein.</value>
   </data>
@@ -1835,9 +1835,6 @@
   </data>
   <data name="CreateEditTrainingPage_ReleaseTrainerTitle" xml:space="preserve">
     <value>Dich selbst als Trainer dieses Trainings freigeben</value>
-  </data>
-  <data name="CreateEditTrainingPage_ReleaseTrainer" xml:space="preserve">
-    <value>Trainer freigeben</value>
   </data>
   <data name="CreateEditTrainingPage_SpecialLocationLabel" xml:space="preserve">
     <value>Beschreibung Sonderort</value>
@@ -2159,5 +2156,290 @@
   </data>
   <data name="CreateEditTrainingPage_ConfirmPlannedDurationMismatchMessage" xml:space="preserve">
     <value>Die Gesamtdauer aller Blöcke ({0} Min.) stimmt nicht mit der Trainingsdauer ({1} Min.) überein. Möchtest du trotzdem fortfahren?</value>
+  </data>
+  <data name="Shared_ManageTags" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="Shared_ManageGames" xml:space="preserve">
+    <value>Spiel</value>
+  </data>
+  <data name="TrainingBlockEditor_Heading" xml:space="preserve">
+    <value>Bausteine</value>
+  </data>
+  <data name="TrainingBlockEditor_NewButton" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="TrainingBlockEditor_AddButton" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="TrainingBlockEditor_PreviewNotice" xml:space="preserve">
+    <value>Speichern Sie zuerst das Training, um Bausteine zu verwalten.</value>
+  </data>
+  <data name="TrainingBlockEditor_AddSectionTitle" xml:space="preserve">
+    <value>Baustein aus Bibliothek hinzufügen</value>
+  </data>
+  <data name="TrainingBlockEditor_TagFilterLabel" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="TrainingBlockEditor_AllTagsOption" xml:space="preserve">
+    <value>-- Alle Tags --</value>
+  </data>
+  <data name="TrainingBlockEditor_CreatorFilterLabel" xml:space="preserve">
+    <value>Ersteller</value>
+  </data>
+  <data name="TrainingBlockEditor_AllCreatorsOption" xml:space="preserve">
+    <value>-- Alle Ersteller --</value>
+  </data>
+  <data name="TrainingBlockEditor_MinDurationLabel" xml:space="preserve">
+    <value>Min. Dauer</value>
+  </data>
+  <data name="TrainingBlockEditor_MaxDurationLabel" xml:space="preserve">
+    <value>Max. Dauer</value>
+  </data>
+  <data name="TrainingBlockEditor_SearchLabel" xml:space="preserve">
+    <value>Suche</value>
+  </data>
+  <data name="TrainingBlockEditor_SearchPlaceholder" xml:space="preserve">
+    <value>Titel oder Beschreibung suchen</value>
+  </data>
+  <data name="TrainingBlockEditor_SearchButton" xml:space="preserve">
+    <value>Suchen</value>
+  </data>
+  <data name="TrainingBlockEditor_NoLibraryResults" xml:space="preserve">
+    <value>Nichts gefunden — erstellen Sie einen neuen.</value>
+  </data>
+  <data name="TrainingBlockEditor_AddLibraryItemAria" xml:space="preserve">
+    <value>{0} hinzufügen</value>
+  </data>
+  <data name="TrainingBlockEditor_LoadMoreButton" xml:space="preserve">
+    <value>Mehr laden</value>
+  </data>
+  <data name="TrainingBlockEditor_NewSectionTitle" xml:space="preserve">
+    <value>Neuen Baustein erstellen</value>
+  </data>
+  <data name="TrainingBlockEditor_TagLabel" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="TrainingBlockEditor_SelectTagPlaceholder" xml:space="preserve">
+    <value>-- Tag auswählen --</value>
+  </data>
+  <data name="TrainingBlockEditor_GameLabel" xml:space="preserve">
+    <value>Spiel</value>
+  </data>
+  <data name="TrainingBlockEditor_GameSearchPlaceholder" xml:space="preserve">
+    <value>Spiele suchen</value>
+  </data>
+  <data name="TrainingBlockEditor_NoGamesFound" xml:space="preserve">
+    <value>Keine Spiele gefunden</value>
+  </data>
+  <data name="TrainingBlockEditor_SelectGamePlaceholder" xml:space="preserve">
+    <value>-- Spiel auswählen --</value>
+  </data>
+  <data name="TrainingBlockEditor_NewGamePlaceholder" xml:space="preserve">
+    <value>Neues Spiel anlegen</value>
+  </data>
+  <data name="TrainingBlockEditor_NewGameHelp" xml:space="preserve">
+    <value>Wenn das Spiel fehlt, geben Sie direkt einen neuen Namen ein.</value>
+  </data>
+  <data name="TrainingBlockEditor_TitleLabel" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="TrainingBlockEditor_DurationFieldLabel" xml:space="preserve">
+    <value>Dauer in Minuten</value>
+  </data>
+  <data name="TrainingBlockEditor_DescriptionLabel" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="TrainingBlockEditor_MinParticipantsLabel" xml:space="preserve">
+    <value>Min. Teilnehmer</value>
+  </data>
+  <data name="TrainingBlockEditor_MaxParticipantsLabel" xml:space="preserve">
+    <value>Max. Teilnehmer</value>
+  </data>
+  <data name="TrainingBlockEditor_EffectiveDurationLabel" xml:space="preserve">
+    <value>Effektive Dauer</value>
+  </data>
+  <data name="TrainingBlockEditor_TrainerCommentLabel" xml:space="preserve">
+    <value>Trainerkommentar</value>
+  </data>
+  <data name="TrainingBlockEditor_NoBlocksMessage" xml:space="preserve">
+    <value>Noch keine Bausteine hinzugefügt.</value>
+  </data>
+  <data name="TrainingBlockEditor_ParticipantsRange" xml:space="preserve">
+    <value>Am besten für {0} bis {1} Personen</value>
+  </data>
+  <data name="TrainingBlockEditor_ActualDurationValue" xml:space="preserve">
+    <value>Effektiv: {0} Min</value>
+  </data>
+  <data name="TrainingBlockEditor_DeleteExecutionAria" xml:space="preserve">
+    <value>{0} löschen</value>
+  </data>
+  <data name="TrainingBlockEditor_AdjustExecutionAria" xml:space="preserve">
+    <value>{0} anpassen</value>
+  </data>
+  <data name="TrainingBlockEditor_MoveUpAria" xml:space="preserve">
+    <value>{0} nach oben verschieben</value>
+  </data>
+  <data name="TrainingBlockEditor_MoveDownAria" xml:space="preserve">
+    <value>{0} nach unten verschieben</value>
+  </data>
+  <data name="TrainingBlockEditor_TotalPlannedSummary" xml:space="preserve">
+    <value>Geplante Dauer gesamt: {0} Min</value>
+  </data>
+  <data name="TrainingBlockEditor_RemainingSummary" xml:space="preserve">
+    <value>Verbleibend: {0} Min</value>
+  </data>
+  <data name="TrainingBlockEditor_OverbookedSummary" xml:space="preserve">
+    <value>Überplant: {0} Min</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockAddedToast" xml:space="preserve">
+    <value>Baustein zur Liste hinzugefügt.</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockCreatedToast" xml:space="preserve">
+    <value>Baustein erstellt.</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockUpdatedToast" xml:space="preserve">
+    <value>Baustein aktualisiert.</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockDeletedToast" xml:space="preserve">
+    <value>Baustein aus der Liste entfernt.</value>
+  </data>
+  <data name="TrainingBlockEditor_TagGameValue" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="TrainingBlockEditor_TagRequired" xml:space="preserve">
+    <value>Bitte wählen Sie ein Tag aus.</value>
+  </data>
+  <data name="TrainingBlockEditor_GameRequired" xml:space="preserve">
+    <value>Bitte wählen oder erstellen Sie ein Spiel.</value>
+  </data>
+  <data name="TrainingBlockEditor_TitleRequired" xml:space="preserve">
+    <value>Bitte geben Sie einen Titel ein.</value>
+  </data>
+  <data name="TrainingBlockEditor_TitleTooLong" xml:space="preserve">
+    <value>Der Titel darf höchstens 64 Zeichen lang sein.</value>
+  </data>
+  <data name="TrainingBlockEditor_DescriptionTooLong" xml:space="preserve">
+    <value>Die Beschreibung darf höchstens 512 Zeichen lang sein.</value>
+  </data>
+  <data name="TrainingBlockEditor_DurationRequired" xml:space="preserve">
+    <value>Bitte geben Sie eine Dauer größer als 0 ein.</value>
+  </data>
+  <data name="TrainingBlockEditor_MinParticipantsRequired" xml:space="preserve">
+    <value>Bitte geben Sie mindestens 1 Teilnehmer an.</value>
+  </data>
+  <data name="TrainingBlockEditor_MaxParticipantsRequired" xml:space="preserve">
+    <value>Bitte geben Sie eine gültige maximale Teilnehmerzahl an.</value>
+  </data>
+  <data name="TrainingBlockEditor_MinMaxParticipantsInvalid" xml:space="preserve">
+    <value>Die minimale Teilnehmerzahl muss kleiner oder gleich der maximalen Teilnehmerzahl sein.</value>
+  </data>
+  <data name="TrainingBlockEditor_EffectiveDurationInvalid" xml:space="preserve">
+    <value>Die effektive Dauer darf nicht negativ sein.</value>
+  </data>
+  <data name="ManageTagsPage_PageTitle" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ManageTagsPage_Heading" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ManageTagsPage_Description" xml:space="preserve">
+    <value>Bearbeiten Sie die festen Baustein-Tags, Farben, Reihenfolge und Verfügbarkeit.</value>
+  </data>
+  <data name="ManageTagsPage_ActiveBadge" xml:space="preserve">
+    <value>Aktiv</value>
+  </data>
+  <data name="ManageTagsPage_InactiveBadge" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+  <data name="ManageTagsPage_DeactivateButton" xml:space="preserve">
+    <value>Deaktivieren</value>
+  </data>
+  <data name="ManageTagsPage_ReactivateButton" xml:space="preserve">
+    <value>Reaktivieren</value>
+  </data>
+  <data name="ManageTagsPage_EnglishLabel" xml:space="preserve">
+    <value>Englisch</value>
+  </data>
+  <data name="ManageTagsPage_GermanLabel" xml:space="preserve">
+    <value>Deutsch</value>
+  </data>
+  <data name="ManageTagsPage_ColorLabel" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="ManageTagsPage_DisplayOrderLabel" xml:space="preserve">
+    <value>Anzeigereihenfolge</value>
+  </data>
+  <data name="ManageTagsPage_TagSavedToast" xml:space="preserve">
+    <value>Tag gespeichert.</value>
+  </data>
+  <data name="ManageTagsPage_TagReactivatedToast" xml:space="preserve">
+    <value>Tag reaktiviert.</value>
+  </data>
+  <data name="ManageTagsPage_TagDeactivatedToast" xml:space="preserve">
+    <value>Tag deaktiviert.</value>
+  </data>
+  <data name="ManageGamesPage_PageTitle" xml:space="preserve">
+    <value>Spiel</value>
+  </data>
+  <data name="ManageGamesPage_Heading" xml:space="preserve">
+    <value>Spiel</value>
+  </data>
+  <data name="ManageGamesPage_Description" xml:space="preserve">
+    <value>Prüfen Sie aktive, inaktive und ausstehende Spiele für Trainingsbausteine.</value>
+  </data>
+  <data name="ManageGamesPage_PendingOnlyLabel" xml:space="preserve">
+    <value>Nur ausstehende anzeigen</value>
+  </data>
+  <data name="ManageGamesPage_NoGamesMessage" xml:space="preserve">
+    <value>Keine Spiele entsprechen dem aktuellen Filter.</value>
+  </data>
+  <data name="ManageGamesPage_ApprovedBadge" xml:space="preserve">
+    <value>Genehmigt</value>
+  </data>
+  <data name="ManageGamesPage_PendingBadge" xml:space="preserve">
+    <value>Ausstehend</value>
+  </data>
+  <data name="ManageGamesPage_ActiveBadge" xml:space="preserve">
+    <value>Aktiv</value>
+  </data>
+  <data name="ManageGamesPage_InactiveBadge" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+  <data name="ManageGamesPage_FallbackBadge" xml:space="preserve">
+    <value>Fallback</value>
+  </data>
+  <data name="ManageGamesPage_ApproveButton" xml:space="preserve">
+    <value>Genehmigen</value>
+  </data>
+  <data name="ManageGamesPage_DeactivateButton" xml:space="preserve">
+    <value>Deaktivieren</value>
+  </data>
+  <data name="ManageGamesPage_ReactivateButton" xml:space="preserve">
+    <value>Reaktivieren</value>
+  </data>
+  <data name="ManageGamesPage_EnglishLabel" xml:space="preserve">
+    <value>Englisch</value>
+  </data>
+  <data name="ManageGamesPage_GermanLabel" xml:space="preserve">
+    <value>Deutsch</value>
+  </data>
+  <data name="ManageGamesPage_CreatedAtValue" xml:space="preserve">
+    <value>Erstellt: {0:g}</value>
+  </data>
+  <data name="ManageGamesPage_CreatedByValue" xml:space="preserve">
+    <value>Erstellt von Benutzer #{0}</value>
+  </data>
+  <data name="ManageGamesPage_GameApprovedToast" xml:space="preserve">
+    <value>Spiel genehmigt.</value>
+  </data>
+  <data name="ManageGamesPage_GameSavedToast" xml:space="preserve">
+    <value>Spiel gespeichert.</value>
+  </data>
+  <data name="ManageGamesPage_GameReactivatedToast" xml:space="preserve">
+    <value>Spiel reaktiviert.</value>
+  </data>
+  <data name="ManageGamesPage_GameDeactivatedToast" xml:space="preserve">
+    <value>Spiel deaktiviert.</value>
   </data>
 </root>
