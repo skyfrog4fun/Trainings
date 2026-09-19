@@ -2208,6 +2208,12 @@
   <data name="TrainingBlockEditor_NoLibraryResults" xml:space="preserve">
     <value>Nichts gefunden — erstellen Sie einen neuen.</value>
   </data>
+  <data name="TrainingBlockEditor_LibraryResultsTitle" xml:space="preserve">
+    <value>Suchergebnisse der Bibliothek</value>
+  </data>
+  <data name="TrainingBlockEditor_LibrarySearchPrompt" xml:space="preserve">
+    <value>Filter festlegen und auf Suchen klicken, um Bausteine zu finden.</value>
+  </data>
   <data name="TrainingBlockEditor_AddLibraryItemAria" xml:space="preserve">
     <value>{0} hinzufügen</value>
   </data>
@@ -2264,12 +2270,6 @@
   </data>
   <data name="TrainingBlockEditor_NoBlocksMessage" xml:space="preserve">
     <value>Noch keine Bausteine hinzugefügt.</value>
-  </data>
-  <data name="TrainingBlockEditor_ParticipantsRange" xml:space="preserve">
-    <value>Am besten für {0} bis {1} Personen</value>
-  </data>
-  <data name="TrainingBlockEditor_ActualDurationValue" xml:space="preserve">
-    <value>Effektiv: {0} Min</value>
   </data>
   <data name="TrainingBlockEditor_DeleteExecutionAria" xml:space="preserve">
     <value>{0} löschen</value>

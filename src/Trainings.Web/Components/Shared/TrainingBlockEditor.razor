@@ -80,50 +80,59 @@ else
             </Footer>
         </CardComponent>
 
-        @if (_libraryResults.Count == 0)
-        {
-            <div class="alert alert-info mb-3">@Localizer["TrainingBlockEditor_NoLibraryResults"]</div>
-        }
-        else
-        {
-            <div class="d-flex flex-column gap-2 mb-3">
-                @foreach (var definition in _libraryResults)
+        <CardComponent CssClass="mb-3" IsCollapsable="false">
+            <Title>@Localizer["TrainingBlockEditor_LibraryResultsTitle"]</Title>
+            <Body>
+                @if (!_librarySearchPerformed)
                 {
-                    <div class="card tb-card @GetStripeCssClass(definition.TagColorToken)">
-                        <div class="card-body d-flex justify-content-between gap-3">
-                            <div class="flex-grow-1 min-w-0">
-                                <div class="d-flex justify-content-between gap-2 align-items-start">
-                                    <div class="fw-semibold text-truncate">@definition.Title</div>
-                                    <div class="text-muted text-nowrap small"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@definition.DurationMinutes</div>
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(definition.Description))
-                                {
-                                    <div class="text-muted small tb-card-description">@definition.Description</div>
-                                }
-                                <div class="text-muted small mt-2">@definition.CreatorName</div>
-                            </div>
-                            <div class="d-flex flex-column justify-content-between align-items-end tb-card-action-column">
-                                <button type="button"
-                                        class="btn btn-sm btn-app-outline btn-app-icon tb-card-icon-button"
-                                        @onclick="() => AddDefinitionAsync(definition.Id)"
-                                        aria-label="@string.Format(Localizer["TrainingBlockEditor_AddLibraryItemAria"].Value, definition.Title)"
-                                        disabled="@IsWriteBlocked">
-                                    <i class="@AppIcons.Plus" aria-hidden="true"></i>
-                                </button>
-                                <div class="tb-tag-text text-muted text-end">@FormatDefinitionType(definition)</div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="alert alert-info mb-0">@Localizer["TrainingBlockEditor_LibrarySearchPrompt"]</div>
                 }
-            </div>
+                else if (_libraryResults.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">@Localizer["TrainingBlockEditor_NoLibraryResults"]</div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var definition in _libraryResults)
+                        {
+                            <div class="card tb-card @GetStripeCssClass(definition.TagColorToken)">
+                                <div class="card-body d-flex justify-content-between gap-3">
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex justify-content-between gap-2 align-items-start">
+                                            <div class="fw-semibold text-truncate">@definition.Title</div>
+                                            <div class="text-muted text-nowrap small"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@definition.DurationMinutes</div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(definition.Description))
+                                        {
+                                            <div class="text-muted small tb-card-description">@definition.Description</div>
+                                        }
+                                        <div class="text-muted small mt-2">@definition.CreatorName</div>
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-between align-items-end tb-card-action-column">
+                                        <button type="button"
+                                                class="btn btn-sm btn-app-outline btn-app-icon tb-card-icon-button"
+                                                @onclick="() => AddDefinitionAsync(definition.Id)"
+                                                aria-label="@string.Format(Localizer["TrainingBlockEditor_AddLibraryItemAria"].Value, definition.Title)"
+                                                disabled="@IsWriteBlocked">
+                                            <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                        </button>
+                                        <div class="tb-tag-text text-muted text-end">@FormatDefinitionType(definition)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
 
-            @if (_libraryHasMore)
-            {
-                <div class="text-center mb-3">
-                    <button type="button" class="btn btn-outline-secondary" @onclick="LoadMoreLibraryAsync" disabled="@IsWriteBlocked">@Localizer["TrainingBlockEditor_LoadMoreButton"]</button>
-                </div>
-            }
-        }
+                    @if (_libraryHasMore)
+                    {
+                        <div class="text-center mt-2">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="LoadMoreLibraryAsync" disabled="@IsWriteBlocked">@Localizer["TrainingBlockEditor_LoadMoreButton"]</button>
+                        </div>
+                    }
+                }
+            </Body>
+        </CardComponent>
     }
 
     @if (_panel == EditorPanel.New)
@@ -279,44 +288,36 @@ else
                         }
                         else
                         {
-                            <div class="d-flex justify-content-between gap-3 flex-wrap">
+                            <div class="d-flex justify-content-between gap-3">
                                 <div class="flex-grow-1 min-w-0">
-                                    <div class="d-flex justify-content-between gap-2 align-items-start flex-wrap">
-                                        <div>
-                                            <div class="fw-semibold">@block.OrderIndex. @block.Title</div>
-                                            <div class="text-muted small mt-1">
-                                                <i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes
-                                                <span class="ms-2">@string.Format(Localizer["TrainingBlockEditor_ParticipantsRange"].Value, block.MinParticipants, block.MaxParticipants)</span>
-                                            </div>
+                                    <div class="d-flex justify-content-between align-items-start gap-2">
+                                        <div class="fw-semibold text-truncate">@block.OrderIndex. @block.Title</div>
+                                        <div class="tb-tag-text text-muted text-nowrap d-flex align-items-center gap-1">
+                                            <i class="@AppIcons.Stopwatch" aria-hidden="true"></i>@block.PlannedDurationMinutes
+                                            <span>@FormatExecutionType(block)</span>
                                         </div>
-                                        <div class="tb-tag-text text-muted text-end">@FormatExecutionType(block)</div>
                                     </div>
                                     @if (!string.IsNullOrWhiteSpace(block.Description))
                                     {
-                                        <div class="mt-2">@block.Description</div>
-                                    }
-                                    @if (block.EffectiveDurationMinutes.HasValue || !string.IsNullOrWhiteSpace(block.TrainerComment))
-                                    {
-                                        <div class="text-muted small mt-2">
-                                            @if (block.EffectiveDurationMinutes.HasValue)
-                                            {
-                                                <span>@string.Format(Localizer["TrainingBlockEditor_ActualDurationValue"].Value, block.EffectiveDurationMinutes.Value)</span>
-                                            }
-                                            @if (!string.IsNullOrWhiteSpace(block.TrainerComment))
-                                            {
-                                                <span class="ms-2">@block.TrainerComment</span>
-                                            }
+                                        <div class="text-muted mt-1">
+                                            <ExpandableTextComponent Text="@block.Description"
+                                                                      MaxLines="2"
+                                                                      StartCollapsed="true"
+                                                                      ShowMoreLabel="@Localizer["Shared_ShowMore"]"
+                                                                      ShowLessLabel="@Localizer["Shared_ShowLess"]" />
                                         </div>
                                     }
                                 </div>
-                                <div class="d-flex align-items-start gap-2 ms-auto">
-                                    <button type="button" class="btn btn-sm btn-outline-danger btn-app-icon tb-card-icon-button" @onclick="() => DeleteExecutionAsync(block.Id)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_DeleteExecutionAria"].Value, block.Title)">
-                                        <i class="@AppIcons.TrainingBlockDelete" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary btn-app-icon tb-card-icon-button" @onclick="() => StartEditExecution(block)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_AdjustExecutionAria"].Value, block.Title)">
-                                        <i class="@AppIcons.TrainingBlockAdjust" aria-hidden="true"></i>
-                                    </button>
-                                    <div class="d-flex flex-column gap-1 tb-card-move-buttons">
+                                <div class="d-flex gap-2 tb-card-actions">
+                                    <div class="d-flex flex-column gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary btn-app-icon tb-card-icon-button" @onclick="() => StartEditExecution(block)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_AdjustExecutionAria"].Value, block.Title)">
+                                            <i class="@AppIcons.TrainingBlockAdjust" aria-hidden="true"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-app-icon tb-card-icon-button" @onclick="() => DeleteExecutionAsync(block.Id)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_DeleteExecutionAria"].Value, block.Title)">
+                                            <i class="@AppIcons.TrainingBlockDelete" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <div class="d-flex flex-column gap-2 tb-card-move-buttons">
                                         <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionUpAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == 1)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveUpAria"].Value, block.Title)">
                                             <i class="@AppIcons.TrainingBlockMoveUp" aria-hidden="true"></i>
                                         </button>
@@ -376,7 +377,8 @@ else
     private List<TrainingBlockDefinitionDto> _libraryResults = [];
     private List<TrainingBlockLibraryCreatorDto> _libraryCreators = [];
     private bool _libraryHasMore;
-    private const int LibraryPageSize = 8;
+    private bool _librarySearchPerformed;
+    private const int LibraryPageSize = 5;
     private int? _libraryTagId;
     private int? _libraryCreatorId;
     private int? _libraryMinDuration;
@@ -450,8 +452,30 @@ else
         _errorMessage = null;
         if (_panel == EditorPanel.Add)
         {
-            await SearchLibraryAsync();
+            _libraryTagId = null;
+            _libraryCreatorId = null;
+            _libraryMinDuration = null;
+            _libraryMaxDuration = null;
+            _librarySearchText = null;
+            _libraryResults.Clear();
+            _libraryHasMore = false;
+            _librarySearchPerformed = false;
+            await RefreshLibraryCreatorOptionsAsync();
         }
+    }
+
+    /// <summary>
+    /// Fetches the Creator filter's dropdown options without running a full (result-producing) library search.
+    /// </summary>
+    private async Task RefreshLibraryCreatorOptionsAsync()
+    {
+        var result = await TrainingBlockLibraryService.SearchAsync(new TrainingBlockLibrarySearchDto
+        {
+            GroupId = _trainingGroupId,
+            Skip = 0,
+            Take = 0
+        });
+        _libraryCreators = result.CreatorOptions.ToList();
     }
 
     private async Task OpenNewPanel()
@@ -493,6 +517,7 @@ else
         _appliedLibraryMinDuration = _libraryMinDuration;
         _appliedLibraryMaxDuration = _libraryMaxDuration;
         _appliedLibrarySearchText = _librarySearchText;
+        _librarySearchPerformed = true;
         await LoadLibraryAsync(reset: true);
     }
 

@@ -2208,6 +2208,12 @@
   <data name="TrainingBlockEditor_NoLibraryResults" xml:space="preserve">
     <value>Nothing found — create a new one.</value>
   </data>
+  <data name="TrainingBlockEditor_LibraryResultsTitle" xml:space="preserve">
+    <value>Library search results</value>
+  </data>
+  <data name="TrainingBlockEditor_LibrarySearchPrompt" xml:space="preserve">
+    <value>Set your filters and click Search to find blocks.</value>
+  </data>
   <data name="TrainingBlockEditor_AddLibraryItemAria" xml:space="preserve">
     <value>Add {0}</value>
   </data>
@@ -2264,12 +2270,6 @@
   </data>
   <data name="TrainingBlockEditor_NoBlocksMessage" xml:space="preserve">
     <value>No blocks added yet.</value>
-  </data>
-  <data name="TrainingBlockEditor_ParticipantsRange" xml:space="preserve">
-    <value>Best for {0} to {1} people</value>
-  </data>
-  <data name="TrainingBlockEditor_ActualDurationValue" xml:space="preserve">
-    <value>Actual: {0} min</value>
   </data>
   <data name="TrainingBlockEditor_DeleteExecutionAria" xml:space="preserve">
     <value>Delete {0}</value>
