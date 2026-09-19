@@ -44,7 +44,7 @@
 
         <EditForm Model="_formModel" OnValidSubmit="SaveTrainingAsync">
             <DataAnnotationsValidator />
-            <CardComponent IsCollapsable="true" Collapsed="false" ShowFooter="true" HeaderCssClass="card-header-nowrap">
+            <CardComponent IsCollapsable="true" Collapsed="@_hasExistingBlocks" ShowFooter="true" HeaderCssClass="card-header-nowrap">
                 <Title>
                     @if (_isEdit)
                     {
@@ -233,6 +233,7 @@
     private bool _loading = true;
     private bool _saving;
     private int _registeredCount;
+    private bool _hasExistingBlocks;
     private ToastComponent? _toast;
     private bool _showNoBlocksConfirm;
     private bool _showDurationMismatchConfirm;
@@ -304,6 +305,7 @@
                 : groups.Where(g => g.IsActive && managedGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
 
             _persistedTrainingId = Id.Value;
+            _hasExistingBlocks = training.Blocks.Count > 0;
             await LoadTraining(training);
         }
         else
