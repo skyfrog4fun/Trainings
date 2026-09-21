@@ -234,7 +234,7 @@ else
         <div class="d-flex flex-column gap-3 mb-3">
             @foreach (var block in _executions)
             {
-                <div class="card tb-card @GetStripeCssClass(block.TagColorToken)">
+                <div class="card tb-card @GetStripeCssClass(block.TagColorToken) @(_panel != EditorPanel.None ? "opacity-50 pe-none" : string.Empty)">
                     <div class="card-body">
                         @if (_editingExecutionId == block.Id)
                         {
