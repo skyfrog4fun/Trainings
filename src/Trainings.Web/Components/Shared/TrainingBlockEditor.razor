@@ -234,7 +234,7 @@ else
         <div class="d-flex flex-column gap-3 mb-3">
             @foreach (var block in _executions)
             {
-                <div class="card tb-card @GetStripeCssClass(block.TagColorToken) @(_panel != EditorPanel.None ? "opacity-50 pe-none" : string.Empty)">
+                <div class="card tb-card @GetStripeCssClass(block.TagColorToken) @((_panel != EditorPanel.None || (_editingExecutionId != 0 && _editingExecutionId != block.Id)) ? "opacity-50 pe-none" : string.Empty)">
                     <div class="card-body">
                         @if (_editingExecutionId == block.Id)
                         {
@@ -246,34 +246,25 @@ else
                                         <InputText class="form-control" maxlength="64" @bind-Value="_editForm.Title" />
                                         <ValidationMessage For="() => _editForm.Title" class="text-danger small" />
                                     </div>
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label">@Localizer["TrainingBlockEditor_DurationFieldLabel"]</label>
-                                        <InputNumber class="form-control" @bind-Value="_editForm.PlannedDurationMinutes" />
-                                        <ValidationMessage For="() => _editForm.PlannedDurationMinutes" class="text-danger small" />
-                                    </div>
                                     <div class="col-12">
                                         <label class="form-label">@Localizer["TrainingBlockEditor_DescriptionLabel"]</label>
                                         <InputTextArea class="form-control" rows="3" maxlength="512" @bind-Value="_editForm.Description" />
                                         <ValidationMessage For="() => _editForm.Description" class="text-danger small" />
                                     </div>
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">@Localizer["TrainingBlockEditor_DurationFieldLabel"]</label>
+                                        <InputNumber class="form-control" @bind-Value="_editForm.PlannedDurationMinutes" />
+                                        <ValidationMessage For="() => _editForm.PlannedDurationMinutes" class="text-danger small" />
+                                    </div>
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label">@Localizer["TrainingBlockEditor_MinParticipantsLabel"]</label>
                                         <InputNumber class="form-control" @bind-Value="_editForm.MinParticipants" />
                                         <ValidationMessage For="() => _editForm.MinParticipants" class="text-danger small" />
                                     </div>
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label">@Localizer["TrainingBlockEditor_MaxParticipantsLabel"]</label>
                                         <InputNumber class="form-control" @bind-Value="_editForm.MaxParticipants" />
                                         <ValidationMessage For="() => _editForm.MaxParticipants" class="text-danger small" />
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label">@Localizer["TrainingBlockEditor_EffectiveDurationLabel"]</label>
-                                        <InputNumber class="form-control" @bind-Value="_editForm.EffectiveDurationMinutes" />
-                                        <ValidationMessage For="() => _editForm.EffectiveDurationMinutes" class="text-danger small" />
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">@Localizer["TrainingBlockEditor_TrainerCommentLabel"]</label>
-                                        <InputTextArea class="form-control" rows="2" @bind-Value="_editForm.TrainerComment" />
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between flex-wrap gap-2 mt-3">
