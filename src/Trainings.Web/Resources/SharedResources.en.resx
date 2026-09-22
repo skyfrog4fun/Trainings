@@ -2262,12 +2262,6 @@
   <data name="TrainingBlockEditor_MaxParticipantsLabel" xml:space="preserve">
     <value>Max. participants</value>
   </data>
-  <data name="TrainingBlockEditor_EffectiveDurationLabel" xml:space="preserve">
-    <value>Actual duration</value>
-  </data>
-  <data name="TrainingBlockEditor_TrainerCommentLabel" xml:space="preserve">
-    <value>Trainer comment</value>
-  </data>
   <data name="TrainingBlockEditor_NoBlocksMessage" xml:space="preserve">
     <value>No blocks added yet.</value>
   </data>
