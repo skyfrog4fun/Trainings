@@ -288,17 +288,19 @@ else
                         }
                         else
                         {
-                            <div class="d-flex flex-column">
-                                <div class="tb-card-header d-flex justify-content-between align-items-start gap-2">
-                                    <div class="fw-semibold text-truncate">@block.OrderIndex. @block.Title</div>
-                                    <div class="tb-tag-text text-muted text-nowrap d-flex align-items-center gap-1">
-                                        <i class="@AppIcons.Stopwatch" aria-hidden="true"></i>@block.PlannedDurationMinutes
-                                        <span>@FormatExecutionType(block)</span>
-                                    </div>
+                            <div class="tb-card-header d-flex justify-content-between align-items-start gap-3">
+                                <div class="fw-semibold text-truncate">@block.OrderIndex. @block.Title</div>
+
+                                <div class="tb-tag-text text-muted text-nowrap d-flex align-items-center gap-1">
+                                    <i class="@AppIcons.Stopwatch" aria-hidden="true"></i>@block.PlannedDurationMinutes | <span>@FormatExecutionType(block)</span>
                                 </div>
-                                <div class="tb-card-content d-flex justify-content-between align-items-start gap-3 mt-2">
-                                    <div class="flex-grow-1 min-w-0">
-                                        @if (!string.IsNullOrWhiteSpace(block.Description))
+
+                            </div>
+
+                            <div class="tb-card-content d-flex justify-content-between align-items-start gap-3 mt-2">
+
+                                <div class="flex-grow-1 min-w-0">
+                                    @if (!string.IsNullOrWhiteSpace(block.Description))
                                         {
                                             <div class="text-muted tb-card-description-slot">
                                                 <ExpandableTextComponent Text="@block.Description"
@@ -308,9 +310,11 @@ else
                                                                           ShowLessLabel="@Localizer["Shared_ShowLess"]" />
                                             </div>
                                         }
-                                    </div>
-                                    <div class="d-flex gap-2 tb-card-actions">
-                                        <div class="d-flex flex-column gap-2 tb-card-actions-primary">
+                                </div>
+
+                                <div class="tb-card-actions d-flex gap-2">
+
+                                    <div class="d-flex flex-column gap-2 tb-card-actions-primary">
                                             <button type="button" class="btn btn-sm btn-outline-primary btn-app-icon tb-card-icon-button" @onclick="() => StartEditExecution(block)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_AdjustExecutionAria"].Value, block.Title)">
                                                 <i class="@AppIcons.TrainingBlockAdjust" aria-hidden="true"></i>
                                             </button>
@@ -326,8 +330,9 @@ else
                                                 <i class="@AppIcons.TrainingBlockMoveDown" aria-hidden="true"></i>
                                             </button>
                                         </div>
-                                    </div>
+
                                 </div>
+
                             </div>
                         }
                     </div>
