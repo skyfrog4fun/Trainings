@@ -1203,8 +1203,16 @@ html {
   min-width: 4.5rem;
 }
 
-.tb-card-move-buttons {
+.tb-card-actions-move {
   min-width: 2.5rem;
+}
+
+/* Reserves the height of the "Show more/less" toggle line so a 2-line description
+   occupies the same vertical space as one whose ExpandableTextComponent renders the
+   toggle, keeping the assigned Training Block card's action buttons consistently
+   aligned regardless of description length. */
+.tb-card-description-slot {
+  min-height: calc(1.5rem * 2 + 1.75rem);
 }
 
 .tb-card-icon-button {

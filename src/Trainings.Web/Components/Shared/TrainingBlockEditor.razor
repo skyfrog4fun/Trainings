@@ -288,42 +288,44 @@ else
                         }
                         else
                         {
-                            <div class="d-flex justify-content-between gap-3">
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="d-flex justify-content-between align-items-start gap-2">
-                                        <div class="fw-semibold text-truncate">@block.OrderIndex. @block.Title</div>
-                                        <div class="tb-tag-text text-muted text-nowrap d-flex align-items-center gap-1">
-                                            <i class="@AppIcons.Stopwatch" aria-hidden="true"></i>@block.PlannedDurationMinutes
-                                            <span>@FormatExecutionType(block)</span>
-                                        </div>
+                            <div class="d-flex flex-column">
+                                <div class="tb-card-header d-flex justify-content-between align-items-start gap-2">
+                                    <div class="fw-semibold text-truncate">@block.OrderIndex. @block.Title</div>
+                                    <div class="tb-tag-text text-muted text-nowrap d-flex align-items-center gap-1">
+                                        <i class="@AppIcons.Stopwatch" aria-hidden="true"></i>@block.PlannedDurationMinutes
+                                        <span>@FormatExecutionType(block)</span>
                                     </div>
-                                    @if (!string.IsNullOrWhiteSpace(block.Description))
-                                    {
-                                        <div class="text-muted mt-1">
-                                            <ExpandableTextComponent Text="@block.Description"
-                                                                      MaxLines="2"
-                                                                      StartCollapsed="true"
-                                                                      ShowMoreLabel="@Localizer["Shared_ShowMore"]"
-                                                                      ShowLessLabel="@Localizer["Shared_ShowLess"]" />
-                                        </div>
-                                    }
                                 </div>
-                                <div class="d-flex gap-2 tb-card-actions">
-                                    <div class="d-flex flex-column gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary btn-app-icon tb-card-icon-button" @onclick="() => StartEditExecution(block)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_AdjustExecutionAria"].Value, block.Title)">
-                                            <i class="@AppIcons.TrainingBlockAdjust" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-app-icon tb-card-icon-button" @onclick="() => DeleteExecutionAsync(block.Id)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_DeleteExecutionAria"].Value, block.Title)">
-                                            <i class="@AppIcons.TrainingBlockDelete" aria-hidden="true"></i>
-                                        </button>
+                                <div class="tb-card-content d-flex justify-content-between align-items-start gap-3 mt-2">
+                                    <div class="flex-grow-1 min-w-0">
+                                        @if (!string.IsNullOrWhiteSpace(block.Description))
+                                        {
+                                            <div class="text-muted tb-card-description-slot">
+                                                <ExpandableTextComponent Text="@block.Description"
+                                                                          MaxLines="2"
+                                                                          StartCollapsed="true"
+                                                                          ShowMoreLabel="@Localizer["Shared_ShowMore"]"
+                                                                          ShowLessLabel="@Localizer["Shared_ShowLess"]" />
+                                            </div>
+                                        }
                                     </div>
-                                    <div class="d-flex flex-column gap-2 tb-card-move-buttons">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionUpAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == 1)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveUpAria"].Value, block.Title)">
-                                            <i class="@AppIcons.TrainingBlockMoveUp" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionDownAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == _executions.Count)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveDownAria"].Value, block.Title)">
-                                            <i class="@AppIcons.TrainingBlockMoveDown" aria-hidden="true"></i>
-                                        </button>
+                                    <div class="d-flex gap-2 tb-card-actions">
+                                        <div class="d-flex flex-column gap-2 tb-card-actions-primary">
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-app-icon tb-card-icon-button" @onclick="() => StartEditExecution(block)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_AdjustExecutionAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockAdjust" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-app-icon tb-card-icon-button" @onclick="() => DeleteExecutionAsync(block.Id)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_DeleteExecutionAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockDelete" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2 tb-card-actions-move">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionUpAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == 1)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveUpAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockMoveUp" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionDownAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == _executions.Count)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveDownAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockMoveDown" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
