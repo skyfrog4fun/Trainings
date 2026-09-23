@@ -9,7 +9,7 @@ namespace Trainings.Application.Tests.Services;
 public class TrainingBlockServiceTests
 {
     [Fact]
-    public async Task CreateDefinitionAndAddExecutionAsync_CreatesDefinitionAndLocalExecutionCopy()
+    public async Task CreateDefinitionAndAddExecutionAsyncCreatesDefinitionAndLocalExecutionCopy()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
         var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
@@ -36,7 +36,7 @@ public class TrainingBlockServiceTests
     }
 
     [Fact]
-    public async Task CreateDefinitionAndAddExecutionAsync_RequiresGameWhenUsingGameTag()
+    public async Task CreateDefinitionAndAddExecutionAsyncRequiresGameWhenUsingGameTag()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
         var gameTag = await TrainingBlockTestData.AddGameTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
@@ -55,7 +55,7 @@ public class TrainingBlockServiceTests
     }
 
     [Fact]
-    public async Task CreateDefinitionAndAddExecutionAsync_CreatesAdHocGameForGameTag()
+    public async Task CreateDefinitionAndAddExecutionAsyncCreatesAdHocGameForGameTag()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
         var gameTag = await TrainingBlockTestData.AddGameTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
@@ -78,7 +78,7 @@ public class TrainingBlockServiceTests
     }
 
     [Fact]
-    public async Task CreateDefinitionAndAddExecutionAsync_ValidatesTitleAndParticipantRules()
+    public async Task CreateDefinitionAndAddExecutionAsyncValidatesTitleAndParticipantRules()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
         var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
@@ -97,7 +97,7 @@ public class TrainingBlockServiceTests
     }
 
     [Fact]
-    public async Task AddUpdateMoveAndDeleteAsync_ManageExecutionOrderAndOverrides()
+    public async Task AddUpdateMoveAndDeleteAsyncManageExecutionOrderAndOverrides()
     {
         await using var scope = await CreateScopeAsync(UserRole.SuperAdmin);
         var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
