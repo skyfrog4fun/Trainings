@@ -9,7 +9,7 @@ namespace Trainings.Application.Tests.Services;
 public class TagAdminServiceTests
 {
     [Fact]
-    public async Task GetActiveForSelectionAsync_ReturnsLocalizedOrderedTags()
+    public async Task GetActiveForSelectionAsyncReturnsLocalizedOrderedTags()
     {
         using var cultureScope = new TagCultureScope("de-DE");
         await using var scope = await CreateScopeAsync();
@@ -25,7 +25,7 @@ public class TagAdminServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_PersistsTranslationsAndMetadata()
+    public async Task UpdateAsyncPersistsTranslationsAndMetadata()
     {
         await using var scope = await CreateScopeAsync();
         var tag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
@@ -52,7 +52,7 @@ public class TagAdminServiceTests
     }
 
     [Fact]
-    public async Task CreateAndToggleAsync_ValidatesAllowedColorTokenAndActiveState()
+    public async Task CreateAndToggleAsyncValidatesAllowedColorTokenAndActiveState()
     {
         await using var scope = await CreateScopeAsync();
 

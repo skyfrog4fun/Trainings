@@ -19,7 +19,7 @@ namespace Trainings.Application.Tests.Services;
 public class DbSeederTagSeedingTests
 {
     [Fact]
-    public async Task SeedTagAndGameCatalogAsync_SeedsExpectedFixedTags()
+    public async Task SeedTagAndGameCatalogAsyncSeedsExpectedFixedTags()
     {
         await using var scope = await CreateSeederScopeAsync();
 
@@ -48,7 +48,7 @@ public class DbSeederTagSeedingTests
     }
 
     [Fact]
-    public async Task SeedTagAndGameCatalogAsync_SeedsStarterGamesIncludingFallback()
+    public async Task SeedTagAndGameCatalogAsyncSeedsStarterGamesIncludingFallback()
     {
         await using var scope = await CreateSeederScopeAsync();
 
@@ -64,7 +64,7 @@ public class DbSeederTagSeedingTests
     }
 
     [Fact]
-    public async Task SeedTagAndGameCatalogAsync_DoesNotDuplicateWhenRunTwice()
+    public async Task SeedTagAndGameCatalogAsyncDoesNotDuplicateWhenRunTwice()
     {
         await using var scope = await CreateSeederScopeAsync();
 

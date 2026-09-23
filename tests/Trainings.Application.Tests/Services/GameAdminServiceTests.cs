@@ -7,7 +7,7 @@ namespace Trainings.Application.Tests.Services;
 public class GameAdminServiceTests
 {
     [Fact]
-    public async Task CreateAdHocAsync_CreatesUnapprovedGameAndDeduplicatesByName()
+    public async Task CreateAdHocAsyncCreatesUnapprovedGameAndDeduplicatesByName()
     {
         await using var scope = await CreateScopeAsync();
         var creator = await TrainingBlockTestData.AddUserAsync(scope.Context, "Ava", "Coach", "ava@example.com", ct: TestContext.Current.CancellationToken);
@@ -23,7 +23,7 @@ public class GameAdminServiceTests
     }
 
     [Fact]
-    public async Task ApproveAndRenameAsync_PersistsStateAndTranslations()
+    public async Task ApproveAndRenameAsyncPersistsStateAndTranslations()
     {
         await using var scope = await CreateScopeAsync();
         var game = await TrainingBlockTestData.AddGameAsync(scope.Context, scope.TranslationService, "Soccer", "Fussball", isApproved: false, ct: TestContext.Current.CancellationToken);
@@ -40,7 +40,7 @@ public class GameAdminServiceTests
     }
 
     [Fact]
-    public async Task DeactivateAsync_ThrowsForSystemFallbackGame()
+    public async Task DeactivateAsyncThrowsForSystemFallbackGame()
     {
         await using var scope = await CreateScopeAsync();
         var game = await TrainingBlockTestData.AddGameAsync(scope.Context, scope.TranslationService, "Other/Unspecified", "Andere/Nicht angegeben", isSystemFallback: true, ct: TestContext.Current.CancellationToken);

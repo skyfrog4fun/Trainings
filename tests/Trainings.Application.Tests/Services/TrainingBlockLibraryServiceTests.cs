@@ -8,7 +8,7 @@ namespace Trainings.Application.Tests.Services;
 public class TrainingBlockLibraryServiceTests
 {
     [Fact]
-    public async Task SearchAsync_FiltersByVisibilityAndSearchInputs()
+    public async Task SearchAsyncFiltersByVisibilityAndSearchInputs()
     {
         await using var scope = await CreateScopeAsync();
         var creatorOne = await TrainingBlockTestData.AddUserAsync(scope.Context, "Nina", "North", "nina@example.com", ct: TestContext.Current.CancellationToken);
@@ -39,7 +39,7 @@ public class TrainingBlockLibraryServiceTests
     }
 
     [Fact]
-    public async Task SearchAsync_PaginatesVisibleDefinitions()
+    public async Task SearchAsyncPaginatesVisibleDefinitions()
     {
         await using var scope = await CreateScopeAsync();
         var creator = await TrainingBlockTestData.AddUserAsync(scope.Context, "Lia", "Lane", "lia@example.com", ct: TestContext.Current.CancellationToken);

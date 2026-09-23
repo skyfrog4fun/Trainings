@@ -13,7 +13,7 @@ namespace Trainings.Application.Tests.Services;
 public class TrainingServiceTests
 {
     [Fact]
-    public async Task GetByIdAsync_MapsExecutionBlocksWithResolvedTagAndGameTexts()
+    public async Task GetByIdAsyncMapsExecutionBlocksWithResolvedTagAndGameTexts()
     {
         using var cultureScope = new CultureScope("de-DE");
         await using var scope = CreateServiceScope();
@@ -93,7 +93,7 @@ public class TrainingServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_LeavesGameDisplayEmptyForNonGameBlocks()
+    public async Task GetAllAsyncLeavesGameDisplayEmptyForNonGameBlocks()
     {
         await using var scope = CreateServiceScope();
 
