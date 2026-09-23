@@ -16,12 +16,7 @@ public enum GroupDeletionBlockReason
 /// so callers (e.g. the Web layer) can localize the failure instead of relying on
 /// <see cref="Exception.Message"/>, which is always English.
 /// </summary>
-public class GroupDeletionBlockedException : InvalidOperationException
+public class GroupDeletionBlockedException(GroupDeletionBlockReason reason, string message) : InvalidOperationException(message)
 {
-    public GroupDeletionBlockReason Reason { get; }
-
-    public GroupDeletionBlockedException(GroupDeletionBlockReason reason, string message) : base(message)
-    {
-        Reason = reason;
-    }
+    public GroupDeletionBlockReason Reason { get; } = reason;
 }

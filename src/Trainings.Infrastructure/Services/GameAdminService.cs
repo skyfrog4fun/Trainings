@@ -22,7 +22,7 @@ public class GameAdminService(ApplicationDbContext context, ITranslationService 
 
         var translations = await _translationService.GetTextLookupAsync(TranslationEntityType.Game, games.Select(g => g.Id), ct);
 
-        return games.Select(game =>
+        return [.. games.Select(game =>
         {
             translations.TryGetValue(game.Id, out var text);
             return new GameAdminDto
@@ -36,7 +36,7 @@ public class GameAdminService(ApplicationDbContext context, ITranslationService 
                 CreatedByUserId = game.CreatedByUserId,
                 CreatedAt = game.CreatedAt
             };
-        }).ToList();
+        })];
     }
 
     public async Task<IReadOnlyList<GameDto>> GetActiveForSelectionAsync(CancellationToken ct = default)
@@ -49,7 +49,7 @@ public class GameAdminService(ApplicationDbContext context, ITranslationService 
             .ToListAsync(ct);
 
         var translations = await _translationService.GetTextLookupAsync(TranslationEntityType.Game, games.Select(g => g.Id), ct);
-        return games.Select(game => MapGameDto(game, translations)).ToList();
+        return [.. games.Select(game => MapGameDto(game, translations))];
     }
 
     public async Task<GameDto> CreateAdHocAsync(string name, int requestingUserId, CancellationToken ct = default)
@@ -61,7 +61,7 @@ public class GameAdminService(ApplicationDbContext context, ITranslationService 
             throw new InvalidOperationException("Game name is required.");
         }
 
-        var normalizedName = name.Trim();
+        string normalizedName = name.Trim();
         var existingMatch = await FindExistingByNameAsync(normalizedName, ct);
         if (existingMatch is not null)
         {

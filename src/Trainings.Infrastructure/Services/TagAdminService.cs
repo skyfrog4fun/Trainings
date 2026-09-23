@@ -19,7 +19,7 @@ public class TagAdminService(ApplicationDbContext context, ITranslationService t
         var tags = await _context.Tags.OrderBy(t => t.DisplayOrder).ToListAsync(ct);
         var translations = await _translationService.GetTextLookupAsync(TranslationEntityType.Tag, tags.Select(t => t.Id), ct);
 
-        return tags.Select(tag =>
+        return [.. tags.Select(tag =>
         {
             translations.TryGetValue(tag.Id, out var text);
             return new TagAdminDto
@@ -32,7 +32,7 @@ public class TagAdminService(ApplicationDbContext context, ITranslationService t
                 DisplayOrder = tag.DisplayOrder,
                 IsActive = tag.IsActive
             };
-        }).ToList();
+        })];
     }
 
     public async Task<IReadOnlyList<TagDto>> GetActiveForSelectionAsync(CancellationToken ct = default)

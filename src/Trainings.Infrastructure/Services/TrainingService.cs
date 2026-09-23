@@ -289,7 +289,7 @@ public class TrainingService(
             TranslationEntityType.Game,
             blocks.Where(b => b.Definition.GameId.HasValue).Select(b => b.Definition.GameId!.Value));
 
-        return trainingList.Select(training => MapTraining(training, tagTexts, gameTexts)).ToList();
+        return [.. trainingList.Select(training => MapTraining(training, tagTexts, gameTexts))];
     }
 
     private async Task<TrainingDto> MapToDtoAsync(Training training)

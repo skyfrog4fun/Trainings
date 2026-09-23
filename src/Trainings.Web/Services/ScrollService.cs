@@ -52,7 +52,7 @@ public sealed class ScrollService(IJSRuntime jsRuntime) : IAsyncDisposable
             return;
         }
 
-        var markerId = _pendingMarkerId;
+        string markerId = _pendingMarkerId;
         _pendingMarkerId = null;
         await ScrollToAsync(markerId);
     }

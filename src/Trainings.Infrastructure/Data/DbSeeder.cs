@@ -23,7 +23,7 @@ public partial class DbSeeder(
     private readonly ILogger<DbSeeder> _logger = logger;
     private readonly ITranslationService _translationService = translationService;
 
-    private static readonly (string Key, string EnglishText, string GermanText, string ColorToken, int DisplayOrder)[] FixedTags =
+    private static readonly (string Key, string EnglishText, string GermanText, string ColorToken, int DisplayOrder)[] _fixedTags =
     [
         (TrainingBlockCatalog.TagKeys.WarmUp, "Warm-Up", "Warm-Up", TrainingBlockCatalog.ColorTokens.Community, 1),
         (TrainingBlockCatalog.TagKeys.Fitness, "Fitness", "Fitness", TrainingBlockCatalog.ColorTokens.Accent, 2),
@@ -33,7 +33,7 @@ public partial class DbSeeder(
         (TrainingBlockCatalog.TagKeys.Other, "Other", "Sonstiges", TrainingBlockCatalog.ColorTokens.Tradition60, 6)
     ];
 
-    private static readonly (string EnglishText, string GermanText, bool IsSystemFallback)[] SeedGames =
+    private static readonly (string EnglishText, string GermanText, bool IsSystemFallback)[] _seedGames =
     [
         ("Soccer", "Fussball", false),
         ("Floorball", "Unihockey", false),
@@ -57,8 +57,8 @@ public partial class DbSeeder(
 
         if (!await _context.Users.AnyAsync())
         {
-            var email = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
-            var password = _configuration["Seed:Password"] ?? "Admin123!";
+            string email = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
+            string password = _configuration["Seed:Password"] ?? "Admin123!";
 
             var superAdmin = new User
             {
@@ -80,16 +80,16 @@ public partial class DbSeeder(
 
     private async Task SeedTagsAsync()
     {
-        foreach (var seed in FixedTags)
+        foreach (var (Key, EnglishText, GermanText, ColorToken, DisplayOrder) in _fixedTags)
         {
-            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Key == seed.Key);
+            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Key == Key);
             if (tag == null)
             {
                 tag = new Tag
                 {
-                    Key = seed.Key,
-                    ColorToken = seed.ColorToken,
-                    DisplayOrder = seed.DisplayOrder,
+                    Key = Key,
+                    ColorToken = ColorToken,
+                    DisplayOrder = DisplayOrder,
                     IsActive = true
                 };
                 _context.Tags.Add(tag);
@@ -97,22 +97,22 @@ public partial class DbSeeder(
             }
             else
             {
-                tag.ColorToken = seed.ColorToken;
-                tag.DisplayOrder = seed.DisplayOrder;
+                tag.ColorToken = ColorToken;
+                tag.DisplayOrder = DisplayOrder;
                 tag.IsActive = true;
                 await _context.SaveChangesAsync();
             }
 
-            await _translationService.UpsertAsync(TranslationEntityType.Tag, tag.Id, seed.EnglishText, seed.GermanText);
+            await _translationService.UpsertAsync(TranslationEntityType.Tag, tag.Id, EnglishText, GermanText);
         }
     }
 
     private async Task SeedGamesAsync()
     {
-        foreach (var seed in SeedGames)
+        foreach (var (EnglishText, GermanText, IsSystemFallback) in _seedGames)
         {
             var translationIds = await _context.Translations
-                .Where(t => t.EntityType == TranslationEntityType.Game && (t.Text == seed.EnglishText || t.Text == seed.GermanText))
+                .Where(t => t.EntityType == TranslationEntityType.Game && (t.Text == EnglishText || t.Text == GermanText))
                 .Select(t => t.EntityId)
                 .Distinct()
                 .ToListAsync();
@@ -129,7 +129,7 @@ public partial class DbSeeder(
                 {
                     IsActive = true,
                     IsApproved = true,
-                    IsSystemFallback = seed.IsSystemFallback,
+                    IsSystemFallback = IsSystemFallback,
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Games.Add(game);
@@ -137,13 +137,13 @@ public partial class DbSeeder(
             }
             else
             {
-                game.IsSystemFallback = seed.IsSystemFallback;
+                game.IsSystemFallback = IsSystemFallback;
                 game.IsActive = true;
                 game.IsApproved = true;
                 await _context.SaveChangesAsync();
             }
 
-            await _translationService.UpsertAsync(TranslationEntityType.Game, game.Id, seed.EnglishText, seed.GermanText);
+            await _translationService.UpsertAsync(TranslationEntityType.Game, game.Id, EnglishText, GermanText);
         }
     }
 
@@ -175,20 +175,20 @@ public partial class DbSeeder(
 
     private Task EnsureDataDirectoryExistsAsync()
     {
-        var connectionString = _context.Database.GetConnectionString();
+        string? connectionString = _context.Database.GetConnectionString();
         if (string.IsNullOrEmpty(connectionString))
         {
             return Task.CompletedTask;
         }
 
         var builder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString);
-        var dbPath = builder.DataSource;
+        string dbPath = builder.DataSource;
         if (string.IsNullOrEmpty(dbPath))
         {
             return Task.CompletedTask;
         }
 
-        var directory = Path.GetDirectoryName(dbPath);
+        string? directory = Path.GetDirectoryName(dbPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             LogCreatingDataDirectory(_logger, directory);
@@ -212,7 +212,7 @@ public partial class DbSeeder(
         {
             using var checkTablesCmd = connection.CreateCommand();
             checkTablesCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='Users'";
-            var tablesExist = await checkTablesCmd.ExecuteScalarAsync() is long tableCount && tableCount > 0;
+            bool tablesExist = await checkTablesCmd.ExecuteScalarAsync() is long tableCount && tableCount > 0;
             if (!tablesExist)
             {
                 return;
@@ -220,13 +220,13 @@ public partial class DbSeeder(
 
             using var checkHistoryCmd = connection.CreateCommand();
             checkHistoryCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsHistory'";
-            var historyTableExists = await checkHistoryCmd.ExecuteScalarAsync() is long historyCount && historyCount > 0;
+            bool historyTableExists = await checkHistoryCmd.ExecuteScalarAsync() is long historyCount && historyCount > 0;
 
             if (historyTableExists)
             {
                 using var checkRowsCmd = connection.CreateCommand();
                 checkRowsCmd.CommandText = "SELECT COUNT(*) FROM \"__EFMigrationsHistory\"";
-                var rowCount = await checkRowsCmd.ExecuteScalarAsync() is long rows ? rows : 0;
+                long rowCount = await checkRowsCmd.ExecuteScalarAsync() is long rows ? rows : 0;
                 if (rowCount > 0)
                 {
                     return;
@@ -291,7 +291,7 @@ public partial class DbSeeder(
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = '{column}'";
-        var result = await cmd.ExecuteScalarAsync();
+        object? result = await cmd.ExecuteScalarAsync();
         return result is long count && count > 0;
     }
 }

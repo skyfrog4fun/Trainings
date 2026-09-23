@@ -7,12 +7,7 @@ namespace Trainings.Application.Exceptions;
 /// Carries the structured <see cref="PasswordValidationError"/> reason so callers (e.g. the Web layer)
 /// can localize the failure instead of relying on <see cref="Exception.Message"/>, which is always English.
 /// </summary>
-public class PasswordPolicyViolationException : ArgumentException
+public class PasswordPolicyViolationException(PasswordValidationError error, string message, string paramName) : ArgumentException(message, paramName)
 {
-    public PasswordValidationError Error { get; }
-
-    public PasswordPolicyViolationException(PasswordValidationError error, string message, string paramName) : base(message, paramName)
-    {
-        Error = error;
-    }
+    public PasswordValidationError Error { get; } = error;
 }

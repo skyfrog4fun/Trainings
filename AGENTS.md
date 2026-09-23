@@ -27,7 +27,11 @@ This file is the canonical instruction source for AI-assisted work in this repos
 - Use `PascalCase` for types, methods, properties, events, and public members.
 - Use `camelCase` for local variables and parameters.
 - Use `_camelCase` for private instance fields.
-- Use `PascalCase` for constants; avoid `ALL_CAPS`.
+- Use `PascalCase` for constants; avoid `ALL_CAPS`. This applies to `public`/`internal`
+  constants that are part of a type's exposed contract (e.g. shared key/token catalogs).
+- Use `_camelCase` for `private` `const` and `private static readonly` fields, same as
+  private instance fields, since they are implementation details rather than part of a
+  contract.
 - Prefix interfaces with `I`.
 - Suffix async methods with `Async`.
 

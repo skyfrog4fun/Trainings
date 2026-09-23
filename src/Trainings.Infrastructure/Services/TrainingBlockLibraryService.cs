@@ -55,7 +55,7 @@ public class TrainingBlockLibraryService(ApplicationDbContext context, ITranslat
 
         return new TrainingBlockLibrarySearchResultDto
         {
-            Items = definitions.Select(d => TrainingBlockMappingHelper.MapDefinition(d, tagTexts, gameTexts)).ToList(),
+            Items = [.. definitions.Select(d => TrainingBlockMappingHelper.MapDefinition(d, tagTexts, gameTexts))],
             CreatorOptions = creatorOptions,
             HasMore = hasMore
         };

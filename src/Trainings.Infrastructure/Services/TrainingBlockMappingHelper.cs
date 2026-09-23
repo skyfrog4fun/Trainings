@@ -10,7 +10,7 @@ internal static class TrainingBlockMappingHelper
         IReadOnlyDictionary<int, TranslationTextsDto> tagTexts,
         IReadOnlyDictionary<int, TranslationTextsDto> gameTexts)
     {
-        var tagText = tagTexts.TryGetValue(definition.TagId, out var resolvedTagText)
+        string tagText = tagTexts.TryGetValue(definition.TagId, out var resolvedTagText)
             ? resolvedTagText.CurrentText
             : definition.Tag.Key;
 

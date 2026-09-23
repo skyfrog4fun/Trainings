@@ -53,8 +53,8 @@ public class TrainingBlockService(
         var creator = await _context.Users.FirstOrDefaultAsync(u => u.Id == creatorId, ct)
             ?? throw new InvalidOperationException($"User {creatorId} not found.");
 
-        var resolvedGameId = await ResolveGameIdAsync(tag.Key, dto.GameId, dto.NewGameName, creatorId, ct);
-        var isSuperAdmin = creator.Role == UserRole.SuperAdmin;
+        int? resolvedGameId = await ResolveGameIdAsync(tag.Key, dto.GameId, dto.NewGameName, creatorId, ct);
+        bool isSuperAdmin = creator.Role == UserRole.SuperAdmin;
 
         var definition = new TrainingBlockDefinition
         {
@@ -203,12 +203,8 @@ public class TrainingBlockService(
 
         if (gameId.HasValue)
         {
-            var existingGame = await _context.Games.FirstOrDefaultAsync(g => g.Id == gameId.Value && g.IsActive, ct);
-            if (existingGame is null)
-            {
-                throw new InvalidOperationException("The selected game is not available.");
-            }
-
+            var existingGame = await _context.Games.FirstOrDefaultAsync(g => g.Id == gameId.Value && g.IsActive, ct)
+                ?? throw new InvalidOperationException("The selected game is not available.");
             return existingGame.Id;
         }
 
@@ -229,7 +225,7 @@ public class TrainingBlockService(
             executions.Where(e => e.Definition.GameId.HasValue).Select(e => e.Definition.GameId!.Value),
             ct);
 
-        return executions.Select(execution => TrainingBlockMappingHelper.MapExecution(execution, tagTexts, gameTexts)).ToList();
+        return [.. executions.Select(execution => TrainingBlockMappingHelper.MapExecution(execution, tagTexts, gameTexts))];
     }
 
     private async Task<TrainingBlockDto> GetExecutionByIdAsync(int executionId, CancellationToken ct)

@@ -208,10 +208,7 @@ public class UserRegistrationService(
         var user = await _context.Users.FindAsync([userId], ct)
             ?? throw new InvalidOperationException($"User {userId} not found.");
 
-        if (user.EntryDate is null)
-        {
-            user.EntryDate = DateTime.UtcNow;
-        }
+        user.EntryDate ??= DateTime.UtcNow;
 
         var managedGroupIds = GetManagedGroupIds();
         var pendingMemberships = await _context.GroupMemberships

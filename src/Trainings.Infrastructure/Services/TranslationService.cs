@@ -40,9 +40,9 @@ public class TranslationService(ApplicationDbContext context) : ITranslationServ
                 group => group.Key,
                 group =>
                 {
-                    var englishText = group.FirstOrDefault(t => t.Culture == "en")?.Text ?? string.Empty;
-                    var germanText = group.FirstOrDefault(t => t.Culture == "de")?.Text ?? englishText;
-                    var currentText = currentCulture == "de"
+                    string englishText = group.FirstOrDefault(t => t.Culture == "en")?.Text ?? string.Empty;
+                    string germanText = group.FirstOrDefault(t => t.Culture == "de")?.Text ?? englishText;
+                    string currentText = currentCulture == "de"
                         ? (string.IsNullOrWhiteSpace(germanText) ? englishText : germanText)
                         : (string.IsNullOrWhiteSpace(englishText) ? germanText : englishText);
 

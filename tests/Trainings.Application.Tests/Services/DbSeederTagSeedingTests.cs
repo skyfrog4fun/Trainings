@@ -83,7 +83,7 @@ public class DbSeederTagSeedingTests
         var method = typeof(DbSeeder).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
         method.Should().NotBeNull();
 
-        var result = method!.Invoke(seeder, null);
+        object? result = method!.Invoke(seeder, null);
         result.Should().BeAssignableTo<Task>();
         await (Task)result!;
     }

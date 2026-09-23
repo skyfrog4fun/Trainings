@@ -14,7 +14,7 @@ namespace Trainings.Application.Tests.Services;
 
 public class UserRegistrationServiceTests
 {
-    private const string ValidPassword = "Passw0rd!";
+    private const string _validPassword = "Passw0rd!";
 
     [Fact]
     public async Task RegisterAsyncSendsOneEmailPerGroupToGroupAdminsWithSuperAdminsCcd()
@@ -44,7 +44,7 @@ public class UserRegistrationServiceTests
             FirstName = "John",
             LastName = "Doe",
             Email = "john.doe@example.com",
-            Password = ValidPassword,
+            Password = _validPassword,
             Gender = Gender.Male,
             RequestedGroupIds = [groupA.Id, groupB.Id]
         };
@@ -93,7 +93,7 @@ public class UserRegistrationServiceTests
             FirstName = "John",
             LastName = "Doe",
             Email = "john.doe@example.com",
-            Password = ValidPassword,
+            Password = _validPassword,
             Gender = Gender.Male,
             RequestedGroupIds = []
         };
@@ -132,7 +132,7 @@ public class UserRegistrationServiceTests
             FirstName = "John",
             LastName = "Doe",
             Email = "john.doe@example.com",
-            Password = ValidPassword,
+            Password = _validPassword,
             Gender = Gender.Male,
             RequestedGroupIds = [groupWithoutAdmins.Id]
         };

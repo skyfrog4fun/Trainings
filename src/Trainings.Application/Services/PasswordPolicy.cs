@@ -19,35 +19,35 @@ public enum PasswordValidationError
 /// </summary>
 public static class PasswordPolicy
 {
-    private const int MinLength = 8;
-    private const int GeneratedLength = 12;
+    private const int _minLength = 8;
+    private const int _generatedLength = 12;
 
-    private const string Upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-    private const string Lower = "abcdefghjkmnpqrstuvwxyz";
-    private const string Digits = "23456789";
-    private const string Special = "!@#$%^&*()-_=+[]{}|;:',.<>?";
-    private const string All = Upper + Lower + Digits + Special;
+    private const string _upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    private const string _lower = "abcdefghjkmnpqrstuvwxyz";
+    private const string _digits = "23456789";
+    private const string _special = "!@#$%^&*()-_=+[]{}|;:',.<>?";
+    private const string _all = _upper + _lower + _digits + _special;
 
     /// <summary>Generates a random 12-character password containing at least one uppercase letter, one lowercase letter, one digit, and one special character.</summary>
     public static string Generate()
     {
         using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-        var bytes = new byte[GeneratedLength];
+        byte[] bytes = new byte[_generatedLength];
         rng.GetBytes(bytes);
 
-        var chars = new char[GeneratedLength];
-        chars[0] = Upper[bytes[0] % Upper.Length];
-        chars[1] = Lower[bytes[1] % Lower.Length];
-        chars[2] = Digits[bytes[2] % Digits.Length];
-        chars[3] = Special[bytes[3] % Special.Length];
-        for (var i = 4; i < GeneratedLength; i++)
+        char[] chars = new char[_generatedLength];
+        chars[0] = _upper[bytes[0] % _upper.Length];
+        chars[1] = _lower[bytes[1] % _lower.Length];
+        chars[2] = _digits[bytes[2] % _digits.Length];
+        chars[3] = _special[bytes[3] % _special.Length];
+        for (int i = 4; i < _generatedLength; i++)
         {
-            chars[i] = All[bytes[i] % All.Length];
+            chars[i] = _all[bytes[i] % _all.Length];
         }
 
-        for (var i = chars.Length - 1; i > 0; i--)
+        for (int i = chars.Length - 1; i > 0; i--)
         {
-            var j = bytes[i % bytes.Length] % (i + 1);
+            int j = bytes[i % bytes.Length] % (i + 1);
             (chars[i], chars[j]) = (chars[j], chars[i]);
         }
 
@@ -56,7 +56,7 @@ public static class PasswordPolicy
 
     /// <summary>
     /// Validates that a password meets the same strength rules enforced by <see cref="Generate"/>:
-    /// at least <see cref="MinLength"/> characters, one uppercase letter, one lowercase letter, one digit, and one special character.
+    /// at least <see cref="_minLength"/> characters, one uppercase letter, one lowercase letter, one digit, and one special character.
     /// </summary>
     /// <param name="password">The password to validate.</param>
     /// <param name="error">The first validation rule that failed, or <see cref="PasswordValidationError.None"/> when valid.</param>
@@ -65,7 +65,7 @@ public static class PasswordPolicy
     {
         ArgumentNullException.ThrowIfNull(password);
 
-        if (password.Length < MinLength)
+        if (password.Length < _minLength)
         {
             error = PasswordValidationError.TooShort;
             return false;
@@ -89,7 +89,7 @@ public static class PasswordPolicy
             return false;
         }
 
-        if (!password.Any(c => Special.Contains(c)))
+        if (!password.Any(c => _special.Contains(c)))
         {
             error = PasswordValidationError.MissingSpecialCharacter;
             return false;
@@ -102,7 +102,7 @@ public static class PasswordPolicy
     /// <summary>Returns a plain-English description of a <see cref="PasswordValidationError"/>, for use in non-localized backend exception messages.</summary>
     public static string Describe(PasswordValidationError error) => error switch
     {
-        PasswordValidationError.TooShort => $"Password must be at least {MinLength} characters.",
+        PasswordValidationError.TooShort => $"Password must be at least {_minLength} characters.",
         PasswordValidationError.MissingUppercase => "Password must contain at least one uppercase letter.",
         PasswordValidationError.MissingLowercase => "Password must contain at least one lowercase letter.",
         PasswordValidationError.MissingDigit => "Password must contain at least one digit.",
