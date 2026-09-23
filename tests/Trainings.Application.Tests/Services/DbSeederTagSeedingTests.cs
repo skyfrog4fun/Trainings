@@ -25,8 +25,8 @@ public class DbSeederTagSeedingTests
 
         await InvokeSeederAsync(scope.Seeder, "SeedTagsAsync");
 
-        var tags = await scope.Context.Tags.OrderBy(tag => tag.DisplayOrder).ToListAsync();
-        var translations = await scope.Context.Translations.Where(t => t.EntityType == TranslationEntityType.Tag).ToListAsync();
+        var tags = await scope.Context.Tags.OrderBy(tag => tag.DisplayOrder).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var translations = await scope.Context.Translations.Where(t => t.EntityType == TranslationEntityType.Tag).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         tags.Should().HaveCount(6);
         tags.Select(tag => tag.Key).Should().Equal(
@@ -54,8 +54,8 @@ public class DbSeederTagSeedingTests
 
         await InvokeSeederAsync(scope.Seeder, "SeedGamesAsync");
 
-        var games = await scope.Context.Games.OrderBy(game => game.Id).ToListAsync();
-        var translations = await scope.Context.Translations.Where(t => t.EntityType == TranslationEntityType.Game).ToListAsync();
+        var games = await scope.Context.Games.OrderBy(game => game.Id).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var translations = await scope.Context.Translations.Where(t => t.EntityType == TranslationEntityType.Game).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         games.Should().HaveCount(9);
         games.Should().ContainSingle(game => game.IsSystemFallback && game.IsActive && game.IsApproved);
@@ -73,9 +73,9 @@ public class DbSeederTagSeedingTests
         await InvokeSeederAsync(scope.Seeder, "SeedTagsAsync");
         await InvokeSeederAsync(scope.Seeder, "SeedGamesAsync");
 
-        (await scope.Context.Tags.CountAsync()).Should().Be(6);
-        (await scope.Context.Games.CountAsync()).Should().Be(9);
-        (await scope.Context.Translations.CountAsync()).Should().Be(30);
+        (await scope.Context.Tags.CountAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().Be(6);
+        (await scope.Context.Games.CountAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().Be(9);
+        (await scope.Context.Translations.CountAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().Be(30);
     }
 
     private static async Task InvokeSeederAsync(DbSeeder seeder, string methodName)

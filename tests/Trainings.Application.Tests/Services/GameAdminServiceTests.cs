@@ -10,29 +10,29 @@ public class GameAdminServiceTests
     public async Task CreateAdHocAsync_CreatesUnapprovedGameAndDeduplicatesByName()
     {
         await using var scope = await CreateScopeAsync();
-        var creator = await TrainingBlockTestData.AddUserAsync(scope.Context, "Ava", "Coach", "ava@example.com");
+        var creator = await TrainingBlockTestData.AddUserAsync(scope.Context, "Ava", "Coach", "ava@example.com", ct: TestContext.Current.CancellationToken);
 
-        var created = await scope.Service.CreateAdHocAsync("Kickball", creator.Id);
-        var duplicate = await scope.Service.CreateAdHocAsync("kickball", creator.Id);
+        var created = await scope.Service.CreateAdHocAsync("Kickball", creator.Id, ct: TestContext.Current.CancellationToken);
+        var duplicate = await scope.Service.CreateAdHocAsync("kickball", creator.Id, ct: TestContext.Current.CancellationToken);
 
         created.Id.Should().Be(duplicate.Id);
         created.IsApproved.Should().BeFalse();
         created.CreatedByUserId.Should().Be(creator.Id);
-        (await scope.Context.Games.CountAsync()).Should().Be(1);
-        (await scope.Context.Translations.CountAsync()).Should().Be(2);
+        (await scope.Context.Games.CountAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().Be(1);
+        (await scope.Context.Translations.CountAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().Be(2);
     }
 
     [Fact]
     public async Task ApproveAndRenameAsync_PersistsStateAndTranslations()
     {
         await using var scope = await CreateScopeAsync();
-        var game = await TrainingBlockTestData.AddGameAsync(scope.Context, scope.TranslationService, "Soccer", "Fussball", isApproved: false);
+        var game = await TrainingBlockTestData.AddGameAsync(scope.Context, scope.TranslationService, "Soccer", "Fussball", isApproved: false, ct: TestContext.Current.CancellationToken);
 
-        await scope.Service.ApproveAsync(game.Id);
-        await scope.Service.RenameAsync(game.Id, "Football", "Fussball neu");
+        await scope.Service.ApproveAsync(game.Id, ct: TestContext.Current.CancellationToken);
+        await scope.Service.RenameAsync(game.Id, "Football", "Fussball neu", ct: TestContext.Current.CancellationToken);
 
-        var storedGame = await scope.Context.Games.SingleAsync();
-        var translations = await scope.Context.Translations.Where(t => t.EntityId == game.Id).ToListAsync();
+        var storedGame = await scope.Context.Games.SingleAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var translations = await scope.Context.Translations.Where(t => t.EntityId == game.Id).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         storedGame.IsApproved.Should().BeTrue();
         translations.Should().Contain(t => t.Culture == "en" && t.Text == "Football");
@@ -43,7 +43,7 @@ public class GameAdminServiceTests
     public async Task DeactivateAsync_ThrowsForSystemFallbackGame()
     {
         await using var scope = await CreateScopeAsync();
-        var game = await TrainingBlockTestData.AddGameAsync(scope.Context, scope.TranslationService, "Other/Unspecified", "Andere/Nicht angegeben", isSystemFallback: true);
+        var game = await TrainingBlockTestData.AddGameAsync(scope.Context, scope.TranslationService, "Other/Unspecified", "Andere/Nicht angegeben", isSystemFallback: true, ct: TestContext.Current.CancellationToken);
 
         var act = async () => await scope.Service.DeactivateAsync(game.Id);
 

@@ -14,11 +14,11 @@ public class TagAdminServiceTests
         using var cultureScope = new TagCultureScope("de-DE");
         await using var scope = await CreateScopeAsync();
 
-        await TrainingBlockTestData.AddTagAsync(scope.Context, scope.TranslationService, "other", "Other", "Sonstiges", TrainingBlockCatalog.ColorTokens.Tradition60, 3);
-        await TrainingBlockTestData.AddTagAsync(scope.Context, scope.TranslationService, "warm-up", "Warm-Up", "Warm-Up", TrainingBlockCatalog.ColorTokens.Community, 1);
-        await TrainingBlockTestData.AddTagAsync(scope.Context, scope.TranslationService, "inactive", "Inactive", "Inaktiv", TrainingBlockCatalog.ColorTokens.Accent, 2, isActive: false);
+        await TrainingBlockTestData.AddTagAsync(scope.Context, scope.TranslationService, "other", "Other", "Sonstiges", TrainingBlockCatalog.ColorTokens.Tradition60, 3, ct: TestContext.Current.CancellationToken);
+        await TrainingBlockTestData.AddTagAsync(scope.Context, scope.TranslationService, "warm-up", "Warm-Up", "Warm-Up", TrainingBlockCatalog.ColorTokens.Community, 1, ct: TestContext.Current.CancellationToken);
+        await TrainingBlockTestData.AddTagAsync(scope.Context, scope.TranslationService, "inactive", "Inactive", "Inaktiv", TrainingBlockCatalog.ColorTokens.Accent, 2, isActive: false, ct: TestContext.Current.CancellationToken);
 
-        var result = await scope.Service.GetActiveForSelectionAsync();
+        var result = await scope.Service.GetActiveForSelectionAsync(ct: TestContext.Current.CancellationToken);
 
         result.Select(tag => tag.Name).Should().Equal("Warm-Up", "Sonstiges");
         result.Should().OnlyContain(tag => tag.IsActive);
@@ -28,7 +28,7 @@ public class TagAdminServiceTests
     public async Task UpdateAsync_PersistsTranslationsAndMetadata()
     {
         await using var scope = await CreateScopeAsync();
-        var tag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService);
+        var tag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
 
         await scope.Service.UpdateAsync(new TagAdminDto
         {
@@ -39,10 +39,10 @@ public class TagAdminServiceTests
             ColorToken = TrainingBlockCatalog.ColorTokens.Accent40,
             DisplayOrder = 7,
             IsActive = false
-        });
+        }, ct: TestContext.Current.CancellationToken);
 
-        var storedTag = await scope.Context.Tags.SingleAsync();
-        var translations = await scope.Context.Translations.Where(t => t.EntityId == tag.Id).ToListAsync();
+        var storedTag = await scope.Context.Tags.SingleAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var translations = await scope.Context.Translations.Where(t => t.EntityId == tag.Id).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         storedTag.ColorToken.Should().Be(TrainingBlockCatalog.ColorTokens.Accent40);
         storedTag.DisplayOrder.Should().Be(7);
@@ -76,13 +76,13 @@ public class TagAdminServiceTests
             ColorToken = TrainingBlockCatalog.ColorTokens.Accent,
             DisplayOrder = 4,
             IsActive = true
-        });
+        }, ct: TestContext.Current.CancellationToken);
 
-        await scope.Service.DeactivateAsync(created.Id);
-        (await scope.Context.Tags.SingleAsync(tag => tag.Id == created.Id)).IsActive.Should().BeFalse();
+        await scope.Service.DeactivateAsync(created.Id, ct: TestContext.Current.CancellationToken);
+        (await scope.Context.Tags.SingleAsync(tag => tag.Id == created.Id, cancellationToken: TestContext.Current.CancellationToken)).IsActive.Should().BeFalse();
 
-        await scope.Service.ReactivateAsync(created.Id);
-        (await scope.Context.Tags.SingleAsync(tag => tag.Id == created.Id)).IsActive.Should().BeTrue();
+        await scope.Service.ReactivateAsync(created.Id, ct: TestContext.Current.CancellationToken);
+        (await scope.Context.Tags.SingleAsync(tag => tag.Id == created.Id, cancellationToken: TestContext.Current.CancellationToken)).IsActive.Should().BeTrue();
     }
 
     private static async Task<TagAdminServiceScope> CreateScopeAsync()

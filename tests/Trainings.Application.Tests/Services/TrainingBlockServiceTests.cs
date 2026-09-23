@@ -12,7 +12,7 @@ public class TrainingBlockServiceTests
     public async Task CreateDefinitionAndAddExecutionAsync_CreatesDefinitionAndLocalExecutionCopy()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
-        var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService);
+        var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
 
         var result = await scope.Service.CreateDefinitionAndAddExecutionAsync(new CreateTrainingBlockDto
         {
@@ -23,10 +23,10 @@ public class TrainingBlockServiceTests
             TagId = warmUpTag.Id,
             MinParticipants = 4,
             MaxParticipants = 10
-        });
+        }, ct: TestContext.Current.CancellationToken);
 
-        var definition = await scope.Context.TrainingBlockDefinitions.SingleAsync();
-        var execution = await scope.Context.TrainingBlocks.SingleAsync();
+        var definition = await scope.Context.TrainingBlockDefinitions.SingleAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var execution = await scope.Context.TrainingBlocks.SingleAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         definition.IsGlobal.Should().BeFalse();
         definition.GroupId.Should().Be(scope.Group.Id);
@@ -39,7 +39,7 @@ public class TrainingBlockServiceTests
     public async Task CreateDefinitionAndAddExecutionAsync_RequiresGameWhenUsingGameTag()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
-        var gameTag = await TrainingBlockTestData.AddGameTagAsync(scope.Context, scope.TranslationService);
+        var gameTag = await TrainingBlockTestData.AddGameTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
 
         var act = async () => await scope.Service.CreateDefinitionAndAddExecutionAsync(new CreateTrainingBlockDto
         {
@@ -58,7 +58,7 @@ public class TrainingBlockServiceTests
     public async Task CreateDefinitionAndAddExecutionAsync_CreatesAdHocGameForGameTag()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
-        var gameTag = await TrainingBlockTestData.AddGameTagAsync(scope.Context, scope.TranslationService);
+        var gameTag = await TrainingBlockTestData.AddGameTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
 
         var result = await scope.Service.CreateDefinitionAndAddExecutionAsync(new CreateTrainingBlockDto
         {
@@ -69,9 +69,9 @@ public class TrainingBlockServiceTests
             NewGameName = "Kickball",
             MinParticipants = 8,
             MaxParticipants = 14
-        });
+        }, ct: TestContext.Current.CancellationToken);
 
-        var createdGame = await scope.Context.Games.SingleAsync();
+        var createdGame = await scope.Context.Games.SingleAsync(cancellationToken: TestContext.Current.CancellationToken);
         createdGame.IsApproved.Should().BeFalse();
         createdGame.CreatedByUserId.Should().Be(scope.Creator.Id);
         result.GameDisplayText.Should().Be("Kickball");
@@ -81,7 +81,7 @@ public class TrainingBlockServiceTests
     public async Task CreateDefinitionAndAddExecutionAsync_ValidatesTitleAndParticipantRules()
     {
         await using var scope = await CreateScopeAsync(UserRole.User);
-        var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService);
+        var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
 
         var act = async () => await scope.Service.CreateDefinitionAndAddExecutionAsync(new CreateTrainingBlockDto
         {
@@ -100,12 +100,12 @@ public class TrainingBlockServiceTests
     public async Task AddUpdateMoveAndDeleteAsync_ManageExecutionOrderAndOverrides()
     {
         await using var scope = await CreateScopeAsync(UserRole.SuperAdmin);
-        var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService);
-        var definitionOne = await TrainingBlockTestData.AddDefinitionAsync(scope.Context, warmUpTag.Id, scope.Creator.Id, null, "Block one", 10, 4, 8, isGlobal: true);
-        var definitionTwo = await TrainingBlockTestData.AddDefinitionAsync(scope.Context, warmUpTag.Id, scope.Creator.Id, null, "Block two", 12, 4, 8, isGlobal: true);
+        var warmUpTag = await TrainingBlockTestData.AddWarmUpTagAsync(scope.Context, scope.TranslationService, ct: TestContext.Current.CancellationToken);
+        var definitionOne = await TrainingBlockTestData.AddDefinitionAsync(scope.Context, warmUpTag.Id, scope.Creator.Id, null, "Block one", 10, 4, 8, isGlobal: true, ct: TestContext.Current.CancellationToken);
+        var definitionTwo = await TrainingBlockTestData.AddDefinitionAsync(scope.Context, warmUpTag.Id, scope.Creator.Id, null, "Block two", 12, 4, 8, isGlobal: true, ct: TestContext.Current.CancellationToken);
 
-        var first = await scope.Service.AddExecutionFromDefinitionAsync(new AddTrainingBlockFromDefinitionDto { TrainingId = scope.Training.Id, DefinitionId = definitionOne.Id });
-        var second = await scope.Service.AddExecutionFromDefinitionAsync(new AddTrainingBlockFromDefinitionDto { TrainingId = scope.Training.Id, DefinitionId = definitionTwo.Id });
+        var first = await scope.Service.AddExecutionFromDefinitionAsync(new AddTrainingBlockFromDefinitionDto { TrainingId = scope.Training.Id, DefinitionId = definitionOne.Id }, ct: TestContext.Current.CancellationToken);
+        var second = await scope.Service.AddExecutionFromDefinitionAsync(new AddTrainingBlockFromDefinitionDto { TrainingId = scope.Training.Id, DefinitionId = definitionTwo.Id }, ct: TestContext.Current.CancellationToken);
 
         await scope.Service.UpdateExecutionAsync(new UpdateTrainingBlockExecutionDto
         {
@@ -117,12 +117,12 @@ public class TrainingBlockServiceTests
             MaxParticipants = 9,
             EffectiveDurationMinutes = 9,
             TrainerComment = "Good"
-        });
+        }, ct: TestContext.Current.CancellationToken);
 
-        await scope.Service.MoveExecutionDownAsync(first.Id);
-        await scope.Service.DeleteExecutionAsync(first.Id);
+        await scope.Service.MoveExecutionDownAsync(first.Id, ct: TestContext.Current.CancellationToken);
+        await scope.Service.DeleteExecutionAsync(first.Id, ct: TestContext.Current.CancellationToken);
 
-        var executions = await scope.Service.GetExecutionsAsync(scope.Training.Id);
+        var executions = await scope.Service.GetExecutionsAsync(scope.Training.Id, ct: TestContext.Current.CancellationToken);
         executions.Should().ContainSingle();
         executions[0].Title.Should().Be("Block two");
         executions[0].OrderIndex.Should().Be(1);
