@@ -1,19 +1,30 @@
 TODOs
 ---
 
-Trainings
+Training
 ---
+- [ ] Rework the location/position of the buttons (Edit, Take, Register, Run, Attendance, Feedback, Done, Cancel, Delete) on a) training list b) training detail c) training edit
+- [ ] Document shortly on what page which button can be found.
+
+Trainings - Run
+---
+- [ ] Check screenshots in D:\Data\OneDrive\Pictures\Screenshots. There are many things to change/improve in the UI.
+- [ ] 
+
+Training - Feedback
+---
+- [ ] Save button is missing
+- [ ] Participants have no way to give feedback. Missing feedback button.
 
 
-- [ ] Edit Training / Add Block
-  - [ ] Duration and Tag on same line
-  - [ ] Rework Tags (which one are really used?!) -> delete the unused once. Put them into enumeration and have resx file trainslation to have it in DE/EN. Add a new Tag 'Other' for blocks that do not fit into any of the other tags.
+Game (/config/games)
+---
+- [ ] When trainer suggested new game, the name of the user is not displayed on the game list. Only the ID is shown. Fix that.
+- [ ] The creation date is in a wrong format (e.g. 9/18/2026 4:26pm). Fix that to show the date in the correct format (e.g. 18.09.2026 16:26).
+- [ ] On the game list, there's no way to add a new one. Add a button to create a new game.
+- [ ] The game list can be better structured to have a clearer overview of the games.
 
-- [ ] Align all edit buttons => style: icon: fa-solid fa-pen-to-square / class: btn btn-sm btn-primary
-    - [ ] change on /config/locations
-    - [ ] change on /trainings/{group-slug}/{id}
 
-- [ ] LocationsPage: URL /config/locations -> change to /locations
 
 - [ ] Overbooking vs. Waiting list? ... GroupAdmin should be able to overbook a training / Participants should add themself to a waiting list [Future Requirement]
 
@@ -71,9 +82,11 @@ Done - Reworked Sections
 - [X] Users (List, Details, Edit/New)
 - [X] Groups (List, Details, Edit/New, Members)
 - [X] Trainings (List, Details, Edit/New)
-- [ ] Trainings Plan (Plan the blocks, etc..)
-- [ ] Trainings Run
-- [ ] Trainings Attendance
+- [X] Trainings Plan (Plan the blocks, etc..)
+- [ ] Training Run
+- [ ] Training Attendance
+- [ ] Training Feedback
+- [ ] Game (/config/games)
 - [ ] My Registrations (from the Users point of view!?) -> maybe integrate that to Trainings Page (List with filter?!)
 - [ ] Dashbaord - User
 - [ ] Dashbaord - Trainer
