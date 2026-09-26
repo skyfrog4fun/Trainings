@@ -1,6 +1,6 @@
 # Application Specification — Trainings
 
-> **Version:** 1.0.17
+> **Version:** 1.0.18
 > **Language:** English (US)
 > **Primary audience:** AI agents and automated tooling
 > **Secondary audience:** Human developers and stakeholders
