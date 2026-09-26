@@ -6,11 +6,16 @@ using Trainings.Domain.Interfaces;
 
 namespace Trainings.Application.Services;
 
-public class RegistrationService(IRegistrationRepository registrationRepository, ITrainingRepository trainingRepository, IAppRuntimeModeService appRuntimeModeService) : IRegistrationService
+public class RegistrationService(
+    IRegistrationRepository registrationRepository,
+    ITrainingRepository trainingRepository,
+    IAppRuntimeModeService appRuntimeModeService,
+    IGroupService groupService) : IRegistrationService
 {
     private readonly IRegistrationRepository _registrationRepository = registrationRepository;
     private readonly ITrainingRepository _trainingRepository = trainingRepository;
     private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
+    private readonly IGroupService _groupService = groupService;
 
     public async Task<IEnumerable<RegistrationDto>> GetByUserIdAsync(int userId)
     {
@@ -35,6 +40,11 @@ public class RegistrationService(IRegistrationRepository registrationRepository,
         if (!isOpen)
         {
             throw new InvalidOperationException("Registration is not open for this training.");
+        }
+
+        if (!await HasParticipantRoleAsync(userId, training.GroupId))
+        {
+            throw new InvalidOperationException("Only a Participant of this group can register for a training.");
         }
 
         int activeRegistrations = (await _registrationRepository.GetByTrainingIdAsync(trainingId))
@@ -86,6 +96,16 @@ public class RegistrationService(IRegistrationRepository registrationRepository,
     {
         var registration = await _registrationRepository.GetByUserAndTrainingAsync(userId, trainingId);
         return registration != null && registration.Status == RegistrationStatus.Registered;
+    }
+
+    private async Task<bool> HasParticipantRoleAsync(int userId, int groupId)
+    {
+        var memberships = await _groupService.GetMembersAsync(groupId);
+        return memberships.Any(m =>
+            m.UserId == userId &&
+            m.Role == GroupMemberRole.Participant &&
+            m.Status == GroupMembershipStatus.Approved &&
+            m.IsActive);
     }
 
     private static RegistrationDto MapToDto(Registration r) => new()

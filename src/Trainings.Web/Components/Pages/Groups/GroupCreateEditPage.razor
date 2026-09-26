@@ -133,7 +133,8 @@
                         </div>
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["GroupCreateEditPage_End"]</label>
-                            <input class="form-control" type="time" value="@_formEndTime" readonly />
+                            <input class="form-control" type="time" @bind="_formModel.EndTime" @bind:after="CalculateGroupDurationFromEndTime" />
+                            <ValidationMessage For="() => _formModel.EndTime" class="text-danger small" />
                         </div>
                     </div>
                 </Body>
@@ -161,7 +162,6 @@
     private bool _loading = true;
     private bool _saving;
     private bool _isAccessDenied;
-    private string _formEndTime = "20:30";
     private string? _formError;
     private GroupFormModel _formModel = new();
     private int _groupId;
@@ -292,8 +292,8 @@
             IsActive = group.IsActive,
             Weekday = group.Weekday,
             LocationId = group.LocationId,
-            StartTime = group.StartTime ?? new TimeOnly(19, 0),
-            DurationMinutes = group.DurationMinutes ?? 90,
+            StartTime = group.StartTime,
+            DurationMinutes = group.DurationMinutes,
             CountryId = group.CountryId,
             MaxParticipants = group.MaxParticipants
         };
@@ -301,16 +301,42 @@
         CalculateGroupEndTime();
     }
 
+    /// <summary>
+    /// Recalculates End from Start + Duration. Start is the fixed anchor and is never
+    /// itself recalculated. If Start or Duration is not set, End cannot be derived, so
+    /// nothing happens. Duration always wins over a previously entered End
+    /// (Start + Duration = End).
+    /// </summary>
     private void CalculateGroupEndTime()
     {
-        var duration = _formModel.DurationMinutes.GetValueOrDefault(0);
-        if (duration <= 0)
+        if (_formModel.StartTime is not { } start || _formModel.DurationMinutes is not { } duration || duration <= 0)
         {
-            duration = 1;
+            return;
         }
 
-        var start = _formModel.StartTime ?? new TimeOnly(19, 0);
-        _formEndTime = start.AddMinutes(duration).ToString("HH:mm");
+        _formModel.EndTime = start.AddMinutes(duration);
+    }
+
+    /// <summary>
+    /// Recalculates Duration from Start + End, triggered when the user edits End directly.
+    /// Start is the fixed anchor: if Start or End is not set, nothing happens.
+    /// </summary>
+    private void CalculateGroupDurationFromEndTime()
+    {
+        if (_formModel.StartTime is not { } start || _formModel.EndTime is not { } end)
+        {
+            return;
+        }
+
+        int startMinutes = (start.Hour * 60) + start.Minute;
+        int endMinutes = (end.Hour * 60) + end.Minute;
+        int duration = endMinutes - startMinutes;
+        if (duration < 0)
+        {
+            duration += 24 * 60; // End crosses midnight relative to Start.
+        }
+
+        _formModel.DurationMinutes = duration;
     }
 
     private static string GetWeekdayLabel(DayOfWeek day) => CultureInfo.CurrentUICulture.DateTimeFormat.GetDayName(day);

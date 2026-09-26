@@ -155,9 +155,9 @@ public class GroupService(
             return;
         }
 
-        var hasActiveMembers = await _context.GroupMemberships
+        bool hasActiveMembers = await _context.GroupMemberships
             .AnyAsync(gm => gm.GroupId == id && gm.Status == GroupMembershipStatus.Approved && gm.IsActive, ct);
-        var hasScheduledTrainings = await _context.Trainings
+        bool hasScheduledTrainings = await _context.Trainings
             .AnyAsync(t => t.GroupId == id && t.DateTime > DateTime.UtcNow, ct);
 
         if (hasActiveMembers || hasScheduledTrainings)
@@ -383,6 +383,7 @@ public class GroupService(
         Weekday = group.Weekday,
         LocationId = group.LocationId,
         LocationName = group.Location?.Name,
+        LocationCity = group.Location?.CityName,
         StartTime = group.StartTime,
         DurationMinutes = group.DurationMinutes,
         MaxParticipants = group.MaxParticipants,

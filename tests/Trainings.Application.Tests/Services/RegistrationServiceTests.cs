@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using Trainings.Application.DTOs;
 using Trainings.Application.Interfaces;
 using Trainings.Application.Services;
 using Trainings.Domain.Entities;
@@ -14,11 +15,58 @@ public class RegistrationServiceTests
     private readonly Mock<IRegistrationRepository> _regRepoMock = new();
     private readonly Mock<ITrainingRepository> _trainingRepoMock = new();
     private readonly Mock<IAppRuntimeModeService> _runtimeMock = new();
+    private readonly Mock<IGroupService> _groupServiceMock = new();
     private readonly RegistrationService _service;
 
     public RegistrationServiceTests()
     {
-        _service = new RegistrationService(_regRepoMock.Object, _trainingRepoMock.Object, _runtimeMock.Object);
+        // By default, the registering user (99) holds an approved, active Participant
+        // membership in any group, so existing tests that were written before the
+        // Participant-role check was introduced keep working unchanged.
+        _groupServiceMock.Setup(g => g.GetMembersAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new GroupMembershipDto
+                {
+                    UserId = 99,
+                    Role = GroupMemberRole.Participant,
+                    Status = GroupMembershipStatus.Approved,
+                    IsActive = true
+                }
+            ]);
+
+        _service = new RegistrationService(_regRepoMock.Object, _trainingRepoMock.Object, _runtimeMock.Object, _groupServiceMock.Object);
+    }
+
+    [Fact]
+    public async Task RegisterAsyncThrowsWhenUserIsNotAParticipantOfTheGroup()
+    {
+        var training = new Training
+        {
+            Id = 100,
+            Title = "Group Restricted",
+            DateTime = DateTime.UtcNow.AddDays(10),
+            Capacity = 10,
+            GroupId = 5,
+            Status = TrainingStatus.New,
+            Registrations = []
+        };
+        _trainingRepoMock.Setup(r => r.GetByIdAsync(100)).ReturnsAsync(training);
+        _regRepoMock.Setup(r => r.GetByTrainingIdAsync(100)).ReturnsAsync([]);
+        _groupServiceMock.Setup(g => g.GetMembersAsync(5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new GroupMembershipDto
+                {
+                    UserId = 99,
+                    Role = GroupMemberRole.Trainer,
+                    Status = GroupMembershipStatus.Approved,
+                    IsActive = true
+                }
+            ]);
+
+        var act = () => _service.RegisterAsync(99, 100);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Only a Participant of this group can register for a training.");
     }
 
     [Fact]

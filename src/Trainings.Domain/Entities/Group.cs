@@ -22,4 +22,5 @@ public class Group
     public ICollection<Training> Trainings { get; set; } = [];
     public ICollection<GroupMailConfiguration> MailConfigurations { get; set; } = [];
     public ICollection<GroupLocation> AllowedLocations { get; set; } = [];
+    public ICollection<TrainingBlockDefinition> TrainingBlockDefinitions { get; set; } = [];
 }

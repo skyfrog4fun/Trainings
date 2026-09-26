@@ -74,7 +74,7 @@
                             <div class="small text-muted text-truncate mt-2">@reg.TrainingDescription</div>
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center gap-2">
-                            <span class="badge @(reg.Status == RegistrationStatus.Registered ? "bg-success" : "bg-secondary")">@reg.Status</span>
+                            <RegistrationStatusComponent Status="reg.Status" />
                             <a href="/trainings/@reg.TrainingGroupSlug/@reg.TrainingId" class="btn btn-sm btn-app-icon btn-app-outline-primary ms-auto" title="@Localizer["MyRegistrationsPage_ViewDetails"]" aria-label="@Localizer["MyRegistrationsPage_ViewDetails"]">
                                 <i class="fa-solid fa-eye" aria-hidden="true"></i>
                             </a>

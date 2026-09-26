@@ -27,91 +27,89 @@
     }
     else if (!_blocks.Any())
     {
-        <div class="my-3">
-            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
-        </div>
+        <PageTitleComponent Icon="@AppIcons.Fire" Text="@_training.Title" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
         <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NoBlocksWarning"] <a href="/trainings/@Slug/@Id/edit">@Localizer["TrainerRunPage_AddBlocksFirst"]</a></div>
     }
     else if (_training.Status is TrainingStatus.New or TrainingStatus.InPlanning)
     {
-        <div class="my-3">
-            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
-        </div>
+        <PageTitleComponent Icon="@AppIcons.Fire" Text="@_training.Title" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
         <div class="alert alert-warning mt-3">@Localizer["TrainerRunPage_NotPlannedYet"]</div>
     }
-    else if (_training.Status == TrainingStatus.Planned)
+    else if (_training.Status == TrainingStatus.Planned && !_previewMode)
     {
-        <div class="my-3">
-            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
-        </div>
+        <PageTitleComponent Icon="@AppIcons.Fire" Text="@_training.Title" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
         <div class="card shadow-lg text-center">
             <div class="card-body py-5">
                 <h4 class="mb-3">@Localizer["TrainerRunPage_ReadyToStart"]</h4>
-                <button type="button" class="btn btn-success btn-lg" @onclick="StartTrainingAsync" disabled="@_starting">
-                    @if (_starting) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
-                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_StartTraining"]
-                </button>
+                <div class="d-grid gap-2 col-12 col-sm-8 col-md-6 mx-auto">
+                    <button type="button" class="btn btn-warning btn-lg mt-4" @onclick="EnterPreviewMode">
+                        <i class="@AppIcons.Eye me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_PreviewBlocks"]
+                    </button>
+                    <button type="button" class="btn btn-success btn-lg mt-3" @onclick="StartTrainingAsync" disabled="@_starting">
+                        @if (_starting) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
+                        <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_StartTraining"]
+                    </button>
+                </div>
                 <div class="mt-2">
                     <ActionAlert IsSuccess="false" Message="@_startError" />
                 </div>
             </div>
         </div>
     }
-    else if (_phase == "complete")
+    else if (_currentIndex >= _blocks.Count)
     {
-        <div class="my-3">
-            <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
-        </div>
-        <div class="alert alert-success mt-3 text-center">
-            <h4>@Localizer["TrainerRunPage_TrainingComplete"]</h4>
-            <p>@string.Format(Localizer["TrainerRunPage_AllBlocksFinished"].Value, _blocks.Count)</p>
-        </div>
-
-        <h5>@Localizer["TrainerRunPage_EnterDurationsAndComments"]</h5>
-        @foreach (var block in _blocks)
-        {
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h6>@(_blocks.IndexOf(block) + 1). @block.Title</h6>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <label class="form-label small">@Localizer["TrainerRunPage_ActualDurationMinutes"]</label>
-                            <input class="form-control form-control-sm" type="number" min="0"
-                                   value="@block.EffectiveDurationMinutes"
-                                   @onchange="e => SetEffectiveDuration(block, e.Value)" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small">@Localizer["TrainerRunPage_TrainerComment"]</label>
-                            <textarea class="form-control form-control-sm" rows="2"
-                                      value="@block.TrainerComment"
-                                      @onchange="e => SetTrainerComment(block, e.Value?.ToString())"></textarea>
-                        </div>
+        <PageTitleComponent Icon="@AppIcons.Fire" Text="@_training.Title" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
+        <div class="card shadow-lg text-center">
+            <div class="card-body py-5">
+                @if (_training.Status == TrainingStatus.Planned)
+                {
+                    <h4 class="mb-3">@Localizer["TrainerRunPage_PlanReviewed"]</h4>
+                    <p class="text-muted">@Localizer["TrainerRunPage_PlanReviewedHint"]</p>
+                    <button type="button" class="btn btn-outline-secondary" @onclick="ExitPreviewMode">
+                        <i class="@AppIcons.Back me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_BackToStartScreen"]
+                    </button>
+                }
+                else
+                {
+                    <h4 class="mb-3">@Localizer["TrainerRunPage_TrainingComplete"]</h4>
+                    <p>@string.Format(Localizer["TrainerRunPage_AllBlocksFinished"].Value, _blocks.Count)</p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 mt-3">
+                        <a href="@($"/trainings/{Slug}/{Id}/attendance")" class="btn btn-primary">
+                            <i class="@AppIcons.ListCheck me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_GoToAttendance"]
+                        </a>
+                        @if (_training.Status == TrainingStatus.Done)
+                        {
+                            <a href="@($"/trainings/{Slug}/{Id}/feedback")" class="btn btn-outline-primary">
+                                <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_GoToFeedback"]
+                            </a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-outline-secondary" disabled title="@Localizer["TrainerRunPage_FeedbackAvailableAfterDone"]">
+                                <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_GoToFeedback"]
+                            </button>
+                        }
                     </div>
-                </div>
+                }
+                @if (_currentIndex > 0)
+                {
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="PreviousBlock">
+                            <i class="@AppIcons.Back me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_Previous"]
+                        </button>
+                    </div>
+                }
             </div>
-        }
-        <button class="btn btn-primary w-100" @onclick="SaveFeedback" disabled="@_saving">
-            @if (_saving) { <LoadingSpinner Inline="true" Small="true" SpinnerClass="me-1" /> }
-            @Localizer["TrainerRunPage_SaveFeedback"]
-        </button>
-        <div class="mt-2">
-            <ActionAlert IsSuccess="true" Message="@(_saved ? Localizer["TrainerRunPage_Saved"].Value : null)" />
         </div>
     }
     else
     {
         var currentBlock = _blocks[_currentIndex];
-        <PageHeader Title="@Localizer["TrainerRunPage_PageTitle"].Value">
-            <Actions>
-                <div class="d-flex align-items-center gap-2">
-                    <small class="text-muted">@string.Format(Localizer["TrainerRunPage_BlockOfCount"].Value, _currentIndex + 1, _blocks.Count)</small>
-                    <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
-                </div>
-            </Actions>
-        </PageHeader>
+        <PageTitleComponent Icon="@AppIcons.Fire" Text="@_training.Title" ButtonIcon="@AppIcons.Back" ButtonText="@Localizer["Shared_Back"]" OnButtonClick="GoBack" />
 
+        <div class="text-muted small mb-2">@string.Format(Localizer["TrainerRunPage_BlockOfCount"].Value, _currentIndex + 1, _blocks.Count)</div>
         <div class="progress progress-thin mb-3">
-            <div class="progress-bar" style="width: @((_currentIndex * 100) / _blocks.Count)%"></div>
+            <div class="progress-bar" style="width: @(((_currentIndex + 1) * 100) / (_blocks.Count + 1))%"></div>
         </div>
 
         <div class="card shadow-lg text-center">
@@ -125,29 +123,20 @@
                 <div class="badge bg-light text-dark border fs-6 mb-4">
                     <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@string.Format(Localizer["TrainerRunPage_DurationMinutesSuffix"].Value, currentBlock.PlannedDurationMinutes)
                 </div>
-                @if (currentBlock.Tags.Any())
-                {
-                    <div class="mb-3">
-                        @foreach (var tag in currentBlock.Tags)
-                        {
-                            <span class="badge bg-info text-dark me-1">@tag.Name</span>
-                        }
-                    </div>
-                }
+                <div class="mb-3 text-muted small">@FormatBlockType(currentBlock)</div>
             </div>
             <div class="card-footer">
-                @if (_currentIndex < _blocks.Count - 1)
-                {
-                    <button class="btn btn-success btn-lg w-100" @onclick="NextBlock">
+                <div class="d-flex gap-2">
+                    @if (_currentIndex > 0)
+                    {
+                        <button class="btn btn-outline-secondary btn-lg" @onclick="PreviousBlock">
+                            <i class="@AppIcons.Back" aria-hidden="true"></i>
+                        </button>
+                    }
+                    <button class="btn btn-success btn-lg flex-fill" @onclick="NextBlock">
                         @Localizer["TrainerRunPage_NextBlock"]
                     </button>
-                }
-                else
-                {
-                    <button class="btn btn-primary btn-lg w-100" @onclick="FinishTraining">
-                        <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainerRunPage_FinishTraining"]
-                    </button>
-                }
+                </div>
             </div>
         </div>
     }
@@ -160,8 +149,8 @@
     private TrainingDto? _training;
     private List<TrainingBlockDto> _blocks = new();
     private int _currentIndex;
-    private string _phase = "running";
-    private bool _loading = true, _saving, _saved;
+    private bool _previewMode;
+    private bool _loading = true;
     private bool _isAccessDenied;
     private bool _starting;
     private string? _startError;
@@ -190,6 +179,9 @@
         _loading = false;
     }
 
+    // /run is purely navigational: the only state-changing call it ever makes is StartAsync,
+    // which is the RUN action itself (Planned -> InProgress). Block browsing, forward/back
+    // navigation, and the terminal step never touch training state.
     private async Task StartTrainingAsync()
     {
         if (_training == null)
@@ -203,6 +195,8 @@
         {
             await TrainingService.StartAsync(_training.Id, _currentUserId);
             _training = await TrainingService.GetByIdAsync(Id);
+            _previewMode = false;
+            _currentIndex = 0;
         }
         catch (Exception ex)
         {
@@ -214,56 +208,38 @@
         }
     }
 
+    private void GoBack() => NavigationManager.NavigateTo($"/trainings/{Slug}/{Id}");
+
+    private void EnterPreviewMode()
+    {
+        _previewMode = true;
+        _currentIndex = 0;
+    }
+
+    private void ExitPreviewMode()
+    {
+        _previewMode = false;
+        _currentIndex = 0;
+    }
+
     private void NextBlock()
     {
-        if (_currentIndex < _blocks.Count - 1)
+        if (_currentIndex < _blocks.Count)
         {
             _currentIndex++;
         }
     }
 
-    private void FinishTraining()
+    private void PreviousBlock()
     {
-        _phase = "complete";
-    }
-
-    private void SetEffectiveDuration(TrainingBlockDto block, object? value)
-    {
-        if (value != null && int.TryParse(value.ToString(), out var mins))
+        if (_currentIndex > 0)
         {
-            block.EffectiveDurationMinutes = mins;
+            _currentIndex--;
         }
     }
 
-    private void SetTrainerComment(TrainingBlockDto block, string? comment)
-    {
-        block.TrainerComment = comment;
-    }
-
-    private async Task SaveFeedback()
-    {
-        _saving = true;
-        try
-        {
-            foreach (var block in _blocks)
-            {
-                await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
-                {
-                    Id = block.Id,
-                    OrderIndex = block.OrderIndex,
-                    Title = block.Title,
-                    Description = block.Description,
-                    PlannedDurationMinutes = block.PlannedDurationMinutes,
-                    EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                    TrainerComment = block.TrainerComment,
-                    TagIds = block.Tags.Select(t => t.Id).ToList()
-                });
-            }
-            _saved = true;
-        }
-        finally
-        {
-            _saving = false;
-        }
-    }
+    private static string FormatBlockType(TrainingBlockDto block)
+        => block.GameDisplayText is null
+            ? block.TagDisplayText
+            : $"{block.TagDisplayText} · {block.GameDisplayText}";
 }

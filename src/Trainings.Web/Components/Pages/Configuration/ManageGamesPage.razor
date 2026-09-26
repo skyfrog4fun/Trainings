@@ -1,0 +1,155 @@
+@page "/config/games"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "SuperAdmin")]
+
+@inject IGameAdminService GameAdminService
+@inject IAppRuntimeModeService AppRuntimeModeService
+
+<PageTitle>@Localizer["ManageGamesPage_PageTitle"]</PageTitle>
+
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
+
+<div class="container px-2 px-md-4">
+    <PageTitleComponent Icon="@AppIcons.BookOpen" Text="@Localizer["ManageGamesPage_Heading"]" />
+
+    <p class="text-muted">@Localizer["ManageGamesPage_Description"]</p>
+
+    <div class="form-check form-switch mb-3">
+        <input id="pendingOnly" class="form-check-input form-check-input-flex" type="checkbox" @bind="_showPendingOnly" />
+        <label class="form-check-label" for="pendingOnly">@Localizer["ManageGamesPage_PendingOnlyLabel"]</label>
+    </div>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (!VisibleGames.Any())
+    {
+        <div class="alert alert-info">@Localizer["ManageGamesPage_NoGamesMessage"]</div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var game in VisibleGames)
+            {
+                <div class="card tb-card tb-tag-stripe-innovation">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div>
+                                <div class="fw-semibold">@game.EnglishText</div>
+                                <div class="text-muted small">
+                                    @(game.IsApproved ? Localizer["ManageGamesPage_ApprovedBadge"] : Localizer["ManageGamesPage_PendingBadge"])
+                                    ·
+                                    @(game.IsActive ? Localizer["ManageGamesPage_ActiveBadge"] : Localizer["ManageGamesPage_InactiveBadge"])
+                                    @if (game.IsSystemFallback)
+                                    {
+                                        <span> · @Localizer["ManageGamesPage_FallbackBadge"]</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                @if (!game.IsApproved)
+                                {
+                                    <button type="button" class="btn btn-success btn-sm" @onclick="() => ApproveGameAsync(game)" disabled="@IsWriteBlocked">
+                                        <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["ManageGamesPage_ApproveButton"]
+                                    </button>
+                                }
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveGameAsync(game)" disabled="@IsWriteBlocked">
+                                    <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => ToggleGameAsync(game)" disabled="@(IsWriteBlocked || game.IsSystemFallback)">
+                                    @(game.IsActive ? Localizer["ManageGamesPage_DeactivateButton"] : Localizer["ManageGamesPage_ReactivateButton"])
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["ManageGamesPage_EnglishLabel"]</label>
+                                <InputText class="form-control" @bind-Value="game.EnglishText" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">@Localizer["ManageGamesPage_GermanLabel"]</label>
+                                <InputText class="form-control" @bind-Value="game.GermanText" />
+                            </div>
+                            <div class="col-12 col-md-6 text-muted small">
+                                @string.Format(Localizer["ManageGamesPage_CreatedAtValue"].Value, game.CreatedAt)
+                            </div>
+                            @if (game.CreatedByUserId.HasValue)
+                            {
+                                <div class="col-12 col-md-6 text-muted small">
+                                    @string.Format(Localizer["ManageGamesPage_CreatedByValue"].Value, game.CreatedByUserId.Value)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private readonly List<GameAdminDto> _games = [];
+    private ToastComponent? _toast;
+    private AppRuntimeModeDto _runtimeMode = new();
+    private bool _loading = true;
+    private bool _showPendingOnly;
+
+    private bool IsWriteBlocked => _runtimeMode.IsReadOnly;
+    private IEnumerable<GameAdminDto> VisibleGames => _showPendingOnly ? _games.Where(game => !game.IsApproved) : _games;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _runtimeMode = AppRuntimeModeService.GetCurrent();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _games.Clear();
+        _games.AddRange(await GameAdminService.GetAllAsync());
+        _loading = false;
+    }
+
+    private async Task ApproveGameAsync(GameAdminDto game)
+    {
+        await GameAdminService.ApproveAsync(game.Id);
+        game.IsApproved = true;
+        await ShowToastAsync(Localizer["ManageGamesPage_GameApprovedToast"], ToastComponent.ToastVariant.Success);
+    }
+
+    private async Task SaveGameAsync(GameAdminDto game)
+    {
+        await GameAdminService.RenameAsync(game.Id, game.EnglishText, game.GermanText);
+        await ShowToastAsync(Localizer["ManageGamesPage_GameSavedToast"], ToastComponent.ToastVariant.Success);
+    }
+
+    private async Task ToggleGameAsync(GameAdminDto game)
+    {
+        if (game.IsActive)
+        {
+            await GameAdminService.DeactivateAsync(game.Id);
+        }
+        else
+        {
+            await GameAdminService.ReactivateAsync(game.Id);
+        }
+
+        game.IsActive = !game.IsActive;
+        await ShowToastAsync(
+            game.IsActive ? Localizer["ManageGamesPage_GameReactivatedToast"] : Localizer["ManageGamesPage_GameDeactivatedToast"],
+            ToastComponent.ToastVariant.Info);
+    }
+
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
+        }
+    }
+}

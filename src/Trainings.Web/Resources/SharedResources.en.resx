@@ -520,7 +520,7 @@
     <value>Save Draft</value>
   </data>
   <data name="AttendancePage_FinalizeAttendance" xml:space="preserve">
-    <value>Finalize Attendance</value>
+    <value>Finalize Training</value>
   </data>
   <data name="GroupMembersPage_AddMemberTitle" xml:space="preserve">
     <value>Add Member</value>
@@ -1056,6 +1056,54 @@
   <data name="TrainerRunPage_PageTitle" xml:space="preserve">
     <value>Run Training</value>
   </data>
+  <data name="FeedbackPage_PageTitle" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+  <data name="FeedbackPage_AccessDenied" xml:space="preserve">
+    <value>You do not have access to this training's feedback.</value>
+  </data>
+  <data name="FeedbackPage_NotDoneYet" xml:space="preserve">
+    <value>Feedback becomes available once the training is marked as done.</value>
+  </data>
+  <data name="FeedbackPage_ParticipantAggregateHeading" xml:space="preserve">
+    <value>Participant rating</value>
+  </data>
+  <data name="FeedbackPage_NoParticipantFeedbackYet" xml:space="preserve">
+    <value>No participant feedback yet.</value>
+  </data>
+  <data name="FeedbackPage_AverageRating" xml:space="preserve">
+    <value>Average rating</value>
+  </data>
+  <data name="FeedbackPage_FeedbackCount" xml:space="preserve">
+    <value>Based on {0} feedback entries</value>
+  </data>
+  <data name="FeedbackPage_OwnFeedbackHeading" xml:space="preserve">
+    <value>Your feedback</value>
+  </data>
+  <data name="FeedbackPage_RatingLabel" xml:space="preserve">
+    <value>Rating</value>
+  </data>
+  <data name="FeedbackPage_NoRating" xml:space="preserve">
+    <value>No rating</value>
+  </data>
+  <data name="FeedbackPage_CommentLabel" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="FeedbackPage_SavedMessage" xml:space="preserve">
+    <value>Feedback saved.</value>
+  </data>
+  <data name="FeedbackPage_TrainerFeedbackHeading" xml:space="preserve">
+    <value>Trainer feedback</value>
+  </data>
+  <data name="FeedbackPage_NoComment" xml:space="preserve">
+    <value>No comment provided.</value>
+  </data>
+  <data name="FeedbackPage_NoTrainerFeedbackYet" xml:space="preserve">
+    <value>No trainer feedback yet.</value>
+  </data>
+  <data name="FeedbackPage_ParticipantEntriesHeading" xml:space="preserve">
+    <value>Participant feedback</value>
+  </data>
   <data name="TrainerRunPage_TrainingNotFound" xml:space="preserve">
     <value>Training not found.</value>
   </data>
@@ -1083,21 +1131,6 @@
   <data name="TrainerRunPage_AllBlocksFinished" xml:space="preserve">
     <value>All {0} blocks finished.</value>
   </data>
-  <data name="TrainerRunPage_EnterDurationsAndComments" xml:space="preserve">
-    <value>Enter actual durations and comments</value>
-  </data>
-  <data name="TrainerRunPage_ActualDurationMinutes" xml:space="preserve">
-    <value>Actual Duration (min)</value>
-  </data>
-  <data name="TrainerRunPage_TrainerComment" xml:space="preserve">
-    <value>Trainer Comment</value>
-  </data>
-  <data name="TrainerRunPage_SaveFeedback" xml:space="preserve">
-    <value>Save Feedback</value>
-  </data>
-  <data name="TrainerRunPage_Saved" xml:space="preserve">
-    <value>Saved!</value>
-  </data>
   <data name="TrainerRunPage_BlockLabel" xml:space="preserve">
     <value>BLOCK {0}</value>
   </data>
@@ -1107,11 +1140,32 @@
   <data name="TrainerRunPage_NextBlock" xml:space="preserve">
     <value>Next Block</value>
   </data>
-  <data name="TrainerRunPage_FinishTraining" xml:space="preserve">
-    <value>Finish Training</value>
-  </data>
   <data name="TrainerRunPage_BlockOfCount" xml:space="preserve">
     <value>Block {0} of {1}</value>
+  </data>
+  <data name="TrainerRunPage_PreviewBlocks" xml:space="preserve">
+    <value>Preview blocks</value>
+  </data>
+  <data name="TrainerRunPage_PlanReviewed" xml:space="preserve">
+    <value>Plan reviewed</value>
+  </data>
+  <data name="TrainerRunPage_PlanReviewedHint" xml:space="preserve">
+    <value>You've browsed through all planned blocks. This was just a preview - nothing has been started yet.</value>
+  </data>
+  <data name="TrainerRunPage_BackToStartScreen" xml:space="preserve">
+    <value>Back to start screen</value>
+  </data>
+  <data name="TrainerRunPage_GoToAttendance" xml:space="preserve">
+    <value>Go to attendance</value>
+  </data>
+  <data name="TrainerRunPage_GoToFeedback" xml:space="preserve">
+    <value>Go to feedback</value>
+  </data>
+  <data name="TrainerRunPage_FeedbackAvailableAfterDone" xml:space="preserve">
+    <value>Feedback becomes available once the training is marked as done.</value>
+  </data>
+  <data name="TrainerRunPage_Previous" xml:space="preserve">
+    <value>Previous</value>
   </data>
   <data name="TrainingDetailPage_PageTitleFallback" xml:space="preserve">
     <value>Training</value>
@@ -1173,8 +1227,14 @@
   <data name="TrainingDetailPage_TrainingBlocksHeading" xml:space="preserve">
     <value>Training Blocks ({0})</value>
   </data>
-  <data name="TrainingDetailPage_PlannedMinutes" xml:space="preserve">
-    <value>Planned: {0} min</value>
+  <data name="TrainingDetailPage_TotalPlannedMinutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="TrainingDetailPage_OverbookedMinutes" xml:space="preserve">
+    <value>(+ {0} min)</value>
+  </data>
+  <data name="TrainingDetailPage_UnderbookedMinutes" xml:space="preserve">
+    <value>(- {0} min)</value>
   </data>
   <data name="TrainingDetailPage_ActualMinutes" xml:space="preserve">
     <value>Actual: {0} min</value>
@@ -1196,6 +1256,27 @@
   </data>
   <data name="TrainingDetailPage_Attendance" xml:space="preserve">
     <value>Attendance</value>
+  </data>
+  <data name="TrainingDetailPage_Cancel" xml:space="preserve">
+    <value>Cancel Training</value>
+  </data>
+  <data name="TrainingDetailPage_CancelConfirmTitle" xml:space="preserve">
+    <value>Cancel this training?</value>
+  </data>
+  <data name="TrainingDetailPage_CancelConfirmMessage" xml:space="preserve">
+    <value>This cancels the training permanently. It cannot be resumed or planned again afterwards.</value>
+  </data>
+  <data name="TrainingDetailPage_MarkAsDone" xml:space="preserve">
+    <value>Mark as Done</value>
+  </data>
+  <data name="TrainingDetailPage_MarkAsDoneConfirmTitle" xml:space="preserve">
+    <value>Mark training as done?</value>
+  </data>
+  <data name="TrainingDetailPage_MarkAsDoneConfirmMessage" xml:space="preserve">
+    <value>This finalizes attendance and completes the training. Make sure attendance has been recorded before continuing - this cannot be undone.</value>
+  </data>
+  <data name="TrainingDetailPage_Feedback" xml:space="preserve">
+    <value>Feedback</value>
   </data>
   <data name="TrainingDetailPage_AddParticipant" xml:space="preserve">
     <value>Add Participant</value>
@@ -1656,6 +1737,9 @@
   <data name="GroupCreateEditPage_StartTimeRequired" xml:space="preserve">
     <value>Start time is required.</value>
   </data>
+  <data name="GroupCreateEditPage_EndTimeRequired" xml:space="preserve">
+    <value>End time is required.</value>
+  </data>
   <data name="GroupCreateEditPage_MaxParticipantsInvalid" xml:space="preserve">
     <value>Max participants must be greater than 0.</value>
   </data>
@@ -1764,6 +1848,12 @@
   <data name="TrainingsPage_TakeSuccess" xml:space="preserve">
     <value>You are the trainer for this training.</value>
   </data>
+  <data name="TrainingsPage_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="TrainingsPage_Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
   <data name="TrainingsPage_TrainingDeleted" xml:space="preserve">
     <value>Training deleted.</value>
   </data>
@@ -1830,14 +1920,17 @@
   <data name="CreateEditTrainingPage_ConfirmPlannedTitle" xml:space="preserve">
     <value>Confirm that planning is finished</value>
   </data>
+  <data name="CreateEditTrainingPage_GroupAdminRestrictedNote" xml:space="preserve">
+    <value>As Group Admin you can only (re)assign the trainer here. All other fields are locked and can only be edited by the assigned trainer.</value>
+  </data>
+  <data name="CreateEditTrainingPage_StatusLockedNote" xml:space="preserve">
+    <value>This training is in progress, done, or cancelled and can no longer be edited.</value>
+  </data>
   <data name="CreateEditTrainingPage_ConfirmPlanned" xml:space="preserve">
     <value>Confirm Planned</value>
   </data>
   <data name="CreateEditTrainingPage_ReleaseTrainerTitle" xml:space="preserve">
     <value>Release yourself as the trainer of this training</value>
-  </data>
-  <data name="CreateEditTrainingPage_ReleaseTrainer" xml:space="preserve">
-    <value>Release Trainer</value>
   </data>
   <data name="CreateEditTrainingPage_SpecialLocationLabel" xml:space="preserve">
     <value>Location Description</value>
@@ -2124,6 +2217,9 @@
   <data name="Enum_TrainingStatus_Done" xml:space="preserve">
     <value>Done</value>
   </data>
+  <data name="Enum_TrainingStatus_Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
   <data name="GroupCreateEditPage_SuggestSlug" xml:space="preserve">
     <value>Suggest slug from name</value>
   </data>
@@ -2159,5 +2255,284 @@
   </data>
   <data name="CreateEditTrainingPage_ConfirmPlannedDurationMismatchMessage" xml:space="preserve">
     <value>The total duration of all blocks ({0} min) does not match the training duration ({1} min). Do you want to continue?</value>
+  </data>
+  <data name="Shared_ManageTags" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="Shared_ManageGames" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="TrainingBlockEditor_Heading" xml:space="preserve">
+    <value>Blocks</value>
+  </data>
+  <data name="TrainingBlockEditor_NewButton" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="TrainingBlockEditor_AddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="TrainingBlockEditor_PreviewNotice" xml:space="preserve">
+    <value>Save the training first to manage blocks.</value>
+  </data>
+  <data name="TrainingBlockEditor_AddSectionTitle" xml:space="preserve">
+    <value>Add block from library</value>
+  </data>
+  <data name="TrainingBlockEditor_TagFilterLabel" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="TrainingBlockEditor_AllTagsOption" xml:space="preserve">
+    <value>-- All tags --</value>
+  </data>
+  <data name="TrainingBlockEditor_CreatorFilterLabel" xml:space="preserve">
+    <value>Creator</value>
+  </data>
+  <data name="TrainingBlockEditor_AllCreatorsOption" xml:space="preserve">
+    <value>-- All creators --</value>
+  </data>
+  <data name="TrainingBlockEditor_MinDurationLabel" xml:space="preserve">
+    <value>Min. duration</value>
+  </data>
+  <data name="TrainingBlockEditor_MaxDurationLabel" xml:space="preserve">
+    <value>Max. duration</value>
+  </data>
+  <data name="TrainingBlockEditor_SearchLabel" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="TrainingBlockEditor_SearchPlaceholder" xml:space="preserve">
+    <value>Search title or description</value>
+  </data>
+  <data name="TrainingBlockEditor_SearchButton" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="TrainingBlockEditor_NoLibraryResults" xml:space="preserve">
+    <value>Nothing found — create a new one.</value>
+  </data>
+  <data name="TrainingBlockEditor_LibraryResultsTitle" xml:space="preserve">
+    <value>Library search results</value>
+  </data>
+  <data name="TrainingBlockEditor_LibrarySearchPrompt" xml:space="preserve">
+    <value>Set your filters and click Search to find blocks.</value>
+  </data>
+  <data name="TrainingBlockEditor_AddLibraryItemAria" xml:space="preserve">
+    <value>Add {0}</value>
+  </data>
+  <data name="TrainingBlockEditor_LoadMoreButton" xml:space="preserve">
+    <value>Load more</value>
+  </data>
+  <data name="TrainingBlockEditor_NewSectionTitle" xml:space="preserve">
+    <value>Create new block</value>
+  </data>
+  <data name="TrainingBlockEditor_TagLabel" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="TrainingBlockEditor_SelectTagPlaceholder" xml:space="preserve">
+    <value>-- Select tag --</value>
+  </data>
+  <data name="TrainingBlockEditor_GameLabel" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="TrainingBlockEditor_GameSearchPlaceholder" xml:space="preserve">
+    <value>Search games</value>
+  </data>
+  <data name="TrainingBlockEditor_NoGamesFound" xml:space="preserve">
+    <value>No games found</value>
+  </data>
+  <data name="TrainingBlockEditor_SelectGamePlaceholder" xml:space="preserve">
+    <value>-- Select game --</value>
+  </data>
+  <data name="TrainingBlockEditor_NewGamePlaceholder" xml:space="preserve">
+    <value>Create a new game</value>
+  </data>
+  <data name="TrainingBlockEditor_NewGameHelp" xml:space="preserve">
+    <value>If the game is missing, enter a name to create it right away.</value>
+  </data>
+  <data name="TrainingBlockEditor_TitleLabel" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="TrainingBlockEditor_DurationFieldLabel" xml:space="preserve">
+    <value>Duration in minutes</value>
+  </data>
+  <data name="TrainingBlockEditor_DescriptionLabel" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="TrainingBlockEditor_MinParticipantsLabel" xml:space="preserve">
+    <value>Min. participants</value>
+  </data>
+  <data name="TrainingBlockEditor_MaxParticipantsLabel" xml:space="preserve">
+    <value>Max. participants</value>
+  </data>
+  <data name="TrainingBlockEditor_NoBlocksMessage" xml:space="preserve">
+    <value>No blocks added yet.</value>
+  </data>
+  <data name="TrainingBlockEditor_DeleteExecutionAria" xml:space="preserve">
+    <value>Delete {0}</value>
+  </data>
+  <data name="TrainingBlockEditor_AdjustExecutionAria" xml:space="preserve">
+    <value>Adjust {0}</value>
+  </data>
+  <data name="TrainingBlockEditor_MoveUpAria" xml:space="preserve">
+    <value>Move {0} up</value>
+  </data>
+  <data name="TrainingBlockEditor_MoveDownAria" xml:space="preserve">
+    <value>Move {0} down</value>
+  </data>
+  <data name="TrainingBlockEditor_TotalPlannedSummary" xml:space="preserve">
+    <value>Planned total: {0} min</value>
+  </data>
+  <data name="TrainingBlockEditor_RemainingSummary" xml:space="preserve">
+    <value>Remaining: {0} min</value>
+  </data>
+  <data name="TrainingBlockEditor_OverbookedSummary" xml:space="preserve">
+    <value>Overbooked: {0} min</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockAddedToast" xml:space="preserve">
+    <value>Block added to list.</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockCreatedToast" xml:space="preserve">
+    <value>Block created.</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockUpdatedToast" xml:space="preserve">
+    <value>Block updated.</value>
+  </data>
+  <data name="TrainingBlockEditor_BlockDeletedToast" xml:space="preserve">
+    <value>Block removed from list.</value>
+  </data>
+  <data name="TrainingBlockEditor_TagGameValue" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="TrainingBlockEditor_TagRequired" xml:space="preserve">
+    <value>Please select a tag.</value>
+  </data>
+  <data name="TrainingBlockEditor_GameRequired" xml:space="preserve">
+    <value>Please select or create a game.</value>
+  </data>
+  <data name="TrainingBlockEditor_TitleRequired" xml:space="preserve">
+    <value>Please enter a title.</value>
+  </data>
+  <data name="TrainingBlockEditor_TitleTooLong" xml:space="preserve">
+    <value>Title must be 64 characters or fewer.</value>
+  </data>
+  <data name="TrainingBlockEditor_DescriptionTooLong" xml:space="preserve">
+    <value>Description must be 512 characters or fewer.</value>
+  </data>
+  <data name="TrainingBlockEditor_DurationRequired" xml:space="preserve">
+    <value>Please enter a duration greater than 0.</value>
+  </data>
+  <data name="TrainingBlockEditor_MinParticipantsRequired" xml:space="preserve">
+    <value>Please enter at least 1 participant.</value>
+  </data>
+  <data name="TrainingBlockEditor_MaxParticipantsRequired" xml:space="preserve">
+    <value>Please enter a valid maximum participant count.</value>
+  </data>
+  <data name="TrainingBlockEditor_MinMaxParticipantsInvalid" xml:space="preserve">
+    <value>Minimum participants must be less than or equal to maximum participants.</value>
+  </data>
+  <data name="TrainingBlockEditor_EffectiveDurationInvalid" xml:space="preserve">
+    <value>Actual duration cannot be negative.</value>
+  </data>
+  <data name="ManageTagsPage_PageTitle" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ManageTagsPage_Heading" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="ManageTagsPage_Description" xml:space="preserve">
+    <value>Edit the fixed training block tags, colors, order, and availability.</value>
+  </data>
+  <data name="ManageTagsPage_ActiveBadge" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="ManageTagsPage_InactiveBadge" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="ManageTagsPage_DeactivateButton" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="ManageTagsPage_ReactivateButton" xml:space="preserve">
+    <value>Reactivate</value>
+  </data>
+  <data name="ManageTagsPage_EnglishLabel" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="ManageTagsPage_GermanLabel" xml:space="preserve">
+    <value>German</value>
+  </data>
+  <data name="ManageTagsPage_ColorLabel" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="ManageTagsPage_DisplayOrderLabel" xml:space="preserve">
+    <value>Display order</value>
+  </data>
+  <data name="ManageTagsPage_TagSavedToast" xml:space="preserve">
+    <value>Tag saved.</value>
+  </data>
+  <data name="ManageTagsPage_TagReactivatedToast" xml:space="preserve">
+    <value>Tag reactivated.</value>
+  </data>
+  <data name="ManageTagsPage_TagDeactivatedToast" xml:space="preserve">
+    <value>Tag deactivated.</value>
+  </data>
+  <data name="ManageGamesPage_PageTitle" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="ManageGamesPage_Heading" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="ManageGamesPage_Description" xml:space="preserve">
+    <value>Review active, inactive, and pending games used in training blocks.</value>
+  </data>
+  <data name="ManageGamesPage_PendingOnlyLabel" xml:space="preserve">
+    <value>Show pending only</value>
+  </data>
+  <data name="ManageGamesPage_NoGamesMessage" xml:space="preserve">
+    <value>No games match the current filter.</value>
+  </data>
+  <data name="ManageGamesPage_ApprovedBadge" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="ManageGamesPage_PendingBadge" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="ManageGamesPage_ActiveBadge" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="ManageGamesPage_InactiveBadge" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="ManageGamesPage_FallbackBadge" xml:space="preserve">
+    <value>Fallback</value>
+  </data>
+  <data name="ManageGamesPage_ApproveButton" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="ManageGamesPage_DeactivateButton" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="ManageGamesPage_ReactivateButton" xml:space="preserve">
+    <value>Reactivate</value>
+  </data>
+  <data name="ManageGamesPage_EnglishLabel" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="ManageGamesPage_GermanLabel" xml:space="preserve">
+    <value>German</value>
+  </data>
+  <data name="ManageGamesPage_CreatedAtValue" xml:space="preserve">
+    <value>Created: {0:g}</value>
+  </data>
+  <data name="ManageGamesPage_CreatedByValue" xml:space="preserve">
+    <value>Created by user #{0}</value>
+  </data>
+  <data name="ManageGamesPage_GameApprovedToast" xml:space="preserve">
+    <value>Game approved.</value>
+  </data>
+  <data name="ManageGamesPage_GameSavedToast" xml:space="preserve">
+    <value>Game saved.</value>
+  </data>
+  <data name="ManageGamesPage_GameReactivatedToast" xml:space="preserve">
+    <value>Game reactivated.</value>
+  </data>
+  <data name="ManageGamesPage_GameDeactivatedToast" xml:space="preserve">
+    <value>Game deactivated.</value>
   </data>
 </root>

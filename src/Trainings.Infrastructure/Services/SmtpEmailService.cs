@@ -213,7 +213,7 @@ public partial class SmtpEmailService(
                 ? "Email delivery skipped because the application is running in Read Only mode."
                 : "Email delivery skipped because the application is running in No E-Mail mode.";
 
-            foreach (var recipient in allRecipients)
+            foreach (string? recipient in allRecipients)
             {
                 await _notificationLogService.LogAsync(action, recipient, userId, null, groupId, true, message, previewAttemptId, ct);
             }
@@ -246,7 +246,7 @@ public partial class SmtpEmailService(
             string message = action == NotificationAction.TestEmail && mailConfigurationId.HasValue
                 ? "The selected mail configuration could not be found."
                 : "No mail configurations available.";
-            foreach (var recipient in allRecipients)
+            foreach (string? recipient in allRecipients)
             {
                 await _notificationLogService.LogAsync(action, recipient, userId, mailConfigurationId, groupId, false, message, attemptId, ct);
             }
@@ -272,7 +272,7 @@ public partial class SmtpEmailService(
                 }
 
                 await _mailConfigService.RecordSuccessfulSendAsync(config.Id, DateTime.UtcNow, ct);
-                foreach (var recipient in allRecipients)
+                foreach (string? recipient in allRecipients)
                 {
                     await _notificationLogService.LogAsync(action, recipient, userId, config.Id, groupId, true, null, attemptId, ct);
                 }
@@ -297,7 +297,7 @@ public partial class SmtpEmailService(
                 string errorMessage = BuildExceptionMessage(ex);
                 LogSmtpError(_logger, config.Host, config.Port, string.Join(", ", allRecipients), subject, errorMessage, ex);
                 await _mailConfigService.RecordFailedSendAsync(config.Id, errorMessage, ct);
-                foreach (var recipient in allRecipients)
+                foreach (string? recipient in allRecipients)
                 {
                     await _notificationLogService.LogAsync(action, recipient, userId, config.Id, groupId, false, errorMessage, attemptId, ct);
                 }
@@ -361,11 +361,11 @@ public partial class SmtpEmailService(
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Trainings App", config.FromAddress));
-        foreach (var toEmail in toEmails)
+        foreach (string toEmail in toEmails)
         {
             message.To.Add(MailboxAddress.Parse(toEmail));
         }
-        foreach (var ccEmail in distinctCc)
+        foreach (string? ccEmail in distinctCc)
         {
             message.Cc.Add(MailboxAddress.Parse(ccEmail));
         }

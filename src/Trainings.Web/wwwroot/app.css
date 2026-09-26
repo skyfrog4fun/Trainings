@@ -21,6 +21,7 @@
   --brand-tradition-20: #d2d4da; /* currently not used */
   /* colors defined by TSV - Ergänzungsfarbe / Wertschätzung*/
   --brand-appreciation: #d8d2cb;
+  --brand-appreciation-dark: #b9ada0;
   --brand-appreciation-80: #dfdbd5; /* currently not used */
   --brand-appreciation-60: #e7e4e0;
   --brand-appreciation-40: #efedea;
@@ -194,6 +195,20 @@ h1:focus {
 .form-control-plaintext:focus {
   border-color: var(--brand-community-60);
   box-shadow: 0 0 0 0.2rem var(--brand-community-40);
+}
+
+/* Bootstrap's disabled form-control keeps a fixed light-gray background
+   (--bs-secondary-bg isn't theme-aware) while its text color follows our
+   themed --bs-body-color, which turns near-white in dark mode - making
+   disabled/readonly fields (e.g. Date, Start, Duration, End) nearly
+   unreadable against the still-light background. Give disabled/readonly
+   controls an explicit, theme-aware color pairing in dark mode. */
+[data-theme="dark"] .form-control:disabled,
+[data-theme="dark"] .form-control[readonly],
+[data-theme="dark"] .form-select:disabled {
+  background-color: var(--brand-tradition-60);
+  color: var(--brand-appreciation-40);
+  opacity: 1;
 }
 
 /* Note: the popup list of a native <select> is rendered by the browser/OS, not by
@@ -384,10 +399,21 @@ h1:focus {
   --bs-btn-active-border-color: var(--color-success);
 }
 
+.btn-warning {
+  --bs-btn-color: var(--brand-tradition);
+  --bs-btn-bg: var(--special-warning);
+  --bs-btn-border-color: var(--special-warning);
+  --bs-btn-hover-color: var(--brand-tradition);
+  --bs-btn-hover-bg: var(--brand-innovation-80);
+  --bs-btn-hover-border-color: var(--brand-innovation-80);
+  --bs-btn-active-color: var(--brand-tradition);
+  --bs-btn-active-bg: var(--brand-innovation);
+  --bs-btn-active-border-color: var(--brand-innovation);
+}
+
 .btn-secondary,
 .btn-light,
-.btn-info,
-.btn-warning {
+.btn-info {
   --bs-btn-color: var(--brand-tradition);
 }
 
@@ -835,6 +861,13 @@ main {
   font-size: 0.875rem;
 }
 
+.training-card-stat-separator {
+  display: inline-block;
+  width: 1px;
+  height: 0.9em;
+  background-color: var(--color-border);
+}
+
 .training-card-header-registered {
   background-color: var(--brand-community-40);
   color: var(--brand-tradition);
@@ -875,6 +908,11 @@ main {
 
 .badge-status-done {
   background-color: var(--brand-tradition);
+  color: var(--brand-white);
+}
+
+.badge-status-cancelled {
+  background-color: var(--color-danger);
   color: var(--brand-white);
 }
 
@@ -1080,6 +1118,34 @@ html {
   line-height: 1;
 }
 
+/* Allow a flex child to shrink below its content's intrinsic width so
+   text-overflow: ellipsis inside it can actually take effect. */
+.min-w-0 {
+  min-width: 0;
+}
+
+.trainer-select-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.trainer-select-group .app-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.trainer-select-group .app-select-toggle {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.trainer-select-group .trainer-release-btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+}
+
+
 .card-title-truncate {
   display: inline-block;
   max-width: 100%;
@@ -1149,6 +1215,69 @@ html {
   --bs-btn-hover-border-color: var(--brand-accent-40);
   --bs-btn-active-bg: var(--brand-accent-40);
   --bs-btn-active-border-color: var(--brand-accent-40);
+}
+
+.tb-card {
+  border-left-width: 0.35rem;
+  border-left-style: solid;
+}
+
+.tb-card-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.tb-card-action-column {
+  min-width: 4.5rem;
+}
+
+.tb-card-actions-move {
+  min-width: 2.5rem;
+}
+
+/* Reserves the height of the "Show more/less" toggle line so a 2-line description
+   occupies the same vertical space as one whose ExpandableTextComponent renders the
+   toggle, keeping the assigned Training Block card's action buttons consistently
+   aligned regardless of description length. */
+.tb-card-description-slot {
+  min-height: calc(1.5rem * 2 + 1.75rem);
+}
+
+.tb-card-icon-button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.tb-tag-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tb-tag-stripe-community {
+  border-left-color: var(--brand-community);
+}
+
+.tb-tag-stripe-accent {
+  border-left-color: var(--brand-accent);
+}
+
+.tb-tag-stripe-accent-40 {
+  border-left-color: var(--brand-accent-40);
+}
+
+.tb-tag-stripe-innovation {
+  border-left-color: var(--brand-innovation);
+}
+
+.tb-tag-stripe-appreciation-dark {
+  border-left-color: var(--brand-appreciation-dark);
+}
+
+.tb-tag-stripe-tradition-60 {
+  border-left-color: var(--brand-tradition-60);
 }
 
 /* === Expandable Text === */
@@ -1254,8 +1383,13 @@ a.app-navbar-brand:focus {
   border-color: var(--color-border);
 }
 
-  .app-menu-dropdown .dropdown-item {
-    color: var(--color-text);
+  .app-menu-dropdown .dropdown-item,
+  .app-menu-dropdown .dropdown-item:visited {
+    /* Explicitly override the global `a:not(.btn):visited` rule (app.css ~line 123),
+       which otherwise wins on specificity for visited links, so that a never-clicked
+       nav item (e.g. a freshly added menu entry) renders with the same brand-community
+       link color as an already-visited one. */
+    color: var(--bs-link-color);
   }
 
     .app-menu-dropdown .dropdown-item.active,

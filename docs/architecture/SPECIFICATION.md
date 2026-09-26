@@ -1,6 +1,6 @@
 # Application Specification — Trainings
 
-> **Version:** 1.0.17
+> **Version:** 1.0.18
 > **Language:** English (US)
 > **Primary audience:** AI agents and automated tooling
 > **Secondary audience:** Human developers and stakeholders
@@ -201,15 +201,20 @@ User              ||--o{  Attendance            : "has attendance"
 User              ||--o{  GroupMembership       : "is member of / requests to join"
 Training          ||--o{  Registration          : "has"
 Training          ||--o{  Attendance            : "records"
-Training          ||--o{  TrainingBlock         : "structured by"
+Training          ||--o{  TrainingBlock         : "executes"
 Training          }o--||  Group                 : "belongs to (required)"
 Group             ||--o{  GroupMembership       : "has members"
 Group             ||--o{  GroupMailConfiguration: "has mail configs"
-Group             ||--o{  Tag                   : "owns"
 MailConfiguration ||--o{  GroupMailConfiguration: "assigned to groups"
 MailConfiguration ||--o{  NotificationLog       : "used by"
-TrainingBlock     ||--o{  TrainingBlockTag      : "tagged with"
-Tag               ||--o{  TrainingBlockTag      : "applied to"
+Tag               ||--o{  TrainingBlockDefinition : "classifies"
+Game              ||--o{  TrainingBlockDefinition : "describes game play"
+User              ||--o{  TrainingBlockDefinition : "creates"
+User              ||--o{  Game                   : "creates ad-hoc entries"
+Group             ||--o{  TrainingBlockDefinition : "owns scoped definitions"
+TrainingBlockDefinition ||--o{ TrainingBlock     : "instantiated as executions"
+Translation       }o--||  Tag                    : "localizes by EntityType/EntityId"
+Translation       }o--||  Game                   : "localizes by EntityType/EntityId"
 ```
 
 > `PendingGroupRequest` entity is **removed** — replaced by `GroupMembership` with `Status = Pending`.
@@ -344,11 +349,19 @@ See the **Training lifecycle** table above (`New → InPlanning → Planned → 
 
 - **Actor:** Group Trainer or Group Admin or SuperAdmin
 - **Steps:**
-  1. Add ordered blocks to a training session (title, description, planned duration, tags).
-  2. Reorder, edit, or delete existing blocks.
-  3. Copy a block from one training to another.
-  4. Browse the shared block library to reuse blocks across trainings.
-- **Postcondition:** Training plan is structured into time-boxed segments.
+  1. Use **NEW** to create a reusable `TrainingBlockDefinition` and immediately add its first `TrainingBlock` execution to the current training.
+  2. Choose exactly one fixed `Tag` for the definition. If the tag is `Game`, select an existing `Game` or create an ad-hoc one inline.
+  3. Use **ADD** to search the block library by tag, creator, duration, and text, then append an existing definition to the current training.
+  4. Reorder or delete executions inside the training.
+  5. Adjust only the execution-local fields (`Title`, `Description`, planned/effective duration, participant range, trainer comment) without changing the underlying definition.
+- **Business Rules:**
+  - A training may contain zero blocks.
+  - `TrainingBlockDefinition.TagId` is required and single-valued.
+  - `GameId` is required only when the selected tag key is `Game`.
+  - Definitions are reusable blueprints; executions keep local editable copies of planning data, while Tag/Game stay locked to the definition.
+  - Non-SuperAdmins can create only group-scoped definitions for their own training group. SuperAdmins can optionally create global definitions.
+  - Definitions, tags, and games are soft-deactivated instead of hard-deleted when historical references exist.
+- **Postcondition:** Training plans reference stable library definitions while preserving per-training execution overrides and consistent reporting.
 
 ### UC-06 — Register for a Training (Participant)
 
@@ -403,12 +416,20 @@ See the **Training lifecycle** table above (`New → InPlanning → Planned → 
   - `Name` and `Identifier` must be unique. Duplicate → validation error, SuperAdmin must choose a different value.
   - Slug must be unique. On 404, check `SlugRedirect` for the entity type and redirect to the latest matching new slug.
 
-### UC-11 — Manage Tags (Admin)
+### UC-11 — Manage Tags and Games (SuperAdmin)
 
-- **Actor:** Group Admin or SuperAdmin
+- **Actor:** SuperAdmin
 - **Steps:**
-  1. Create tags optionally scoped to a group.
-  2. Tags can be applied to training blocks to categorize content.
+  1. Maintain the fixed six training block tags (`Warm-Up`, `Fitness`, `Technique`, `Game`, `Cool-down`, `Other`).
+  2. Edit English and German translations, display order, active state, and color token from the approved brand-token allow-list.
+  3. Review the global games catalog, including pending ad-hoc games created by trainers during planning.
+  4. Approve pending games, rename their English/German translations, or deactivate them when no longer offered.
+  5. Keep the mandatory `Other/Unspecified` fallback game active at all times so trainers can always save a `Game` block.
+- **Business Rules:**
+  - Tags and games are global catalogs, not per-group free-form lists.
+  - Existing training blocks keep working when a tag or game is deactivated; deactivated items simply disappear from new-selection lists.
+  - The fallback game cannot be deactivated or deleted.
+  - Ad-hoc trainer-created games start as `IsApproved = false` and become visible to everyone immediately for duplicate reduction and later cleanup.
 
 ### UC-12 — Password Reset
 
@@ -589,12 +610,10 @@ ITrainingService
   Task<IEnumerable<TrainingDto>>       GetAllAsync(CancellationToken ct)
   Task<IEnumerable<TrainingDto>>       GetActiveAsync(CancellationToken ct)
   Task<IEnumerable<TrainingDto>>       GetByTrainerIdAsync(int trainerId, CancellationToken ct)
-  Task<IEnumerable<TrainingDto>>       GetByGroupIdAsync(int groupId, CancellationToken ct)
-  Task<IEnumerable<TrainingDto>>       GetForUserAsync(int userId, CancellationToken ct)
-    // Returns trainings only from groups where user has Status = Approved
   Task<TrainingDto>                    CreateAsync(CreateTrainingDto dto, CancellationToken ct)
   Task                                 UpdateAsync(UpdateTrainingDto dto, CancellationToken ct)
   Task                                 DeleteAsync(int id, CancellationToken ct)
+  Task<DateTime>                       GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct)
   // Lifecycle actions (see Training lifecycle table above)
   Task<TrainingDto>                    TakeAsync(int trainingId, int trainerId, CancellationToken ct)
   Task                                 ReleaseTrainerAsync(int trainingId, int requestingUserId, CancellationToken ct)
@@ -604,13 +623,19 @@ ITrainingService
   Task                                 SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct)
   Task                                 LockAttendanceAsync(int trainingId, CancellationToken ct)
     // Marks attendance locked and moves Status to Done
-  // Training blocks
-  Task<IEnumerable<TrainingBlockDto>>  GetBlocksAsync(int trainingId, CancellationToken ct)
-  Task<TrainingBlockDto>               AddBlockAsync(CreateTrainingBlockDto dto, CancellationToken ct)
-  Task                                 UpdateBlockAsync(UpdateTrainingBlockDto dto, CancellationToken ct)
-  Task                                 DeleteBlockAsync(int blockId, CancellationToken ct)
-  Task                                 CopyBlockAsync(int sourceBlockId, int targetTrainingId, CancellationToken ct)
-  Task<IEnumerable<TrainingBlockDto>>  GetAllBlocksLibraryAsync(CancellationToken ct)
+
+ITrainingBlockService
+  Task<IReadOnlyList<TrainingBlockDto>>     GetExecutionsAsync(int trainingId, CancellationToken ct)
+  Task<TrainingBlockDto>                    CreateDefinitionAndAddExecutionAsync(CreateTrainingBlockDto dto, CancellationToken ct)
+  Task<TrainingBlockDto>                    AddExecutionFromDefinitionAsync(AddTrainingBlockFromDefinitionDto dto, CancellationToken ct)
+  Task                                      UpdateExecutionAsync(UpdateTrainingBlockExecutionDto dto, CancellationToken ct)
+  Task                                      DeleteExecutionAsync(int executionId, CancellationToken ct)
+  Task                                      MoveExecutionUpAsync(int executionId, CancellationToken ct)
+  Task                                      MoveExecutionDownAsync(int executionId, CancellationToken ct)
+
+ITrainingBlockLibraryService
+  Task<TrainingBlockLibrarySearchResultDto> SearchAsync(TrainingBlockLibrarySearchDto dto, CancellationToken ct)
+  Task<TrainingBlockDefinitionDto?>         GetByIdAsync(int definitionId, CancellationToken ct)
 
 IUserService
   Task<UserDto?>                       GetByIdAsync(int id, CancellationToken ct)
@@ -702,11 +727,27 @@ ISlugRedirectService
   Task<string?>                        ResolveRedirectAsync(string oldSlug, string entityType, CancellationToken ct)
     // Returns the latest NewSlug for the given OldSlug and EntityType, or null if not found
 
-ITagService
-  Task<IEnumerable<TagDto>>            GetAllAsync(CancellationToken ct)
-  Task<IEnumerable<TagDto>>            GetByGroupAsync(int? groupId, CancellationToken ct)
-  Task<TagDto>                         CreateAsync(CreateTagDto dto, CancellationToken ct)
-  Task                                 DeleteAsync(int id, CancellationToken ct)
+ITagAdminService
+  Task<IReadOnlyList<TagAdminDto>>     GetAllAsync(CancellationToken ct)
+  Task<IReadOnlyList<TagDto>>          GetActiveForSelectionAsync(CancellationToken ct)
+  Task<TagAdminDto>                    CreateAsync(TagAdminDto dto, CancellationToken ct)
+  Task                                 UpdateAsync(TagAdminDto dto, CancellationToken ct)
+  Task                                 DeactivateAsync(int id, CancellationToken ct)
+  Task                                 ReactivateAsync(int id, CancellationToken ct)
+
+IGameAdminService
+  Task<IReadOnlyList<GameAdminDto>>    GetAllAsync(CancellationToken ct)
+  Task<IReadOnlyList<GameDto>>         GetActiveForSelectionAsync(CancellationToken ct)
+  Task<GameDto>                        CreateAdHocAsync(string name, int requestingUserId, CancellationToken ct)
+  Task                                 ApproveAsync(int id, CancellationToken ct)
+  Task                                 RenameAsync(int id, string englishText, string germanText, CancellationToken ct)
+  Task                                 DeactivateAsync(int id, CancellationToken ct)
+  Task                                 ReactivateAsync(int id, CancellationToken ct)
+
+ITranslationService
+  string                               GetCurrentCulture()
+  Task<IReadOnlyDictionary<int, TranslationTextsDto>> GetTextLookupAsync(TranslationEntityType entityType, IEnumerable<int> entityIds, CancellationToken ct)
+  Task                                 UpsertAsync(TranslationEntityType entityType, int entityId, string englishText, string germanText, CancellationToken ct)
 ```
 
 ---
@@ -885,12 +926,15 @@ rules:
 | Registration          | The act of a participant reserving a spot in a training                       |
 | Attendance            | A record of whether a registered participant was present or absent            |
 | Capacity              | The maximum number of participants allowed in a training session              |
-| Group                 | An organizational unit containing members, trainings, tags, and mail config   |
+| Group                 | An organizational unit containing members, trainings, scoped block definitions, and mail config |
 | GroupMembership       | A user's relationship with a group: includes role, status (Pending/Approved/Declined), and date history |
 | MailConfiguration     | A system-level SMTP configuration with priority, managed by SuperAdmin        |
 | GroupMailConfiguration| A per-group override assigning specific mail configurations with group-specific priority |
 | NotificationLog       | An immutable audit record of every email send attempt (success or failure)    |
 | SlugRedirect          | A historical record mapping old URL slugs to new ones after entity renames    |
-| TrainingBlock         | A time-boxed segment of a training session (title, duration, tags)            |
-| Tag                   | A label that can be applied to training blocks to categorize content          |
+| TrainingBlockDefinition | A reusable block-library blueprint containing the locked tag/game classification and default planning values |
+| TrainingBlock         | A per-training execution of a block definition, with local editable planning and feedback fields |
+| Tag                   | One of six fixed, translated block categories managed by SuperAdmin          |
+| Game                  | A translated global catalog entry used when a block is tagged as `Game`      |
+| Translation           | Generic EN/DE text storage keyed by entity type, entity ID, and culture      |
 | Slug                  | A URL-friendly identifier auto-generated from an entity name (e.g., group name) |

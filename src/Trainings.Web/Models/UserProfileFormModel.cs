@@ -23,22 +23,22 @@ public class UserProfileFormModel : IValidatableObject
 
         if (string.IsNullOrWhiteSpace(FirstName))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_FirstNameRequired"), new[] { nameof(FirstName) });
+            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_FirstNameRequired"), [nameof(FirstName)]);
         }
 
         if (string.IsNullOrWhiteSpace(LastName))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_LastNameRequired"), new[] { nameof(LastName) });
+            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_LastNameRequired"), [nameof(LastName)]);
         }
 
         if (string.IsNullOrWhiteSpace(Email))
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_EmailRequired"), new[] { nameof(Email) });
+            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_EmailRequired"), [nameof(Email)]);
         }
 
         if (CountryId is null)
         {
-            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_CountryRequired"), new[] { nameof(CountryId) });
+            yield return new ValidationResult(GetMessage(localizer, "UserInformationPage_CountryRequired"), [nameof(CountryId)]);
         }
     }
 

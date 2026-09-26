@@ -35,11 +35,16 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddScoped<DbSeeder>();
 
+        services.AddScoped<ITranslationService, TranslationService>();
         services.AddScoped<ITrainingService, TrainingService>();
+        services.AddScoped<ITrainingBlockService, TrainingBlockService>();
+        services.AddScoped<IFeedbackService, FeedbackService>();
+        services.AddScoped<ITrainingBlockLibraryService, TrainingBlockLibraryService>();
+        services.AddScoped<ITagAdminService, TagAdminService>();
+        services.AddScoped<IGameAdminService, GameAdminService>();
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
         services.AddScoped<IGroupService, GroupService>();
-        services.AddScoped<ITagService, TagService>();
         services.AddScoped<IUserRegistrationService, UserRegistrationService>();
         services.AddScoped<IMailConfigurationService, MailConfigurationService>();
         services.AddScoped<INotificationLogService, NotificationLogService>();

@@ -102,6 +102,36 @@ namespace Trainings.Infrastructure.Migrations
                     b.ToTable("EmailConfirmationTokens");
                 });
 
+            modelBuilder.Entity("Trainings.Domain.Entities.Game", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSystemFallback")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("IsActive", "IsApproved");
+
+                    b.ToTable("Games");
+                });
+
             modelBuilder.Entity("Trainings.Domain.Entities.Group", b =>
                 {
                     b.Property<int>("Id")
@@ -396,6 +426,10 @@ namespace Trainings.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AttemptId");
+
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("GroupId");
 
                     b.HasIndex("MailConfigurationId");
@@ -403,6 +437,38 @@ namespace Trainings.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("NotificationLogs");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.ParticipantFeedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TrainingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("TrainingId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ParticipantFeedbacks");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.PasswordResetToken", b =>
@@ -497,19 +563,63 @@ namespace Trainings.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("GroupId")
+                    b.Property<string>("ColorToken")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DisplayOrder")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(32)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("DisplayOrder")
+                        .IsUnique();
+
+                    b.HasIndex("Key")
+                        .IsUnique();
 
                     b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.TrainerFeedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TrainerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TrainingId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TrainerId");
+
+                    b.HasIndex("TrainingId")
+                        .IsUnique();
+
+                    b.ToTable("TrainerFeedbacks");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.Training", b =>
@@ -585,10 +695,17 @@ namespace Trainings.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DefinitionId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Description")
+                        .HasMaxLength(512)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("EffectiveDurationMinutes")
+                    b.Property<int>("MaxParticipants")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MinParticipants")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderIndex")
@@ -597,15 +714,9 @@ namespace Trainings.Infrastructure.Migrations
                     b.Property<int>("PlannedDurationMinutes")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("SourceBlockId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TrainerComment")
+                        .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("TrainingId")
@@ -613,26 +724,104 @@ namespace Trainings.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SourceBlockId");
+                    b.HasIndex("DefinitionId");
 
-                    b.HasIndex("TrainingId");
+                    b.HasIndex("TrainingId", "OrderIndex")
+                        .IsUnique();
 
                     b.ToTable("TrainingBlocks");
                 });
 
-            modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlockTag", b =>
+            modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlockDefinition", b =>
                 {
-                    b.Property<int>("TrainingBlockId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("GameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsGlobal")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MaxParticipants")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MinParticipants")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TagId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("TrainingBlockId", "TagId");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("TrainingBlockTags");
+                    b.HasIndex("CreatorId", "IsActive");
+
+                    b.HasIndex("GroupId", "IsActive");
+
+                    b.HasIndex("IsGlobal", "IsActive");
+
+                    b.ToTable("TrainingBlockDefinitions");
+                });
+
+            modelBuilder.Entity("Trainings.Domain.Entities.Translation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Culture")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EntityType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.HasIndex("EntityType", "EntityId", "Culture")
+                        .IsUnique();
+
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.User", b =>
@@ -747,6 +936,16 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Trainings.Domain.Entities.Game", b =>
+                {
+                    b.HasOne("Trainings.Domain.Entities.User", "CreatedByUser")
+                        .WithMany("CreatedGames")
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
+                });
+
             modelBuilder.Entity("Trainings.Domain.Entities.Group", b =>
                 {
                     b.HasOne("Trainings.Domain.Entities.Country", "Country")
@@ -855,6 +1054,25 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Trainings.Domain.Entities.ParticipantFeedback", b =>
+                {
+                    b.HasOne("Trainings.Domain.Entities.Training", "Training")
+                        .WithMany()
+                        .HasForeignKey("TrainingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Trainings.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Training");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Trainings.Domain.Entities.PasswordResetToken", b =>
                 {
                     b.HasOne("Trainings.Domain.Entities.User", "User")
@@ -885,14 +1103,23 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Trainings.Domain.Entities.Tag", b =>
+            modelBuilder.Entity("Trainings.Domain.Entities.TrainerFeedback", b =>
                 {
-                    b.HasOne("Trainings.Domain.Entities.Group", "Group")
+                    b.HasOne("Trainings.Domain.Entities.User", "Trainer")
                         .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Group");
+                    b.HasOne("Trainings.Domain.Entities.Training", "Training")
+                        .WithMany()
+                        .HasForeignKey("TrainingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trainer");
+
+                    b.Navigation("Training");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.Training", b =>
@@ -922,10 +1149,11 @@ namespace Trainings.Infrastructure.Migrations
 
             modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlock", b =>
                 {
-                    b.HasOne("Trainings.Domain.Entities.TrainingBlock", "SourceBlock")
-                        .WithMany()
-                        .HasForeignKey("SourceBlockId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Trainings.Domain.Entities.TrainingBlockDefinition", "Definition")
+                        .WithMany("Executions")
+                        .HasForeignKey("DefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Trainings.Domain.Entities.Training", "Training")
                         .WithMany("Blocks")
@@ -933,28 +1161,42 @@ namespace Trainings.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SourceBlock");
+                    b.Navigation("Definition");
 
                     b.Navigation("Training");
                 });
 
-            modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlockTag", b =>
+            modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlockDefinition", b =>
                 {
-                    b.HasOne("Trainings.Domain.Entities.Tag", "Tag")
-                        .WithMany("TrainingBlockTags")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Trainings.Domain.Entities.User", "Creator")
+                        .WithMany("CreatedTrainingBlockDefinitions")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Trainings.Domain.Entities.TrainingBlock", "TrainingBlock")
-                        .WithMany("TrainingBlockTags")
-                        .HasForeignKey("TrainingBlockId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Trainings.Domain.Entities.Game", "Game")
+                        .WithMany("TrainingBlockDefinitions")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Trainings.Domain.Entities.Group", "Group")
+                        .WithMany("TrainingBlockDefinitions")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Trainings.Domain.Entities.Tag", "Tag")
+                        .WithMany("TrainingBlockDefinitions")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Group");
 
                     b.Navigation("Tag");
-
-                    b.Navigation("TrainingBlock");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.User", b =>
@@ -976,6 +1218,11 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("Trainings.Domain.Entities.Game", b =>
+                {
+                    b.Navigation("TrainingBlockDefinitions");
+                });
+
             modelBuilder.Entity("Trainings.Domain.Entities.Group", b =>
                 {
                     b.Navigation("AllowedLocations");
@@ -983,6 +1230,8 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("MailConfigurations");
 
                     b.Navigation("Memberships");
+
+                    b.Navigation("TrainingBlockDefinitions");
 
                     b.Navigation("Trainings");
                 });
@@ -1005,7 +1254,7 @@ namespace Trainings.Infrastructure.Migrations
 
             modelBuilder.Entity("Trainings.Domain.Entities.Tag", b =>
                 {
-                    b.Navigation("TrainingBlockTags");
+                    b.Navigation("TrainingBlockDefinitions");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.Training", b =>
@@ -1017,14 +1266,18 @@ namespace Trainings.Infrastructure.Migrations
                     b.Navigation("Registrations");
                 });
 
-            modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlock", b =>
+            modelBuilder.Entity("Trainings.Domain.Entities.TrainingBlockDefinition", b =>
                 {
-                    b.Navigation("TrainingBlockTags");
+                    b.Navigation("Executions");
                 });
 
             modelBuilder.Entity("Trainings.Domain.Entities.User", b =>
                 {
                     b.Navigation("Attendances");
+
+                    b.Navigation("CreatedGames");
+
+                    b.Navigation("CreatedTrainingBlockDefinitions");
 
                     b.Navigation("EmailConfirmationTokens");
 

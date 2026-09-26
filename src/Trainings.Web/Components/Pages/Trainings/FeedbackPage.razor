@@ -1,0 +1,288 @@
+@page "/trainings/{Slug}/{Id:int}/feedback"
+
+@namespace Trainings.Web.Components.Pages.TrainingsPages
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Policy = "GroupMember")]
+
+@inject ITrainingService TrainingService
+@inject IFeedbackService FeedbackService
+@inject IRegistrationService RegistrationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationHelper AuthorizationHelper
+
+<PageTitle>@Localizer["FeedbackPage_PageTitle"]</PageTitle>
+
+<div class="container px-2 px-md-3">
+    <div class="my-3">
+        <BackButton Href="@($"/trainings/{Slug}/{Id}")" />
+    </div>
+
+    @if (_loading)
+    {
+        <LoadingSpinner />
+    }
+    else if (_isAccessDenied || _training is null)
+    {
+        <div class="alert alert-danger">@Localizer["FeedbackPage_AccessDenied"]</div>
+    }
+    else if (_training.Status != TrainingStatus.Done)
+    {
+        <div class="alert alert-info">@Localizer["FeedbackPage_NotDoneYet"]</div>
+    }
+    else
+    {
+        <PageHeader Title="@Localizer["FeedbackPage_PageTitle"].Value" />
+
+        <CardComponent Collapsed="false">
+            <Title>@Localizer["FeedbackPage_ParticipantAggregateHeading"]</Title>
+            <Body>
+                @if (_overview!.ParticipantAggregate.Count == 0)
+                {
+                    <div class="text-muted">@Localizer["FeedbackPage_NoParticipantFeedbackYet"]</div>
+                }
+                else
+                {
+                    <p class="mb-1">
+                        <span class="fw-semibold">@Localizer["FeedbackPage_AverageRating"]:</span>
+                        @(_overview.ParticipantAggregate.AverageRating.HasValue ? _overview.ParticipantAggregate.AverageRating.Value.ToString("0.0") : "-")
+                        / 5
+                    </p>
+                    <p class="mb-0 text-muted small">@string.Format(Localizer["FeedbackPage_FeedbackCount"].Value, _overview.ParticipantAggregate.Count)</p>
+                }
+            </Body>
+        </CardComponent>
+
+        @if (_isRegisteredParticipant)
+        {
+            <CardComponent Collapsed="false">
+                <Title>@Localizer["FeedbackPage_OwnFeedbackHeading"]</Title>
+                <Body>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">@Localizer["FeedbackPage_RatingLabel"]</label>
+                            <select class="form-select" @bind="_ownRating">
+                                <option value="">@Localizer["FeedbackPage_NoRating"]</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["FeedbackPage_CommentLabel"]</label>
+                            <textarea class="form-control" rows="3" maxlength="2000" @bind="_ownComment"></textarea>
+                        </div>
+                    </div>
+                </Body>
+                <Footer>
+                    <button type="button" class="btn btn-primary" @onclick="SaveOwnFeedbackAsync" disabled="@_savingOwnFeedback">
+                        <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                    </button>
+                    <ActionAlert IsSuccess="_ownFeedbackSaved" Message="@_ownFeedbackMessage" />
+                </Footer>
+            </CardComponent>
+        }
+
+        @if (_isStaffViewer)
+        {
+            <CardComponent Collapsed="false">
+                <Title>@Localizer["FeedbackPage_TrainerFeedbackHeading"]</Title>
+                <Body>
+                    @if (_isAssignedTrainer)
+                    {
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">@Localizer["FeedbackPage_RatingLabel"]</label>
+                                <select class="form-select" @bind="_trainerRating">
+                                    <option value="">@Localizer["FeedbackPage_NoRating"]</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">@Localizer["FeedbackPage_CommentLabel"]</label>
+                                <textarea class="form-control" rows="3" maxlength="2000" @bind="_trainerComment"></textarea>
+                            </div>
+                        </div>
+                    }
+                    else if (_overview!.TrainerFeedback is not null)
+                    {
+                        <p class="mb-1"><span class="fw-semibold">@Localizer["FeedbackPage_RatingLabel"]:</span> @(_overview.TrainerFeedback.Rating?.ToString() ?? "-") / 5</p>
+                        <p class="mb-0">@(_overview.TrainerFeedback.Comment ?? Localizer["FeedbackPage_NoComment"].Value)</p>
+                    }
+                    else
+                    {
+                        <div class="text-muted">@Localizer["FeedbackPage_NoTrainerFeedbackYet"]</div>
+                    }
+                </Body>
+                <Footer>
+                    @if (_isAssignedTrainer)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="SaveTrainerFeedbackAsync" disabled="@_savingTrainerFeedback">
+                            <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                        </button>
+                        <ActionAlert IsSuccess="_trainerFeedbackSaved" Message="@_trainerFeedbackMessage" />
+                    }
+                </Footer>
+            </CardComponent>
+
+            <CardComponent Collapsed="false">
+                <Title>@Localizer["FeedbackPage_ParticipantEntriesHeading"]</Title>
+                <Body>
+                    @if (!_overview!.ParticipantFeedbackEntries.Any())
+                    {
+                        <div class="text-muted">@Localizer["FeedbackPage_NoParticipantFeedbackYet"]</div>
+                    }
+                    else
+                    {
+                        <div class="list-group">
+                            @foreach (var entry in _overview.ParticipantFeedbackEntries)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-semibold">@(entry.Rating?.ToString() ?? "-") / 5</span>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(entry.Comment))
+                                    {
+                                        <p class="mb-0 mt-1">@entry.Comment</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </Body>
+            </CardComponent>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
+
+    private TrainingDto? _training;
+    private TrainingFeedbackOverviewDto? _overview;
+    private bool _loading = true;
+    private bool _isAccessDenied;
+    private bool _isStaffViewer;
+    private bool _isAssignedTrainer;
+    private bool _isRegisteredParticipant;
+    private int _currentUserId;
+
+    private string _ownRating = "";
+    private string _ownComment = "";
+    private bool _savingOwnFeedback;
+    private bool _ownFeedbackSaved;
+    private string? _ownFeedbackMessage;
+
+    private string _trainerRating = "";
+    private string _trainerComment = "";
+    private bool _savingTrainerFeedback;
+    private bool _trainerFeedbackSaved;
+    private string? _trainerFeedbackMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _training = await TrainingService.GetByIdAsync(Id);
+        if (_training is null)
+        {
+            _isAccessDenied = true;
+            _loading = false;
+            return;
+        }
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        _currentUserId = int.TryParse(user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+        if (!AuthorizationHelper.IsGroupMember(user, _training.GroupId))
+        {
+            _isAccessDenied = true;
+            _loading = false;
+            return;
+        }
+
+        _isStaffViewer = AuthorizationHelper.IsGroupTrainer(user, _training.GroupId);
+        _isAssignedTrainer = _training.TrainerId == _currentUserId;
+        _isRegisteredParticipant = await RegistrationService.IsRegisteredAsync(_currentUserId, Id);
+
+        if (_training.Status == TrainingStatus.Done)
+        {
+            _overview = await FeedbackService.GetOverviewAsync(Id, _currentUserId, _isStaffViewer);
+
+            if (_overview.OwnParticipantFeedback is not null)
+            {
+                _ownRating = _overview.OwnParticipantFeedback.Rating?.ToString() ?? "";
+                _ownComment = _overview.OwnParticipantFeedback.Comment ?? "";
+            }
+
+            if (_overview.TrainerFeedback is not null)
+            {
+                _trainerRating = _overview.TrainerFeedback.Rating?.ToString() ?? "";
+                _trainerComment = _overview.TrainerFeedback.Comment ?? "";
+            }
+        }
+
+        _loading = false;
+    }
+
+    private async Task SaveOwnFeedbackAsync()
+    {
+        _savingOwnFeedback = true;
+        _ownFeedbackMessage = null;
+        try
+        {
+            await FeedbackService.UpsertParticipantFeedbackAsync(_currentUserId, new UpsertParticipantFeedbackDto
+            {
+                TrainingId = Id,
+                Comment = string.IsNullOrWhiteSpace(_ownComment) ? null : _ownComment,
+                Rating = int.TryParse(_ownRating, out var rating) ? rating : null
+            });
+            _overview = await FeedbackService.GetOverviewAsync(Id, _currentUserId, _isStaffViewer);
+            _ownFeedbackSaved = true;
+            _ownFeedbackMessage = Localizer["FeedbackPage_SavedMessage"];
+        }
+        catch (Exception ex)
+        {
+            _ownFeedbackSaved = false;
+            _ownFeedbackMessage = ex.Message;
+        }
+        finally
+        {
+            _savingOwnFeedback = false;
+        }
+    }
+
+    private async Task SaveTrainerFeedbackAsync()
+    {
+        _savingTrainerFeedback = true;
+        _trainerFeedbackMessage = null;
+        try
+        {
+            await FeedbackService.UpsertTrainerFeedbackAsync(_currentUserId, new UpsertTrainerFeedbackDto
+            {
+                TrainingId = Id,
+                Comment = string.IsNullOrWhiteSpace(_trainerComment) ? null : _trainerComment,
+                Rating = int.TryParse(_trainerRating, out var rating) ? rating : null
+            });
+            _overview = await FeedbackService.GetOverviewAsync(Id, _currentUserId, _isStaffViewer);
+            _trainerFeedbackSaved = true;
+            _trainerFeedbackMessage = Localizer["FeedbackPage_SavedMessage"];
+        }
+        catch (Exception ex)
+        {
+            _trainerFeedbackSaved = false;
+            _trainerFeedbackMessage = ex.Message;
+        }
+        finally
+        {
+            _savingTrainerFeedback = false;
+        }
+    }
+}

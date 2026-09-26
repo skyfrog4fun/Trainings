@@ -72,6 +72,33 @@
                             <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingsPage_Take"]
                         </button>
                     }
+                    @if (CanEditAsTrainer(training))
+                    {
+                        <a href="/trainings/@training.GroupSlug/@training.Id/edit"
+                           class="btn btn-sm btn-app-outline-success"
+                           title='@Localizer["Shared_Edit"]'
+                           aria-label='@Localizer["Shared_Edit"]'>
+                            <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
+                        </a>
+                    }
+                    @if (CanRunAsTrainer(training))
+                    {
+                        <a href="/trainings/@training.GroupSlug/@training.Id/run"
+                           class="btn btn-sm btn-app-outline-success"
+                           title='@Localizer["TrainingsPage_Run"]'
+                           aria-label='@Localizer["TrainingsPage_Run"]'>
+                            <i class="@AppIcons.Play me-1" aria-hidden="true"></i>@Localizer["TrainingsPage_Run"]
+                        </a>
+                    }
+                    @if (CanResumeAsTrainer(training))
+                    {
+                        <a href="/trainings/@training.GroupSlug/@training.Id/run"
+                           class="btn btn-sm btn-app-outline-success"
+                           title='@Localizer["TrainingsPage_Resume"]'
+                           aria-label='@Localizer["TrainingsPage_Resume"]'>
+                            <i class="@AppIcons.Play me-1" aria-hidden="true"></i>@Localizer["TrainingsPage_Resume"]
+                        </a>
+                    }
                     @if (CanRegister(training))
                     {
                         <button type="button"
@@ -252,12 +279,24 @@
         return query.ToList();
     }
 
-    private bool CanRegister(TrainingDto training) =>
-        _isSuperAdmin || _accessibleGroupIds.Contains(training.GroupId);
+    private static bool IsRegistrationOpen(TrainingDto training) => training.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned;
+
+    private bool CanRegister(TrainingDto training) => (_isSuperAdmin || _accessibleGroupIds.Contains(training.GroupId)) && IsRegistrationOpen(training);
 
     private bool CanTake(TrainingDto training) =>
         !training.TrainerId.HasValue && training.Status == TrainingStatus.New &&
-        (_isSuperAdmin || _trainerGroupIds.Contains(training.GroupId) || _adminGroupIds.Contains(training.GroupId));
+        _trainerGroupIds.Contains(training.GroupId);
+
+    private bool IsAssignedTrainer(TrainingDto training) => training.TrainerId == _userId;
+
+    private bool CanEditAsTrainer(TrainingDto training) =>
+        IsAssignedTrainer(training) && training.Status == TrainingStatus.InPlanning;
+
+    private bool CanRunAsTrainer(TrainingDto training) =>
+        IsAssignedTrainer(training) && training.Status == TrainingStatus.Planned;
+
+    private bool CanResumeAsTrainer(TrainingDto training) =>
+        IsAssignedTrainer(training) && training.Status == TrainingStatus.InProgress;
 
     private async Task TakeTrainingAsync(TrainingDto training)
     {

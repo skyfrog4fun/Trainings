@@ -17,8 +17,11 @@ public class TrainingRepository(ApplicationDbContext context) : ITrainingReposit
                 .ThenInclude(g => g!.Country)
             .Include(t => t.Location)
             .Include(t => t.Blocks)
-                .ThenInclude(b => b.TrainingBlockTags)
-                    .ThenInclude(bt => bt.Tag)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Tag)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Game)
             .FirstOrDefaultAsync(t => t.Id == id);
 
     public async Task<IEnumerable<Training>> GetAllAsync() =>
@@ -27,6 +30,12 @@ public class TrainingRepository(ApplicationDbContext context) : ITrainingReposit
             .Include(t => t.Registrations)
             .Include(t => t.Group)
             .Include(t => t.Location)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Tag)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Game)
             .OrderByDescending(t => t.DateTime)
             .ToListAsync();
 
@@ -37,6 +46,12 @@ public class TrainingRepository(ApplicationDbContext context) : ITrainingReposit
             .Include(t => t.Group)
                 .ThenInclude(g => g!.Country)
             .Include(t => t.Location)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Tag)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Game)
             .OrderBy(t => t.DateTime)
             .ToListAsync();
 
@@ -46,6 +61,12 @@ public class TrainingRepository(ApplicationDbContext context) : ITrainingReposit
             .Include(t => t.Registrations)
             .Include(t => t.Group)
             .Include(t => t.Location)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Tag)
+            .Include(t => t.Blocks)
+                .ThenInclude(b => b.Definition)
+                    .ThenInclude(d => d.Game)
             .Where(t => t.TrainerId == trainerId)
             .OrderByDescending(t => t.DateTime)
             .ToListAsync();

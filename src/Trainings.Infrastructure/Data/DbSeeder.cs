@@ -3,18 +3,48 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Trainings.Application.Constants;
 using Trainings.Application.Interfaces;
 using Trainings.Domain.Entities;
 using Trainings.Domain.Enums;
 
 namespace Trainings.Infrastructure.Data;
 
-public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher passwordHasher, IConfiguration configuration, ILogger<DbSeeder> logger)
+public partial class DbSeeder(
+    ApplicationDbContext context,
+    IPasswordHasher passwordHasher,
+    IConfiguration configuration,
+    ILogger<DbSeeder> logger,
+    ITranslationService translationService)
 {
     private readonly ApplicationDbContext _context = context;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<DbSeeder> _logger = logger;
+    private readonly ITranslationService _translationService = translationService;
+
+    private static readonly (string Key, string EnglishText, string GermanText, string ColorToken, int DisplayOrder)[] _fixedTags =
+    [
+        (TrainingBlockCatalog.TagKeys.WarmUp, "Warm-Up", "Warm-Up", TrainingBlockCatalog.ColorTokens.Community, 1),
+        (TrainingBlockCatalog.TagKeys.Fitness, "Fitness", "Fitness", TrainingBlockCatalog.ColorTokens.Accent, 2),
+        (TrainingBlockCatalog.TagKeys.Technique, "Technique", "Technik", TrainingBlockCatalog.ColorTokens.Accent40, 3),
+        (TrainingBlockCatalog.TagKeys.Game, "Game", "Spiel", TrainingBlockCatalog.ColorTokens.Innovation, 4),
+        (TrainingBlockCatalog.TagKeys.CoolDown, "Cool-down", "Cool-down", TrainingBlockCatalog.ColorTokens.AppreciationDark, 5),
+        (TrainingBlockCatalog.TagKeys.Other, "Other", "Sonstiges", TrainingBlockCatalog.ColorTokens.Tradition60, 6)
+    ];
+
+    private static readonly (string EnglishText, string GermanText, bool IsSystemFallback)[] _seedGames =
+    [
+        ("Soccer", "Fussball", false),
+        ("Floorball", "Unihockey", false),
+        ("Dodgeball", "Völkerball", false),
+        ("Basketball", "Basketball", false),
+        ("Volleyball", "Volleyball", false),
+        ("Handball", "Handball", false),
+        ("Tag", "Fangen", false),
+        ("Relay", "Stafette", false),
+        ("Other", "Sonstiges", true)
+    ];
 
     public async Task SeedAsync()
     {
@@ -22,13 +52,13 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
         await HandlePreExistingDatabaseAsync();
         await _context.Database.MigrateAsync();
         await SeedLocationsAsync();
-        await SeedGlobalTagsAsync();
+        await SeedTagsAsync();
+        await SeedGamesAsync();
 
-        if (!_context.Users.Any())
+        if (!await _context.Users.AnyAsync())
         {
             string email = _configuration["Seed:Email"] ?? "superadmin@trainings.app";
             string password = _configuration["Seed:Password"] ?? "Admin123!";
-            //string defaultCountry = (_configuration["App:DefaultCountry"] ?? "CH").ToUpperInvariant();
 
             var superAdmin = new User
             {
@@ -48,25 +78,73 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
         }
     }
 
-    private async Task SeedGlobalTagsAsync()
+    private async Task SeedTagsAsync()
     {
-        if (await _context.Tags.AnyAsync(t => t.GroupId == null))
+        foreach (var (Key, EnglishText, GermanText, ColorToken, DisplayOrder) in _fixedTags)
         {
-            return;
+            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Key == Key);
+            if (tag == null)
+            {
+                tag = new Tag
+                {
+                    Key = Key,
+                    ColorToken = ColorToken,
+                    DisplayOrder = DisplayOrder,
+                    IsActive = true
+                };
+                _context.Tags.Add(tag);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                tag.ColorToken = ColorToken;
+                tag.DisplayOrder = DisplayOrder;
+                tag.IsActive = true;
+                await _context.SaveChangesAsync();
+            }
+
+            await _translationService.UpsertAsync(TranslationEntityType.Tag, tag.Id, EnglishText, GermanText);
         }
+    }
 
-        string[] globalTags =
-        [
-            "Warm-up", "Stretching", "Strength", "Cardio", "Coordination",
-            "Technique", "Mental", "Game", "Cool-down", "Other"
-        ];
-
-        foreach (string name in globalTags)
+    private async Task SeedGamesAsync()
+    {
+        foreach (var (EnglishText, GermanText, IsSystemFallback) in _seedGames)
         {
-            _context.Tags.Add(new Tag { Name = name, GroupId = null });
-        }
+            var translationIds = await _context.Translations
+                .Where(t => t.EntityType == TranslationEntityType.Game && (t.Text == EnglishText || t.Text == GermanText))
+                .Select(t => t.EntityId)
+                .Distinct()
+                .ToListAsync();
 
-        await _context.SaveChangesAsync();
+            Game? game = null;
+            if (translationIds.Count > 0)
+            {
+                game = await _context.Games.FirstOrDefaultAsync(g => translationIds.Contains(g.Id));
+            }
+
+            if (game == null)
+            {
+                game = new Game
+                {
+                    IsActive = true,
+                    IsApproved = true,
+                    IsSystemFallback = IsSystemFallback,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.Games.Add(game);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                game.IsSystemFallback = IsSystemFallback;
+                game.IsActive = true;
+                game.IsApproved = true;
+                await _context.SaveChangesAsync();
+            }
+
+            await _translationService.UpsertAsync(TranslationEntityType.Game, game.Id, EnglishText, GermanText);
+        }
     }
 
     private async Task SeedLocationsAsync()
@@ -95,11 +173,6 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
         await _context.SaveChangesAsync();
     }
 
-    /// <summary>
-    /// Ensures the data directory for the SQLite database file exists.
-    /// When running in Docker with a volume mount, the directory may not be writable
-    /// if it wasn't created beforehand on the host.
-    /// </summary>
     private Task EnsureDataDirectoryExistsAsync()
     {
         string? connectionString = _context.Database.GetConnectionString();
@@ -109,7 +182,7 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
         }
 
         var builder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString);
-        string? dbPath = builder.DataSource;
+        string dbPath = builder.DataSource;
         if (string.IsNullOrEmpty(dbPath))
         {
             return Task.CompletedTask;
@@ -125,11 +198,6 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Handles databases that were created by EnsureCreatedAsync (without migration history).
-    /// If the database has tables but no __EFMigrationsHistory table, it marks the initial
-    /// migration as applied so that MigrateAsync does not try to recreate existing tables.
-    /// </summary>
     private async Task HandlePreExistingDatabaseAsync()
     {
         var databaseCreator = _context.Database.GetService<IRelationalDatabaseCreator>();
@@ -138,14 +206,10 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
             return;
         }
 
-        // Check directly via SQL whether application tables already exist
-        // but migration history is missing — indicating the database was created
-        // by EnsureCreatedAsync rather than by migrations.
         var connection = _context.Database.GetDbConnection();
         await connection.OpenAsync();
         try
         {
-            // Check if the Users table exists (proxy for "schema is already present")
             using var checkTablesCmd = connection.CreateCommand();
             checkTablesCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='Users'";
             bool tablesExist = await checkTablesCmd.ExecuteScalarAsync() is long tableCount && tableCount > 0;
@@ -154,10 +218,8 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
                 return;
             }
 
-            // Check if the __EFMigrationsHistory table exists and has rows
             using var checkHistoryCmd = connection.CreateCommand();
-            checkHistoryCmd.CommandText =
-                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsHistory'";
+            checkHistoryCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsHistory'";
             bool historyTableExists = await checkHistoryCmd.ExecuteScalarAsync() is long historyCount && historyCount > 0;
 
             if (historyTableExists)
@@ -172,14 +234,10 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
             }
 
             LogPreExistingDatabaseDetected(_logger);
-
-            // Add columns that may be missing in databases created by older versions.
             await AddMissingColumnsAsync(connection);
 
-            // Create the history table and insert the initial migration so MigrateAsync skips it.
             using var createCmd = connection.CreateCommand();
-            createCmd.CommandText =
-                """
+            createCmd.CommandText = """
                 CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
                     "MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY,
                     "ProductVersion" TEXT NOT NULL
@@ -204,20 +262,15 @@ public partial class DbSeeder(ApplicationDbContext context, IPasswordHasher pass
     [LoggerMessage(Level = LogLevel.Information, Message = "Added missing column {Column} to table {Table}.")]
     private static partial void LogAddedMissingColumn(ILogger logger, string column, string table);
 
-    /// <summary>
-    /// Adds columns to existing tables that may have been created by an older version
-    /// of the model (via <c>EnsureCreatedAsync</c>) before the InitialSchema migration
-    /// included them.
-    /// </summary>
     private async Task AddMissingColumnsAsync(System.Data.Common.DbConnection connection)
     {
         var columnsToAdd = new (string Table, string Column, string TypeAndDefault)[]
         {
-            ("GroupMemberships", "Status",        "INTEGER NOT NULL DEFAULT 0"),
-            ("GroupMemberships", "RequestedAt",    "TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'"),
-            ("GroupMemberships", "ApprovedAt",     "TEXT"),
-            ("GroupMemberships", "DeclinedAt",     "TEXT"),
-            ("NotificationLogs", "AttemptId",      "TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'"),
+            ("GroupMemberships", "Status", "INTEGER NOT NULL DEFAULT 0"),
+            ("GroupMemberships", "RequestedAt", "TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'"),
+            ("GroupMemberships", "ApprovedAt", "TEXT"),
+            ("GroupMemberships", "DeclinedAt", "TEXT"),
+            ("NotificationLogs", "AttemptId", "TEXT NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'")
         };
 
         foreach (var (table, column, typeAndDefault) in columnsToAdd)

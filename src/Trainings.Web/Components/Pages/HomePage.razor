@@ -358,6 +358,7 @@
                 .Where(t =>
                     !myRegistrationIds.Contains(t.Id) &&
                     (_isSuperAdmin || accessibleGroupIds.Contains(t.GroupId)) &&
+                    (t.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned) &&
                     (t.Status == TrainingStatus.Planned
                         ? t.DateTime <= now.AddDays(28)
                         : t.DateTime <= now.AddDays(4)))

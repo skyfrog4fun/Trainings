@@ -15,5 +15,8 @@ public enum TrainingStatus
     InProgress = 3,
 
     /// <summary>Attendance has been finalized and locked; only non-attendance fields remain editable.</summary>
-    Done = 4
+    Done = 4,
+
+    /// <summary>Terminal state; the training was cancelled and will not be held. Not reversible.</summary>
+    Cancelled = 9
 }

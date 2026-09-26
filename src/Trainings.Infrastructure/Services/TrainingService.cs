@@ -8,36 +8,43 @@ using Trainings.Infrastructure.Data;
 
 namespace Trainings.Infrastructure.Services;
 
-public class TrainingService(ITrainingRepository trainingRepository, IRegistrationRepository registrationRepository, ApplicationDbContext context, IAppRuntimeModeService appRuntimeModeService, IDateTimeFormatService dateTimeFormatService) : ITrainingService
+public class TrainingService(
+    ITrainingRepository trainingRepository,
+    IRegistrationRepository registrationRepository,
+    ApplicationDbContext context,
+    IAppRuntimeModeService appRuntimeModeService,
+    IDateTimeFormatService dateTimeFormatService,
+    ITranslationService translationService) : ITrainingService
 {
     private readonly ITrainingRepository _trainingRepository = trainingRepository;
     private readonly IRegistrationRepository _registrationRepository = registrationRepository;
     private readonly ApplicationDbContext _context = context;
     private readonly IAppRuntimeModeService _appRuntimeModeService = appRuntimeModeService;
     private readonly IDateTimeFormatService _dateTimeFormatService = dateTimeFormatService;
+    private readonly ITranslationService _translationService = translationService;
 
     public async Task<TrainingDto?> GetByIdAsync(int id)
     {
         var training = await _trainingRepository.GetByIdAsync(id);
-        return training == null ? null : MapToDto(training);
+        return training == null ? null : await MapToDtoAsync(training);
     }
 
     public async Task<IEnumerable<TrainingDto>> GetAllAsync()
     {
         var trainings = await _trainingRepository.GetAllAsync();
-        return trainings.Select(MapToDto);
+        return await MapTrainingsAsync(trainings);
     }
 
     public async Task<IEnumerable<TrainingDto>> GetActiveAsync()
     {
         var trainings = await _trainingRepository.GetActiveAsync();
-        return trainings.Select(MapToDto);
+        return await MapTrainingsAsync(trainings);
     }
 
     public async Task<IEnumerable<TrainingDto>> GetByTrainerIdAsync(int trainerId)
     {
         var trainings = await _trainingRepository.GetByTrainerIdAsync(trainerId);
-        return trainings.Select(MapToDto);
+        return await MapTrainingsAsync(trainings);
     }
 
     public async Task<TrainingDto> CreateAsync(CreateTrainingDto dto)
@@ -68,8 +75,9 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
             GroupId = dto.GroupId,
             Status = dto.TrainerId.HasValue ? TrainingStatus.InPlanning : TrainingStatus.New
         };
+
         await _trainingRepository.AddAsync(training);
-        return MapToDto(training);
+        return await MapToDtoAsync(training);
     }
 
     public async Task UpdateAsync(UpdateTrainingDto dto)
@@ -78,6 +86,12 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
 
         var training = await _trainingRepository.GetByIdAsync(dto.Id)
             ?? throw new InvalidOperationException($"Training {dto.Id} not found.");
+
+        if (training.Status is TrainingStatus.InProgress or TrainingStatus.Done or TrainingStatus.Cancelled)
+        {
+            throw new InvalidOperationException("This training can no longer be edited.");
+        }
+
         training.Title = dto.Title;
         training.Description = dto.Description;
         training.LocationId = dto.LocationId;
@@ -86,16 +100,46 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         training.DateTime = dto.DateTime;
         training.DurationMinutes = dto.DurationMinutes;
         training.Capacity = dto.Capacity;
-        training.Status = dto.Status;
         training.TrainerId = dto.TrainerId;
+
+        // Editing a Planned training always reverts it to InPlanning; planning must be
+        // re-confirmed explicitly. The Status passed in the DTO is otherwise ignored so this
+        // rule cannot be bypassed by callers.
+        training.Status = training.Status == TrainingStatus.Planned ? TrainingStatus.InPlanning : training.Status;
         training.GroupId = dto.GroupId;
+
         await _trainingRepository.UpdateAsync(training);
     }
 
     public async Task DeleteAsync(int id)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _trainingRepository.GetByIdAsync(id)
+            ?? throw new InvalidOperationException($"Training {id} not found.");
+
+        if (training.Status is not (TrainingStatus.New or TrainingStatus.InPlanning))
+        {
+            throw new InvalidOperationException("Only a training in New or InPlanning state can be hard-deleted. Use Cancel instead.");
+        }
+
         await _trainingRepository.DeleteAsync(id);
+    }
+
+    public async Task CancelAsync(int trainingId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.Status is not (TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned))
+        {
+            throw new InvalidOperationException("Only a training that has not started yet can be cancelled.");
+        }
+
+        training.Status = TrainingStatus.Cancelled;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct = default)
@@ -103,134 +147,38 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         _appRuntimeModeService.EnsureWriteAllowed();
         var training = await _context.Trainings.FindAsync([trainingId], ct)
             ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (!IsValidTransition(training.Status, status))
+        {
+            throw new InvalidOperationException($"Cannot transition training {trainingId} from {training.Status} to {status}.");
+        }
+
         training.Status = status;
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<IEnumerable<TrainingBlockDto>> GetBlocksAsync(int trainingId, CancellationToken ct = default)
+    /// <summary>
+    /// Validates a status transition against the training lifecycle state diagram
+    /// (see docs/architecture/training-lifecycle-redesign.md). Same-status "transitions" are
+    /// always allowed (no-op).
+    /// </summary>
+    private static bool IsValidTransition(TrainingStatus from, TrainingStatus to)
     {
-        var blocks = await _context.TrainingBlocks
-            .Include(b => b.TrainingBlockTags)
-                .ThenInclude(bt => bt.Tag)
-            .Where(b => b.TrainingId == trainingId)
-            .OrderBy(b => b.OrderIndex)
-            .ToListAsync(ct);
-        return blocks.Select(MapBlockToDto);
-    }
-
-    public async Task<TrainingBlockDto> AddBlockAsync(CreateTrainingBlockDto dto, CancellationToken ct = default)
-    {
-        _appRuntimeModeService.EnsureWriteAllowed();
-
-        var block = new TrainingBlock
+        if (from == to)
         {
-            TrainingId = dto.TrainingId,
-            OrderIndex = dto.OrderIndex,
-            Title = dto.Title,
-            Description = dto.Description,
-            PlannedDurationMinutes = dto.PlannedDurationMinutes,
-            CreatedAt = DateTime.UtcNow
+            return true;
+        }
+
+        return from switch
+        {
+            TrainingStatus.New => to is TrainingStatus.InPlanning or TrainingStatus.Cancelled,
+            TrainingStatus.InPlanning => to is TrainingStatus.New or TrainingStatus.Planned or TrainingStatus.Cancelled,
+            TrainingStatus.Planned => to is TrainingStatus.InPlanning or TrainingStatus.InProgress or TrainingStatus.Cancelled,
+            TrainingStatus.InProgress => to is TrainingStatus.Done,
+            TrainingStatus.Done => false,
+            TrainingStatus.Cancelled => false,
+            _ => false
         };
-
-        foreach (int tagId in dto.TagIds)
-        {
-            block.TrainingBlockTags.Add(new TrainingBlockTag { TagId = tagId });
-        }
-
-        _context.TrainingBlocks.Add(block);
-        await _context.SaveChangesAsync(ct);
-
-        // Reload with tags
-        await _context.Entry(block)
-            .Collection(b => b.TrainingBlockTags)
-            .Query()
-            .Include(bt => bt.Tag)
-            .LoadAsync(ct);
-
-        return MapBlockToDto(block);
-    }
-
-    public async Task UpdateBlockAsync(UpdateTrainingBlockDto dto, CancellationToken ct = default)
-    {
-        _appRuntimeModeService.EnsureWriteAllowed();
-
-        var block = await _context.TrainingBlocks
-            .Include(b => b.TrainingBlockTags)
-            .FirstOrDefaultAsync(b => b.Id == dto.Id, ct)
-            ?? throw new InvalidOperationException($"Block {dto.Id} not found.");
-
-        block.OrderIndex = dto.OrderIndex;
-        block.Title = dto.Title;
-        block.Description = dto.Description;
-        block.PlannedDurationMinutes = dto.PlannedDurationMinutes;
-        block.EffectiveDurationMinutes = dto.EffectiveDurationMinutes;
-        block.TrainerComment = dto.TrainerComment;
-
-        // Update tags
-        block.TrainingBlockTags.Clear();
-        foreach (int tagId in dto.TagIds)
-        {
-            block.TrainingBlockTags.Add(new TrainingBlockTag { TrainingBlockId = block.Id, TagId = tagId });
-        }
-
-        await _context.SaveChangesAsync(ct);
-    }
-
-    public async Task DeleteBlockAsync(int blockId, CancellationToken ct = default)
-    {
-        _appRuntimeModeService.EnsureWriteAllowed();
-
-        var block = await _context.TrainingBlocks.FindAsync([blockId], ct);
-        if (block != null)
-        {
-            _context.TrainingBlocks.Remove(block);
-            await _context.SaveChangesAsync(ct);
-        }
-    }
-
-    public async Task CopyBlockAsync(int sourceBlockId, int targetTrainingId, CancellationToken ct = default)
-    {
-        _appRuntimeModeService.EnsureWriteAllowed();
-
-        var source = await _context.TrainingBlocks
-            .Include(b => b.TrainingBlockTags)
-            .FirstOrDefaultAsync(b => b.Id == sourceBlockId, ct)
-            ?? throw new InvalidOperationException($"Block {sourceBlockId} not found.");
-
-        int maxOrder = await _context.TrainingBlocks
-            .Where(b => b.TrainingId == targetTrainingId)
-            .MaxAsync(b => (int?)b.OrderIndex, ct) ?? 0;
-
-        var copy = new TrainingBlock
-        {
-            TrainingId = targetTrainingId,
-            OrderIndex = maxOrder + 1,
-            Title = source.Title,
-            Description = source.Description,
-            PlannedDurationMinutes = source.PlannedDurationMinutes,
-            SourceBlockId = sourceBlockId,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        foreach (var tag in source.TrainingBlockTags)
-        {
-            copy.TrainingBlockTags.Add(new TrainingBlockTag { TagId = tag.TagId });
-        }
-
-        _context.TrainingBlocks.Add(copy);
-        await _context.SaveChangesAsync(ct);
-    }
-
-    public async Task<IEnumerable<TrainingBlockDto>> GetAllBlocksLibraryAsync(CancellationToken ct = default)
-    {
-        var blocks = await _context.TrainingBlocks
-            .Include(b => b.TrainingBlockTags)
-                .ThenInclude(bt => bt.Tag)
-            .Include(b => b.Training)
-                .ThenInclude(t => t.Trainer)
-            .OrderByDescending(b => b.CreatedAt)
-            .ToListAsync(ct);
-        return blocks.Select(MapBlockToDto);
     }
 
     public async Task LockAttendanceAsync(int trainingId, CancellationToken ct = default)
@@ -239,6 +187,12 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
 
         var training = await _context.Trainings.FindAsync([trainingId], ct)
             ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.Status != TrainingStatus.InProgress)
+        {
+            throw new InvalidOperationException("Only a training that is in progress can be marked as done.");
+        }
+
         training.AttendanceLocked = true;
         training.AttendanceLockedAt = DateTime.UtcNow;
         training.Status = TrainingStatus.Done;
@@ -256,6 +210,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         {
             throw new InvalidOperationException("This training already has a trainer assigned.");
         }
+
         if (training.Status != TrainingStatus.New)
         {
             throw new InvalidOperationException("Only an unassigned training can be taken.");
@@ -265,7 +220,6 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         training.Status = TrainingStatus.InPlanning;
         await _trainingRepository.UpdateAsync(training);
 
-        // A Trainer taking a training on their own also assigns themself as a participant.
         var existingRegistration = await _registrationRepository.GetByUserAndTrainingAsync(trainerId, trainingId);
         if (existingRegistration == null)
         {
@@ -284,7 +238,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
             await _registrationRepository.UpdateAsync(existingRegistration);
         }
 
-        return MapToDto(training);
+        return await MapToDtoAsync(training);
     }
 
     public async Task ReleaseTrainerAsync(int trainingId, int requestingUserId, CancellationToken ct = default)
@@ -298,6 +252,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         {
             throw new InvalidOperationException("Only the assigned trainer can release this training.");
         }
+
         if (training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
         {
             throw new InvalidOperationException("A training that is in progress or already done cannot be released.");
@@ -322,7 +277,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
 
         training.TrainerId = newTrainerId;
         training.Status = newTrainerId.HasValue
-            ? (training.Status == TrainingStatus.New ? TrainingStatus.InPlanning : training.Status)
+            ? (training.Status is TrainingStatus.New or TrainingStatus.Planned ? TrainingStatus.InPlanning : training.Status)
             : TrainingStatus.New;
         await _context.SaveChangesAsync(ct);
     }
@@ -338,6 +293,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         {
             throw new InvalidOperationException("A trainer must be assigned before the training can be confirmed as planned.");
         }
+
         if (training.Status != TrainingStatus.InPlanning)
         {
             throw new InvalidOperationException("Only a training that is in planning can be confirmed as planned.");
@@ -358,6 +314,7 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         {
             throw new InvalidOperationException("Only the assigned trainer can start this training.");
         }
+
         if (training.Status != TrainingStatus.Planned)
         {
             throw new InvalidOperationException("Only a planned training can be started.");
@@ -380,11 +337,77 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
         for (int week = 0; week < maxWeeksAhead; week++, candidate = candidate.AddDays(7))
         {
             if (!occupiedDates.Contains(candidate.Date))
+            {
                 return candidate;
+            }
         }
 
-        throw new InvalidOperationException(
-            $"No available training date found for group {groupId} within {maxWeeksAhead} weeks.");
+        throw new InvalidOperationException($"No available training date found for group {groupId} within {maxWeeksAhead} weeks.");
+    }
+
+    private async Task<IEnumerable<TrainingDto>> MapTrainingsAsync(IEnumerable<Training> trainings)
+    {
+        var trainingList = trainings.ToList();
+        if (trainingList.Count == 0)
+        {
+            return [];
+        }
+
+        var blocks = trainingList.SelectMany(t => t.Blocks).ToList();
+        var tagTexts = await _translationService.GetTextLookupAsync(TranslationEntityType.Tag, blocks.Select(b => b.Definition.TagId));
+        var gameTexts = await _translationService.GetTextLookupAsync(
+            TranslationEntityType.Game,
+            blocks.Where(b => b.Definition.GameId.HasValue).Select(b => b.Definition.GameId!.Value));
+
+        return [.. trainingList.Select(training => MapTraining(training, tagTexts, gameTexts))];
+    }
+
+    private async Task<TrainingDto> MapToDtoAsync(Training training)
+    {
+        var blocks = training.Blocks.ToList();
+        var tagTexts = await _translationService.GetTextLookupAsync(TranslationEntityType.Tag, blocks.Select(b => b.Definition.TagId));
+        var gameTexts = await _translationService.GetTextLookupAsync(
+            TranslationEntityType.Game,
+            blocks.Where(b => b.Definition.GameId.HasValue).Select(b => b.Definition.GameId!.Value));
+
+        return MapTraining(training, tagTexts, gameTexts);
+    }
+
+    private static TrainingDto MapBaseTraining(Training training) => new()
+    {
+        Id = training.Id,
+        Title = training.Title,
+        Description = training.Description,
+        LocationId = training.LocationId,
+        LocationName = training.Location?.Name,
+        LocationCity = training.Location?.CityName,
+        SpecialLocationDescription = training.SpecialLocationDescription,
+        MeetingPoint = training.MeetingPoint,
+        DateTime = training.DateTime,
+        DurationMinutes = training.DurationMinutes,
+        Capacity = training.Capacity,
+        Status = training.Status,
+        TrainerId = training.TrainerId,
+        TrainerName = training.Trainer?.DisplayName ?? string.Empty,
+        RegisteredCount = training.Registrations?.Count(r => r.Status == RegistrationStatus.Registered) ?? 0,
+        GroupId = training.GroupId,
+        GroupName = training.Group?.Name,
+        GroupSlug = training.Group?.Slug,
+        GroupCountry = training.Group?.Country?.Code,
+        AttendanceLocked = training.AttendanceLocked,
+        AttendanceLockedAt = training.AttendanceLockedAt
+    };
+
+    private static TrainingDto MapTraining(
+        Training training,
+        IReadOnlyDictionary<int, TranslationTextsDto> tagTexts,
+        IReadOnlyDictionary<int, TranslationTextsDto> gameTexts)
+    {
+        var dto = MapBaseTraining(training);
+        dto.Blocks = [.. training.Blocks
+            .OrderBy(b => b.OrderIndex)
+            .Select(block => TrainingBlockMappingHelper.MapExecution(block, tagTexts, gameTexts))];
+        return dto;
     }
 
     private static DateTime GetNextWeekday(DateTime startDate, DayOfWeek day)
@@ -397,57 +420,4 @@ public class TrainingService(ITrainingRepository trainingRepository, IRegistrati
 
         return startDate.AddDays(offset);
     }
-
-    private static TrainingDto MapToDto(Training t) => new()
-    {
-        Id = t.Id,
-        Title = t.Title,
-        Description = t.Description,
-        LocationId = t.LocationId,
-        LocationName = t.Location?.Name,
-        LocationCity = t.Location?.CityName,
-        SpecialLocationDescription = t.SpecialLocationDescription,
-        MeetingPoint = t.MeetingPoint,
-        DateTime = t.DateTime,
-        DurationMinutes = t.DurationMinutes,
-        Capacity = t.Capacity,
-        Status = t.Status,
-        TrainerId = t.TrainerId,
-        TrainerName = t.Trainer?.DisplayName ?? string.Empty,
-        RegisteredCount = t.Registrations?.Count(r => r.Status == Domain.Enums.RegistrationStatus.Registered) ?? 0,
-        GroupId = t.GroupId,
-        GroupName = t.Group?.Name,
-        GroupSlug = t.Group?.Slug,
-        GroupCountry = t.Group?.Country?.Code,
-        AttendanceLocked = t.AttendanceLocked,
-        AttendanceLockedAt = t.AttendanceLockedAt,
-        Blocks = t.Blocks?
-            .OrderBy(b => b.OrderIndex)
-            .Select(MapBlockToDto)
-            .ToList() ?? []
-    };
-
-    private static TrainingBlockDto MapBlockToDto(TrainingBlock b) => new()
-    {
-        Id = b.Id,
-        TrainingId = b.TrainingId,
-        OrderIndex = b.OrderIndex,
-        Title = b.Title,
-        Description = b.Description,
-        PlannedDurationMinutes = b.PlannedDurationMinutes,
-        EffectiveDurationMinutes = b.EffectiveDurationMinutes,
-        TrainerComment = b.TrainerComment,
-        SourceBlockId = b.SourceBlockId,
-        CreatedAt = b.CreatedAt,
-        TrainerId = b.Training?.TrainerId ?? 0,
-        TrainerName = b.Training?.Trainer?.DisplayName ?? string.Empty,
-        Tags = [.. b.TrainingBlockTags
-            .Where(bt => bt.Tag is not null)
-            .Select(bt => new TagDto
-            {
-                Id = bt.Tag.Id,
-                Name = bt.Tag.Name,
-                GroupId = bt.Tag.GroupId
-            })]
-    };
 }

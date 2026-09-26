@@ -347,9 +347,9 @@
             return "-";
         }
 
-        return string.IsNullOrWhiteSpace(_group.CountryCode)
+        return string.IsNullOrWhiteSpace(_group.LocationCity)
             ? _group.LocationName
-            : $"{_group.LocationName} [{_group.CountryCode}]";
+            : $"{_group.LocationName}, {_group.LocationCity}";
     }
 
     private string FormatMembers()

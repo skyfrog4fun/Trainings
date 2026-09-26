@@ -8,6 +8,7 @@
 @attribute [Authorize(Policy = "GroupTrainer")]
 
 @inject ITrainingService TrainingService
+@inject ITrainingBlockService TrainingBlockService
 @inject IGroupService GroupService
 @inject ILocationService LocationService
 @inject IAppRuntimeModeService AppRuntimeModeService
@@ -43,7 +44,7 @@
 
         <EditForm Model="_formModel" OnValidSubmit="SaveTrainingAsync">
             <DataAnnotationsValidator />
-            <CardComponent IsCollapsable="true" Collapsed="false" ShowFooter="true" HeaderCssClass="card-header-nowrap">
+            <CardComponent IsCollapsable="true" Collapsed="@_hasExistingBlocks" ShowFooter="true" HeaderCssClass="card-header-nowrap">
                 <Title>
                     @if (_isEdit)
                     {
@@ -71,7 +72,7 @@
                                                       ValueSelector="g => (int?)g.Id"
                                                       TextSelector="@(g => g.Name)"
                                                       PlaceholderText="@Localizer["CreateEditTrainingPage_SelectGroup"]"
-                                                      Disabled="@_isGroupLocked" />
+                                                      Disabled="@(_isGroupLocked || !_canFullyEdit)" />
                             <ValidationMessage For="() => _formModel.GroupId" class="text-danger small" />
                             @if (_isGroupLocked)
                             {
@@ -81,18 +82,27 @@
 
                         <div class="col-12 col-md-6">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_TrainerLabel"]</label>
-                            <SelectDropdownComponent TItem="GroupMembershipDto" TValue="int"
-                                                      @bind-Value="_formModel.TrainerId"
-                                                      Items="_groupTrainers"
-                                                      ValueSelector="t => t.UserId"
-                                                      TextSelector="@(t => t.UserDisplayName)"
-                                                      PlaceholderText="@Localizer["CreateEditTrainingPage_SelectTrainer"]"
-                                                      PlaceholderValue="0" />
+                            <div class="trainer-select-group">
+                                <SelectDropdownComponent TItem="GroupMembershipDto" TValue="int"
+                                                          @bind-Value="_formModel.TrainerId"
+                                                          Items="_groupTrainers"
+                                                          ValueSelector="t => t.UserId"
+                                                          TextSelector="@(t => t.UserDisplayName)"
+                                                          PlaceholderText="@Localizer["CreateEditTrainingPage_SelectTrainer"]"
+                                                          PlaceholderValue="0"
+                                                          Disabled="@_isStatusLocked" />
+                                @if (_showReleaseTrainer)
+                                {
+                                    <button type="button" class="btn btn-outline-danger trainer-release-btn" @onclick="ReleaseTrainerAsync" title="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]" aria-label="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]">
+                                        <i class="@AppIcons.ReleaseTrainer" aria-hidden="true"></i>
+                                    </button>
+                                }
+                            </div>
                         </div>
 
                         <div class="col-12">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_TitleLabel"]</label>
-                            <InputText class="form-control" maxlength="64" @bind-Value="_formModel.Title" />
+                            <InputText class="form-control" maxlength="64" @bind-Value="_formModel.Title" disabled="@(!_canFullyEdit)" />
                         </div>
 
                         <div class="col-12">
@@ -106,13 +116,14 @@
                                                               ValueSelector="l => (int?)l.Id"
                                                               TextSelector="@(l => l.Name)"
                                                               SubTextSelector="@(l => l.CityName)"
-                                                              PlaceholderText="@Localizer["CreateEditTrainingPage_SelectLocation"]" />
+                                                              PlaceholderText="@Localizer["CreateEditTrainingPage_SelectLocation"]"
+                                                              Disabled="@(!_canFullyEdit)" />
                                     <ValidationMessage For="() => _formModel.LocationId" class="text-danger small" />
                                 </div>
 
                                 <div class="col-12 col-md-3 order-4 order-md-2">
                                     <label class="form-label">@Localizer["CreateEditTrainingPage_MaxParticipantLabel"]</label>
-                                    <InputNumber class="form-control" @bind-Value="_formModel.Capacity" />
+                                    <InputNumber class="form-control" @bind-Value="_formModel.Capacity" disabled="@(!_canFullyEdit)" />
                                     <ValidationMessage For="() => _formModel.Capacity" class="text-danger small" />
                                 </div>
 
@@ -120,12 +131,12 @@
                                 {
                                     <div class="col-12 col-md-6 order-2 order-md-3">
                                         <label class="form-label">@Localizer["CreateEditTrainingPage_SpecialLocationLabel"]</label>
-                                        <InputText class="form-control" @bind-Value="_formModel.SpecialLocationDescription" />
+                                        <InputText class="form-control" @bind-Value="_formModel.SpecialLocationDescription" disabled="@(!_canFullyEdit)" />
                                         <ValidationMessage For="() => _formModel.SpecialLocationDescription" class="text-danger small" />
                                     </div>
                                     <div class="col-12 col-md-6 order-3 order-md-4">
                                         <label class="form-label">@Localizer["CreateEditTrainingPage_MeetingPointLabel"]</label>
-                                        <InputText class="form-control" @bind-Value="_formModel.MeetingPoint" />
+                                        <InputText class="form-control" @bind-Value="_formModel.MeetingPoint" disabled="@(!_canFullyEdit)" />
                                         <ValidationMessage For="() => _formModel.MeetingPoint" class="text-danger small" />
                                     </div>
                                 }
@@ -134,52 +145,43 @@
 
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_DateLabel"]</label>
-                            <InputDate class="form-control" @bind-Value="_formModel.Date" />
+                            <InputDate class="form-control" @bind-Value="_formModel.Date" disabled="@(!_canFullyEdit)" />
                             <ValidationMessage For="() => _formModel.Date" class="text-danger small" />
                         </div>
 
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_StartLabel"]</label>
-                            <input class="form-control" type="time" @bind="_formModel.StartTime" @bind:after="OnStartTimeChanged" />
+                            <input class="form-control" type="time" @bind="_formModel.StartTime" @bind:after="OnStartTimeChanged" disabled="@(!_canFullyEdit)" />
                             <ValidationMessage For="() => _formModel.StartTime" class="text-danger small" />
                         </div>
 
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_DurationLabel"]</label>
-                            <InputNumber class="form-control" @bind-Value="_formModel.DurationMinutes" @bind-Value:after="CalculateEndTime" />
+                            <InputNumber class="form-control" @bind-Value="_formModel.DurationMinutes" @bind-Value:after="CalculateEndTime" disabled="@(!_canFullyEdit)" />
                             <ValidationMessage For="() => _formModel.DurationMinutes" class="text-danger small" />
                         </div>
 
                         <div class="col-12 col-md-3">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_EndLabel"]</label>
-                            <input class="form-control" type="time" @bind="_endTime" @bind:after="OnEndTimeChanged" />
+                            <input class="form-control" type="time" @bind="_endTime" @bind:after="OnEndTimeChanged" disabled="@(!_canFullyEdit)" />
                         </div>
 
                         <div class="col-12">
                             <label class="form-label">@Localizer["CreateEditTrainingPage_DescriptionLabel"]</label>
-                            <InputTextArea class="form-control" rows="3" maxlength="512" @bind-Value="_formModel.Description" />
+                            <InputTextArea class="form-control" rows="3" maxlength="512" @bind-Value="_formModel.Description" disabled="@(!_canFullyEdit)" />
                         </div>
                     </div>
                 </Body>
                 <Footer>
-                    <div class="d-flex flex-column gap-2">
-                        @if (_showConfirmPlanned || _showReleaseTrainer)
+                    @if (_isStatusLocked)
+                    {
+                        <div class="alert alert-info mb-2 py-2 w-100">@Localizer["CreateEditTrainingPage_StatusLockedNote"]</div>
+                    }
+                    else
+                    {
+                        @if (!_canFullyEdit)
                         {
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                @if (_showConfirmPlanned)
-                                {
-                                    <button type="button" class="btn btn-success" @onclick="ConfirmPlannedAsync" title="@Localizer["CreateEditTrainingPage_ConfirmPlannedTitle"]">
-                                        <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ConfirmPlanned"]
-                                    </button>
-                                }
-                                @if (_showReleaseTrainer)
-                                {
-                                    <button type="button" class="btn btn-outline-secondary ms-auto" @onclick="ReleaseTrainerAsync" title="@Localizer["CreateEditTrainingPage_ReleaseTrainerTitle"]">
-                                        <i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ReleaseTrainer"]
-                                    </button>
-                                }
-                            </div>
-                            <hr class="my-1" />
+                            <div class="alert alert-info mb-2 py-2 w-100">@Localizer["CreateEditTrainingPage_GroupAdminRestrictedNote"]</div>
                         }
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <button type="submit" class="btn btn-primary" disabled="@(_saving || IsWriteBlocked)">
@@ -189,14 +191,24 @@
                                 <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
                             </button>
                         </div>
-                    </div>
+                    }
                 </Footer>
             </CardComponent>
         </EditForm>
 
         @if (_persistedTrainingId.HasValue)
         {
-            <TrainingBlockEditor TrainingId="@_persistedTrainingId.Value" IsWriteBlocked="@IsWriteBlocked" />
+            <TrainingBlockEditor TrainingId="@_persistedTrainingId.Value" IsWriteBlocked="@(IsWriteBlocked || !_canFullyEdit)" />
+        }
+
+        @if (_showConfirmPlanned)
+        {
+            <hr class="my-4" />
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-success" @onclick="ConfirmPlannedAsync" title="@Localizer["CreateEditTrainingPage_ConfirmPlannedTitle"]">
+                    <i class="fa-solid fa-check me-1" aria-hidden="true"></i>@Localizer["CreateEditTrainingPage_ConfirmPlanned"]
+                </button>
+            </div>
         }
     }
 </div>
@@ -234,6 +246,7 @@
     private bool _loading = true;
     private bool _saving;
     private int _registeredCount;
+    private bool _hasExistingBlocks;
     private ToastComponent? _toast;
     private bool _showNoBlocksConfirm;
     private bool _showDurationMismatchConfirm;
@@ -247,10 +260,30 @@
     private TrainingFormModel _formModel = new();
 
     private CultureInfo _groupCulture = CultureInfo.InvariantCulture;
+    private bool _isAssignedTrainer;
 
     private bool IsWriteBlocked => _runtimeMode.IsReadOnly && !_isSuperAdmin;
     private bool _isGroupLocked => _isEdit && _registeredCount > 0;
-    private bool _showConfirmPlanned => _isEdit && _status == TrainingStatus.InPlanning && _formModel.TrainerId > 0;
+
+    /// <summary>
+    /// True once the training has reached a terminal/in-progress status where the server
+    /// unconditionally rejects edits (<see cref="ITrainingService.UpdateAsync"/>,
+    /// <see cref="ITrainingService.ReassignTrainerAsync"/>), regardless of role. The UI must
+    /// mirror this so fields/buttons don't stay enabled only to fail on save.
+    /// </summary>
+    private bool _isStatusLocked => _isEdit && _status is TrainingStatus.InProgress or TrainingStatus.Done or TrainingStatus.Cancelled;
+
+    /// <summary>
+    /// True when the current user may edit training content (title, date, location, blocks,
+    /// confirm-planned, etc.). On a new (not-yet-persisted) training this is always true for
+    /// whoever passed access control (Group Admin/SuperAdmin, per the Create action). On an
+    /// existing training, editing content is AT-only; a Group Admin who is not the assigned
+    /// trainer is restricted to trainer (re)assignment only. SuperAdmin always retains full
+    /// edit rights as the app-wide override. Once the training is <see cref="_isStatusLocked"/>
+    /// (InProgress/Done/Cancelled), no one can edit content anymore, matching the server rule.
+    /// </summary>
+    private bool _canFullyEdit => !_isEdit || (!_isStatusLocked && (_isSuperAdmin || _isAssignedTrainer));
+    private bool _showConfirmPlanned => _isEdit && _canFullyEdit && _status == TrainingStatus.InPlanning && _formModel.TrainerId > 0;
     private bool _showReleaseTrainer => _isEdit && _originalTrainerId == _currentUserId && _status is TrainingStatus.InPlanning or TrainingStatus.Planned;
     private bool _isSpecialLocationSelected =>
         _formModel.LocationId.HasValue &&
@@ -287,6 +320,7 @@
             }
 
             bool isAssignedTrainer = training.TrainerId == _currentUserId;
+            _isAssignedTrainer = isAssignedTrainer;
             _isGroupAdmin = AuthorizationHelper.IsGroupAdmin(user, training.GroupId);
             if (!_isSuperAdmin && !_isGroupAdmin && !isAssignedTrainer)
             {
@@ -305,6 +339,7 @@
                 : groups.Where(g => g.IsActive && managedGroupIds.Contains(g.Id)).OrderBy(g => g.Name).ToList();
 
             _persistedTrainingId = Id.Value;
+            _hasExistingBlocks = training.Blocks.Count > 0;
             await LoadTraining(training);
         }
         else
@@ -504,26 +539,31 @@
 
             if (_isEdit && Id.HasValue)
             {
-                await TrainingService.UpdateAsync(new UpdateTrainingDto
+                if (_canFullyEdit)
                 {
-                    Id = Id.Value,
-                    Title = _formModel.Title,
-                    Description = _formModel.Description,
-                    LocationId = _formModel.LocationId,
-                    SpecialLocationDescription = string.IsNullOrWhiteSpace(_formModel.SpecialLocationDescription) ? null : _formModel.SpecialLocationDescription,
-                    MeetingPoint = string.IsNullOrWhiteSpace(_formModel.MeetingPoint) ? null : _formModel.MeetingPoint,
-                    Capacity = _formModel.Capacity!.Value,
-                    DateTime = dateTime,
-                    DurationMinutes = _formModel.DurationMinutes,
-                    Status = _status,
-                    TrainerId = _originalTrainerId,
-                    GroupId = _formModel.GroupId!.Value
-                });
+                    await TrainingService.UpdateAsync(new UpdateTrainingDto
+                    {
+                        Id = Id.Value,
+                        Title = _formModel.Title,
+                        Description = _formModel.Description,
+                        LocationId = _formModel.LocationId,
+                        SpecialLocationDescription = string.IsNullOrWhiteSpace(_formModel.SpecialLocationDescription) ? null : _formModel.SpecialLocationDescription,
+                        MeetingPoint = string.IsNullOrWhiteSpace(_formModel.MeetingPoint) ? null : _formModel.MeetingPoint,
+                        Capacity = _formModel.Capacity!.Value,
+                        DateTime = dateTime,
+                        DurationMinutes = _formModel.DurationMinutes,
+                        TrainerId = _originalTrainerId,
+                        GroupId = _formModel.GroupId!.Value
+                    });
+                }
 
                 if (newTrainerId != _originalTrainerId)
                 {
+                    // Trainer (re)assignment is the one capability a Group Admin who is not
+                    // the assigned trainer keeps on an already-created training.
                     await TrainingService.ReassignTrainerAsync(Id.Value, newTrainerId);
                     _originalTrainerId = newTrainerId;
+                    _isAssignedTrainer = newTrainerId == _currentUserId;
                 }
 
                 var refreshed = await TrainingService.GetByIdAsync(Id.Value);
@@ -583,7 +623,7 @@
 
         try
         {
-            var blocks = (await TrainingService.GetBlocksAsync(_persistedTrainingId.Value)).ToList();
+            var blocks = (await TrainingBlockService.GetExecutionsAsync(_persistedTrainingId.Value)).ToList();
             if (blocks.Count == 0)
             {
                 _showNoBlocksConfirm = true;

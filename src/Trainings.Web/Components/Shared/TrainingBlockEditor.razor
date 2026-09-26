@@ -1,256 +1,402 @@
 @inject ITrainingService TrainingService
-@inject ITagService TagService
+@inject ITrainingBlockService TrainingBlockService
+@inject ITrainingBlockLibraryService TrainingBlockLibraryService
+@inject ITagAdminService TagAdminService
+@inject IGameAdminService GameAdminService
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Training Blocks</h4>
-    <div>
-        <button type="button" class="btn btn-success btn-sm me-2" @onclick="ToggleNewBlockPanel" disabled="@IsWriteBlocked"><i class="@AppIcons.Plus me-1" aria-hidden="true"></i>New</button>
-        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="ToggleLibraryPanel" disabled="@IsWriteBlocked">
-            <i class="@AppIcons.BookOpen me-1" aria-hidden="true"></i>Add
-        </button>
-    </div>
-</div>
+<ToastComponent @ref="_toast" CloseLabel="@Localizer["Shared_Close"]" />
 
-@if (_showLibrary)
+<PageTitleComponent Icon="@AppIcons.BookOpen"
+                    Text="@Localizer["TrainingBlockEditor_Heading"]"
+                    ButtonText="@(IsWriteBlocked ? null : (string)Localizer["TrainingBlockEditor_NewButton"])"
+                    ButtonIcon="@AppIcons.Plus"
+                    ButtonDisabled="@(_isLoading || !_hasTrainingContext)"
+                    OnButtonClick="OpenNewPanel"
+                    SecondaryButtonText="@(IsWriteBlocked ? null : (string)Localizer["TrainingBlockEditor_AddButton"])"
+                    SecondaryButtonIcon="@AppIcons.BookOpen"
+                    SecondaryButtonCssClass="btn btn-outline-secondary"
+                    SecondaryButtonDisabled="@(_isLoading || !_hasTrainingContext)"
+                    OnSecondaryButtonClick="OpenAddPanel" />
+
+@if (_isLoading)
 {
-    <div class="card mb-3 border-info">
-        <div class="card-header bg-info bg-opacity-10">Block Library</div>
-        <div class="card-body p-2">
-            <div class="row g-2 mb-2">
-                <div class="col-12 col-md-5">
-                    <input class="form-control form-control-sm" @bind="_librarySearch" @bind:event="oninput" placeholder="Search blocks..." />
-                </div>
-                <div class="col-12 col-md-4">
-                    <select class="form-select form-select-sm" @bind="_libraryTagFilter">
-                        <option value="">All tags</option>
-                        @foreach (var tag in _allTags)
-                        {
-                            <option value="@tag.Id">@tag.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-12 col-md-3">
-                    <select class="form-select form-select-sm" @bind="_libraryCreatorFilter">
-                        <option value="">All creators</option>
-                        @foreach (var creator in LibraryCreators)
-                        {
-                            <option value="@creator.Id">@creator.Name</option>
-                        }
-                    </select>
-                </div>
-            </div>
-            <div class="scroll-container-md">
-                @foreach (var block in FilteredLibraryBlocks)
-                {
-                    <div class="d-flex align-items-stretch p-2 border-bottom gap-2">
-                        <div class="flex-grow-1 min-w-0">
-                            <div class="d-flex justify-content-between align-items-center gap-2">
-                                <span class="fw-bold small text-truncate">@block.Title</span>
-                                <span class="text-muted small text-nowrap"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</span>
-                            </div>
-                            @if (!string.IsNullOrWhiteSpace(block.Description))
-                            {
-                                <div class="text-muted small text-truncate">@block.Description</div>
-                            }
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="() => CopyFromLibrary(block)" disabled="@IsWriteBlocked">Add</button>
-                        </div>
-                    </div>
-                }
-                @if (!FilteredLibraryBlocks.Any())
-                {
-                    <p class="text-muted small text-center py-2">No blocks found.</p>
-                }
-            </div>
-            @if (_hasOlderLibraryBlocks && !_libraryLoadedAll)
-            {
-                <div class="text-center mt-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="LoadMoreLibraryBlocks">Load more</button>
-                </div>
-            }
-        </div>
-    </div>
+    <LoadingSpinner />
 }
-
-@if (_editingBlockIndex >= 0 && _editingBlockIndex >= _blocks.Count)
+else if (!_hasTrainingContext)
 {
-    <div class="list-group mb-3">
-        <div class="list-group-item">
-            <div class="row g-2">
-                <div class="col-12">
-                    <input class="form-control" @bind="_blockTitle" placeholder="Block title" />
-                </div>
-                <div class="col-12">
-                    <textarea class="form-control" rows="2" @bind="_blockDescription" placeholder="Description"></textarea>
-                </div>
-                <div class="col-6 col-md-4">
-                    <label class="form-label small">Planned Duration (min)</label>
-                    <input class="form-control" type="number" @bind="_blockPlannedMinutes" min="1" />
-                </div>
-                <div class="col-12 col-md-6">
-                    <label class="form-label small">Tag</label>
-                    <select class="form-select form-select-sm" @bind="_blockTagId">
-                        <option value="">- none -</option>
-                        @foreach (var tag in _allTags)
-                        {
-                            <option value="@tag.Id">@tag.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-12">
-                    <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(_editingBlockIndex)" disabled="@IsWriteBlocked"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
-                    <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="alert alert-info mb-3">@Localizer["TrainingBlockEditor_PreviewNotice"]</div>
 }
-
-@if (_blocks.Any())
+else
 {
-    <div class="list-group mb-3">
-        @for (var i = 0; i < _blocks.Count; i++)
-        {
-            var block = _blocks[i];
-            var idx = i;
-            <div class="list-group-item">
-                @if (_editingBlockIndex == idx)
-                {
-                    <div class="row g-2">
-                        <div class="col-12">
-                            <input class="form-control" @bind="_blockTitle" placeholder="Block title" />
-                        </div>
-                        <div class="col-12">
-                            <textarea class="form-control" rows="2" @bind="_blockDescription" placeholder="Description"></textarea>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <label class="form-label small">Planned Duration (min)</label>
-                            <input class="form-control" type="number" @bind="_blockPlannedMinutes" min="1" />
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label small">Tag</label>
-                            <select class="form-select form-select-sm" @bind="_blockTagId">
-                                <option value="">- none -</option>
-                                @foreach (var tag in _allTags)
-                                {
-                                    <option value="@tag.Id">@tag.Name</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <button type="button" class="btn btn-primary btn-sm me-2" @onclick="() => SaveBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>Save</button>
-                            <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelBlockEdit"><i class="@AppIcons.XMark me-1" aria-hidden="true"></i>Cancel</button>
-                        </div>
+    @if (_panel == EditorPanel.Add)
+    {
+        <CardComponent CssClass="mb-3" IsCollapsable="false" ShowFooter="true">
+            <Title>@Localizer["TrainingBlockEditor_AddSectionTitle"]</Title>
+            <Body>
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <label class="form-label">@Localizer["TrainingBlockEditor_TagFilterLabel"]</label>
+                        <SelectDropdownComponent TItem="TagDto"
+                                                 TValue="int?"
+                                                 @bind-Value="_libraryTagId"
+                                                 Items="_tags"
+                                                 ValueSelector="tag => (int?)tag.Id"
+                                                 TextSelector="tag => tag.Name"
+                                                 PlaceholderText="@Localizer["TrainingBlockEditor_AllTagsOption"]" />
                     </div>
+                    <div class="col-12 col-md-6 col-xl-3">
+                        <label class="form-label">@Localizer["TrainingBlockEditor_CreatorFilterLabel"]</label>
+                        <SelectDropdownComponent TItem="TrainingBlockLibraryCreatorDto"
+                                                 TValue="int?"
+                                                 @bind-Value="_libraryCreatorId"
+                                                 Items="_libraryCreators"
+                                                 ValueSelector="creator => (int?)creator.CreatorId"
+                                                 TextSelector="creator => creator.CreatorName"
+                                                 PlaceholderText="@Localizer["TrainingBlockEditor_AllCreatorsOption"]" />
+                    </div>
+                    <div class="col-6 col-xl-2">
+                        <label class="form-label">@Localizer["TrainingBlockEditor_MinDurationLabel"]</label>
+                        <InputNumber class="form-control" @bind-Value="_libraryMinDuration" />
+                    </div>
+                    <div class="col-6 col-xl-2">
+                        <label class="form-label">@Localizer["TrainingBlockEditor_MaxDurationLabel"]</label>
+                        <InputNumber class="form-control" @bind-Value="_libraryMaxDuration" />
+                    </div>
+                    <div class="col-12 col-xl-2">
+                        <label class="form-label">@Localizer["TrainingBlockEditor_SearchLabel"]</label>
+                        <InputText class="form-control" @bind-Value="_librarySearchText" placeholder="@Localizer["TrainingBlockEditor_SearchPlaceholder"]" />
+                    </div>
+                </div>
+            </Body>
+            <Footer>
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <button type="button" class="btn btn-primary" @onclick="SearchLibraryAsync" disabled="@IsWriteBlocked">
+                        <i class="@AppIcons.Filter me-1" aria-hidden="true"></i>@Localizer["TrainingBlockEditor_SearchButton"]
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="ClosePanel">
+                        <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
+                    </button>
+                </div>
+            </Footer>
+        </CardComponent>
+
+        <CardComponent CssClass="mb-3" IsCollapsable="false">
+            <Title>@Localizer["TrainingBlockEditor_LibraryResultsTitle"]</Title>
+            <Body>
+                @if (!_librarySearchPerformed)
+                {
+                    <div class="alert alert-info mb-0">@Localizer["TrainingBlockEditor_LibrarySearchPrompt"]</div>
+                }
+                else if (_libraryResults.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">@Localizer["TrainingBlockEditor_NoLibraryResults"]</div>
                 }
                 else
                 {
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-bold">@((idx + 1)). @block.Title</div>
-                            <small class="text-muted"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes min</small>
-                            @if (block.Tags.Any())
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var definition in _libraryResults)
+                        {
+                            <div class="card tb-card @GetStripeCssClass(definition.TagColorToken)">
+                                <div class="card-body d-flex justify-content-between gap-3">
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex justify-content-between gap-2 align-items-start">
+                                            <div class="fw-semibold text-truncate">@definition.Title</div>
+                                            <div class="text-muted text-nowrap small"><i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@definition.DurationMinutes</div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(definition.Description))
+                                        {
+                                            <div class="text-muted small tb-card-description">@definition.Description</div>
+                                        }
+                                        <div class="text-muted small mt-2">@definition.CreatorName</div>
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-between align-items-end tb-card-action-column">
+                                        <button type="button"
+                                                class="btn btn-sm btn-app-outline btn-app-icon tb-card-icon-button"
+                                                @onclick="() => AddDefinitionAsync(definition.Id)"
+                                                aria-label="@string.Format(Localizer["TrainingBlockEditor_AddLibraryItemAria"].Value, definition.Title)"
+                                                disabled="@IsWriteBlocked">
+                                            <i class="@AppIcons.Plus" aria-hidden="true"></i>
+                                        </button>
+                                        <div class="tb-tag-text text-muted text-end">@FormatDefinitionType(definition)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (_libraryHasMore)
+                    {
+                        <div class="text-center mt-2">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="LoadMoreLibraryAsync" disabled="@IsWriteBlocked">@Localizer["TrainingBlockEditor_LoadMoreButton"]</button>
+                        </div>
+                    }
+                }
+            </Body>
+        </CardComponent>
+    }
+
+    @if (_panel == EditorPanel.New)
+    {
+        <EditForm Model="_createForm" OnValidSubmit="CreateBlockAsync">
+            <DataAnnotationsValidator />
+            <CardComponent CssClass="mb-3" IsCollapsable="false" ShowFooter="true">
+                <Title>@Localizer["TrainingBlockEditor_NewSectionTitle"]</Title>
+                <Body>
+                    <div class="row g-2">
+                        <div class="col-12 @(_createForm.RequiresGame ? "col-md-4" : "")">
+                            <label class="form-label">@Localizer["TrainingBlockEditor_TagLabel"]</label>
+                            <SelectDropdownComponent TItem="TagDto"
+                                                     TValue="int?"
+                                                     @bind-Value="_createForm.TagId"
+                                                     @bind-Value:after="OnCreateTagChangedAsync"
+                                                     Items="_tags"
+                                                     ValueSelector="tag => (int?)tag.Id"
+                                                     TextSelector="tag => tag.Name"
+                                                     PlaceholderText="@Localizer["TrainingBlockEditor_SelectTagPlaceholder"]" />
+                            <ValidationMessage For="() => _createForm.TagId" class="text-danger small" />
+                        </div>
+
+                        @if (_createForm.RequiresGame)
+                        {
+                            <div class="@(_createForm.GameId is null ? "col-6 col-md-4" : "col-12 col-md-8")">
+                                <label class="form-label">@Localizer["TrainingBlockEditor_GameLabel"]</label>
+                                <SelectDropdownComponent TItem="GameDto"
+                                                         TValue="int?"
+                                                         @bind-Value="_createForm.GameId"
+                                                         Items="_games"
+                                                         ValueSelector="game => (int?)game.Id"
+                                                         TextSelector="game => game.DisplayText"
+                                                         Searchable="true"
+                                                         SearchPlaceholder="@Localizer["TrainingBlockEditor_GameSearchPlaceholder"]"
+                                                         NoResultsText="@Localizer["TrainingBlockEditor_NoGamesFound"]"
+                                                         PlaceholderText="@Localizer["TrainingBlockEditor_SelectGamePlaceholder"]" />
+                                <ValidationMessage For="() => _createForm.GameId" class="text-danger small" />
+                            </div>
+                            @if (_createForm.GameId is null)
                             {
-                                <div class="mt-1">
-                                    @foreach (var tag in block.Tags)
-                                    {
-                                        <span class="badge bg-info text-dark me-1">@tag.Name</span>
-                                    }
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label d-block">&nbsp;</label>
+                                    <InputText class="form-control" @bind-Value="_createForm.NewGameName" placeholder="@Localizer["TrainingBlockEditor_NewGamePlaceholder"]" />
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-text">@Localizer["TrainingBlockEditor_NewGameHelp"]</div>
                                 </div>
                             }
+                        }
+
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["TrainingBlockEditor_TitleLabel"]</label>
+                            <InputText class="form-control" maxlength="64" @bind-Value="_createForm.Title" />
+                            <ValidationMessage For="() => _createForm.Title" class="text-danger small" />
                         </div>
-                        <div class="btn-group btn-group-sm ms-2">
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, -1)" disabled="@(idx == 0 || IsWriteBlocked)">↑</button>
-                            <button type="button" class="btn btn-outline-secondary" @onclick="() => MoveBlock(idx, 1)" disabled="@(idx == _blocks.Count - 1 || IsWriteBlocked)">↓</button>
-                            <button type="button" class="btn btn-outline-primary" @onclick="() => StartEditBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.Edit" aria-hidden="true"></i></button>
-                            <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteBlock(idx)" disabled="@IsWriteBlocked"><i class="@AppIcons.Trash" aria-hidden="true"></i></button>
+                        <div class="col-12">
+                            <label class="form-label">@Localizer["TrainingBlockEditor_DescriptionLabel"]</label>
+                            <InputTextArea class="form-control" rows="3" maxlength="512" @bind-Value="_createForm.Description" />
+                            <ValidationMessage For="() => _createForm.Description" class="text-danger small" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">@Localizer["TrainingBlockEditor_DurationFieldLabel"]</label>
+                            <InputNumber class="form-control" @bind-Value="_createForm.DurationMinutes" />
+                            <ValidationMessage For="() => _createForm.DurationMinutes" class="text-danger small" />
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label">@Localizer["TrainingBlockEditor_MinParticipantsLabel"]</label>
+                            <InputNumber class="form-control" @bind-Value="_createForm.MinParticipants" />
+                            <ValidationMessage For="() => _createForm.MinParticipants" class="text-danger small" />
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label">@Localizer["TrainingBlockEditor_MaxParticipantsLabel"]</label>
+                            <InputNumber class="form-control" @bind-Value="_createForm.MaxParticipants" />
+                            <ValidationMessage For="() => _createForm.MaxParticipants" class="text-danger small" />
                         </div>
                     </div>
-                }
-            </div>
-        }
-    </div>
-    <div class="d-flex justify-content-between align-items-center text-muted small">
-        <span>Total planned: @_blocks.Sum(b => b.PlannedDurationMinutes) min</span>
-        @{ var remaining = _trainingDurationMinutes - _blocks.Sum(b => b.PlannedDurationMinutes); }
-        @if (remaining >= 0)
+                </Body>
+                <Footer>
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary" disabled="@IsWriteBlocked">
+                            <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                        </button>
+                        <button type="button" class="btn btn-secondary" @onclick="ClosePanel">
+                            <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
+                        </button>
+                    </div>
+                </Footer>
+            </CardComponent>
+        </EditForm>
+    }
+
+    @if (_executions.Count == 0)
+    {
+        <div class="alert alert-info mb-3">@Localizer["TrainingBlockEditor_NoBlocksMessage"]</div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3 mb-3">
+            @foreach (var block in _executions)
+            {
+                <div class="card tb-card @GetStripeCssClass(block.TagColorToken) @((_panel != EditorPanel.None || (_editingExecutionId != 0 && _editingExecutionId != block.Id)) ? "opacity-50 pe-none" : string.Empty)">
+                    <div class="card-body">
+                        @if (_editingExecutionId == block.Id)
+                        {
+                            <EditForm Model="_editForm" OnValidSubmit="SaveExecutionAsync">
+                                <DataAnnotationsValidator />
+                                <div class="row g-2">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">@Localizer["TrainingBlockEditor_TitleLabel"]</label>
+                                        <InputText class="form-control" maxlength="64" @bind-Value="_editForm.Title" />
+                                        <ValidationMessage For="() => _editForm.Title" class="text-danger small" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">@Localizer["TrainingBlockEditor_DescriptionLabel"]</label>
+                                        <InputTextArea class="form-control" rows="3" maxlength="512" @bind-Value="_editForm.Description" />
+                                        <ValidationMessage For="() => _editForm.Description" class="text-danger small" />
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">@Localizer["TrainingBlockEditor_DurationFieldLabel"]</label>
+                                        <InputNumber class="form-control" @bind-Value="_editForm.PlannedDurationMinutes" />
+                                        <ValidationMessage For="() => _editForm.PlannedDurationMinutes" class="text-danger small" />
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label">@Localizer["TrainingBlockEditor_MinParticipantsLabel"]</label>
+                                        <InputNumber class="form-control" @bind-Value="_editForm.MinParticipants" />
+                                        <ValidationMessage For="() => _editForm.MinParticipants" class="text-danger small" />
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label">@Localizer["TrainingBlockEditor_MaxParticipantsLabel"]</label>
+                                        <InputNumber class="form-control" @bind-Value="_editForm.MaxParticipants" />
+                                        <ValidationMessage For="() => _editForm.MaxParticipants" class="text-danger small" />
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between flex-wrap gap-2 mt-3">
+                                    <button type="submit" class="btn btn-primary" disabled="@IsWriteBlocked">
+                                        <i class="@AppIcons.FloppyDisk me-1" aria-hidden="true"></i>@Localizer["Shared_Save"]
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" @onclick="CancelEditExecution">
+                                        <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["Shared_Cancel"]
+                                    </button>
+                                </div>
+                            </EditForm>
+                        }
+                        else
+                        {
+                            <div class="tb-card-header d-flex justify-content-between align-items-start gap-3">
+                                <div class="fw-semibold text-truncate">@block.OrderIndex. @block.Title</div>
+
+                                <div class="tb-tag-text text-muted text-nowrap d-flex align-items-center gap-1">
+                                    <i class="@AppIcons.Stopwatch" aria-hidden="true"></i>@block.PlannedDurationMinutes | <span>@FormatExecutionType(block)</span>
+                                </div>
+
+                            </div>
+
+                            <div class="tb-card-content d-flex justify-content-between align-items-start gap-3 mt-2">
+
+                                <div class="flex-grow-1 min-w-0">
+                                    @if (!string.IsNullOrWhiteSpace(block.Description))
+                                        {
+                                            <div class="text-muted tb-card-description-slot">
+                                                <ExpandableTextComponent Text="@block.Description"
+                                                                          MaxLines="2"
+                                                                          StartCollapsed="true"
+                                                                          ShowMoreLabel="@Localizer["Shared_ShowMore"]"
+                                                                          ShowLessLabel="@Localizer["Shared_ShowLess"]" />
+                                            </div>
+                                        }
+                                </div>
+
+                                <div class="tb-card-actions d-flex gap-2">
+
+                                    <div class="d-flex flex-column gap-2 tb-card-actions-primary">
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-app-icon tb-card-icon-button" @onclick="() => StartEditExecution(block)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_AdjustExecutionAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockAdjust" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-app-icon tb-card-icon-button" @onclick="() => DeleteExecutionAsync(block.Id)" disabled="@IsWriteBlocked" aria-label="@string.Format(Localizer["TrainingBlockEditor_DeleteExecutionAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockDelete" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2 tb-card-actions-move">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionUpAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == 1)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveUpAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockMoveUp" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-app-icon tb-card-icon-button" @onclick="() => MoveExecutionDownAsync(block.Id)" disabled="@(IsWriteBlocked || block.OrderIndex == _executions.Count)" aria-label="@string.Format(Localizer["TrainingBlockEditor_MoveDownAria"].Value, block.Title)">
+                                                <i class="@AppIcons.TrainingBlockMoveDown" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center text-muted small flex-wrap gap-2 mb-3">
+        <span>@string.Format(Localizer["TrainingBlockEditor_TotalPlannedSummary"].Value, TotalPlannedMinutes)</span>
+        @if (RemainingMinutes >= 0)
         {
-            <span>Remaining: @remaining min</span>
+            <span>@string.Format(Localizer["TrainingBlockEditor_RemainingSummary"].Value, RemainingMinutes)</span>
         }
         else
         {
-            <span class="text-danger fw-bold">Overbooked: @(-remaining) min</span>
+            <span class="text-danger fw-semibold">@string.Format(Localizer["TrainingBlockEditor_OverbookedSummary"].Value, -RemainingMinutes)</span>
         }
     </div>
-}
 
-<ActionAlert IsSuccess="false" Message="@_error" />
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <ActionAlert IsSuccess="false" Message="@_errorMessage" />
+    }
+}
 
 @code {
     [Parameter] public int TrainingId { get; set; }
     [Parameter] public bool IsWriteBlocked { get; set; }
 
+    private enum EditorPanel
+    {
+        None,
+        New,
+        Add
+    }
+
+    private ToastComponent? _toast;
+    private EditorPanel _panel;
+    private bool _isLoading;
+    private bool _hasTrainingContext;
     private int _loadedTrainingId;
     private int _trainingDurationMinutes;
-    private string? _error;
+    private int _trainingGroupId;
+    private string? _errorMessage;
+    private List<TrainingBlockDto> _executions = [];
+    private List<TagDto> _tags = [];
+    private List<GameDto> _games = [];
+    private List<TrainingBlockDefinitionDto> _libraryResults = [];
+    private List<TrainingBlockLibraryCreatorDto> _libraryCreators = [];
+    private bool _libraryHasMore;
+    private bool _librarySearchPerformed;
+    private const int LibraryPageSize = 5;
+    private int? _libraryTagId;
+    private int? _libraryCreatorId;
+    private int? _libraryMinDuration;
+    private int? _libraryMaxDuration;
+    private string? _librarySearchText;
+    private int? _appliedLibraryTagId;
+    private int? _appliedLibraryCreatorId;
+    private int? _appliedLibraryMinDuration;
+    private int? _appliedLibraryMaxDuration;
+    private string? _appliedLibrarySearchText;
+    private int _editingExecutionId;
+    private readonly TrainingBlockCreateFormModel _createForm = new();
+    private readonly TrainingBlockExecutionEditFormModel _editForm = new();
 
-    private List<TrainingBlockDto> _blocks = new();
-    private List<TagDto> _allTags = new();
-    private List<TrainingBlockDto> _libraryBlocks = new();
-    private List<TrainingBlockDto> _allLibraryBlocks = new();
-    private bool _showLibrary;
-    private bool _libraryLoadedAll;
-    private bool _hasOlderLibraryBlocks;
-    private string _librarySearch = string.Empty;
-    private int? _libraryTagFilter;
-    private int? _libraryCreatorFilter;
-    private int _editingBlockIndex = -1;
-    private string _blockTitle = string.Empty;
-    private string _blockDescription = string.Empty;
-    private int _blockPlannedMinutes = 30;
-    private int? _blockTagId;
-
-    private sealed record CreatorOption(int Id, string Name);
-
-    private IEnumerable<CreatorOption> LibraryCreators =>
-        _allLibraryBlocks
-            .Where(b => b.TrainerId > 0)
-            .DistinctBy(b => b.TrainerId)
-            .Select(b => new CreatorOption(b.TrainerId, b.TrainerName))
-            .OrderBy(c => c.Name);
-
-    private IEnumerable<TrainingBlockDto> FilteredLibraryBlocks
-    {
-        get
-        {
-            var query = _libraryBlocks.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(_librarySearch))
-            {
-                query = query.Where(b =>
-                    b.Title.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase) ||
-                    (b.Description?.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    b.Tags.Any(t => t.Name.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase)));
-            }
-
-            if (_libraryTagFilter.HasValue)
-            {
-                query = query.Where(b => b.Tags.Any(t => t.Id == _libraryTagFilter.Value));
-            }
-
-            if (_libraryCreatorFilter.HasValue)
-            {
-                query = query.Where(b => b.TrainerId == _libraryCreatorFilter.Value);
-            }
-
-            return query;
-        }
-    }
+    private int TotalPlannedMinutes => _executions.Sum(block => block.PlannedDurationMinutes);
+    private int RemainingMinutes => (_trainingDurationMinutes > 0 ? _trainingDurationMinutes : 0) - TotalPlannedMinutes;
 
     protected override async Task OnParametersSetAsync()
     {
-        if (TrainingId <= 0 || TrainingId == _loadedTrainingId)
+        if (TrainingId == _loadedTrainingId)
         {
             return;
         }
@@ -261,190 +407,284 @@
 
     private async Task LoadAsync()
     {
-        _error = null;
-        _allTags = (await TagService.GetAllAsync()).ToList();
-        _blocks = (await TrainingService.GetBlocksAsync(TrainingId)).ToList();
+        _isLoading = true;
+        _errorMessage = null;
+        _panel = EditorPanel.None;
+        _editingExecutionId = 0;
+
+        if (TrainingId <= 0)
+        {
+            _hasTrainingContext = false;
+            _executions.Clear();
+            _tags.Clear();
+            _games.Clear();
+            _libraryResults.Clear();
+            _libraryCreators.Clear();
+            _trainingDurationMinutes = 0;
+            _trainingGroupId = 0;
+            _isLoading = false;
+            return;
+        }
+
         var training = await TrainingService.GetByIdAsync(TrainingId);
-        _trainingDurationMinutes = training?.DurationMinutes ?? 0;
-        await LoadLibraryBlocksAsync(TrainingId);
-    }
-
-    private async Task LoadLibraryBlocksAsync(int currentTrainingId)
-    {
-        var all = (await TrainingService.GetAllBlocksLibraryAsync())
-            .Where(b => b.TrainingId != currentTrainingId)
-            .ToList();
-        _allLibraryBlocks = all;
-        var cutoff = DateTime.UtcNow.AddMonths(-12);
-        var recent = all.Where(b => b.CreatedAt >= cutoff).ToList();
-        _hasOlderLibraryBlocks = all.Count > recent.Count;
-        _libraryLoadedAll = false;
-        _libraryBlocks = recent;
-    }
-
-    private void LoadMoreLibraryBlocks()
-    {
-        _libraryBlocks = _allLibraryBlocks;
-        _libraryLoadedAll = true;
-    }
-
-    private void ToggleNewBlockPanel()
-    {
-        if (_editingBlockIndex >= _blocks.Count && _editingBlockIndex >= 0)
+        if (training is null)
         {
-            _editingBlockIndex = -1;
-        }
-        else
-        {
-            _showLibrary = false;
-            _editingBlockIndex = _blocks.Count;
-            _blockTitle = string.Empty;
-            _blockDescription = string.Empty;
-            _blockPlannedMinutes = 30;
-            _blockTagId = null;
-        }
-    }
-
-    private void ToggleLibraryPanel()
-    {
-        _showLibrary = !_showLibrary;
-        if (_showLibrary && _editingBlockIndex >= _blocks.Count && _editingBlockIndex >= 0)
-        {
-            _editingBlockIndex = -1;
-        }
-    }
-
-    private void StartEditBlock(int idx)
-    {
-        _showLibrary = false;
-        _editingBlockIndex = idx;
-        var block = _blocks[idx];
-        _blockTitle = block.Title;
-        _blockDescription = block.Description ?? string.Empty;
-        _blockPlannedMinutes = block.PlannedDurationMinutes;
-        _blockTagId = block.Tags.FirstOrDefault()?.Id;
-    }
-
-    private async Task SaveBlock(int idx)
-    {
-        if (string.IsNullOrWhiteSpace(_blockTitle))
-        {
+            _hasTrainingContext = false;
+            _isLoading = false;
             return;
         }
 
-        try
-        {
-            if (idx >= _blocks.Count)
-            {
-                var dto = new CreateTrainingBlockDto
-                {
-                    TrainingId = TrainingId,
-                    OrderIndex = _blocks.Count + 1,
-                    Title = _blockTitle,
-                    Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
-                    PlannedDurationMinutes = _blockPlannedMinutes,
-                    TagIds = _blockTagId.HasValue ? [_blockTagId.Value] : []
-                };
-                var newBlock = await TrainingService.AddBlockAsync(dto);
-                _blocks.Add(newBlock);
-            }
-            else
-            {
-                var block = _blocks[idx];
-                var dto = new UpdateTrainingBlockDto
-                {
-                    Id = block.Id,
-                    OrderIndex = idx + 1,
-                    Title = _blockTitle,
-                    Description = string.IsNullOrWhiteSpace(_blockDescription) ? null : _blockDescription,
-                    PlannedDurationMinutes = _blockPlannedMinutes,
-                    EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                    TrainerComment = block.TrainerComment,
-                    TagIds = _blockTagId.HasValue ? [_blockTagId.Value] : []
-                };
-                await TrainingService.UpdateBlockAsync(dto);
-                _blocks = (await TrainingService.GetBlocksAsync(TrainingId)).ToList();
-            }
+        _hasTrainingContext = true;
+        _trainingDurationMinutes = training.DurationMinutes ?? 0;
+        _trainingGroupId = training.GroupId;
+        _tags = (await TagAdminService.GetActiveForSelectionAsync()).ToList();
+        _games = (await GameAdminService.GetActiveForSelectionAsync()).ToList();
+        _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+        _isLoading = false;
+    }
 
-            _editingBlockIndex = -1;
-        }
-        catch (Exception ex)
+    private async Task OpenAddPanel()
+    {
+        _panel = _panel == EditorPanel.Add ? EditorPanel.None : EditorPanel.Add;
+        _editingExecutionId = 0;
+        _errorMessage = null;
+        if (_panel == EditorPanel.Add)
         {
-            _error = $"Failed to save block: {ex.Message}";
+            _libraryTagId = null;
+            _libraryCreatorId = null;
+            _libraryMinDuration = null;
+            _libraryMaxDuration = null;
+            _librarySearchText = null;
+            _libraryResults.Clear();
+            _libraryHasMore = false;
+            _librarySearchPerformed = false;
+            await RefreshLibraryCreatorOptionsAsync();
         }
     }
 
-    private void CancelBlockEdit() => _editingBlockIndex = -1;
-
-    private async Task DeleteBlock(int idx)
+    /// <summary>
+    /// Fetches the Creator filter's dropdown options without running a full (result-producing) library search.
+    /// </summary>
+    private async Task RefreshLibraryCreatorOptionsAsync()
     {
-        try
+        var result = await TrainingBlockLibraryService.SearchAsync(new TrainingBlockLibrarySearchDto
         {
-            await TrainingService.DeleteBlockAsync(_blocks[idx].Id);
-            _blocks.RemoveAt(idx);
-            await ReorderBlocks();
-        }
-        catch (Exception ex)
+            GroupId = _trainingGroupId,
+            Skip = 0,
+            Take = 0
+        });
+        _libraryCreators = result.CreatorOptions.ToList();
+    }
+
+    private async Task OpenNewPanel()
+    {
+        _panel = _panel == EditorPanel.New ? EditorPanel.None : EditorPanel.New;
+        _editingExecutionId = 0;
+        _errorMessage = null;
+        _createForm.Reset();
+        if (_panel == EditorPanel.New)
         {
-            _error = $"Failed to delete block: {ex.Message}";
+            _games = (await GameAdminService.GetActiveForSelectionAsync()).ToList();
         }
     }
 
-    private async Task MoveBlock(int idx, int direction)
+    private void ClosePanel()
     {
-        var newIdx = idx + direction;
-        if (newIdx < 0 || newIdx >= _blocks.Count)
+        _panel = EditorPanel.None;
+        _createForm.Reset();
+        _errorMessage = null;
+    }
+
+    private async Task OnCreateTagChangedAsync()
+    {
+        var selectedTag = _tags.FirstOrDefault(tag => tag.Id == _createForm.TagId);
+        _createForm.RequiresGame = string.Equals(selectedTag?.Key, Trainings.Application.Constants.TrainingBlockCatalog.TagKeys.Game, StringComparison.Ordinal);
+        if (!_createForm.RequiresGame)
         {
+            _createForm.GameId = null;
+            _createForm.NewGameName = string.Empty;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SearchLibraryAsync()
+    {
+        _appliedLibraryTagId = _libraryTagId;
+        _appliedLibraryCreatorId = _libraryCreatorId;
+        _appliedLibraryMinDuration = _libraryMinDuration;
+        _appliedLibraryMaxDuration = _libraryMaxDuration;
+        _appliedLibrarySearchText = _librarySearchText;
+        _librarySearchPerformed = true;
+        await LoadLibraryAsync(reset: true);
+    }
+
+    private Task LoadMoreLibraryAsync() => LoadLibraryAsync(reset: false);
+
+    private async Task LoadLibraryAsync(bool reset)
+    {
+        var skip = reset ? 0 : _libraryResults.Count;
+        var result = await TrainingBlockLibraryService.SearchAsync(new TrainingBlockLibrarySearchDto
+        {
+            GroupId = _trainingGroupId,
+            TagId = _appliedLibraryTagId,
+            CreatorId = _appliedLibraryCreatorId,
+            MinDurationMinutes = _appliedLibraryMinDuration,
+            MaxDurationMinutes = _appliedLibraryMaxDuration,
+            SearchText = string.IsNullOrWhiteSpace(_appliedLibrarySearchText) ? null : _appliedLibrarySearchText.Trim(),
+            Skip = skip,
+            Take = LibraryPageSize
+        });
+
+        _libraryCreators = result.CreatorOptions.ToList();
+        _libraryHasMore = result.HasMore;
+        if (reset)
+        {
+            _libraryResults = result.Items.ToList();
             return;
         }
 
-        try
-        {
-            (_blocks[idx], _blocks[newIdx]) = (_blocks[newIdx], _blocks[idx]);
-            await ReorderBlocks();
-        }
-        catch (Exception ex)
-        {
-            _error = $"Failed to move block: {ex.Message}";
-        }
+        _libraryResults.AddRange(result.Items);
     }
 
-    private async Task ReorderBlocks()
+    private async Task AddDefinitionAsync(int definitionId)
     {
-        for (var i = 0; i < _blocks.Count; i++)
+        try
         {
-            var block = _blocks[i];
-            if (block.OrderIndex == i + 1)
+            await TrainingBlockService.AddExecutionFromDefinitionAsync(new AddTrainingBlockFromDefinitionDto
             {
-                continue;
-            }
-
-            await TrainingService.UpdateBlockAsync(new UpdateTrainingBlockDto
-            {
-                Id = block.Id,
-                OrderIndex = i + 1,
-                Title = block.Title,
-                Description = block.Description,
-                PlannedDurationMinutes = block.PlannedDurationMinutes,
-                EffectiveDurationMinutes = block.EffectiveDurationMinutes,
-                TrainerComment = block.TrainerComment,
-                TagIds = block.Tags.Select(t => t.Id).ToList()
+                TrainingId = TrainingId,
+                DefinitionId = definitionId
             });
-            block.OrderIndex = i + 1;
-        }
-    }
-
-    private async Task CopyFromLibrary(TrainingBlockDto block)
-    {
-        try
-        {
-            await TrainingService.CopyBlockAsync(block.Id, TrainingId);
-            _blocks = (await TrainingService.GetBlocksAsync(TrainingId)).ToList();
-            _showLibrary = false;
+            _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+            await ShowToastAsync(Localizer["TrainingBlockEditor_BlockAddedToast"], ToastComponent.ToastVariant.Success);
         }
         catch (Exception ex)
         {
-            _error = $"Failed to copy block from library: {ex.Message}";
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task CreateBlockAsync()
+    {
+        try
+        {
+            await TrainingBlockService.CreateDefinitionAndAddExecutionAsync(new CreateTrainingBlockDto
+            {
+                TrainingId = TrainingId,
+                TagId = _createForm.TagId ?? 0,
+                GameId = _createForm.GameId,
+                NewGameName = string.IsNullOrWhiteSpace(_createForm.NewGameName) ? null : _createForm.NewGameName.Trim(),
+                Title = _createForm.Title,
+                Description = string.IsNullOrWhiteSpace(_createForm.Description) ? null : _createForm.Description.Trim(),
+                DurationMinutes = _createForm.DurationMinutes ?? 0,
+                MinParticipants = _createForm.MinParticipants ?? 0,
+                MaxParticipants = _createForm.MaxParticipants ?? 0
+            });
+
+            _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+            _games = (await GameAdminService.GetActiveForSelectionAsync()).ToList();
+            _createForm.Reset();
+            _panel = EditorPanel.None;
+            await ShowToastAsync(Localizer["TrainingBlockEditor_BlockCreatedToast"], ToastComponent.ToastVariant.Success);
+            await ShowToastAsync(Localizer["TrainingBlockEditor_BlockAddedToast"], ToastComponent.ToastVariant.Success);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void StartEditExecution(TrainingBlockDto block)
+    {
+        _panel = EditorPanel.None;
+        _editingExecutionId = block.Id;
+        _editForm.LoadFrom(block);
+        _errorMessage = null;
+    }
+
+    private async Task SaveExecutionAsync()
+    {
+        try
+        {
+            await TrainingBlockService.UpdateExecutionAsync(new UpdateTrainingBlockExecutionDto
+            {
+                Id = _editingExecutionId,
+                Title = _editForm.Title,
+                Description = string.IsNullOrWhiteSpace(_editForm.Description) ? null : _editForm.Description.Trim(),
+                PlannedDurationMinutes = _editForm.PlannedDurationMinutes ?? 0,
+                MinParticipants = _editForm.MinParticipants ?? 0,
+                MaxParticipants = _editForm.MaxParticipants ?? 0
+            });
+
+            _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+            _editingExecutionId = 0;
+            await ShowToastAsync(Localizer["TrainingBlockEditor_BlockUpdatedToast"], ToastComponent.ToastVariant.Success);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void CancelEditExecution()
+    {
+        _editingExecutionId = 0;
+        _errorMessage = null;
+    }
+
+    private async Task DeleteExecutionAsync(int executionId)
+    {
+        try
+        {
+            await TrainingBlockService.DeleteExecutionAsync(executionId);
+            _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+            await ShowToastAsync(Localizer["TrainingBlockEditor_BlockDeletedToast"], ToastComponent.ToastVariant.Info);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task MoveExecutionUpAsync(int executionId)
+    {
+        await TrainingBlockService.MoveExecutionUpAsync(executionId);
+        _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+    }
+
+    private async Task MoveExecutionDownAsync(int executionId)
+    {
+        await TrainingBlockService.MoveExecutionDownAsync(executionId);
+        _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();
+    }
+
+    private string FormatDefinitionType(TrainingBlockDefinitionDto definition)
+        => definition.GameDisplayText is null
+            ? definition.TagDisplayText
+            : string.Format(Localizer["TrainingBlockEditor_TagGameValue"].Value, definition.TagDisplayText, definition.GameDisplayText);
+
+    private string FormatExecutionType(TrainingBlockDto block)
+        => block.GameDisplayText is null
+            ? block.TagDisplayText
+            : string.Format(Localizer["TrainingBlockEditor_TagGameValue"].Value, block.TagDisplayText, block.GameDisplayText);
+
+    private static string GetStripeCssClass(string colorToken) => colorToken switch
+    {
+        "--brand-community" => "tb-tag-stripe-community",
+        "--brand-accent" => "tb-tag-stripe-accent",
+        "--brand-accent-40" => "tb-tag-stripe-accent-40",
+        "--brand-innovation" => "tb-tag-stripe-innovation",
+        "--brand-appreciation-dark" => "tb-tag-stripe-appreciation-dark",
+        _ => "tb-tag-stripe-tradition-60"
+    };
+
+    private async Task ShowToastAsync(string message, ToastComponent.ToastVariant variant)
+    {
+        _errorMessage = null;
+        if (_toast is not null)
+        {
+            await _toast.Show(message, variant);
         }
     }
 }
