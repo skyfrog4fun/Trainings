@@ -13,8 +13,5 @@ public class TrainingBlock
     public int PlannedDurationMinutes { get; set; }
     public int MinParticipants { get; set; }
     public int MaxParticipants { get; set; }
-    public int? EffectiveDurationMinutes { get; set; }
-
-    public string? TrainerComment { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

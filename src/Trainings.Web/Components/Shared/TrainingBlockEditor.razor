@@ -8,14 +8,14 @@
 
 <PageTitleComponent Icon="@AppIcons.BookOpen"
                     Text="@Localizer["TrainingBlockEditor_Heading"]"
-                    ButtonText="@Localizer["TrainingBlockEditor_NewButton"]"
+                    ButtonText="@(IsWriteBlocked ? null : (string)Localizer["TrainingBlockEditor_NewButton"])"
                     ButtonIcon="@AppIcons.Plus"
-                    ButtonDisabled="@(_isLoading || IsWriteBlocked || !_hasTrainingContext)"
+                    ButtonDisabled="@(_isLoading || !_hasTrainingContext)"
                     OnButtonClick="OpenNewPanel"
-                    SecondaryButtonText="@Localizer["TrainingBlockEditor_AddButton"]"
+                    SecondaryButtonText="@(IsWriteBlocked ? null : (string)Localizer["TrainingBlockEditor_AddButton"])"
                     SecondaryButtonIcon="@AppIcons.BookOpen"
                     SecondaryButtonCssClass="btn btn-outline-secondary"
-                    SecondaryButtonDisabled="@(_isLoading || IsWriteBlocked || !_hasTrainingContext)"
+                    SecondaryButtonDisabled="@(_isLoading || !_hasTrainingContext)"
                     OnSecondaryButtonClick="OpenAddPanel" />
 
 @if (_isLoading)
@@ -614,9 +614,7 @@ else
                 Description = string.IsNullOrWhiteSpace(_editForm.Description) ? null : _editForm.Description.Trim(),
                 PlannedDurationMinutes = _editForm.PlannedDurationMinutes ?? 0,
                 MinParticipants = _editForm.MinParticipants ?? 0,
-                MaxParticipants = _editForm.MaxParticipants ?? 0,
-                EffectiveDurationMinutes = _editForm.EffectiveDurationMinutes,
-                TrainerComment = string.IsNullOrWhiteSpace(_editForm.TrainerComment) ? null : _editForm.TrainerComment.Trim()
+                MaxParticipants = _editForm.MaxParticipants ?? 0
             });
 
             _executions = (await TrainingBlockService.GetExecutionsAsync(TrainingId)).ToList();

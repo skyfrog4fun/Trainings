@@ -38,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<ITranslationService, TranslationService>();
         services.AddScoped<ITrainingService, TrainingService>();
         services.AddScoped<ITrainingBlockService, TrainingBlockService>();
+        services.AddScoped<IFeedbackService, FeedbackService>();
         services.AddScoped<ITrainingBlockLibraryService, TrainingBlockLibraryService>();
         services.AddScoped<ITagAdminService, TagAdminService>();
         services.AddScoped<IGameAdminService, GameAdminService>();

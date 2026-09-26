@@ -53,7 +53,6 @@ public class UpdateTrainingDto
     public DateTime DateTime { get; set; }
     public int? DurationMinutes { get; set; }
     public int Capacity { get; set; }
-    public TrainingStatus Status { get; set; }
     public int? TrainerId { get; set; }
     public int GroupId { get; set; }
 }

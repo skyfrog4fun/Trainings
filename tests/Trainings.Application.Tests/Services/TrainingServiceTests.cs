@@ -61,8 +61,6 @@ public class TrainingServiceTests
                     PlannedDurationMinutes = 18,
                     MinParticipants = 6,
                     MaxParticipants = 10,
-                    EffectiveDurationMinutes = 16,
-                    TrainerComment = "Worked well",
                     CreatedAt = DateTime.UtcNow
                 }
             ]

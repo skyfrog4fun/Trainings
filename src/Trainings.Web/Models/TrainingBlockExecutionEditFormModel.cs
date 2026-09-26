@@ -11,8 +11,6 @@ public class TrainingBlockExecutionEditFormModel : IValidatableObject
     public int? PlannedDurationMinutes { get; set; }
     public int? MinParticipants { get; set; }
     public int? MaxParticipants { get; set; }
-    public int? EffectiveDurationMinutes { get; set; }
-    public string? TrainerComment { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -50,11 +48,6 @@ public class TrainingBlockExecutionEditFormModel : IValidatableObject
         {
             yield return new ValidationResult(GetMessage(localizer, "TrainingBlockEditor_MinMaxParticipantsInvalid"), [nameof(MinParticipants), nameof(MaxParticipants)]);
         }
-
-        if (EffectiveDurationMinutes.HasValue && EffectiveDurationMinutes < 0)
-        {
-            yield return new ValidationResult(GetMessage(localizer, "TrainingBlockEditor_EffectiveDurationInvalid"), [nameof(EffectiveDurationMinutes)]);
-        }
     }
 
     public void LoadFrom(TrainingBlockDto block)
@@ -64,8 +57,6 @@ public class TrainingBlockExecutionEditFormModel : IValidatableObject
         PlannedDurationMinutes = block.PlannedDurationMinutes;
         MinParticipants = block.MinParticipants;
         MaxParticipants = block.MaxParticipants;
-        EffectiveDurationMinutes = block.EffectiveDurationMinutes;
-        TrainerComment = block.TrainerComment;
     }
 
     private static string GetMessage(IStringLocalizer<SharedResources>? localizer, string key)

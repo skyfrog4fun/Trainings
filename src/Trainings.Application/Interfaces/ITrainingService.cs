@@ -12,6 +12,7 @@ public interface ITrainingService
     Task<TrainingDto> CreateAsync(CreateTrainingDto dto);
     Task UpdateAsync(UpdateTrainingDto dto);
     Task DeleteAsync(int id);
+    Task CancelAsync(int trainingId, CancellationToken ct = default);
     Task<DateTime> GetNextAvailableDateForGroupAsync(int groupId, DayOfWeek weekday, CancellationToken ct = default);
     Task SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct = default);
     Task LockAttendanceAsync(int trainingId, CancellationToken ct = default);

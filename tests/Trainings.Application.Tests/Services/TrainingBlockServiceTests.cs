@@ -114,9 +114,7 @@ public class TrainingBlockServiceTests
             Description = "Adjusted",
             PlannedDurationMinutes = 11,
             MinParticipants = 5,
-            MaxParticipants = 9,
-            EffectiveDurationMinutes = 9,
-            TrainerComment = "Good"
+            MaxParticipants = 9
         }, ct: TestContext.Current.CancellationToken);
 
         await scope.Service.MoveExecutionDownAsync(first.Id, ct: TestContext.Current.CancellationToken);

@@ -21,6 +21,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Translation> Translations => Set<Translation>();
     public DbSet<TrainingBlockDefinition> TrainingBlockDefinitions => Set<TrainingBlockDefinition>();
     public DbSet<TrainingBlock> TrainingBlocks => Set<TrainingBlock>();
+    public DbSet<TrainerFeedback> TrainerFeedbacks => Set<TrainerFeedback>();
+    public DbSet<ParticipantFeedback> ParticipantFeedbacks => Set<ParticipantFeedback>();
     public DbSet<MailConfiguration> MailConfigurations => Set<MailConfiguration>();
     public DbSet<GroupMailConfiguration> GroupMailConfigurations => Set<GroupMailConfiguration>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
@@ -252,7 +254,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(b => b.Id);
             entity.Property(b => b.Title).IsRequired().HasMaxLength(64);
             entity.Property(b => b.Description).HasMaxLength(512);
-            entity.Property(b => b.TrainerComment).HasMaxLength(1000);
             entity.HasIndex(b => new { b.TrainingId, b.OrderIndex }).IsUnique();
             entity.HasIndex(b => b.DefinitionId);
             entity.HasOne(b => b.Training)
@@ -262,6 +263,36 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(b => b.Definition)
                 .WithMany(d => d.Executions)
                 .HasForeignKey(b => b.DefinitionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<TrainerFeedback>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+            entity.Property(f => f.Comment).HasMaxLength(2000);
+            entity.HasIndex(f => f.TrainingId).IsUnique();
+            entity.HasOne(f => f.Training)
+                .WithMany()
+                .HasForeignKey(f => f.TrainingId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(f => f.Trainer)
+                .WithMany()
+                .HasForeignKey(f => f.TrainerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ParticipantFeedback>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+            entity.Property(f => f.Comment).HasMaxLength(2000);
+            entity.HasIndex(f => new { f.TrainingId, f.UserId }).IsUnique();
+            entity.HasOne(f => f.Training)
+                .WithMany()
+                .HasForeignKey(f => f.TrainingId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

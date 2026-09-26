@@ -77,11 +77,20 @@
             <Footer>
                 @if (ShowManagementRow)
                 {
-                    <div class="d-flex justify-content-between flex-wrap gap-2">
-                        <a href="@TrainingEditUrl()" class="btn btn-sm btn-primary">
-                            <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
-                        </a>
-                        @if (_isAdmin)
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (CanEditTraining)
+                        {
+                            <a href="@TrainingEditUrl()" class="btn btn-sm btn-primary">
+                                <i class="@AppIcons.Edit me-1" aria-hidden="true"></i>@Localizer["Shared_Edit"]
+                            </a>
+                        }
+                        @if (CanCancelTraining)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-warning" @onclick="PromptCancelTraining" disabled="@_cancelInProgress">
+                                <i class="@AppIcons.XMark me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Cancel"]
+                            </button>
+                        }
+                        @if (CanDeleteTraining)
                         {
                             <button type="button" class="btn btn-sm btn-outline-danger" @onclick="PromptDeleteTraining" disabled="@_deleteInProgress">
                                 <i class="@AppIcons.Trash me-1" aria-hidden="true"></i>@Localizer["Shared_Delete"]
@@ -95,36 +104,32 @@
                 }
                 @if (ShowParticipationRow)
                 {
-                    <div class="d-flex justify-content-between flex-wrap gap-2">
-                        <div>
-                            @if (_canTake)
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (_canTake)
+                        {
+                            <button type="button" class="btn btn-sm btn-success" @onclick="TakeTraining">
+                                <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Take"]
+                            </button>
+                        }
+                        @if (_canRegister)
+                        {
+                            @if (_isRegistered)
                             {
-                                <button type="button" class="btn btn-sm btn-success" @onclick="TakeTraining">
-                                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Take"]
+                                <button type="button" class="btn btn-sm btn-danger" @onclick="PromptSelfUnregister">
+                                    <i class="@AppIcons.Unregister me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Unregister"]
                                 </button>
                             }
-                        </div>
-                        <div>
-                            @if (_canRegister)
+                            else if (_training.RegisteredCount < _training.Capacity)
                             {
-                                @if (_isRegistered)
-                                {
-                                    <button type="button" class="btn btn-sm btn-danger" @onclick="PromptSelfUnregister">
-                                        <i class="@AppIcons.Unregister me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Unregister"]
-                                    </button>
-                                }
-                                else if (_training.RegisteredCount < _training.Capacity)
-                                {
-                                    <button type="button" class="btn btn-sm btn-primary" @onclick="Register">
-                                        <i class="@AppIcons.Register me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Register"]
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">@Localizer["TrainingDetailPage_TrainingFull"]</span>
-                                }
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="Register">
+                                    <i class="@AppIcons.Register me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Register"]
+                                </button>
                             }
-                        </div>
+                            else
+                            {
+                                <span class="badge bg-warning text-dark align-self-center">@Localizer["TrainingDetailPage_TrainingFull"]</span>
+                            }
+                        }
                     </div>
                 }
                 @if (ShowParticipationRow && ShowTrainerOpsRow)
@@ -133,23 +138,31 @@
                 }
                 @if (ShowTrainerOpsRow)
                 {
-                    <div class="d-flex justify-content-between flex-wrap gap-2">
-                        <div>
-                            @if (_training.Status is TrainingStatus.Planned or TrainingStatus.InProgress or TrainingStatus.Done)
-                            {
-                                <a href="@TrainingRunUrl()" class="btn btn-sm btn-success">
-                                    <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Run"]
-                                </a>
-                            }
-                        </div>
-                        <div>
-                            @if (_training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
-                            {
-                                <a href="@TrainingAttendanceUrl()" class="btn btn-sm btn-primary">
-                                    <i class="@AppIcons.ListCheck me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Attendance"]
-                                </a>
-                            }
-                        </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (_training.Status is TrainingStatus.Planned or TrainingStatus.InProgress or TrainingStatus.Done)
+                        {
+                            <a href="@TrainingRunUrl()" class="btn btn-sm btn-success">
+                                <i class="@AppIcons.Check me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Run"]
+                            </a>
+                        }
+                        @if (_training.Status is TrainingStatus.InProgress or TrainingStatus.Done)
+                        {
+                            <a href="@TrainingAttendanceUrl()" class="btn btn-sm btn-primary">
+                                <i class="@AppIcons.ListCheck me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Attendance"]
+                            </a>
+                        }
+                        @if (_training.Status == TrainingStatus.InProgress)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-success" @onclick="MarkAsDoneClicked">
+                                <i class="@AppIcons.CalendarCheck me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_MarkAsDone"]
+                            </button>
+                        }
+                        @if (_training.Status == TrainingStatus.Done)
+                        {
+                            <a href="@TrainingFeedbackUrl()" class="btn btn-sm btn-outline-primary">
+                                <i class="@AppIcons.CircleInfo me-1" aria-hidden="true"></i>@Localizer["TrainingDetailPage_Feedback"]
+                            </a>
+                        }
                     </div>
                 }
             </Footer>
@@ -232,6 +245,20 @@
             {
                 <CardComponent Collapsed="false">
                     <Title>@string.Format(Localizer["TrainingDetailPage_TrainingBlocksHeading"].Value, _training.Blocks.Count)</Title>
+                    <TitleMeta>
+                        <span>@string.Format(Localizer["TrainingDetailPage_TotalPlannedMinutes"].Value, TotalPlannedBlockMinutes)</span>
+                        @if (BlockMinutesDifference is { } diff && diff != 0)
+                        {
+                            @if (diff > 0)
+                            {
+                                <span class="text-danger fw-semibold ms-1">@string.Format(Localizer["TrainingDetailPage_OverbookedMinutes"].Value, diff)</span>
+                            }
+                            else
+                            {
+                                <span class="ms-1">@string.Format(Localizer["TrainingDetailPage_UnderbookedMinutes"].Value, -diff)</span>
+                            }
+                        }
+                    </TitleMeta>
                     <Body>
                         <div class="row g-3">
                             @{ var blockStart = _training.DateTime; }
@@ -254,10 +281,6 @@
                                             }
                                             <div class="small text-muted mt-2">
                                                 <i class="@AppIcons.Stopwatch me-1" aria-hidden="true"></i>@block.PlannedDurationMinutes <em>[@startTime.ToString("HH:mm")]</em>
-                                                @if (block.EffectiveDurationMinutes.HasValue)
-                                                {
-                                                    <text> · @string.Format(Localizer["TrainingDetailPage_ActualMinutes"].Value, block.EffectiveDurationMinutes)</text>
-                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -298,6 +321,24 @@
                         OnConfirm="CloseTrainerCannotUnregisterDialog"
                         OnCancel="CloseTrainerCannotUnregisterDialog" />
 
+<ConfirmDialogComponent IsVisible="_showCancelConfirm"
+                        Title="@Localizer["TrainingDetailPage_CancelConfirmTitle"]"
+                        Message="@Localizer["TrainingDetailPage_CancelConfirmMessage"]"
+                        ConfirmText="@Localizer["TrainingDetailPage_Cancel"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        IsBusy="_cancelInProgress"
+                        OnConfirm="ConfirmCancelTrainingAsync"
+                        OnCancel="CancelCancelConfirm" />
+
+<ConfirmDialogComponent IsVisible="_showMarkAsDoneConfirm"
+                        Title="@Localizer["TrainingDetailPage_MarkAsDoneConfirmTitle"]"
+                        Message="@Localizer["TrainingDetailPage_MarkAsDoneConfirmMessage"]"
+                        ConfirmText="@Localizer["TrainingDetailPage_MarkAsDone"]"
+                        CancelText="@Localizer["Shared_Cancel"]"
+                        IsBusy="_markAsDoneInProgress"
+                        OnConfirm="ConfirmMarkAsDoneAsync"
+                        OnCancel="CancelMarkAsDoneConfirm" />
+
 @code {
     [Parameter] public int Id { get; set; }
     [Parameter] public string? Slug { get; set; }
@@ -313,6 +354,10 @@
     private bool _fullDetailAllowed;
     private bool _showDeleteConfirm;
     private bool _deleteInProgress;
+    private bool _showCancelConfirm;
+    private bool _cancelInProgress;
+    private bool _showMarkAsDoneConfirm;
+    private bool _markAsDoneInProgress;
     private int _userId;
     private List<RegistrationDto> _registrations = new();
     private List<GroupMembershipDto> _groupMembers = new();
@@ -332,10 +377,15 @@
     private bool HasRegisteredParticipants => RegisteredParticipants.Count > 0;
     private RegistrationDto? OwnRegistration => RegisteredParticipants.FirstOrDefault(r => r.UserId == _userId);
     private bool ShowManagementRow => _isAdmin || _isAssignedTrainer;
+    private bool CanEditTraining => _isAdmin || _isAssignedTrainer;
+    private bool CanDeleteTraining => _isAdmin && _training is not null &&
+        _training.Status is TrainingStatus.New or TrainingStatus.InPlanning;
+    private bool CanCancelTraining => _isAdmin && _training is not null &&
+        _training.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned;
     private bool ShowParticipationRow => _canTake || _canRegister;
     private bool IsRegistrationOpen => _training is not null &&
         _training.Status is TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned;
-    private bool ShowTrainerOpsRow => _isAssignedTrainer &&
+    private bool ShowTrainerOpsRow => (_isAssignedTrainer || _isAdmin) &&
         _training is not null &&
         _training.Status is TrainingStatus.Planned or TrainingStatus.InProgress or TrainingStatus.Done;
 
@@ -376,7 +426,8 @@
         _isAdmin = isSuperAdmin || user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Admin");
         _isTrainer = _isAdmin || user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Trainer");
         _isAssignedTrainer = _isTrainer && _training.TrainerId == _userId;
-        _canRegister = IsRegistrationOpen;
+        var isGroupParticipant = user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Participant");
+        _canRegister = IsRegistrationOpen && isGroupParticipant;
 
         _fullDetailAllowed = _isTrainer || _isAdmin || _training.Status >= TrainingStatus.Planned;
         var isGroupTrainer = user.HasClaim(AppClaimTypes.GroupRole(_training.GroupId), "Trainer");
@@ -396,7 +447,7 @@
         if (_isAdmin)
         {
             _groupMembers = (await GroupService.GetMembersAsync(_training.GroupId))
-                .Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive)
+                .Where(m => m.Status == GroupMembershipStatus.Approved && m.IsActive && m.Role == GroupMemberRole.Participant)
                 .GroupBy(m => m.UserId)
                 .Select(g => g.First())
                 .ToList();
@@ -584,6 +635,74 @@
         _showDeleteConfirm = false;
     }
 
+    private void PromptCancelTraining()
+    {
+        _showCancelConfirm = true;
+    }
+
+    private void CancelCancelConfirm()
+    {
+        _showCancelConfirm = false;
+    }
+
+    private async Task ConfirmCancelTrainingAsync()
+    {
+        if (_training is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _cancelInProgress = true;
+            await TrainingService.CancelAsync(_training.Id);
+            _showCancelConfirm = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(string.Format(Localizer["TrainingDetailPage_FailedMessage"].Value, ex.Message), ToastComponent.ToastVariant.Danger);
+        }
+        finally
+        {
+            _cancelInProgress = false;
+        }
+    }
+
+    private void MarkAsDoneClicked()
+    {
+        _showMarkAsDoneConfirm = true;
+    }
+
+    private void CancelMarkAsDoneConfirm()
+    {
+        _showMarkAsDoneConfirm = false;
+    }
+
+    private async Task ConfirmMarkAsDoneAsync()
+    {
+        if (_training is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _markAsDoneInProgress = true;
+            await TrainingService.LockAttendanceAsync(_training.Id);
+            _showMarkAsDoneConfirm = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync(string.Format(Localizer["TrainingDetailPage_FailedMessage"].Value, ex.Message), ToastComponent.ToastVariant.Danger);
+        }
+        finally
+        {
+            _markAsDoneInProgress = false;
+        }
+    }
+
     private async Task DeleteTraining() => await DeleteTrainingInternalAsync(notifyParticipants: false);
 
     private async Task NotifyAndDeleteTraining() => await DeleteTrainingInternalAsync(notifyParticipants: true);
@@ -639,6 +758,18 @@
         }
     }
 
+    private int TotalPlannedBlockMinutes => _training?.Blocks.Sum(block => block.PlannedDurationMinutes) ?? 0;
+
+    /// <summary>
+    /// Positive when the planned blocks exceed the training's scheduled duration (overbooked),
+    /// negative when there is spare time left (underbooked), or null when the training has no
+    /// scheduled duration to compare against.
+    /// </summary>
+    private int? BlockMinutesDifference
+        => _training?.DurationMinutes is { } durationMinutes
+            ? TotalPlannedBlockMinutes - durationMinutes
+            : null;
+
     private static string FormatBlockType(TrainingBlockDto block)
         => block.GameDisplayText is null
             ? block.TagDisplayText
@@ -687,6 +818,8 @@
     private string TrainingRunUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/run";
 
     private string TrainingAttendanceUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/attendance";
+
+    private string TrainingFeedbackUrl() => $"/trainings/{_training!.GroupSlug}/{_training.Id}/feedback";
 
     private bool CanActOnParticipant(RegistrationDto registration) => _isAdmin && IsRegistrationOpen;
 

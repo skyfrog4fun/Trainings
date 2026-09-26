@@ -68,8 +68,6 @@ internal static class TrainingBlockMappingHelper
             PlannedDurationMinutes = execution.PlannedDurationMinutes,
             MinParticipants = execution.MinParticipants,
             MaxParticipants = execution.MaxParticipants,
-            EffectiveDurationMinutes = execution.EffectiveDurationMinutes,
-            TrainerComment = execution.TrainerComment,
             TagId = definition.TagId,
             TagKey = definition.Tag.Key,
             TagDisplayText = tagText,

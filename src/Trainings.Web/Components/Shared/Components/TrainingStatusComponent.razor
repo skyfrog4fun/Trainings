@@ -12,6 +12,7 @@
         TrainingStatus.Planned => Localizer["Enum_TrainingStatus_Planned"],
         TrainingStatus.InProgress => Localizer["Enum_TrainingStatus_InProgress"],
         TrainingStatus.Done => Localizer["Enum_TrainingStatus_Done"],
+        TrainingStatus.Cancelled => Localizer["Enum_TrainingStatus_Cancelled"],
         _ => status.ToString()
     };
 
@@ -22,6 +23,7 @@
         TrainingStatus.Planned => "badge-status-planned",
         TrainingStatus.InProgress => "badge-status-inprogress",
         TrainingStatus.Done => "badge-status-done",
+        TrainingStatus.Cancelled => "badge-status-cancelled",
         _ => "bg-light text-dark border"
     };
 }

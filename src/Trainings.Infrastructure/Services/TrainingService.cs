@@ -87,6 +87,11 @@ public class TrainingService(
         var training = await _trainingRepository.GetByIdAsync(dto.Id)
             ?? throw new InvalidOperationException($"Training {dto.Id} not found.");
 
+        if (training.Status is TrainingStatus.InProgress or TrainingStatus.Done or TrainingStatus.Cancelled)
+        {
+            throw new InvalidOperationException("This training can no longer be edited.");
+        }
+
         training.Title = dto.Title;
         training.Description = dto.Description;
         training.LocationId = dto.LocationId;
@@ -95,8 +100,12 @@ public class TrainingService(
         training.DateTime = dto.DateTime;
         training.DurationMinutes = dto.DurationMinutes;
         training.Capacity = dto.Capacity;
-        training.Status = dto.Status;
         training.TrainerId = dto.TrainerId;
+
+        // Editing a Planned training always reverts it to InPlanning; planning must be
+        // re-confirmed explicitly. The Status passed in the DTO is otherwise ignored so this
+        // rule cannot be bypassed by callers.
+        training.Status = training.Status == TrainingStatus.Planned ? TrainingStatus.InPlanning : training.Status;
         training.GroupId = dto.GroupId;
 
         await _trainingRepository.UpdateAsync(training);
@@ -105,7 +114,32 @@ public class TrainingService(
     public async Task DeleteAsync(int id)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _trainingRepository.GetByIdAsync(id)
+            ?? throw new InvalidOperationException($"Training {id} not found.");
+
+        if (training.Status is not (TrainingStatus.New or TrainingStatus.InPlanning))
+        {
+            throw new InvalidOperationException("Only a training in New or InPlanning state can be hard-deleted. Use Cancel instead.");
+        }
+
         await _trainingRepository.DeleteAsync(id);
+    }
+
+    public async Task CancelAsync(int trainingId, CancellationToken ct = default)
+    {
+        _appRuntimeModeService.EnsureWriteAllowed();
+
+        var training = await _context.Trainings.FindAsync([trainingId], ct)
+            ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.Status is not (TrainingStatus.New or TrainingStatus.InPlanning or TrainingStatus.Planned))
+        {
+            throw new InvalidOperationException("Only a training that has not started yet can be cancelled.");
+        }
+
+        training.Status = TrainingStatus.Cancelled;
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task SetStatusAsync(int trainingId, TrainingStatus status, CancellationToken ct = default)
@@ -113,8 +147,38 @@ public class TrainingService(
         _appRuntimeModeService.EnsureWriteAllowed();
         var training = await _context.Trainings.FindAsync([trainingId], ct)
             ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (!IsValidTransition(training.Status, status))
+        {
+            throw new InvalidOperationException($"Cannot transition training {trainingId} from {training.Status} to {status}.");
+        }
+
         training.Status = status;
         await _context.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// Validates a status transition against the training lifecycle state diagram
+    /// (see docs/architecture/training-lifecycle-redesign.md). Same-status "transitions" are
+    /// always allowed (no-op).
+    /// </summary>
+    private static bool IsValidTransition(TrainingStatus from, TrainingStatus to)
+    {
+        if (from == to)
+        {
+            return true;
+        }
+
+        return from switch
+        {
+            TrainingStatus.New => to is TrainingStatus.InPlanning or TrainingStatus.Cancelled,
+            TrainingStatus.InPlanning => to is TrainingStatus.New or TrainingStatus.Planned or TrainingStatus.Cancelled,
+            TrainingStatus.Planned => to is TrainingStatus.InPlanning or TrainingStatus.InProgress or TrainingStatus.Cancelled,
+            TrainingStatus.InProgress => to is TrainingStatus.Done,
+            TrainingStatus.Done => false,
+            TrainingStatus.Cancelled => false,
+            _ => false
+        };
     }
 
     public async Task LockAttendanceAsync(int trainingId, CancellationToken ct = default)
@@ -123,6 +187,12 @@ public class TrainingService(
 
         var training = await _context.Trainings.FindAsync([trainingId], ct)
             ?? throw new InvalidOperationException($"Training {trainingId} not found.");
+
+        if (training.Status != TrainingStatus.InProgress)
+        {
+            throw new InvalidOperationException("Only a training that is in progress can be marked as done.");
+        }
+
         training.AttendanceLocked = true;
         training.AttendanceLockedAt = DateTime.UtcNow;
         training.Status = TrainingStatus.Done;
@@ -207,7 +277,7 @@ public class TrainingService(
 
         training.TrainerId = newTrainerId;
         training.Status = newTrainerId.HasValue
-            ? (training.Status == TrainingStatus.New ? TrainingStatus.InPlanning : training.Status)
+            ? (training.Status is TrainingStatus.New or TrainingStatus.Planned ? TrainingStatus.InPlanning : training.Status)
             : TrainingStatus.New;
         await _context.SaveChangesAsync(ct);
     }

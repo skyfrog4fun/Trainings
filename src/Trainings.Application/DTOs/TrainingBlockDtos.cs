@@ -59,8 +59,6 @@ public class TrainingBlockDto
     public int PlannedDurationMinutes { get; set; }
     public int MinParticipants { get; set; }
     public int MaxParticipants { get; set; }
-    public int? EffectiveDurationMinutes { get; set; }
-    public string? TrainerComment { get; set; }
     public int TagId { get; set; }
     public string TagKey { get; set; } = string.Empty;
     public string TagDisplayText { get; set; } = string.Empty;
@@ -99,8 +97,6 @@ public class UpdateTrainingBlockExecutionDto
     public int PlannedDurationMinutes { get; set; }
     public int MinParticipants { get; set; }
     public int MaxParticipants { get; set; }
-    public int? EffectiveDurationMinutes { get; set; }
-    public string? TrainerComment { get; set; }
 }
 
 public class TrainingBlockLibrarySearchDto

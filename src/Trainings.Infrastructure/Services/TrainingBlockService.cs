@@ -110,7 +110,7 @@ public class TrainingBlockService(
     public async Task UpdateExecutionAsync(UpdateTrainingBlockExecutionDto dto, CancellationToken ct = default)
     {
         _appRuntimeModeService.EnsureWriteAllowed();
-        ValidateExecutionInput(dto.Title, dto.Description, dto.PlannedDurationMinutes, dto.MinParticipants, dto.MaxParticipants, dto.EffectiveDurationMinutes);
+        ValidateExecutionInput(dto.Title, dto.Description, dto.PlannedDurationMinutes, dto.MinParticipants, dto.MaxParticipants);
 
         var execution = await _context.TrainingBlocks.FirstOrDefaultAsync(b => b.Id == dto.Id, ct)
             ?? throw new InvalidOperationException($"Execution {dto.Id} not found.");
@@ -120,8 +120,6 @@ public class TrainingBlockService(
         execution.PlannedDurationMinutes = dto.PlannedDurationMinutes;
         execution.MinParticipants = dto.MinParticipants;
         execution.MaxParticipants = dto.MaxParticipants;
-        execution.EffectiveDurationMinutes = dto.EffectiveDurationMinutes;
-        execution.TrainerComment = string.IsNullOrWhiteSpace(dto.TrainerComment) ? null : dto.TrainerComment.Trim();
 
         await _context.SaveChangesAsync(ct);
     }
@@ -263,15 +261,10 @@ public class TrainingBlockService(
         ValidateParticipantsAndDurations(durationMinutes, minParticipants, maxParticipants);
     }
 
-    private static void ValidateExecutionInput(string title, string? description, int plannedDurationMinutes, int minParticipants, int maxParticipants, int? effectiveDurationMinutes)
+    private static void ValidateExecutionInput(string title, string? description, int plannedDurationMinutes, int minParticipants, int maxParticipants)
     {
         ValidateTitleAndDescription(title, description);
         ValidateParticipantsAndDurations(plannedDurationMinutes, minParticipants, maxParticipants);
-
-        if (effectiveDurationMinutes.HasValue && effectiveDurationMinutes.Value < 0)
-        {
-            throw new InvalidOperationException("Effective duration cannot be negative.");
-        }
     }
 
     private static void ValidateTitleAndDescription(string title, string? description)

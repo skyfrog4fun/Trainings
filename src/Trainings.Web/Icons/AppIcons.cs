@@ -57,6 +57,7 @@ public static class AppIcons
     public const string EyeSlash = "fa-solid fa-eye-slash";
     public const string Bed = "fa-solid fa-bed";
     public const string ReleaseTrainer = "fa-solid fa-trash";
+    public const string Play = "fa-solid fa-play";
 
     public static IReadOnlyList<AppIconDefinition> All { get; } =
     [
@@ -113,7 +114,8 @@ public static class AppIcons
         new("Show Password", Eye),
         new("Hide Password", EyeSlash),
         new("Not Registered", Bed),
-        new("Release Trainer", ReleaseTrainer)
+        new("Release Trainer", ReleaseTrainer),
+        new("Run/Resume Training", Play)
     ];
 }
 
